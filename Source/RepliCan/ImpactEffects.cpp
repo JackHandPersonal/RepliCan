@@ -43,7 +43,7 @@ namespace
 	};
 
 	TArray<FRule> GRules;
-	bool GLoaded = false;
+	bool GImpactEffectsLoaded = false;
 
 	FString RuleFile()
 	{
@@ -96,8 +96,8 @@ namespace
 
 	void LoadIfNeeded()
 	{
-		if (GLoaded) { return; }
-		GLoaded = true;
+		if (GImpactEffectsLoaded) { return; }
+		GImpactEffectsLoaded = true;
 		GRules.Reset();
 		FString Text;
 		if (!FFileHelper::LoadFileToString(Text, *RuleFile()))
@@ -258,5 +258,5 @@ UNiagaraComponent* ImpactEffects::SpawnBurst(UWorld* World, const FBurst& B, con
 	return C;
 }
 
-void ImpactEffects::Reload() { GLoaded = false; }
+void ImpactEffects::Reload() { GImpactEffectsLoaded = false; }
 int32 ImpactEffects::NumRules() { LoadIfNeeded(); return GRules.Num(); }

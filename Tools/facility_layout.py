@@ -873,29 +873,32 @@ def loot_box(label, x, y, yaw, items):
         a = eas.spawn_actor_from_class(unreal.LootBoxActor, unreal.Vector(x, y, 0.0)); apply(a); return a
     ensure(label, spawn, apply)
 
-def door_sign(label, x, y, yaw, text, width=470.0):
+DOOR_SIGN_Z = 298.0   # where the user set the wide door signs by hand (2026-09-16); only a NEW sign is placed from this
+def door_sign(label, x, y, yaw, text, width=441.0, height=42.0, z=None, depth=16.0, standoff=18.6):
+    if z is None: z = DOOR_SIGN_Z
     """A dot-matrix LED strip in the lintel plate of the door's far-side (B) trim: the trim's
     inset plate spans local x 60..440, z 352..384 on its outer face (local y -8)."""
     if not hasattr(unreal, 'SignActor'): print('SignActor not built yet: skipping', label); return
     byaw = yaw + 180.0
     bx, by = rot(500.0, 34.0, yaw)
-    sx, sy = rot(250.0, -8.6, byaw)
+    sx, sy = rot(250.0, -standoff, byaw)   # the face this far off the wall line; the housing reaches back `depth` from it
     def apply(a):
         # Hand placement wins; see REPOSITION.
         if may_move(label):
-            a.set_actor_location_and_rotation(unreal.Vector(x + bx + sx, y + by + sy, 373.0 - CEIL_DROP), unreal.Rotator(roll=0.0, pitch=0.0, yaw=byaw - 90.0), False, True)
-        # Sized to the door bay rather than to the trim's inset plate: measured, the bay between
-        # the wall segments is 500 wide and the bulkhead above starts at z 396, so 470 x 42
-        # centred on 373 fills it with ~15 cm of padding at each end and clears the bulkhead.
-        # The housing cube scales with these, so the backing plate grows with the face.
+            a.set_actor_location_and_rotation(unreal.Vector(x + bx + sx, y + by + sy, z), unreal.Rotator(roll=0.0, pitch=0.0, yaw=byaw - 90.0), False, True)
+        # Sized to the door bay rather than to the trim's inset plate: the bay between the wall
+        # segments is 500 wide. 470 x 42 filled it with ~15 cm of padding; 441 is two characters
+        # (twelve columns at this pitch) narrower, per the user. The housing cube scales with these.
         a.set_editor_property('width', width)
-        a.set_editor_property('height', 42.0)
+        try: a.set_editor_property('depth', depth)
+        except Exception: pass   # a build before the property existed
+        a.set_editor_property('height', height)
         # set_text() is what rebuilds the face. Writing the 'text' property alone changes the
         # value and nothing else -- OnConstruction does not fire for a scripted property write,
         # so every text change made that way sat invisible until the level was reloaded.
         a.set_text(text)
     def spawn():
-        a = eas.spawn_actor_from_class(unreal.SignActor, unreal.Vector(x, y, 373.0 - CEIL_DROP)); apply(a); return a
+        a = eas.spawn_actor_from_class(unreal.SignActor, unreal.Vector(x, y, z)); apply(a); return a
     ensure(label, spawn, apply)
 
 def door_lamps(label, x, y, yaw, z=None):
@@ -1574,14 +1577,17 @@ place('LiftShaft_Pit', B + 'SM_Bld_Floor_01', 250.0, LIFT_Y + 16.5, -LIFT_DOWN *
 # Sized to its text. The face is 16 lamp rows (two lines of 7 and a gap of 2) and a lamp is 1.25
 # wide for its height, so columns = 16 * 1.25 * width / 42: 252 wide is 120 columns, the 17
 # characters take 102, and 9 columns (19 cm) of housing show each side of the text.
-door_sign('Sign_Door_Lift', 750.0, FY1 + WALL_T - 54.0, 180.0, 'PERSONNEL LIFT B4|AT BAY 01', width=252.0)
+# ONE ROW. Seven lamp rows at the two-row signs' pitch (42 / 16 = 2.625) is 18.4 tall; the top
+# edge stays where the two-row strip's was (DOOR_SIGN_Z + 21). Fifteen characters are 90
+# columns; 227 wide is 108, so nine columns of housing show each side, as before.
+door_sign('Sign_Door_Lift', 750.0, FY1 + WALL_T - 54.0, 180.0, 'LIFT B4 - LVL 4', width=227.0, height=18.4, z=355.8 - 9.2, depth=6.0, standoff=8.6)
 # The sign is the lift's status board: the car rewrites its second line as it moves (see
 # AElevatorActor::UpdateSign). The text above is only what it shows before play begins. Both
 # actors exist by this point, placed or kept, so the reference can be set on every run.
 if 'Lift_Car' in existing and 'Sign_Door_Lift' in existing:
     try:
         existing['Lift_Car'].set_editor_property('status_sign', existing['Sign_Door_Lift'])
-        existing['Lift_Car'].set_editor_property('lift_name', 'PERSONNEL LIFT B4')
+        existing['Lift_Car'].set_editor_property('lift_name', 'LIFT B4')   # one row: "LIFT B4 - LVL n" (AElevatorActor::UpdateSign)
     except Exception as e:
         print('LIFT SIGN not wired:', e)
 

@@ -35,6 +35,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sign") int32 Characters = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sign") float Width = 370.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sign") float Height = 24.0f;
+	// How far the housing reaches back from the face, cm. The face sits at the actor origin, so a
+	// sign stood off its wall by ten is made ten deeper to close up to it again.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sign") float Depth = 6.0f;
 
 	// The resolution knob. The grid has 7 rows because the font is 7 tall, so on a strip this
 	// shallow squareness alone decides how many columns fit, and that caps a 366 x 22 lintel at

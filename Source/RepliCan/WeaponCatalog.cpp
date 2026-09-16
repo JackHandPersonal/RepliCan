@@ -17,7 +17,7 @@ namespace
 	};
 	TMap<FString, FStance> GStances;
 	TMap<FString, WeaponCatalog::FOptic> GOptics;
-	bool GLoaded = false;
+	bool GWeaponCatalogLoaded = false;
 
 	FString CatalogueFile()
 	{
@@ -33,8 +33,8 @@ namespace
 
 	void LoadIfNeeded()
 	{
-		if (GLoaded) { return; }
-		GLoaded = true;
+		if (GWeaponCatalogLoaded) { return; }
+		GWeaponCatalogLoaded = true;
 		GByName.Reset();
 
 		FString Text;
@@ -144,7 +144,7 @@ const WeaponCatalog::FOptic* WeaponCatalog::FindOptic(const FString& OpticName)
 	return GOptics.Find(OpticName);
 }
 
-void WeaponCatalog::Reload() { GLoaded = false; }
+void WeaponCatalog::Reload() { GWeaponCatalogLoaded = false; }
 
 int32 WeaponCatalog::Num() { LoadIfNeeded(); return GByName.Num(); }
 

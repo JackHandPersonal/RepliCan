@@ -187,19 +187,21 @@ FString AElevatorActor::FloorName(int32 Floor) const
 
 FString AElevatorActor::StatusLine() const
 {
+	// Levels are numbered DOWN from the top of the shaft: the top floor (+4) is LVL 0 and the
+	// bay (floor 0) is LVL 4, so the basement is LVL 14. One row on the sign, per the user.
+	auto Level = [](int32 Floor) { return FString::FromInt(4 - Floor); };
 	if (bMoving)
 	{
 		const TCHAR* Arrow = (TargetFloor > CurrentFloor) ? TEXT("UP") : TEXT("DOWN");
-		return FString::Printf(TEXT("%s TO %s"), Arrow, *FloorName(TargetFloor).ToUpper());
+		return FString::Printf(TEXT("%s TO LVL %s"), Arrow, *Level(TargetFloor));
 	}
-	return FString::Printf(TEXT("AT %s%s"), *FloorName(CurrentFloor).ToUpper(),
-	                       DoorAlpha > 0.5f ? TEXT("  OPEN") : TEXT(""));
+	return FString::Printf(TEXT("LVL %s%s"), *Level(CurrentFloor), DoorAlpha > 0.5f ? TEXT(" OPEN") : TEXT(""));
 }
 
 void AElevatorActor::UpdateSign()
 {
 	if (!StatusSign) { return; }
-	const FString Want = LiftName + TEXT("|") + StatusLine();
+	const FString Want = LiftName + TEXT(" - ") + StatusLine();   // one row: "LIFT B4 - LVL 4"
 	if (Want == LastSignText) { return; }
 	LastSignText = Want;
 	StatusSign->SetText(Want);

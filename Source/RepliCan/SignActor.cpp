@@ -91,7 +91,6 @@ void ASignActor::BeginPlay()
 void ASignActor::Rebuild()
 {
 	// Geometry: a slim dark box, the LED plane a hair proud of its +X face (local +X = the face normal).
-	const float Depth = 6.0f;
 	Housing->SetRelativeLocation(FVector(-Depth * 0.5f, 0.0f, 0.0f));
 	Housing->SetRelativeScale3D(FVector(Depth / 100.0f, Width / 100.0f, Height / 100.0f));
 	if (HousingMaterial) { Housing->SetMaterial(0, HousingMaterial); }

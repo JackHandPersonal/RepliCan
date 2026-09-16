@@ -77,7 +77,7 @@ void UReferenceWidget::NativeDestruct()
 }
 
 static FString CatalogueFile() { return FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("Weapons.json")); }
-static FString ItemsFile() { return FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("Items.json")); }
+static FString RefItemsFile() { return FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("Items.json")); }
 static const TCHAR* Categories[] = { TEXT("weapons"), TEXT("armor"), TEXT("equipment"), TEXT("consumables"), TEXT("other") };
 
 // UI/Weapons.json: { "weapons": { "<Pack>/<asset>": { name, kind, pack, description, icon, mesh } } }
@@ -114,7 +114,7 @@ void UReferenceWidget::LoadCatalogue()
 	// stance, no hip fire, no points to draw.
 	FString ItemsJson;
 	TSharedPtr<FJsonObject> ItemsRoot;
-	if (FFileHelper::LoadFileToString(ItemsJson, *ItemsFile()))
+	if (FFileHelper::LoadFileToString(ItemsJson, *RefItemsFile()))
 	{
 		TSharedRef<TJsonReader<>> ItemsReader = TJsonReaderFactory<>::Create(ItemsJson);
 		const TSharedPtr<FJsonObject>* Items = nullptr;
@@ -143,7 +143,7 @@ void UReferenceWidget::LoadCatalogue()
 bool UReferenceWidget::SaveItemEntry(const FReferenceEntry& E)
 {
 	FString Json;
-	if (!FFileHelper::LoadFileToString(Json, *ItemsFile())) { return false; }
+	if (!FFileHelper::LoadFileToString(Json, *RefItemsFile())) { return false; }
 	TSharedPtr<FJsonObject> Root;
 	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
 	if (!FJsonSerializer::Deserialize(Reader, Root) || !Root.IsValid()) { return false; }
@@ -158,7 +158,7 @@ bool UReferenceWidget::SaveItemEntry(const FReferenceEntry& E)
 	FString Out;
 	TSharedRef<TJsonWriter<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>> Writer = TJsonWriterFactory<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>::Create(&Out);
 	if (!FJsonSerializer::Serialize(Root.ToSharedRef(), Writer)) { return false; }
-	const bool bSaved = FFileHelper::SaveStringToFile(Out, *ItemsFile(), FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
+	const bool bSaved = FFileHelper::SaveStringToFile(Out, *RefItemsFile(), FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
 	if (bSaved) { ItemCatalog::Reload(true); }
 	return bSaved;
 }
