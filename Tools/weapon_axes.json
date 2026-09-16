@@ -1,0 +1,2498 @@
+{
+ "CyberCity/Dagger_01": {
+  "kind": "Dagger",
+  "pack": "CyberCity",
+  "min": [
+   -2.77,
+   -4.32,
+   -11.5
+  ],
+  "max": [
+   2.77,
+   5.25,
+   38.66
+  ],
+  "extent": [
+   5.55,
+   9.57,
+   50.16
+  ],
+  "axis": "+Z",
+  "length": 50.16,
+  "butt_offset": 11.5,
+  "lateral": [
+   5.55,
+   9.57
+  ]
+ },
+ "CyberCity/Dagger_02": {
+  "kind": "Dagger",
+  "pack": "CyberCity",
+  "min": [
+   -2.79,
+   -4.93,
+   -9.43
+  ],
+  "max": [
+   2.79,
+   4.93,
+   42.04
+  ],
+  "extent": [
+   5.59,
+   9.87,
+   51.46
+  ],
+  "axis": "+Z",
+  "length": 51.46,
+  "butt_offset": 9.43,
+  "lateral": [
+   5.59,
+   9.87
+  ]
+ },
+ "CyberCity/Laser_Gun_01": {
+  "kind": "Laser",
+  "pack": "CyberCity",
+  "min": [
+   -5.88,
+   -40.99,
+   -16.43
+  ],
+  "max": [
+   5.88,
+   63.41,
+   26.99
+  ],
+  "extent": [
+   11.76,
+   104.41,
+   43.41
+  ],
+  "axis": "+Y",
+  "length": 104.41,
+  "butt_offset": 40.99,
+  "lateral": [
+   11.76,
+   43.41
+  ]
+ },
+ "CyberCity/Paint_Gun_01": {
+  "kind": "Paint",
+  "pack": "CyberCity",
+  "min": [
+   -5.84,
+   -8.29,
+   -17.99
+  ],
+  "max": [
+   6.87,
+   28.87,
+   15.14
+  ],
+  "extent": [
+   12.71,
+   37.16,
+   33.13
+  ],
+  "axis": "+Y",
+  "length": 37.16,
+  "butt_offset": 8.29,
+  "lateral": [
+   12.71,
+   33.13
+  ]
+ },
+ "CyberCity/Pistol_01": {
+  "kind": "Pistol",
+  "pack": "CyberCity",
+  "min": [
+   -3.49,
+   -16.72,
+   -18.93
+  ],
+  "max": [
+   3.49,
+   33.85,
+   12.85
+  ],
+  "extent": [
+   6.99,
+   50.57,
+   31.79
+  ],
+  "axis": "+Y",
+  "length": 50.57,
+  "butt_offset": 16.72,
+  "lateral": [
+   6.99,
+   31.79
+  ]
+ },
+ "CyberCity/Rifle_01": {
+  "kind": "Rifle",
+  "pack": "CyberCity",
+  "min": [
+   -5.02,
+   -32.7,
+   -18.89
+  ],
+  "max": [
+   5.02,
+   59.86,
+   15.22
+  ],
+  "extent": [
+   10.04,
+   92.56,
+   34.11
+  ],
+  "axis": "+Y",
+  "length": 92.56,
+  "butt_offset": 32.7,
+  "lateral": [
+   10.04,
+   34.11
+  ]
+ },
+ "CyberCity/SMG_01": {
+  "kind": "SMG",
+  "pack": "CyberCity",
+  "min": [
+   -3.93,
+   -33.46,
+   -9.7
+  ],
+  "max": [
+   3.93,
+   30.11,
+   19.25
+  ],
+  "extent": [
+   7.87,
+   63.57,
+   28.95
+  ],
+  "axis": "-Y",
+  "length": 63.57,
+  "butt_offset": 30.11,
+  "lateral": [
+   7.87,
+   28.95
+  ]
+ },
+ "CyberCity/Shock_Stick_01": {
+  "kind": "Shock",
+  "pack": "CyberCity",
+  "min": [
+   -4.32,
+   -5.54,
+   -14.15
+  ],
+  "max": [
+   4.32,
+   5.54,
+   81.66
+  ],
+  "extent": [
+   8.64,
+   11.08,
+   95.81
+  ],
+  "axis": "+Z",
+  "length": 95.81,
+  "butt_offset": 14.15,
+  "lateral": [
+   8.64,
+   11.08
+  ]
+ },
+ "CyberCity/Shock_Stick_02": {
+  "kind": "Shock",
+  "pack": "CyberCity",
+  "min": [
+   -5.44,
+   -27.4,
+   -26.04
+  ],
+  "max": [
+   5.44,
+   4.2,
+   72.28
+  ],
+  "extent": [
+   10.89,
+   31.6,
+   98.33
+  ],
+  "axis": "+Z",
+  "length": 98.33,
+  "butt_offset": 26.04,
+  "lateral": [
+   10.89,
+   31.6
+  ]
+ },
+ "CyberCity/Shock_Stick_03": {
+  "kind": "Shock",
+  "pack": "CyberCity",
+  "min": [
+   -11.04,
+   -9.67,
+   -63.0
+  ],
+  "max": [
+   11.04,
+   9.67,
+   63.86
+  ],
+  "extent": [
+   22.09,
+   19.35,
+   126.86
+  ],
+  "axis": "+Z",
+  "length": 126.86,
+  "butt_offset": 63.0,
+  "lateral": [
+   22.09,
+   19.35
+  ]
+ },
+ "CyberCity/Shock_Stick_04": {
+  "kind": "Shock",
+  "pack": "CyberCity",
+  "min": [
+   -6.83,
+   -5.92,
+   -25.73
+  ],
+  "max": [
+   6.83,
+   5.92,
+   78.11
+  ],
+  "extent": [
+   13.67,
+   11.84,
+   103.84
+  ],
+  "axis": "+Z",
+  "length": 103.84,
+  "butt_offset": 25.73,
+  "lateral": [
+   13.67,
+   11.84
+  ]
+ },
+ "CyberCity/Shock_Stick_05": {
+  "kind": "Shock",
+  "pack": "CyberCity",
+  "min": [
+   -5.97,
+   -5.85,
+   -20.03
+  ],
+  "max": [
+   5.97,
+   11.65,
+   77.59
+  ],
+  "extent": [
+   11.94,
+   17.5,
+   97.62
+  ],
+  "axis": "+Z",
+  "length": 97.62,
+  "butt_offset": 20.03,
+  "lateral": [
+   11.94,
+   17.5
+  ]
+ },
+ "CyberCity/Shuriken_01": {
+  "kind": "Shuriken",
+  "pack": "CyberCity",
+  "min": [
+   -9.35,
+   -10.12,
+   0.0
+  ],
+  "max": [
+   11.11,
+   10.94,
+   2.16
+  ],
+  "extent": [
+   20.46,
+   21.06,
+   2.16
+  ],
+  "axis": "+Y",
+  "length": 21.06,
+  "butt_offset": 10.12,
+  "lateral": [
+   20.46,
+   2.16
+  ]
+ },
+ "CyberCity/Shuriken_03": {
+  "kind": "Shuriken",
+  "pack": "CyberCity",
+  "min": [
+   -13.17,
+   -7.44,
+   -0.0
+  ],
+  "max": [
+   13.17,
+   15.15,
+   1.55
+  ],
+  "extent": [
+   26.34,
+   22.59,
+   1.55
+  ],
+  "axis": "+X",
+  "length": 26.34,
+  "butt_offset": 13.17,
+  "lateral": [
+   22.59,
+   1.55
+  ]
+ },
+ "CyberCity/Shuriken_05": {
+  "kind": "Shuriken",
+  "pack": "CyberCity",
+  "min": [
+   -3.3,
+   -11.07,
+   -2.85
+  ],
+  "max": [
+   3.3,
+   17.99,
+   2.85
+  ],
+  "extent": [
+   6.61,
+   29.05,
+   5.69
+  ],
+  "axis": "+Y",
+  "length": 29.05,
+  "butt_offset": 11.07,
+  "lateral": [
+   6.61,
+   5.69
+  ]
+ },
+ "CyberCity/Sniper_Rifle_01": {
+  "kind": "Marksman Rifle",
+  "pack": "CyberCity",
+  "min": [
+   -7.65,
+   -36.96,
+   -15.62
+  ],
+  "max": [
+   7.71,
+   144.57,
+   14.4
+  ],
+  "extent": [
+   15.36,
+   181.53,
+   30.03
+  ],
+  "axis": "+Y",
+  "length": 181.53,
+  "butt_offset": 36.96,
+  "lateral": [
+   15.36,
+   30.03
+  ]
+ },
+ "CyberCity/Sword_01": {
+  "kind": "Sword",
+  "pack": "CyberCity",
+  "min": [
+   -7.7,
+   -12.22,
+   -26.81
+  ],
+  "max": [
+   7.7,
+   6.91,
+   118.99
+  ],
+  "extent": [
+   15.41,
+   19.14,
+   145.8
+  ],
+  "axis": "+Z",
+  "length": 145.8,
+  "butt_offset": 26.81,
+  "lateral": [
+   15.41,
+   19.14
+  ]
+ },
+ "CyberCity/Sword_02": {
+  "kind": "Sword",
+  "pack": "CyberCity",
+  "min": [
+   -7.7,
+   -12.39,
+   -26.78
+  ],
+  "max": [
+   7.7,
+   6.74,
+   119.02
+  ],
+  "extent": [
+   15.41,
+   19.14,
+   145.8
+  ],
+  "axis": "+Z",
+  "length": 145.8,
+  "butt_offset": 26.78,
+  "lateral": [
+   15.41,
+   19.14
+  ]
+ },
+ "CyberCity/Sword_03": {
+  "kind": "Sword",
+  "pack": "CyberCity",
+  "min": [
+   -4.62,
+   -9.13,
+   -22.85
+  ],
+  "max": [
+   4.87,
+   10.02,
+   123.47
+  ],
+  "extent": [
+   9.49,
+   19.15,
+   146.32
+  ],
+  "axis": "+Z",
+  "length": 146.32,
+  "butt_offset": 22.85,
+  "lateral": [
+   9.49,
+   19.15
+  ]
+ },
+ "CyberCity/Sword_04": {
+  "kind": "Sword",
+  "pack": "CyberCity",
+  "min": [
+   -6.43,
+   -16.21,
+   -17.17
+  ],
+  "max": [
+   6.43,
+   16.21,
+   126.0
+  ],
+  "extent": [
+   12.85,
+   32.43,
+   143.17
+  ],
+  "axis": "+Z",
+  "length": 143.17,
+  "butt_offset": 17.17,
+  "lateral": [
+   12.85,
+   32.43
+  ]
+ },
+ "CyberCity/Sword_05": {
+  "kind": "Sword",
+  "pack": "CyberCity",
+  "min": [
+   -4.04,
+   -15.04,
+   -18.13
+  ],
+  "max": [
+   4.04,
+   14.29,
+   131.23
+  ],
+  "extent": [
+   8.07,
+   29.33,
+   149.36
+  ],
+  "axis": "+Z",
+  "length": 149.36,
+  "butt_offset": 18.13,
+  "lateral": [
+   8.07,
+   29.33
+  ]
+ },
+ "CyberCity/Sword_06": {
+  "kind": "Sword",
+  "pack": "CyberCity",
+  "min": [
+   -4.99,
+   -4.77,
+   -19.45
+  ],
+  "max": [
+   4.99,
+   4.87,
+   128.35
+  ],
+  "extent": [
+   9.99,
+   9.64,
+   147.79
+  ],
+  "axis": "+Z",
+  "length": 147.79,
+  "butt_offset": 19.45,
+  "lateral": [
+   9.99,
+   9.64
+  ]
+ },
+ "CyberCity/Sword_07": {
+  "kind": "Sword",
+  "pack": "CyberCity",
+  "min": [
+   -3.87,
+   -21.68,
+   -23.02
+  ],
+  "max": [
+   3.87,
+   21.68,
+   125.31
+  ],
+  "extent": [
+   7.73,
+   43.36,
+   148.32
+  ],
+  "axis": "+Z",
+  "length": 148.32,
+  "butt_offset": 23.02,
+  "lateral": [
+   7.73,
+   43.36
+  ]
+ },
+ "CyberCity/Sword_08": {
+  "kind": "Sword",
+  "pack": "CyberCity",
+  "min": [
+   -4.24,
+   -11.82,
+   -23.5
+  ],
+  "max": [
+   4.24,
+   12.47,
+   118.81
+  ],
+  "extent": [
+   8.47,
+   24.3,
+   142.32
+  ],
+  "axis": "+Z",
+  "length": 142.32,
+  "butt_offset": 23.5,
+  "lateral": [
+   8.47,
+   24.3
+  ]
+ },
+ "Space/Wep_Pistol_01": {
+  "kind": "Pistol",
+  "pack": "Space",
+  "min": [
+   -3.42,
+   -10.69,
+   -14.27
+  ],
+  "max": [
+   3.42,
+   30.76,
+   11.77
+  ],
+  "extent": [
+   6.83,
+   41.46,
+   26.04
+  ],
+  "axis": "+Y",
+  "length": 41.46,
+  "butt_offset": 10.69,
+  "lateral": [
+   6.83,
+   26.04
+  ]
+ },
+ "Space/Wep_Rifle_01": {
+  "kind": "Rifle",
+  "pack": "Space",
+  "min": [
+   -19.79,
+   -34.31,
+   -13.83
+  ],
+  "max": [
+   5.83,
+   40.59,
+   24.07
+  ],
+  "extent": [
+   25.62,
+   74.9,
+   37.9
+  ],
+  "axis": "+Y",
+  "length": 74.9,
+  "butt_offset": 34.31,
+  "lateral": [
+   25.62,
+   37.9
+  ]
+ },
+ "Space/Wep_Shield_01": {
+  "kind": "Shield",
+  "pack": "Space",
+  "min": [
+   -22.38,
+   -2.09,
+   -28.95
+  ],
+  "max": [
+   22.38,
+   9.76,
+   38.73
+  ],
+  "extent": [
+   44.77,
+   11.85,
+   67.68
+  ],
+  "axis": "+Z",
+  "length": 67.68,
+  "butt_offset": 28.95,
+  "lateral": [
+   44.77,
+   11.85
+  ]
+ },
+ "Space/Wep_Shield_Extended_01": {
+  "kind": "Shield",
+  "pack": "Space",
+  "min": [
+   -34.8,
+   -3.2,
+   -42.86
+  ],
+  "max": [
+   34.8,
+   9.76,
+   79.35
+  ],
+  "extent": [
+   69.6,
+   12.96,
+   122.21
+  ],
+  "axis": "+Z",
+  "length": 122.21,
+  "butt_offset": 42.86,
+  "lateral": [
+   69.6,
+   12.96
+  ]
+ },
+ "Space/Wep_Shotgun_01": {
+  "kind": "Shotgun",
+  "pack": "Space",
+  "min": [
+   -5.13,
+   -22.32,
+   -9.3
+  ],
+  "max": [
+   5.21,
+   55.38,
+   18.53
+  ],
+  "extent": [
+   10.34,
+   77.7,
+   27.82
+  ],
+  "axis": "+Y",
+  "length": 77.7,
+  "butt_offset": 22.32,
+  "lateral": [
+   10.34,
+   27.82
+  ]
+ },
+ "Space/Wep_Sword_01": {
+  "kind": "Sword",
+  "pack": "Space",
+  "min": [
+   -8.99,
+   -2.72,
+   -18.36
+  ],
+  "max": [
+   8.43,
+   2.72,
+   116.1
+  ],
+  "extent": [
+   17.42,
+   5.44,
+   134.46
+  ],
+  "axis": "+Z",
+  "length": 134.46,
+  "butt_offset": 18.36,
+  "lateral": [
+   17.42,
+   5.44
+  ]
+ },
+ "Space/Wep_Sword_Double_01": {
+  "kind": "Sword",
+  "pack": "Space",
+  "min": [
+   -11.18,
+   -2.09,
+   -22.31
+  ],
+  "max": [
+   11.18,
+   2.09,
+   103.36
+  ],
+  "extent": [
+   22.35,
+   4.17,
+   125.67
+  ],
+  "axis": "+Z",
+  "length": 125.67,
+  "butt_offset": 22.31,
+  "lateral": [
+   22.35,
+   4.17
+  ]
+ },
+ "Worlds/Wep_Alien_01": {
+  "kind": "Alien Weapon",
+  "pack": "Worlds",
+  "min": [
+   -3.96,
+   -18.03,
+   -13.04
+  ],
+  "max": [
+   3.96,
+   63.91,
+   23.33
+  ],
+  "extent": [
+   7.93,
+   81.94,
+   36.38
+  ],
+  "axis": "+Y",
+  "length": 81.94,
+  "butt_offset": 18.03,
+  "lateral": [
+   7.93,
+   36.38
+  ]
+ },
+ "Worlds/Wep_Alien_02": {
+  "kind": "Alien Weapon",
+  "pack": "Worlds",
+  "min": [
+   -3.84,
+   -25.65,
+   -19.0
+  ],
+  "max": [
+   3.84,
+   70.11,
+   16.94
+  ],
+  "extent": [
+   7.68,
+   95.76,
+   35.94
+  ],
+  "axis": "+Y",
+  "length": 95.76,
+  "butt_offset": 25.65,
+  "lateral": [
+   7.68,
+   35.94
+  ]
+ },
+ "Worlds/Wep_Alien_03": {
+  "kind": "Alien Weapon",
+  "pack": "Worlds",
+  "min": [
+   -7.28,
+   -27.53,
+   -14.69
+  ],
+  "max": [
+   7.28,
+   91.8,
+   22.72
+  ],
+  "extent": [
+   14.56,
+   119.33,
+   37.41
+  ],
+  "axis": "+Y",
+  "length": 119.33,
+  "butt_offset": 27.53,
+  "lateral": [
+   14.56,
+   37.41
+  ]
+ },
+ "Worlds/Wep_Alien_04": {
+  "kind": "Alien Weapon",
+  "pack": "Worlds",
+  "min": [
+   -6.29,
+   -29.01,
+   -15.56
+  ],
+  "max": [
+   6.29,
+   95.35,
+   26.52
+  ],
+  "extent": [
+   12.58,
+   124.36,
+   42.08
+  ],
+  "axis": "+Y",
+  "length": 124.36,
+  "butt_offset": 29.01,
+  "lateral": [
+   12.58,
+   42.08
+  ]
+ },
+ "Worlds/Wep_Assault_01": {
+  "kind": "Assault Rifle",
+  "pack": "Worlds",
+  "min": [
+   -3.78,
+   -29.37,
+   -19.28
+  ],
+  "max": [
+   4.7,
+   66.17,
+   22.25
+  ],
+  "extent": [
+   8.48,
+   95.54,
+   41.53
+  ],
+  "axis": "+Y",
+  "length": 95.54,
+  "butt_offset": 29.37,
+  "lateral": [
+   8.48,
+   41.53
+  ]
+ },
+ "Worlds/Wep_Assault_02": {
+  "kind": "Assault Rifle",
+  "pack": "Worlds",
+  "min": [
+   -3.61,
+   -28.01,
+   -19.14
+  ],
+  "max": [
+   3.61,
+   63.29,
+   21.72
+  ],
+  "extent": [
+   7.23,
+   91.3,
+   40.86
+  ],
+  "axis": "+Y",
+  "length": 91.3,
+  "butt_offset": 28.01,
+  "lateral": [
+   7.23,
+   40.86
+  ]
+ },
+ "Worlds/Wep_Assault_03": {
+  "kind": "Assault Rifle",
+  "pack": "Worlds",
+  "min": [
+   -5.27,
+   -24.1,
+   -20.93
+  ],
+  "max": [
+   5.27,
+   73.0,
+   24.03
+  ],
+  "extent": [
+   10.54,
+   97.09,
+   44.96
+  ],
+  "axis": "+Y",
+  "length": 97.09,
+  "butt_offset": 24.1,
+  "lateral": [
+   10.54,
+   44.96
+  ]
+ },
+ "Worlds/Wep_BigAxe_01": {
+  "kind": "Great Axe",
+  "pack": "Worlds",
+  "min": [
+   -5.78,
+   -22.88,
+   -51.18
+  ],
+  "max": [
+   5.78,
+   22.88,
+   69.12
+  ],
+  "extent": [
+   11.56,
+   45.75,
+   120.31
+  ],
+  "axis": "+Z",
+  "length": 120.31,
+  "butt_offset": 51.18,
+  "lateral": [
+   11.56,
+   45.75
+  ]
+ },
+ "Worlds/Wep_BigAxe_02": {
+  "kind": "Great Axe",
+  "pack": "Worlds",
+  "min": [
+   -5.08,
+   -10.41,
+   -49.9
+  ],
+  "max": [
+   5.08,
+   23.64,
+   49.9
+  ],
+  "extent": [
+   10.16,
+   34.05,
+   99.8
+  ],
+  "axis": "+Z",
+  "length": 99.8,
+  "butt_offset": 49.9,
+  "lateral": [
+   10.16,
+   34.05
+  ]
+ },
+ "Worlds/Wep_BigAxe_03": {
+  "kind": "Great Axe",
+  "pack": "Worlds",
+  "min": [
+   -4.05,
+   -23.57,
+   -42.76
+  ],
+  "max": [
+   4.05,
+   17.17,
+   69.25
+  ],
+  "extent": [
+   8.1,
+   40.74,
+   112.02
+  ],
+  "axis": "+Z",
+  "length": 112.02,
+  "butt_offset": 42.76,
+  "lateral": [
+   8.1,
+   40.74
+  ]
+ },
+ "Worlds/Wep_BigAxe_04": {
+  "kind": "Great Axe",
+  "pack": "Worlds",
+  "min": [
+   -3.44,
+   -19.39,
+   -55.41
+  ],
+  "max": [
+   3.44,
+   19.39,
+   55.51
+  ],
+  "extent": [
+   6.88,
+   38.79,
+   110.93
+  ],
+  "axis": "+Z",
+  "length": 110.93,
+  "butt_offset": 55.41,
+  "lateral": [
+   6.88,
+   38.79
+  ]
+ },
+ "Worlds/Wep_BigAxe_05": {
+  "kind": "Great Axe",
+  "pack": "Worlds",
+  "min": [
+   -4.98,
+   -21.29,
+   -35.02
+  ],
+  "max": [
+   4.98,
+   21.29,
+   59.61
+  ],
+  "extent": [
+   9.96,
+   42.58,
+   94.63
+  ],
+  "axis": "+Z",
+  "length": 94.63,
+  "butt_offset": 35.02,
+  "lateral": [
+   9.96,
+   42.58
+  ]
+ },
+ "Worlds/Wep_BigAxe_06": {
+  "kind": "Great Axe",
+  "pack": "Worlds",
+  "min": [
+   -5.31,
+   -24.83,
+   -35.51
+  ],
+  "max": [
+   5.31,
+   24.83,
+   67.07
+  ],
+  "extent": [
+   10.62,
+   49.65,
+   102.58
+  ],
+  "axis": "+Z",
+  "length": 102.58,
+  "butt_offset": 35.51,
+  "lateral": [
+   10.62,
+   49.65
+  ]
+ },
+ "Worlds/Wep_BigAxe_07": {
+  "kind": "Great Axe",
+  "pack": "Worlds",
+  "min": [
+   -11.79,
+   -28.51,
+   -69.54
+  ],
+  "max": [
+   11.79,
+   32.0,
+   69.54
+  ],
+  "extent": [
+   23.58,
+   60.51,
+   139.08
+  ],
+  "axis": "-Z",
+  "length": 139.08,
+  "butt_offset": 69.54,
+  "lateral": [
+   23.58,
+   60.51
+  ]
+ },
+ "Worlds/Wep_Dagger_01": {
+  "kind": "Dagger",
+  "pack": "Worlds",
+  "min": [
+   -2.73,
+   -9.94,
+   -6.29
+  ],
+  "max": [
+   2.79,
+   10.1,
+   43.15
+  ],
+  "extent": [
+   5.52,
+   20.05,
+   49.44
+  ],
+  "axis": "+Z",
+  "length": 49.44,
+  "butt_offset": 6.29,
+  "lateral": [
+   5.52,
+   20.05
+  ]
+ },
+ "Worlds/Wep_Dagger_02": {
+  "kind": "Dagger",
+  "pack": "Worlds",
+  "min": [
+   -2.07,
+   -4.75,
+   -9.5
+  ],
+  "max": [
+   2.07,
+   4.75,
+   40.1
+  ],
+  "extent": [
+   4.14,
+   9.49,
+   49.6
+  ],
+  "axis": "+Z",
+  "length": 49.6,
+  "butt_offset": 9.5,
+  "lateral": [
+   4.14,
+   9.49
+  ]
+ },
+ "Worlds/Wep_Dagger_03": {
+  "kind": "Dagger",
+  "pack": "Worlds",
+  "min": [
+   -2.94,
+   -5.47,
+   -11.19
+  ],
+  "max": [
+   2.94,
+   11.14,
+   45.43
+  ],
+  "extent": [
+   5.88,
+   16.61,
+   56.62
+  ],
+  "axis": "+Z",
+  "length": 56.62,
+  "butt_offset": 11.19,
+  "lateral": [
+   5.88,
+   16.61
+  ]
+ },
+ "Worlds/Wep_Dagger_04": {
+  "kind": "Dagger",
+  "pack": "Worlds",
+  "min": [
+   -2.14,
+   -4.43,
+   -10.51
+  ],
+  "max": [
+   2.14,
+   11.7,
+   42.08
+  ],
+  "extent": [
+   4.29,
+   16.12,
+   52.59
+  ],
+  "axis": "+Z",
+  "length": 52.59,
+  "butt_offset": 10.51,
+  "lateral": [
+   4.29,
+   16.12
+  ]
+ },
+ "Worlds/Wep_Dagger_05": {
+  "kind": "Dagger",
+  "pack": "Worlds",
+  "min": [
+   -2.5,
+   -5.8,
+   -10.75
+  ],
+  "max": [
+   2.5,
+   5.8,
+   40.54
+  ],
+  "extent": [
+   5.0,
+   11.61,
+   51.29
+  ],
+  "axis": "+Z",
+  "length": 51.29,
+  "butt_offset": 10.75,
+  "lateral": [
+   5.0,
+   11.61
+  ]
+ },
+ "Worlds/Wep_Dagger_06": {
+  "kind": "Dagger",
+  "pack": "Worlds",
+  "min": [
+   -2.56,
+   -5.81,
+   -10.4
+  ],
+  "max": [
+   2.56,
+   5.81,
+   40.99
+  ],
+  "extent": [
+   5.13,
+   11.62,
+   51.39
+  ],
+  "axis": "+Z",
+  "length": 51.39,
+  "butt_offset": 10.4,
+  "lateral": [
+   5.13,
+   11.62
+  ]
+ },
+ "Worlds/Wep_Dagger_07": {
+  "kind": "Dagger",
+  "pack": "Worlds",
+  "min": [
+   -2.99,
+   -5.02,
+   -9.71
+  ],
+  "max": [
+   2.96,
+   5.89,
+   40.55
+  ],
+  "extent": [
+   5.95,
+   10.91,
+   50.26
+  ],
+  "axis": "+Z",
+  "length": 50.26,
+  "butt_offset": 9.71,
+  "lateral": [
+   5.95,
+   10.91
+  ]
+ },
+ "Worlds/Wep_GrenadeLauncher_01": {
+  "kind": "Grenade Launcher",
+  "pack": "Worlds",
+  "min": [
+   -19.31,
+   -46.85,
+   -27.32
+  ],
+  "max": [
+   19.31,
+   46.85,
+   27.32
+  ],
+  "extent": [
+   38.62,
+   93.71,
+   54.64
+  ],
+  "axis": "-Y",
+  "length": 93.71,
+  "butt_offset": 46.85,
+  "lateral": [
+   38.62,
+   54.64
+  ]
+ },
+ "Worlds/Wep_Hammer_02": {
+  "kind": "Hammer",
+  "pack": "Worlds",
+  "min": [
+   -13.3,
+   -28.14,
+   -67.13
+  ],
+  "max": [
+   13.3,
+   32.78,
+   77.97
+  ],
+  "extent": [
+   26.61,
+   60.92,
+   145.1
+  ],
+  "axis": "+Z",
+  "length": 145.1,
+  "butt_offset": 67.13,
+  "lateral": [
+   26.61,
+   60.92
+  ]
+ },
+ "Worlds/Wep_Hammer_03": {
+  "kind": "Hammer",
+  "pack": "Worlds",
+  "min": [
+   -15.71,
+   -32.12,
+   -55.71
+  ],
+  "max": [
+   15.71,
+   32.12,
+   93.65
+  ],
+  "extent": [
+   31.42,
+   64.24,
+   149.36
+  ],
+  "axis": "+Z",
+  "length": 149.36,
+  "butt_offset": 55.71,
+  "lateral": [
+   31.42,
+   64.24
+  ]
+ },
+ "Worlds/Wep_Heavy_01": {
+  "kind": "Heavy Gun",
+  "pack": "Worlds",
+  "min": [
+   -9.96,
+   -44.0,
+   -17.26
+  ],
+  "max": [
+   9.96,
+   83.3,
+   44.04
+  ],
+  "extent": [
+   19.93,
+   127.3,
+   61.31
+  ],
+  "axis": "+Y",
+  "length": 127.3,
+  "butt_offset": 44.0,
+  "lateral": [
+   19.93,
+   61.31
+  ]
+ },
+ "Worlds/Wep_Heavy_02": {
+  "kind": "Heavy Gun",
+  "pack": "Worlds",
+  "min": [
+   -15.68,
+   -17.26,
+   -15.06
+  ],
+  "max": [
+   15.68,
+   57.07,
+   27.58
+  ],
+  "extent": [
+   31.35,
+   74.33,
+   42.64
+  ],
+  "axis": "+Y",
+  "length": 74.33,
+  "butt_offset": 17.26,
+  "lateral": [
+   31.35,
+   42.64
+  ]
+ },
+ "Worlds/Wep_Heavy_03": {
+  "kind": "Heavy Gun",
+  "pack": "Worlds",
+  "min": [
+   -15.45,
+   -34.6,
+   -32.83
+  ],
+  "max": [
+   15.45,
+   70.25,
+   18.08
+  ],
+  "extent": [
+   30.89,
+   104.85,
+   50.91
+  ],
+  "axis": "+Y",
+  "length": 104.85,
+  "butt_offset": 34.6,
+  "lateral": [
+   30.89,
+   50.91
+  ]
+ },
+ "Worlds/Wep_Launcher_01": {
+  "kind": "Launcher",
+  "pack": "Worlds",
+  "min": [
+   -15.29,
+   -80.08,
+   -14.96
+  ],
+  "max": [
+   15.29,
+   68.68,
+   53.37
+  ],
+  "extent": [
+   30.58,
+   148.75,
+   68.33
+  ],
+  "axis": "-Y",
+  "length": 148.75,
+  "butt_offset": 68.68,
+  "lateral": [
+   30.58,
+   68.33
+  ]
+ },
+ "Worlds/Wep_Launcher_02": {
+  "kind": "Launcher",
+  "pack": "Worlds",
+  "min": [
+   -15.29,
+   -68.4,
+   -16.93
+  ],
+  "max": [
+   15.29,
+   86.77,
+   47.56
+  ],
+  "extent": [
+   30.59,
+   155.16,
+   64.48
+  ],
+  "axis": "+Y",
+  "length": 155.16,
+  "butt_offset": 68.4,
+  "lateral": [
+   30.59,
+   64.48
+  ]
+ },
+ "Worlds/Wep_Launcher_03": {
+  "kind": "Launcher",
+  "pack": "Worlds",
+  "min": [
+   -12.75,
+   -74.79,
+   -13.43
+  ],
+  "max": [
+   12.75,
+   56.62,
+   47.87
+  ],
+  "extent": [
+   25.51,
+   131.41,
+   61.3
+  ],
+  "axis": "-Y",
+  "length": 131.41,
+  "butt_offset": 56.62,
+  "lateral": [
+   25.51,
+   61.3
+  ]
+ },
+ "Worlds/Wep_Pistol_01": {
+  "kind": "Pistol",
+  "pack": "Worlds",
+  "min": [
+   -5.33,
+   -12.16,
+   -15.88
+  ],
+  "max": [
+   5.33,
+   23.94,
+   16.56
+  ],
+  "extent": [
+   10.66,
+   36.1,
+   32.43
+  ],
+  "axis": "+Y",
+  "length": 36.1,
+  "butt_offset": 12.16,
+  "lateral": [
+   10.66,
+   32.43
+  ]
+ },
+ "Worlds/Wep_Pistol_02": {
+  "kind": "Pistol",
+  "pack": "Worlds",
+  "min": [
+   -4.04,
+   -7.67,
+   -7.17
+  ],
+  "max": [
+   4.04,
+   45.95,
+   15.77
+  ],
+  "extent": [
+   8.07,
+   53.62,
+   22.94
+  ],
+  "axis": "+Y",
+  "length": 53.62,
+  "butt_offset": 7.67,
+  "lateral": [
+   8.07,
+   22.94
+  ]
+ },
+ "Worlds/Wep_Pistol_03": {
+  "kind": "Pistol",
+  "pack": "Worlds",
+  "min": [
+   -10.26,
+   -9.35,
+   -10.25
+  ],
+  "max": [
+   10.26,
+   25.39,
+   21.46
+  ],
+  "extent": [
+   20.53,
+   34.74,
+   31.71
+  ],
+  "axis": "+Y",
+  "length": 34.74,
+  "butt_offset": 9.35,
+  "lateral": [
+   20.53,
+   31.71
+  ]
+ },
+ "Worlds/Wep_Pistol_04": {
+  "kind": "Pistol",
+  "pack": "Worlds",
+  "min": [
+   -4.36,
+   -7.52,
+   -10.91
+  ],
+  "max": [
+   4.36,
+   30.08,
+   20.11
+  ],
+  "extent": [
+   8.72,
+   37.59,
+   31.02
+  ],
+  "axis": "+Y",
+  "length": 37.59,
+  "butt_offset": 7.52,
+  "lateral": [
+   8.72,
+   31.02
+  ]
+ },
+ "Worlds/Wep_Pistol_05": {
+  "kind": "Pistol",
+  "pack": "Worlds",
+  "min": [
+   -3.75,
+   -14.47,
+   -11.99
+  ],
+  "max": [
+   3.75,
+   37.49,
+   14.32
+  ],
+  "extent": [
+   7.5,
+   51.96,
+   26.31
+  ],
+  "axis": "+Y",
+  "length": 51.96,
+  "butt_offset": 14.47,
+  "lateral": [
+   7.5,
+   26.31
+  ]
+ },
+ "Worlds/Wep_Pistol_06": {
+  "kind": "Pistol",
+  "pack": "Worlds",
+  "min": [
+   -2.65,
+   -15.11,
+   -16.34
+  ],
+  "max": [
+   2.65,
+   23.14,
+   14.0
+  ],
+  "extent": [
+   5.31,
+   38.26,
+   30.34
+  ],
+  "axis": "+Y",
+  "length": 38.26,
+  "butt_offset": 15.11,
+  "lateral": [
+   5.31,
+   30.34
+  ]
+ },
+ "Worlds/Wep_SMG_01": {
+  "kind": "SMG",
+  "pack": "Worlds",
+  "min": [
+   -7.76,
+   -13.45,
+   -19.77
+  ],
+  "max": [
+   7.76,
+   68.83,
+   17.51
+  ],
+  "extent": [
+   15.52,
+   82.28,
+   37.28
+  ],
+  "axis": "+Y",
+  "length": 82.28,
+  "butt_offset": 13.45,
+  "lateral": [
+   15.52,
+   37.28
+  ]
+ },
+ "Worlds/Wep_SMG_02": {
+  "kind": "SMG",
+  "pack": "Worlds",
+  "min": [
+   -3.51,
+   -28.34,
+   -10.77
+  ],
+  "max": [
+   3.51,
+   40.92,
+   18.95
+  ],
+  "extent": [
+   7.02,
+   69.25,
+   29.72
+  ],
+  "axis": "+Y",
+  "length": 69.25,
+  "butt_offset": 28.34,
+  "lateral": [
+   7.02,
+   29.72
+  ]
+ },
+ "Worlds/Wep_SMG_03": {
+  "kind": "SMG",
+  "pack": "Worlds",
+  "min": [
+   -3.98,
+   -43.08,
+   -19.59
+  ],
+  "max": [
+   3.98,
+   43.08,
+   27.16
+  ],
+  "extent": [
+   7.96,
+   86.16,
+   46.75
+  ],
+  "axis": "+Y",
+  "length": 86.16,
+  "butt_offset": 43.08,
+  "lateral": [
+   7.96,
+   46.75
+  ]
+ },
+ "Worlds/Wep_Shield_01": {
+  "kind": "Shield",
+  "pack": "Worlds",
+  "min": [
+   -31.78,
+   -2.53,
+   -56.17
+  ],
+  "max": [
+   31.78,
+   13.67,
+   55.86
+  ],
+  "extent": [
+   63.56,
+   16.2,
+   112.03
+  ],
+  "axis": "-Z",
+  "length": 112.03,
+  "butt_offset": 55.86,
+  "lateral": [
+   63.56,
+   16.2
+  ]
+ },
+ "Worlds/Wep_Shield_02": {
+  "kind": "Shield",
+  "pack": "Worlds",
+  "min": [
+   -29.47,
+   -3.34,
+   -56.69
+  ],
+  "max": [
+   29.47,
+   9.37,
+   56.69
+  ],
+  "extent": [
+   58.95,
+   12.71,
+   113.38
+  ],
+  "axis": "+Z",
+  "length": 113.38,
+  "butt_offset": 56.69,
+  "lateral": [
+   58.95,
+   12.71
+  ]
+ },
+ "Worlds/Wep_Shield_03": {
+  "kind": "Shield",
+  "pack": "Worlds",
+  "min": [
+   -29.47,
+   -2.53,
+   -46.02
+  ],
+  "max": [
+   29.47,
+   10.17,
+   46.02
+  ],
+  "extent": [
+   58.95,
+   12.71,
+   92.05
+  ],
+  "axis": "+Z",
+  "length": 92.05,
+  "butt_offset": 46.02,
+  "lateral": [
+   58.95,
+   12.71
+  ]
+ },
+ "Worlds/Wep_Shield_04": {
+  "kind": "Shield",
+  "pack": "Worlds",
+  "min": [
+   -24.04,
+   -2.17,
+   -56.02
+  ],
+  "max": [
+   24.04,
+   12.97,
+   56.02
+  ],
+  "extent": [
+   48.09,
+   15.15,
+   112.05
+  ],
+  "axis": "+Z",
+  "length": 112.05,
+  "butt_offset": 56.02,
+  "lateral": [
+   48.09,
+   15.15
+  ]
+ },
+ "Worlds/Wep_Shield_05": {
+  "kind": "Shield",
+  "pack": "Worlds",
+  "min": [
+   -22.31,
+   -2.53,
+   -41.02
+  ],
+  "max": [
+   22.31,
+   12.61,
+   41.02
+  ],
+  "extent": [
+   44.62,
+   15.15,
+   82.05
+  ],
+  "axis": "+Z",
+  "length": 82.05,
+  "butt_offset": 41.02,
+  "lateral": [
+   44.62,
+   15.15
+  ]
+ },
+ "Worlds/Wep_Shotgun_01": {
+  "kind": "Shotgun",
+  "pack": "Worlds",
+  "min": [
+   -7.93,
+   -23.8,
+   -6.72
+  ],
+  "max": [
+   7.92,
+   40.4,
+   16.47
+  ],
+  "extent": [
+   15.85,
+   64.2,
+   23.19
+  ],
+  "axis": "+Y",
+  "length": 64.2,
+  "butt_offset": 23.8,
+  "lateral": [
+   15.85,
+   23.19
+  ]
+ },
+ "Worlds/Wep_Shotgun_02": {
+  "kind": "Shotgun",
+  "pack": "Worlds",
+  "min": [
+   -4.48,
+   -28.77,
+   -9.87
+  ],
+  "max": [
+   4.48,
+   75.38,
+   23.26
+  ],
+  "extent": [
+   8.96,
+   104.16,
+   33.13
+  ],
+  "axis": "+Y",
+  "length": 104.16,
+  "butt_offset": 28.77,
+  "lateral": [
+   8.96,
+   33.13
+  ]
+ },
+ "Worlds/Wep_Shotgun_03": {
+  "kind": "Shotgun",
+  "pack": "Worlds",
+  "min": [
+   -4.41,
+   -26.14,
+   -12.06
+  ],
+  "max": [
+   7.55,
+   80.18,
+   19.04
+  ],
+  "extent": [
+   11.96,
+   106.32,
+   31.09
+  ],
+  "axis": "+Y",
+  "length": 106.32,
+  "butt_offset": 26.14,
+  "lateral": [
+   11.96,
+   31.09
+  ]
+ },
+ "Worlds/Wep_SmallAxe_01": {
+  "kind": "Hand Axe",
+  "pack": "Worlds",
+  "min": [
+   -4.36,
+   -11.02,
+   -25.61
+  ],
+  "max": [
+   4.36,
+   19.69,
+   39.44
+  ],
+  "extent": [
+   8.72,
+   30.7,
+   65.05
+  ],
+  "axis": "+Z",
+  "length": 65.05,
+  "butt_offset": 25.61,
+  "lateral": [
+   8.72,
+   30.7
+  ]
+ },
+ "Worlds/Wep_SmallAxe_02": {
+  "kind": "Hand Axe",
+  "pack": "Worlds",
+  "min": [
+   -5.72,
+   -13.94,
+   -24.41
+  ],
+  "max": [
+   5.72,
+   25.55,
+   42.08
+  ],
+  "extent": [
+   11.43,
+   39.49,
+   66.49
+  ],
+  "axis": "+Z",
+  "length": 66.49,
+  "butt_offset": 24.41,
+  "lateral": [
+   11.43,
+   39.49
+  ]
+ },
+ "Worlds/Wep_SmallAxe_03": {
+  "kind": "Hand Axe",
+  "pack": "Worlds",
+  "min": [
+   -4.59,
+   -12.38,
+   -24.24
+  ],
+  "max": [
+   4.59,
+   20.8,
+   42.92
+  ],
+  "extent": [
+   9.18,
+   33.18,
+   67.16
+  ],
+  "axis": "+Z",
+  "length": 67.16,
+  "butt_offset": 24.24,
+  "lateral": [
+   9.18,
+   33.18
+  ]
+ },
+ "Worlds/Wep_SmallAxe_04": {
+  "kind": "Hand Axe",
+  "pack": "Worlds",
+  "min": [
+   -4.08,
+   -12.15,
+   -24.26
+  ],
+  "max": [
+   4.08,
+   13.43,
+   37.2
+  ],
+  "extent": [
+   8.16,
+   25.58,
+   61.46
+  ],
+  "axis": "+Z",
+  "length": 61.46,
+  "butt_offset": 24.26,
+  "lateral": [
+   8.16,
+   25.58
+  ]
+ },
+ "Worlds/Wep_SmallAxe_05": {
+  "kind": "Hand Axe",
+  "pack": "Worlds",
+  "min": [
+   -4.58,
+   -13.75,
+   -28.86
+  ],
+  "max": [
+   4.58,
+   20.25,
+   37.75
+  ],
+  "extent": [
+   9.16,
+   34.0,
+   66.61
+  ],
+  "axis": "+Z",
+  "length": 66.61,
+  "butt_offset": 28.86,
+  "lateral": [
+   9.16,
+   34.0
+  ]
+ },
+ "Worlds/Wep_Sniper_01": {
+  "kind": "Marksman Rifle",
+  "pack": "Worlds",
+  "min": [
+   -7.01,
+   -27.0,
+   -22.3
+  ],
+  "max": [
+   7.01,
+   139.49,
+   28.35
+  ],
+  "extent": [
+   14.02,
+   166.48,
+   50.66
+  ],
+  "axis": "+Y",
+  "length": 166.48,
+  "butt_offset": 27.0,
+  "lateral": [
+   14.02,
+   50.66
+  ]
+ },
+ "Worlds/Wep_Sniper_02": {
+  "kind": "Marksman Rifle",
+  "pack": "Worlds",
+  "min": [
+   -6.51,
+   -29.04,
+   -18.46
+  ],
+  "max": [
+   6.51,
+   133.73,
+   30.56
+  ],
+  "extent": [
+   13.01,
+   162.77,
+   49.02
+  ],
+  "axis": "+Y",
+  "length": 162.77,
+  "butt_offset": 29.04,
+  "lateral": [
+   13.01,
+   49.02
+  ]
+ },
+ "Worlds/Wep_Sniper_03": {
+  "kind": "Marksman Rifle",
+  "pack": "Worlds",
+  "min": [
+   -8.03,
+   -27.17,
+   -10.21
+  ],
+  "max": [
+   8.03,
+   138.87,
+   28.2
+  ],
+  "extent": [
+   16.07,
+   166.04,
+   38.41
+  ],
+  "axis": "+Y",
+  "length": 166.04,
+  "butt_offset": 27.17,
+  "lateral": [
+   16.07,
+   38.41
+  ]
+ },
+ "Worlds/Wep_Sword_01a": {
+  "kind": "Sword",
+  "pack": "Worlds",
+  "min": [
+   -3.63,
+   -5.36,
+   -13.42
+  ],
+  "max": [
+   3.63,
+   5.36,
+   80.62
+  ],
+  "extent": [
+   7.26,
+   10.71,
+   94.04
+  ],
+  "axis": "+Z",
+  "length": 94.04,
+  "butt_offset": 13.42,
+  "lateral": [
+   7.26,
+   10.71
+  ]
+ },
+ "Worlds/Wep_Sword_02": {
+  "kind": "Sword",
+  "pack": "Worlds",
+  "min": [
+   -4.48,
+   -9.59,
+   -19.6
+  ],
+  "max": [
+   4.48,
+   9.59,
+   76.01
+  ],
+  "extent": [
+   8.95,
+   19.17,
+   95.61
+  ],
+  "axis": "+Z",
+  "length": 95.61,
+  "butt_offset": 19.6,
+  "lateral": [
+   8.95,
+   19.17
+  ]
+ },
+ "Worlds/Wep_Sword_03": {
+  "kind": "Sword",
+  "pack": "Worlds",
+  "min": [
+   -2.62,
+   -9.24,
+   -15.31
+  ],
+  "max": [
+   2.62,
+   10.92,
+   77.54
+  ],
+  "extent": [
+   5.23,
+   20.16,
+   92.85
+  ],
+  "axis": "+Z",
+  "length": 92.85,
+  "butt_offset": 15.31,
+  "lateral": [
+   5.23,
+   20.16
+  ]
+ },
+ "Worlds/Wep_Sword_04": {
+  "kind": "Sword",
+  "pack": "Worlds",
+  "min": [
+   -3.86,
+   -7.54,
+   -12.14
+  ],
+  "max": [
+   3.86,
+   7.46,
+   75.08
+  ],
+  "extent": [
+   7.71,
+   15.0,
+   87.22
+  ],
+  "axis": "+Z",
+  "length": 87.22,
+  "butt_offset": 12.14,
+  "lateral": [
+   7.71,
+   15.0
+  ]
+ },
+ "Worlds/Wep_Sword_05": {
+  "kind": "Sword",
+  "pack": "Worlds",
+  "min": [
+   -2.23,
+   -3.81,
+   -18.43
+  ],
+  "max": [
+   2.23,
+   11.53,
+   75.42
+  ],
+  "extent": [
+   4.47,
+   15.33,
+   93.85
+  ],
+  "axis": "+Z",
+  "length": 93.85,
+  "butt_offset": 18.43,
+  "lateral": [
+   4.47,
+   15.33
+  ]
+ },
+ "Worlds/Wep_Sword_06": {
+  "kind": "Sword",
+  "pack": "Worlds",
+  "min": [
+   -2.44,
+   -10.54,
+   -11.95
+  ],
+  "max": [
+   2.44,
+   10.54,
+   82.7
+  ],
+  "extent": [
+   4.87,
+   21.07,
+   94.66
+  ],
+  "axis": "+Z",
+  "length": 94.66,
+  "butt_offset": 11.95,
+  "lateral": [
+   4.87,
+   21.07
+  ]
+ },
+ "Worlds/Wep_Sword_07": {
+  "kind": "Sword",
+  "pack": "Worlds",
+  "min": [
+   -3.96,
+   -10.06,
+   -12.48
+  ],
+  "max": [
+   3.96,
+   10.06,
+   79.43
+  ],
+  "extent": [
+   7.91,
+   20.13,
+   91.91
+  ],
+  "axis": "+Z",
+  "length": 91.91,
+  "butt_offset": 12.48,
+  "lateral": [
+   7.91,
+   20.13
+  ]
+ },
+ "Worlds/Wep_Sword_08": {
+  "kind": "Sword",
+  "pack": "Worlds",
+  "min": [
+   -3.55,
+   -2.53,
+   -17.25
+  ],
+  "max": [
+   3.55,
+   9.12,
+   65.25
+  ],
+  "extent": [
+   7.1,
+   11.65,
+   82.5
+  ],
+  "axis": "+Z",
+  "length": 82.5,
+  "butt_offset": 17.25,
+  "lateral": [
+   7.1,
+   11.65
+  ]
+ },
+ "Worlds/Wep_Tool_01": {
+  "kind": "Tool",
+  "pack": "Worlds",
+  "min": [
+   -5.32,
+   -8.32,
+   -18.1
+  ],
+  "max": [
+   5.32,
+   20.37,
+   15.87
+  ],
+  "extent": [
+   10.65,
+   28.7,
+   33.98
+  ],
+  "axis": "-Z",
+  "length": 33.98,
+  "butt_offset": 15.87,
+  "lateral": [
+   10.65,
+   28.7
+  ]
+ },
+ "Worlds/Wep_Tool_02": {
+  "kind": "Tool",
+  "pack": "Worlds",
+  "min": [
+   -4.5,
+   -14.32,
+   -12.41
+  ],
+  "max": [
+   4.5,
+   26.93,
+   10.46
+  ],
+  "extent": [
+   8.99,
+   41.25,
+   22.87
+  ],
+  "axis": "+Y",
+  "length": 41.25,
+  "butt_offset": 14.32,
+  "lateral": [
+   8.99,
+   22.87
+  ]
+ }
+}

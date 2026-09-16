@@ -1,0 +1,345 @@
+{
+ "_": "The character sheet's layout. Re-read every time the sheet opens (Tab), so edits show on the next open, game running. Fonts are point sizes; cells and gaps are pixels; column weights are relative. Any caption or stat row that ends in one of rule_chars pads itself with that character to the full width of its column; divider is the vertical rule between columns.",
+ "panel": {
+  "_": "inset from the screen edges, px; the container screen uses the same",
+  "left": 200,
+  "top": 124,
+  "right": 200,
+  "bottom": 72,
+  "_min": "the frame never shrinks below this (logical px); below it the frame keeps its size and runs off screen instead of squeezing the content",
+  "min_width": 1520,
+  "min_height": 884
+ },
+ "columns": {
+  "_": "right 0 = the right column hugs its grid; the others share the rest",
+  "stats": 1.0,
+  "mirror": 0.8,
+  "right": 0,
+  "gap": 30,
+  "divider": "|"
+ },
+ "font": {
+  "rule": 13,
+  "row": 12,
+  "caption": 13,
+  "info_name": 15,
+  "info_text": 12,
+  "name": 15,
+  "art": 12
+ },
+ "header": {
+  "left": "+===[ ",
+  "right": " ]=",
+  "end": "+",
+  "rule_chars": "-=",
+  "hint": ""
+ },
+ "footer": {
+  "left": "+=",
+  "end": "=+"
+ },
+ "inventory": {
+  "caption": "==[ INVENTORY ]=",
+  "columns": 10,
+  "cell": 64,
+  "gap": 6
+ },
+ "gear": {
+  "caption": "--[ EQUIPMENT ]-",
+  "cell": 64,
+  "info_caption": "--[ INFO ]-",
+  "_slots": "row/col on the gear grid; label = none | left | right | above | below (the caption takes the neighbouring cell); kinds = ItemCatalog kinds that equip here; spacers hold a column open",
+  "spacers": [
+   {
+    "row": 1,
+    "col": 2,
+    "width": 36
+   },
+   {
+    "row": 1,
+    "col": 4,
+    "width": 36
+   },
+   {
+    "row": 1,
+    "col": 8,
+    "width": 36
+   }
+  ],
+  "slots": [
+   {
+    "name": "Slot 1",
+    "row": 1,
+    "col": 0,
+    "enabled": true,
+    "label": "above",
+    "kinds": [
+     "Rifle",
+     "Assault Rifle",
+     "Marksman Rifle",
+     "Shotgun",
+     "SMG",
+     "Heavy Gun",
+     "Launcher",
+     "Grenade Launcher",
+     "Laser",
+     "Alien Weapon",
+     "Great Axe",
+     "Hammer",
+     "Primary"
+    ]
+   },
+   {
+    "name": "Slot 3",
+    "row": 2,
+    "col": 0,
+    "enabled": false,
+    "label": "below",
+    "kinds": []
+   },
+   {
+    "name": "Slot 2",
+    "row": 1,
+    "col": 1,
+    "enabled": true,
+    "label": "above",
+    "kinds": [
+     "Sidearm",
+     "Pistol",
+     "Shock",
+     "Paint",
+     "Dagger",
+     "Hand Axe",
+     "Sword",
+     "Shuriken",
+     "Tool",
+     "Shield"
+    ]
+   },
+   {
+    "name": "Slot 4",
+    "row": 2,
+    "col": 1,
+    "enabled": false,
+    "label": "below",
+    "kinds": []
+   },
+   {
+    "name": "Shield",
+    "row": 1,
+    "col": 3,
+    "enabled": true,
+    "label": "above",
+    "kinds": [
+     "Shield",
+     "Barrier",
+     "Deflector"
+    ]
+   },
+   {
+    "name": "Healing",
+    "row": 2,
+    "col": 3,
+    "enabled": true,
+    "label": "below",
+    "kinds": [
+     "Healing",
+     "Medkit",
+     "Stim",
+     "Medical"
+    ]
+   },
+   {
+    "name": "Arms",
+    "row": 1,
+    "col": 5,
+    "enabled": true,
+    "label": "above",
+    "kinds": [
+     "Sleeves",
+     "Arms"
+    ]
+   },
+   {
+    "name": "Hands",
+    "row": 2,
+    "col": 5,
+    "enabled": true,
+    "label": "below",
+    "kinds": [
+     "Gloves",
+     "Hands"
+    ]
+   },
+   {
+    "name": "Head",
+    "row": 1,
+    "col": 6,
+    "enabled": true,
+    "label": "above",
+    "kinds": [
+     "Helmet",
+     "Head"
+    ]
+   },
+   {
+    "name": "Chest",
+    "row": 2,
+    "col": 6,
+    "enabled": true,
+    "label": "below",
+    "kinds": [
+     "Armor",
+     "Chest"
+    ]
+   },
+   {
+    "name": "Legs",
+    "row": 1,
+    "col": 7,
+    "enabled": true,
+    "label": "above",
+    "kinds": [
+     "Legwear",
+     "Legs"
+    ]
+   },
+   {
+    "name": "Feet",
+    "row": 2,
+    "col": 7,
+    "enabled": true,
+    "label": "below",
+    "kinds": [
+     "Boots",
+     "Feet"
+    ]
+   },
+   {
+    "name": "Acc 1",
+    "row": 1,
+    "col": 9,
+    "enabled": true,
+    "label": "above",
+    "kinds": [
+     "Accessory"
+    ]
+   },
+   {
+    "name": "Acc 2",
+    "row": 2,
+    "col": 9,
+    "enabled": true,
+    "label": "below",
+    "kinds": [
+     "Accessory"
+    ]
+   },
+   {
+    "name": "Aug 1",
+    "row": 1,
+    "col": 10,
+    "enabled": true,
+    "label": "above",
+    "kinds": [
+     "Augment"
+    ]
+   },
+   {
+    "name": "Aug 2",
+    "row": 2,
+    "col": 10,
+    "enabled": true,
+    "label": "below",
+    "kinds": [
+     "Augment"
+    ]
+   }
+  ]
+ },
+ "stats": {
+  "_art": "optional lines drawn above the caption in the art font, dim; corporation-agnostic; keep lines under about 30 characters",
+  "art": [],
+  "caption": "==[ ATTRIBUTES ]=",
+  "_rows": "a row naming an attribute in braces, {Brawn} {Agility} {Endurance} {Cognition} {Tech} {Presence}, shows that character's score. What each one covers, for reference, is documented on FAttributes in CharacterConfig.h and returned by FAttributes::Describe: Brawn is raw muscle power, heavy lifting and melee force; Agility is coordination, speed, dodging and fine motor skills; Endurance is immune system strength, stamina and resistance to toxins or radiation; Cognition is memory, logical deduction and academic knowledge; Tech is repair, hacking and operating futuristic machinery or starship systems; Presence is leadership, intimidation and social engineering.",
+  "rows": [
+   "BRAWN        {Brawn}",
+   "AGILITY      {Agility}",
+   "ENDURANCE    {Endurance}",
+   "COGNITION    {Cognition}",
+   "TECH         {Tech}",
+   "PRESENCE     {Presence}",
+   "",
+   "-"
+  ],
+  "_sections": "The left column, top to bottom. Each block is a caption and its rows; a row may carry {Tokens}. Attribute tokens are {Brawn} {Agility} {Endurance} {Cognition} {Tech} {Presence}; derived tokens come from FAttributes::Derived in CharacterConfig.h -- {Vitality} {Kinetic} {Thermal} {Toxin} {Evasion} {Firewall}. Statuses and Talents are authored here for now: when a real status or talent system exists these rows become live and the placeholder lines go.",
+  "sections": [
+   {
+    "caption": "==[ ATTRIBUTES ]=",
+    "rows": [
+     "BRAWN        {Brawn}",
+     "AGILITY      {Agility}",
+     "ENDURANCE    {Endurance}",
+     "COGNITION    {Cognition}",
+     "TECH         {Tech}",
+     "PRESENCE     {Presence}"
+    ]
+   },
+   {
+    "caption": "==[ DEFENCES ]=",
+    "rows": [
+     "VITALITY     {Vitality}",
+     "KINETIC      {Kinetic}",
+     "THERMAL      {Thermal}",
+     "TOXIN        {Toxin}",
+     "EVASION      {Evasion}",
+     "FIREWALL     {Firewall}"
+    ]
+   },
+   {
+    "caption": "==[ STATUSES ]=",
+    "rows": [
+     "NOMINAL"
+    ]
+   },
+   {
+    "caption": "==[ TALENTS ]=",
+    "rows": [
+     "NONE RECORDED"
+    ]
+   }
+  ]
+ },
+ "mirror": {
+  "_": "camera relative to the head socket, cm; fov is horizontal on the 5:8 portrait target",
+  "caption": "==[ CHARACTER ]=",
+  "footer": "-",
+  "body": {
+   "offset": [
+    285,
+    38,
+    -40
+   ],
+   "look": [
+    0,
+    0,
+    -60
+   ],
+   "fov": 26
+  },
+  "head": {
+   "offset": [
+    84,
+    8,
+    16
+   ],
+   "look": [
+    0,
+    0,
+    5
+   ],
+   "fov": 26
+  },
+  "face_click_fraction": 0.3
+ }
+}

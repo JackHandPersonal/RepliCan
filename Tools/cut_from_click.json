@@ -1,0 +1,1 @@
+{"feature": "Button", "name": "Lights", "desc": "", "actions": ["Room", "Desk", "Bath"], "extra_tags": ["toggle:Room=cabin_s1_room", "toggle:Desk=cabin_s1_desk", "toggle:Bath=cabin_s1_bath"], "seed_r": 10, "grow": 8, "rounds": 3}

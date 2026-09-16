@@ -1,0 +1,130 @@
+{
+ "SK_Chr_Junker_Male_01": {
+  "atlas": "/Game/PolygonSciFiSpace/Textures/Alternates/T_PolygonSciFiSpace_02_F",
+  "samples": 56,
+  "skin_srgb_255": [
+   99,
+   115,
+   79
+  ],
+  "skin_linear": [
+   0.1248,
+   0.1714,
+   0.0782
+  ],
+  "all": [
+   {
+    "srgb": [
+     115,
+     116,
+     121
+    ],
+    "n": 46
+   },
+   {
+    "srgb": [
+     99,
+     115,
+     79
+    ],
+    "n": 10
+   }
+  ]
+ },
+ "SK_Chr_Junker_Female_01": {
+  "atlas": "/Game/PolygonSciFiSpace/Textures/Alternates/T_PolygonSciFiSpace_02_F",
+  "samples": 26,
+  "skin_srgb_255": [
+   115,
+   116,
+   121
+  ],
+  "skin_linear": [
+   0.1714,
+   0.1746,
+   0.1912
+  ],
+  "all": [
+   {
+    "srgb": [
+     115,
+     116,
+     121
+    ],
+    "n": 18
+   },
+   {
+    "srgb": [
+     0,
+     0,
+     0
+    ],
+    "n": 8
+   }
+  ]
+ },
+ "SK_Chr_Hunter_Female_01": {
+  "atlas": "/Game/PolygonSciFiSpace/Textures/Alternates/T_PolygonSciFiSpace_02_F",
+  "samples": 26,
+  "skin_srgb_255": [
+   115,
+   116,
+   121
+  ],
+  "skin_linear": [
+   0.1714,
+   0.1746,
+   0.1912
+  ],
+  "all": [
+   {
+    "srgb": [
+     115,
+     116,
+     121
+    ],
+    "n": 18
+   },
+   {
+    "srgb": [
+     0,
+     0,
+     0
+    ],
+    "n": 8
+   }
+  ]
+ },
+ "SK_Chr_SpaceSoldier_Head_Male_01": {
+  "atlas": "/Game/PolygonSciFiSpace/Textures/T_PolygonSciFiSpace_01_A",
+  "samples": 56,
+  "skin_srgb_255": [
+   255,
+   204,
+   173
+  ],
+  "skin_linear": [
+   1.0,
+   0.6038,
+   0.4179
+  ],
+  "all": [
+   {
+    "srgb": [
+     115,
+     116,
+     121
+    ],
+    "n": 46
+   },
+   {
+    "srgb": [
+     255,
+     204,
+     173
+    ],
+    "n": 10
+   }
+  ]
+ }
+}

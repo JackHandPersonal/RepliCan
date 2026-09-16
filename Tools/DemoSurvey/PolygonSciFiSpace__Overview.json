@@ -1,0 +1,2081 @@
+{
+ "map": "/Game/PolygonSciFiSpace/Maps/Overview",
+ "actors": 637,
+ "mesh_actors": 593,
+ "families": [
+  [
+   "Bld_Wall",
+   54
+  ],
+  [
+   "Prop_Detail",
+   43
+  ],
+  [
+   "Bld_Floor",
+   27
+  ],
+  [
+   "Env_Asteroid",
+   25
+  ],
+  [
+   "Prop_Turret",
+   24
+  ],
+  [
+   "Chr_Attach",
+   17
+  ],
+  [
+   "Prop_Buttons",
+   14
+  ],
+  [
+   "Env_Planet",
+   14
+  ],
+  [
+   "Prop_Light",
+   13
+  ],
+  [
+   "Prop_Screen",
+   13
+  ],
+  [
+   "Env_Debris",
+   12
+  ],
+  [
+   "Bld_Bridge",
+   11
+  ],
+  [
+   "Prop_Crate",
+   11
+  ],
+  [
+   "Bld_Hydroponics",
+   10
+  ],
+  [
+   "SignBorder_Number",
+   9
+  ],
+  [
+   "Prop_Greeble",
+   9
+  ],
+  [
+   "Prop_Medical",
+   9
+  ],
+  [
+   "Ship_Fighter",
+   9
+  ],
+  [
+   "Hud_Reticle",
+   9
+  ],
+  [
+   "Bld_Ceiling",
+   8
+  ],
+  [
+   "Bld_Crew",
+   8
+  ],
+  [
+   "Prop_Missile",
+   7
+  ],
+  [
+   "Bld_Lift",
+   6
+  ],
+  [
+   "Bld_Corridor",
+   5
+  ],
+  [
+   "Prop_Wires",
+   5
+  ],
+  [
+   "Prop_Bed",
+   5
+  ],
+  [
+   "Prop_Satellite",
+   5
+  ],
+  [
+   "Ship_Stealth",
+   5
+  ],
+  [
+   "Ship_Station",
+   5
+  ],
+  [
+   "Hud_Text",
+   5
+  ],
+  [
+   "Prop_Chr",
+   4
+  ],
+  [
+   "Prop_CenterTube",
+   4
+  ],
+  [
+   "Prop_ControlPanel",
+   4
+  ],
+  [
+   "Prop_EscapePod",
+   4
+  ],
+  [
+   "Prop_FoodPacket",
+   4
+  ],
+  [
+   "Prop_Hose",
+   4
+  ],
+  [
+   "Prop_Plant",
+   4
+  ],
+  [
+   "Prop_Stairs",
+   4
+  ],
+  [
+   "Prop_Test",
+   4
+  ],
+  [
+   "Env_Rubble",
+   4
+  ],
+  [
+   "Wep_Sword",
+   4
+  ],
+  [
+   "Ship_Bomber",
+   4
+  ],
+  [
+   "Prop_Battery",
+   3
+  ],
+  [
+   "Prop_CryoBed",
+   3
+  ],
+  [
+   "Prop_FoodTray",
+   3
+  ],
+  [
+   "Prop_Keycard",
+   3
+  ],
+  [
+   "Prop_Oxygen",
+   3
+  ],
+  [
+   "Prop_Wall",
+   3
+  ],
+  [
+   "Bld_Roof",
+   3
+  ],
+  [
+   "Wep_Shield",
+   3
+  ],
+  [
+   "Ship_Cruiser",
+   3
+  ],
+  [
+   "Hud_Box",
+   3
+  ],
+  [
+   "Hud_Rings",
+   3
+  ],
+  [
+   "Pebble_Debris",
+   3
+  ],
+  [
+   "FX_LightBlocker",
+   3
+  ],
+  [
+   "Hud_Barrier",
+   3
+  ],
+  [
+   "Hud_ScreenPreset",
+   3
+  ],
+  [
+   "Sign_Hydroponics",
+   2
+  ],
+  [
+   "SignBorder_Arrow",
+   2
+  ],
+  [
+   "SignBorder_Electric",
+   2
+  ],
+  [
+   "SignBorder_Medical",
+   2
+  ],
+  [
+   "Prop_AirVent",
+   2
+  ],
+  [
+   "Prop_Cart",
+   2
+  ],
+  [
+   "Prop_Desk",
+   2
+  ],
+  [
+   "Prop_Ladder",
+   2
+  ],
+  [
+   "Prop_MapTable",
+   2
+  ],
+  [
+   "Prop_Radar",
+   2
+  ],
+  [
+   "Prop_SpaceWalk",
+   2
+  ],
+  [
+   "Prop_StairsPlatform",
+   2
+  ],
+  [
+   "Prop_Stool",
+   2
+  ],
+  [
+   "Bld_HangerExteriorDoor",
+   2
+  ],
+  [
+   "Veh_Part",
+   2
+  ],
+  [
+   "Flame_Mesh",
+   2
+  ],
+  [
+   "Sign_AirLock",
+   1
+  ],
+  [
+   "Sign_Bridge",
+   1
+  ],
+  [
+   "Sign_CrewQuarters",
+   1
+  ],
+  [
+   "Sign_EngineRoom",
+   1
+  ],
+  [
+   "Sign_EscpapePod",
+   1
+  ],
+  [
+   "Sign_Exit",
+   1
+  ],
+  [
+   "Sign_Hanger",
+   1
+  ],
+  [
+   "Sign_Kitchen",
+   1
+  ],
+  [
+   "Sign_LoadingBay",
+   1
+  ],
+  [
+   "Sign_LockerRoom",
+   1
+  ],
+  [
+   "Sign_MedicalBay",
+   1
+  ],
+  [
+   "Sign_ScienceLab",
+   1
+  ],
+  [
+   "SignBorder_Ammo",
+   1
+  ],
+  [
+   "SignBorder_Battery",
+   1
+  ],
+  [
+   "SignBorder_Cog",
+   1
+  ],
+  [
+   "SignBorder_Communication",
+   1
+  ],
+  [
+   "SignBorder_Fire",
+   1
+  ],
+  [
+   "SignBorder_Fix",
+   1
+  ],
+  [
+   "SignBorder_Heart",
+   1
+  ],
+  [
+   "SignBorder_Leaf",
+   1
+  ],
+  [
+   "SignBorder_Nuclear",
+   1
+  ],
+  [
+   "SignBorder_Planet",
+   1
+  ],
+  [
+   "SignBorder_Plant",
+   1
+  ],
+  [
+   "SignBorder_Rocket",
+   1
+  ],
+  [
+   "SignBorder_Science",
+   1
+  ],
+  [
+   "SignBorder_Shield",
+   1
+  ],
+  [
+   "SignBorder_Ship",
+   1
+  ],
+  [
+   "SignBorder_Toxic",
+   1
+  ],
+  [
+   "SignBorder_Warning",
+   1
+  ],
+  [
+   "SignBorder_Water",
+   1
+  ],
+  [
+   "Prop_Antenna",
+   1
+  ],
+  [
+   "Prop_Barrel",
+   1
+  ],
+  [
+   "Prop_CornerSeat",
+   1
+  ],
+  [
+   "Prop_CornerTable",
+   1
+  ],
+  [
+   "Prop_DeadZub",
+   1
+  ],
+  [
+   "Prop_Decontamination",
+   1
+  ],
+  [
+   "Prop_EnergyPort",
+   1
+  ],
+  [
+   "Prop_Engine",
+   1
+  ],
+  [
+   "Prop_Handle",
+   1
+  ],
+  [
+   "Prop_HandScanner",
+   1
+  ],
+  [
+   "Prop_Joystick",
+   1
+  ],
+  [
+   "Prop_MedicalArms",
+   1
+  ],
+  [
+   "Prop_Mine",
+   1
+  ],
+  [
+   "Prop_MissleRack",
+   1
+  ],
+  [
+   "Prop_Pad",
+   1
+  ],
+  [
+   "Prop_Panel",
+   1
+  ],
+  [
+   "Prop_Pillar",
+   1
+  ],
+  [
+   "Prop_Sink",
+   1
+  ],
+  [
+   "Prop_Solar",
+   1
+  ],
+  [
+   "Prop_SquareTable",
+   1
+  ],
+  [
+   "Prop_Table",
+   1
+  ],
+  [
+   "Prop_Tank",
+   1
+  ],
+  [
+   "Prop_TestTubes",
+   1
+  ],
+  [
+   "Prop_Toilet",
+   1
+  ],
+  [
+   "Bld_Hanger",
+   1
+  ],
+  [
+   "Bld_HangerCeiling",
+   1
+  ],
+  [
+   "Bld_Landing",
+   1
+  ],
+  [
+   "Wep_Rifle",
+   1
+  ],
+  [
+   "Wep_Shotgun",
+   1
+  ],
+  [
+   "Wep_Pistol",
+   1
+  ],
+  [
+   "Veh_Drone",
+   1
+  ],
+  [
+   "Ship_Massive",
+   1
+  ],
+  [
+   "Ship_Colossal",
+   1
+  ],
+  [
+   "Ship_Transport",
+   1
+  ],
+  [
+   "Hud_Screen",
+   1
+  ],
+  [
+   "Tunnel_Mesh",
+   1
+  ],
+  [
+   "SphereInverted",
+   1
+  ],
+  [
+   "SphereGeo",
+   1
+  ],
+  [
+   "MissleReady",
+   1
+  ],
+  [
+   "Laser_Trail",
+   1
+  ],
+  [
+   "Hud_Arrows",
+   1
+  ]
+ ],
+ "materials_by_family": {
+  "Bld_Bridge": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    10
+   ],
+   [
+    "M_PolygonSciFiSpace_Glass_01",
+    1
+   ]
+  ],
+  "Bld_Ceiling": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    8
+   ]
+  ],
+  "Bld_Corridor": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    5
+   ]
+  ],
+  "Bld_Crew": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    8
+   ]
+  ],
+  "Bld_Floor": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    27
+   ]
+  ],
+  "Bld_Hanger": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Bld_HangerCeiling": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Bld_HangerExteriorDoor": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Bld_Hydroponics": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    10
+   ]
+  ],
+  "Bld_Landing": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Bld_Lift": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    6
+   ]
+  ],
+  "Bld_Roof": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    3
+   ]
+  ],
+  "Bld_Wall": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    52
+   ],
+   [
+    "M_PolygonSciFiSpace_Glass_01",
+    2
+   ]
+  ],
+  "Chr_Attach": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    15
+   ],
+   [
+    "M_PolygonSciFiSpace_Glass_01",
+    2
+   ]
+  ],
+  "Env_Asteroid": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    18
+   ],
+   [
+    "M_PolygonSciFiSpace_Planets_Lines",
+    4
+   ],
+   [
+    "M_PolygonSciFiSpace_Space_Planets",
+    3
+   ]
+  ],
+  "Env_Debris": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    12
+   ]
+  ],
+  "Env_Planet": [
+   [
+    "M_PolygonSciFiSpace_Planets_Lines",
+    10
+   ],
+   [
+    "M_PolygonSciFiSpace_Space_Planets",
+    4
+   ]
+  ],
+  "Env_Rubble": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    4
+   ]
+  ],
+  "FX_LightBlocker": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    3
+   ]
+  ],
+  "Flame_Mesh": [
+   [
+    "M_FX_Booster",
+    2
+   ]
+  ],
+  "Hud_Arrows": [
+   [
+    "M_PolygonSciFiSpace_Hud",
+    1
+   ]
+  ],
+  "Hud_Barrier": [
+   [
+    "M_PolygonSciFiSpace_Hud",
+    3
+   ]
+  ],
+  "Hud_Box": [
+   [
+    "M_PolygonSciFiSpace_Hud",
+    3
+   ]
+  ],
+  "Hud_Reticle": [
+   [
+    "M_PolygonSciFiSpace_Hud",
+    9
+   ]
+  ],
+  "Hud_Rings": [
+   [
+    "M_PolygonSciFiSpace_Hud",
+    3
+   ]
+  ],
+  "Hud_Screen": [
+   [
+    "M_PolygonSciFiSpace_Hud",
+    1
+   ]
+  ],
+  "Hud_ScreenPreset": [
+   [
+    "M_PolygonSciFiSpace_Hud",
+    3
+   ],
+   [
+    "M_PolygonSciFiSpace_Hud_Glass",
+    3
+   ]
+  ],
+  "Hud_Text": [
+   [
+    "M_PolygonSciFiSpace_Hud",
+    5
+   ]
+  ],
+  "Laser_Trail": [
+   [
+    "M_FX_Laser",
+    1
+   ]
+  ],
+  "MissleReady": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Pebble_Debris": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    3
+   ]
+  ],
+  "Prop_AirVent": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Prop_Antenna": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Barrel": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Battery": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    3
+   ]
+  ],
+  "Prop_Bed": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    5
+   ]
+  ],
+  "Prop_Buttons": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    14
+   ]
+  ],
+  "Prop_Cart": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Prop_CenterTube": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ],
+   [
+    "M_PolygonSciFiSpace_Glass_01",
+    2
+   ]
+  ],
+  "Prop_Chr": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    4
+   ]
+  ],
+  "Prop_ControlPanel": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    4
+   ]
+  ],
+  "Prop_CornerSeat": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_CornerTable": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Crate": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    11
+   ]
+  ],
+  "Prop_CryoBed": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ],
+   [
+    "M_PolygonSciFiSpace_Glass_01",
+    1
+   ]
+  ],
+  "Prop_DeadZub": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Decontamination": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Desk": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Prop_Detail": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    43
+   ]
+  ],
+  "Prop_EnergyPort": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Engine": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_EscapePod": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    4
+   ]
+  ],
+  "Prop_FoodPacket": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    4
+   ]
+  ],
+  "Prop_FoodTray": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    3
+   ]
+  ],
+  "Prop_Greeble": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    9
+   ]
+  ],
+  "Prop_HandScanner": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Handle": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Hose": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    4
+   ]
+  ],
+  "Prop_Joystick": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Keycard": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    3
+   ]
+  ],
+  "Prop_Ladder": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Prop_Light": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    13
+   ]
+  ],
+  "Prop_MapTable": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Prop_Medical": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    7
+   ],
+   [
+    "M_PolygonSciFiSpace_Glass_01",
+    2
+   ]
+  ],
+  "Prop_MedicalArms": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Mine": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Missile": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    7
+   ]
+  ],
+  "Prop_MissleRack": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Oxygen": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    3
+   ]
+  ],
+  "Prop_Pad": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Panel": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Pillar": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Plant": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    4
+   ]
+  ],
+  "Prop_Radar": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Prop_Satellite": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    5
+   ]
+  ],
+  "Prop_Screen": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    13
+   ]
+  ],
+  "Prop_Sink": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Solar": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_SpaceWalk": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Prop_SquareTable": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Stairs": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    4
+   ]
+  ],
+  "Prop_StairsPlatform": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Prop_Stool": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Prop_Table": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Tank": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Test": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ],
+   [
+    "M_PolygonSciFiSpace_Glass_01",
+    2
+   ]
+  ],
+  "Prop_TestTubes": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Toilet": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Turret": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    24
+   ]
+  ],
+  "Prop_Wall": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    3
+   ]
+  ],
+  "Prop_Wires": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    5
+   ]
+  ],
+  "Ship_Bomber": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    4
+   ]
+  ],
+  "Ship_Colossal": [
+   [
+    "M_PolygonSciFiSpace_Ship",
+    1
+   ]
+  ],
+  "Ship_Cruiser": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    3
+   ]
+  ],
+  "Ship_Fighter": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    9
+   ]
+  ],
+  "Ship_Massive": [
+   [
+    "M_PolygonSciFiSpace_Ship",
+    1
+   ]
+  ],
+  "Ship_Station": [
+   [
+    "M_PolygonSciFiSpace_Station",
+    5
+   ]
+  ],
+  "Ship_Stealth": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    5
+   ]
+  ],
+  "Ship_Transport": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Ammo": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Arrow": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    2
+   ]
+  ],
+  "SignBorder_Battery": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Cog": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Communication": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Electric": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    2
+   ]
+  ],
+  "SignBorder_Fire": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Fix": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Heart": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Leaf": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Medical": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    2
+   ]
+  ],
+  "SignBorder_Nuclear": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Number": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    9
+   ]
+  ],
+  "SignBorder_Planet": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Plant": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Rocket": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Science": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Shield": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Ship": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Toxic": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Warning": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Water": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "Sign_AirLock": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "Sign_Bridge": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "Sign_CrewQuarters": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "Sign_EngineRoom": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "Sign_EscpapePod": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "Sign_Exit": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "Sign_Hanger": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "Sign_Hydroponics": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    2
+   ]
+  ],
+  "Sign_Kitchen": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "Sign_LoadingBay": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "Sign_LockerRoom": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "Sign_MedicalBay": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "Sign_ScienceLab": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SphereGeo": [
+   [
+    "M_FX_Fire",
+    1
+   ]
+  ],
+  "SphereInverted": [
+   [
+    "M_FX_Skybox",
+    1
+   ]
+  ],
+  "Tunnel_Mesh": [
+   [
+    "M_FX_Warptunnel",
+    1
+   ]
+  ],
+  "Veh_Drone": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Veh_Part": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Wep_Pistol": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Wep_Rifle": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Wep_Shield": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ],
+   [
+    "M_PolygonSciFiSpace_Energy",
+    1
+   ]
+  ],
+  "Wep_Shotgun": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Wep_Sword": [
+   [
+    "M_PolygonSciFiSpace_Energy",
+    2
+   ],
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ]
+ },
+ "doorways": [
+  {
+   "mesh": "SM_Sign_AirLock_01",
+   "at": [
+    -3284.5,
+    1100.0,
+    1000.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_Signs_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Sign_Exit_02",
+     1
+    ],
+    [
+     "SM_Sign_Hanger_01",
+     1
+    ],
+    [
+     "SM_Sign_Hydroponics_02",
+     1
+    ],
+    [
+     "SM_SignBorder_Ammo_01",
+     1
+    ],
+    [
+     "SM_SignBorder_Arrow_02",
+     1
+    ],
+    [
+     "SM_SignBorder_Ship_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Floor_Small_Hatch_01",
+   "at": [
+    4000.0,
+    2150.0,
+    50.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Prop_EscapePod_Door_01",
+   "at": [
+    -850.0,
+    1750.0,
+    250.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Prop_EscapePod_Door_02",
+     1
+    ],
+    [
+     "SM_Prop_EscapePod_Hatch_Large_01",
+     1
+    ],
+    [
+     "SM_Prop_Ladder_01",
+     1
+    ],
+    [
+     "SM_Prop_Medical_Tube_01",
+     1
+    ],
+    [
+     "SM_Prop_Medical_Tube_Glass_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Prop_EscapePod_Door_02",
+   "at": [
+    -750.0,
+    1750.0,
+    250.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Prop_EscapePod_Door_01",
+     1
+    ],
+    [
+     "SM_Prop_EscapePod_Hatch_Large_01",
+     1
+    ],
+    [
+     "SM_Prop_Ladder_01",
+     1
+    ],
+    [
+     "SM_Prop_Medical_Tube_01",
+     1
+    ],
+    [
+     "SM_Prop_Medical_Tube_Glass_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Prop_EscapePod_Hatch_Large_01",
+   "at": [
+    -800.0,
+    1600.0,
+    250.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Prop_EscapePod_Door_01",
+     1
+    ],
+    [
+     "SM_Prop_EscapePod_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Prop_EscapePod_Hatch_Small_01",
+   "at": [
+    -650.0,
+    4150.0,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Prop_Detail_Airvent_01",
+     1
+    ],
+    [
+     "SM_Prop_Medical_Cart_01",
+     1
+    ],
+    [
+     "SM_Prop_Medical_Cart_02",
+     1
+    ],
+    [
+     "SM_Prop_Medical_Isolator_01",
+     1
+    ],
+    [
+     "SM_Prop_Medical_Isolator_Glass_01",
+     1
+    ],
+    [
+     "SM_Prop_Missile_06",
+     1
+    ],
+    [
+     "SM_Prop_Missile_07",
+     1
+    ],
+    [
+     "SM_Prop_Oxygen_Tank_Large",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Floor_Small_Hatch_Door_01",
+   "at": [
+    4100.0,
+    2450.0,
+    50.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_Small_Walkway_Endcap_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_HangerExteriorDoor_02",
+   "at": [
+    -11035.0,
+    -12090.0,
+    150.0
+   ],
+   "yaw": 90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_HangerExteriorDoor_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_HangerExteriorDoor_01",
+   "at": [
+    -11135.0,
+    -12090.0,
+    150.0
+   ],
+   "yaw": 90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_HangerExteriorDoor_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Lift_01",
+   "at": [
+    -6245.0,
+    -10285.0,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Lift_Door_01",
+   "at": [
+    -5745.0,
+    -10370.0,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Lift_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Lift_Door_02",
+   "at": [
+    -5520.0,
+    -10365.0,
+    15.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Lift_Door_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Lift_Wall_01",
+   "at": [
+    -5020.0,
+    -10325.0,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Lift_Wall_Door_01",
+   "at": [
+    -4590.0,
+    -10295.0,
+    50.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Lift_Wall_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Lift_Wall_Door_02",
+   "at": [
+    -4425.0,
+    -10275.0,
+    65.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Lift_Wall_Door_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Door_01",
+   "at": [
+    -2030.0,
+    -7350.0,
+    170.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_01",
+   "at": [
+    -1700.0,
+    -7250.0,
+    170.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_02",
+   "at": [
+    -4645.0,
+    -6950.0,
+    170.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_03",
+   "at": [
+    -3475.0,
+    -6905.0,
+    170.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_04",
+   "at": [
+    -2850.0,
+    -6875.0,
+    170.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_05",
+   "at": [
+    -2170.0,
+    -6810.0,
+    170.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_06",
+   "at": [
+    -4460.0,
+    -6425.0,
+    170.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_01",
+   "at": [
+    -3855.0,
+    -6405.0,
+    170.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_02",
+   "at": [
+    -3360.0,
+    -6305.0,
+    170.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_03",
+   "at": [
+    -2785.0,
+    -6310.0,
+    170.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_04",
+   "at": [
+    -1985.0,
+    -6250.0,
+    530.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_L_05",
+   "at": [
+    -1680.0,
+    -6320.0,
+    170.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_R_05",
+   "at": [
+    -1265.0,
+    -6310.0,
+    170.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Wall_Esc_Hatch_Door_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Esc_Hatch_Door_01",
+   "at": [
+    -1055.0,
+    -6275.0,
+    170.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Wall_Doorframe_Door_R_05",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_EscPod_Hatch_01",
+   "at": [
+    -4260.0,
+    -5975.0,
+    170.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": []
+  }
+ ],
+ "lights": [
+  {
+   "class": "DirectionalLight",
+   "at": [
+    100.0,
+    -200.0,
+    570.0
+   ],
+   "mobility": "<ComponentMobility.STATIONARY: 1>",
+   "intensity": 3.1415927410125732,
+   "colour": "<Struct 'Color' (0x000001A7D07FF2B8) {b: 255, g: 255, r: 255, a: 255}>",
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Bld_Hydroponics_Ladder_01",
+   "nearest_dist": 685.0
+  },
+  {
+   "class": "SkyLight",
+   "at": [
+    20.8,
+    -31.0,
+    504.7
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 1.0,
+   "colour": "<Struct 'Color' (0x000001A7D10EE3B8) {b: 255, g: 255, r: 255, a: 255}>",
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Bld_Hydroponics_Ladder_01",
+   "nearest_dist": 627.0
+  }
+ ]
+}

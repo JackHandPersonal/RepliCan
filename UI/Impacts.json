@@ -1,0 +1,34 @@
+{
+ "_": "What a shot leaves where it lands. Read by Source/RepliCan/ImpactEffects.cpp; nothing in C++ knows what a pipe or a trooper is.",
+ "_matching": "Each rule's 'match' is a lowercase substring tested against a description of what was hit: the actor's label, then every tag on it, then the material name, the component name and the mesh's asset path. FIRST MATCH WINS, so order the list most specific first; the 'default' block is both the fallback and the base every rule starts from, so a rule only states what differs.",
+ "_fields": "fx is the list of particle systems fired, each {niagara, scale, seconds}: seconds > 0 stops the emitter after that long, which is how a pack's ambient spark or smoke loop becomes a burst (an 'fx' or 'niagara' key on a rule replaces the whole list; 'fx': [] is nothing). decal and decal_size/decal_life are the mark left; light_* is the brief flash at the point of impact (intensity 0 disables it); sound is a file in RawAudio and variants how many numbered takes exist.",
+ "_now": "ONE EFFECT FOR EVERYTHING, for now: a puff of smoke, a spit of sparks, a short sharp crack. No gas clouds -- the smoke emits for four hundredths of a second, so it is a wisp, not a column. The horror pack's NS_Spark_Shower_01 is an ambient loop; a tenth of a second of it, small, is the spark burst. People get the dull thud and no sparks.",
+ "default": {
+  "fx": [
+   { "niagara": "/Game/PolygonSciFiWorlds/FX/Niagara/NS_Smoke_Small_01", "scale": 0.08, "seconds": 0.04 },
+   { "niagara": "/Game/Synty/PolygonSciFiHorror/FX/NS_Spark_Shower_01", "scale": 0.35, "seconds": 0.1 }
+  ],
+  "decal": "/Game/RepliCan/Materials/M_ImpactScorch",
+  "decal_size": 8.0,
+  "decal_life": 30.0,
+  "light_color": [ 1.0, 0.8, 0.45 ],
+  "light_intensity": 1600.0,
+  "light_radius": 220.0,
+  "light_seconds": 0.045,
+  "sound": "impact_crack",
+  "volume": 0.6,
+  "variants": 4
+ },
+ "rules": [
+  {
+   "_": "People. No sparks, no smoke, no scorch mark on a body, and a dull sound instead of a crack.",
+   "match": "/characters",
+   "fx": [],
+   "decal": "",
+   "light_intensity": 300.0,
+   "sound": "impact_flesh",
+   "volume": 0.6,
+   "variants": 3
+  }
+ ]
+}

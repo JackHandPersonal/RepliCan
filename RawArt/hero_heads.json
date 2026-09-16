@@ -1,0 +1,210 @@
+{
+ "hero_heads": {
+  "SK_Chr_Head_Female_00": {
+   "tris": 174,
+   "z": [
+    141.9,
+    178.8
+   ],
+   "x": [
+    -13.3,
+    13.3
+   ],
+   "y": [
+    -12.3,
+    13.0
+   ],
+   "ring": {
+    "n": 1,
+    "centre": [
+     0.0,
+     3.9,
+     141.9
+    ],
+    "radius": [
+     0.0,
+     0.0
+    ]
+   },
+   "ear_band_radius": [
+    8.5,
+    16.8
+   ],
+   "skeleton": "SK_Character_Base_01_Skeleton",
+   "materials": [
+    "Polygon_Modular_Fantasy_Hero_Instance_Main"
+   ]
+  },
+  "SK_Chr_Head_Male_00": {
+   "tris": 160,
+   "z": [
+    143.6,
+    178.8
+   ],
+   "x": [
+    -13.3,
+    13.3
+   ],
+   "y": [
+    -12.3,
+    13.5
+   ],
+   "ring": {
+    "n": 3,
+    "centre": [
+     0.0,
+     4.5,
+     143.6
+    ],
+    "radius": [
+     0.3,
+     3.0
+    ]
+   },
+   "ear_band_radius": [
+    10.1,
+    16.5
+   ],
+   "skeleton": "SK_Character_Base_01_Skeleton",
+   "materials": [
+    "Polygon_Modular_Fantasy_Hero_Instance_Main"
+   ]
+  }
+ },
+ "ours": {
+  "male_head": {
+   "tris": 309,
+   "z": [
+    145.8,
+    179.7
+   ],
+   "x": [
+    -13.3,
+    13.3
+   ],
+   "y": [
+    -12.3,
+    13.5
+   ],
+   "ring": {
+    "n": 2,
+    "centre": [
+     0.0,
+     2.1,
+     145.8
+    ],
+    "radius": [
+     6.2,
+     6.2
+    ]
+   },
+   "ear_band_radius": [
+    10.7,
+    15.2
+   ],
+   "skeleton": "UE4_Mannequin_Skeleton",
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ]
+  },
+  "female_head": {
+   "tris": 342,
+   "z": [
+    146.1,
+    179.9
+   ],
+   "x": [
+    -14.2,
+    14.2
+   ],
+   "y": [
+    -12.7,
+    13.0
+   ],
+   "ring": {
+    "n": 2,
+    "centre": [
+     0.0,
+     0.9,
+     146.1
+    ],
+    "radius": [
+     6.4,
+     6.4
+    ]
+   },
+   "ear_band_radius": [
+    10.2,
+    15.2
+   ],
+   "skeleton": "UE4_Mannequin_Skeleton",
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ]
+  },
+  "male_torso": {
+   "tris": 346,
+   "z": [
+    91.2,
+    151.1
+   ],
+   "x": [
+    -29.1,
+    29.1
+   ],
+   "y": [
+    -15.9,
+    13.3
+   ],
+   "ring": {
+    "n": 4,
+    "centre": [
+     0.0,
+     1.5,
+     151.1
+    ],
+    "radius": [
+     4.2,
+     11.5
+    ]
+   },
+   "ear_band_radius": null,
+   "skeleton": "UE4_Mannequin_Skeleton",
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ]
+  },
+  "female_torso": {
+   "tris": 550,
+   "z": [
+    92.2,
+    153.1
+   ],
+   "x": [
+    -27.9,
+    27.9
+   ],
+   "y": [
+    -15.7,
+    13.5
+   ],
+   "ring": {
+    "n": 2,
+    "centre": [
+     0.0,
+     2.4,
+     153.1
+    ],
+    "radius": [
+     5.4,
+     5.4
+    ]
+   },
+   "ear_band_radius": null,
+   "skeleton": "UE4_Mannequin_Skeleton",
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ]
+  }
+ }
+}

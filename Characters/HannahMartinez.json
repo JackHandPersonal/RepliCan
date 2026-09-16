@@ -1,0 +1,146 @@
+{
+ "name": "Hannah Martinez",
+ "type": "Single",
+ "baseMesh": "/Game/PolygonSciFiSpace/Meshes/CharactersUE4/SK_Chr_Crew_Female_01.SK_Chr_Crew_Female_01",
+ "material": "/Game/PolygonSciFiSpace/Materials/Alternates/M_PolygonSciFiSpace_01_B.M_PolygonSciFiSpace_01_B",
+ "gender": "Female",
+ "locomotion": "",
+ "parts": {},
+ "face": {
+  "bEnabled": true,
+  "noseMesh": "/Game/Characters/KnightDemo/SM_Nose.SM_Nose",
+  "noseLocation": {
+   "x": 6.89,
+   "y": 13,
+   "z": 0
+  },
+  "noseRotation": {
+   "pitch": -90,
+   "yaw": 0,
+   "roll": 0
+  },
+  "bMouthDecal": false,
+  "mouthLocation": {
+   "x": -1.06,
+   "y": 13.7,
+   "z": 0
+  },
+  "mouthRotation": {
+   "pitch": 0,
+   "yaw": -90,
+   "roll": -90
+  },
+  "mouthScale": 0.5,
+  "mouthTint": {
+   "r": 1,
+   "g": 1,
+   "b": 1,
+   "a": 1
+  },
+  "expression": "Neutral",
+  "bAutoBlink": true,
+  "hairMesh": "",
+  "headGearMesh": "/Game/PolygonSciFiSpace/Meshes/CharactersUE4/Attachments/SM_Chr_Attach_Hat_Crew_01.SM_Chr_Attach_Hat_Crew_01",
+  "headGearLocation": {
+   "x": 0,
+   "y": 0,
+   "z": 0
+  },
+  "headGearScale": 1.0,
+  "headGearBadgeMaterial": "/Game/RepliCan/Materials/M_HatBadge.M_HatBadge",
+  "headGearBadgeLocation": {
+   "x": 0.0,
+   "y": -15.4,
+   "z": 16.8
+  },
+  "headGearBadgeRotation": {
+   "pitch": 180.0,
+   "yaw": 0.0,
+   "roll": -90.0
+  },
+  "headGearBadgeSize": {
+   "x": 4.5,
+   "y": 4.5
+  }
+ },
+ "colors": {},
+ "weaponMesh": "/Game/PolygonSciFiSpace/Meshes/Props/SM_Prop_Pad_01.SM_Prop_Pad_01",
+ "weaponLocation": {
+  "x": -14.19,
+  "y": 5.24,
+  "z": 1.8
+ },
+ "weaponRotation": {
+  "pitch": 25.71,
+  "yaw": -59.99,
+  "roll": -62.48
+ },
+ "armPose": "None",
+ "armPoseWeight": 0,
+ "gait": {
+  "stanceWidthDegrees": 0,
+  "movingStanceWidthDegrees": 4,
+  "toeOutDegrees": 0,
+  "hunchDegrees": 0,
+  "leanDegrees": 0,
+  "armSwingScale": 0.85,
+  "bounceScale": 0.9,
+  "sway": 0,
+  "cadenceScale": 1,
+  "stumble": 0,
+  "limpAmount": 0,
+  "limpSide": "Left"
+ },
+ "fingerCurlDegrees": 0,
+ "thumbCurlDegrees": 0,
+ "scale": {
+  "x": 1,
+  "y": 1,
+  "z": 1
+ },
+ "speedMultiplier": 1,
+ "tags": [
+  "npc"
+ ],
+ "description": "Junior Vice President Hannah Martinez, untroubled by the status quo.",
+ "comment": "The numbers are fine. The numbers are always fine.",
+ "idleAnimations": [
+  "/Game/Characters/Animations/SyntyIdles/Feminine/UsePhone/A_POLY_IDL_UsePhone_TwoHands_Loop_Femn.A_POLY_IDL_UsePhone_TwoHands_Loop_Femn"
+ ],
+ "weaponScale": {
+  "x": 0.55,
+  "y": 0.55,
+  "z": 0.55
+ },
+ "gazeTargets": [
+  {
+   "target": "player",
+   "weight": 0.7
+  },
+  {
+   "target": "prop",
+   "weight": 0.2
+  },
+  {
+   "target": "character:LiJun",
+   "weight": 0.1
+  }
+ ],
+ "gazeHoldMin": 3.5,
+ "gazeHoldMax": 8.0,
+ "gazeTurnSpeed": 1.4,
+ "remoteCamera": {
+  "offset": {
+   "x": 62,
+   "y": 16,
+   "z": 22
+  },
+  "lookOffset": {
+   "x": 0,
+   "y": 0,
+   "z": 2
+  },
+  "fov": 34,
+  "roll": 0
+ }
+}

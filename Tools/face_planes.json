@@ -1,0 +1,97 @@
+{
+ "SK_Chr_SpaceSoldier_Head_Male_01": {
+  "head_bone": [
+   0.0,
+   -3.98,
+   165.52
+  ],
+  "head_verts": 182,
+  "face_verts": 34,
+  "face_up": 2.28,
+  "face_forward": 0.52,
+  "nose_offset": [
+   6.89,
+   13.0
+  ]
+ },
+ "SK_Chr_SpaceSoldier_Head_Female_01": {
+  "head_bone": [
+   0.0,
+   -3.98,
+   165.52
+  ],
+  "head_verts": 192,
+  "face_verts": 22,
+  "face_up": 3.15,
+  "face_forward": 0.53,
+  "nose_offset": [
+   7.76,
+   13.01
+  ]
+ },
+ "SK_Chr_BR_SpaceSoldier_Male_01": {
+  "head_bone": [
+   0.0,
+   -3.98,
+   165.52
+  ],
+  "head_verts": 228,
+  "face_verts": 50,
+  "face_up": 2.66,
+  "face_forward": 6.03,
+  "nose_offset": [
+   6.89,
+   13.0
+  ],
+  "nose_offset_measured": [
+   7.27,
+   18.51
+  ],
+  "note": "hand-held to the standard head: the densest sheet on this head is its face plates, 5.5 cm proud of the eye line, and the measured offset hung the nose out in front of them (2026-09-16); measure_face_planes.py will overwrite this on its next run"
+ },
+ "SK_Chr_Junker_Male_01": {
+  "head_bone": [
+   0.0,
+   -3.98,
+   165.52
+  ],
+  "head_verts": 182,
+  "face_verts": 30,
+  "face_up": 2.44,
+  "face_forward": 0.62,
+  "nose_offset": [
+   7.05,
+   13.1
+  ]
+ },
+ "SK_Chr_Junker_Female_01": {
+  "head_bone": [
+   0.0,
+   -3.98,
+   165.52
+  ],
+  "head_verts": 192,
+  "face_verts": 22,
+  "face_up": 3.15,
+  "face_forward": 0.53,
+  "nose_offset": [
+   7.76,
+   13.01
+  ]
+ },
+ "SK_Chr_Hunter_Female_01": {
+  "head_bone": [
+   0.0,
+   -3.98,
+   165.52
+  ],
+  "head_verts": 248,
+  "face_verts": 22,
+  "face_up": 3.15,
+  "face_forward": 0.53,
+  "nose_offset": [
+   7.76,
+   13.01
+  ]
+ }
+}

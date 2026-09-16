@@ -1,0 +1,73 @@
+{
+ "map": "/Game/Synty/PolygonSciFiHorror/Maps/Demo_Exterior",
+ "actors": 13,
+ "mesh_actors": 6,
+ "families": [
+  [
+   "Veh_Ship",
+   5
+  ],
+  [
+   "SkySphere",
+   1
+  ]
+ ],
+ "materials_by_family": {
+  "SkySphere": [
+   [
+    "M_Sky_01",
+    1
+   ]
+  ],
+  "Veh_Ship": [
+   [
+    "MI_PolygonSciFiHorror_Mat_01_A",
+    5
+   ],
+   [
+    "MI_PolygonSciFiHorror_01_B",
+    1
+   ]
+  ]
+ },
+ "doorways": [],
+ "lights": [
+  {
+   "class": "DirectionalLight",
+   "at": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 10.0,
+   "colour": "<Struct 'Color' (0x000001A875B856B8) {b: 97, g: 97, r: 97, a: 255}>",
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Veh_Ship_01",
+   "nearest_dist": 0.0,
+   "offset_in_mesh_frame": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "class": "SkyLight",
+   "at": [
+    -11768.3,
+    -939.8,
+    3456.4
+   ],
+   "mobility": "<ComponentMobility.STATIONARY: 1>",
+   "intensity": 11.0,
+   "colour": "<Struct 'Color' (0x000001A88C5BFCB8) {b: 86, g: 86, r: 86, a: 255}>",
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_SkySphere",
+   "nearest_dist": 10039.7
+  }
+ ]
+}

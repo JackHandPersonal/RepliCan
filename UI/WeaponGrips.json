@@ -1,0 +1,41 @@
+{
+  "_": "Inputs to Tools/normalise_weapons.py. This file is NOT read at play time -- see Docs/HeldAssetStandard.md. Its whole job is to tell the bake how to turn a Synty mesh into HAC1 grip space, after which the game attaches weapons to the WeaponGrip_R socket with an identity transform and reads nothing from here.",
+
+  "_axis_hints": "Which bounding-box axis becomes forward and which becomes up. 'long' is the longest extent, 'thin' the shortest, 'wide' the remaining one. up_sign settles the one thing geometry cannot: +1 keeps the measured up axis pointing the way it already does, -1 flips it. forward_sign likewise, where 'auto' means 'toward whichever end of the axis reaches further from the origin'.",
+  "axis_hints": {
+    "default": { "forward": "long", "up": "wide", "forward_sign": "auto", "up_sign": 1 },
+    "Shield":  { "forward": "thin", "up": "long", "forward_sign": "auto", "up_sign": 1 }
+  },
+
+  "_grip_rule": "Where the hand closes, as a signed fraction of a measured bound, in the mesh's space AFTER the axes are fixed. [\"min\", 0.40] means 0.40 * bounds.min (a negative number, so this moves back toward the stock); [\"min\", -0.55] means the same distance FORWARD of the origin, which is how a blade's handle is expressed. \"zero\" pins the axis to the origin the artist already chose.",
+  "grip_rule": {
+    "default":          { "x": ["min", 0.40], "y": ["zero", 0], "z": ["min", 0.45] },
+
+    "Rifle":            { "x": ["min", 0.40], "y": ["zero", 0], "z": ["min", 0.45] },
+    "Assault Rifle":    { "x": ["min", 0.40], "y": ["zero", 0], "z": ["min", 0.45] },
+    "Marksman Rifle":   { "x": ["min", 0.42], "y": ["zero", 0], "z": ["min", 0.45] },
+    "SMG":              { "x": ["min", 0.45], "y": ["zero", 0], "z": ["min", 0.45] },
+    "Shotgun":          { "x": ["min", 0.45], "y": ["zero", 0], "z": ["min", 0.45] },
+    "Heavy Gun":        { "x": ["min", 0.30], "y": ["zero", 0], "z": ["min", 0.50] },
+    "Launcher":         { "x": ["min", 0.25], "y": ["zero", 0], "z": ["min", 0.50] },
+    "Grenade Launcher": { "x": ["min", 0.40], "y": ["zero", 0], "z": ["min", 0.45] },
+    "Laser":            { "x": ["min", 0.40], "y": ["zero", 0], "z": ["min", 0.45] },
+    "Alien Weapon":     { "x": ["min", 0.40], "y": ["zero", 0], "z": ["min", 0.45] },
+    "Pistol":           { "x": ["min", 0.50], "y": ["zero", 0], "z": ["min", 0.45] },
+    "Paint":            { "x": ["min", 0.50], "y": ["zero", 0], "z": ["min", 0.45] },
+    "Shock":            { "x": ["min", 0.50], "y": ["zero", 0], "z": ["min", 0.45] },
+
+    "Sword":            { "x": ["min", -0.55], "y": ["zero", 0], "z": ["zero", 0] },
+    "Dagger":           { "x": ["min", -0.55], "y": ["zero", 0], "z": ["zero", 0] },
+    "Great Axe":        { "x": ["min", -0.35], "y": ["zero", 0], "z": ["zero", 0] },
+    "Hand Axe":         { "x": ["min", -0.55], "y": ["zero", 0], "z": ["zero", 0] },
+    "Hammer":           { "x": ["min", -0.45], "y": ["zero", 0], "z": ["zero", 0] },
+    "Tool":             { "x": ["min", -0.50], "y": ["zero", 0], "z": ["zero", 0] },
+    "Shuriken":         { "x": ["zero", 0],    "y": ["zero", 0], "z": ["zero", 0] },
+    "Shield":           { "x": ["zero", 0],    "y": ["zero", 0], "z": ["zero", 0] }
+  },
+
+  "_overrides": "Per weapon, keyed by catalogue key, for the ones the rules get wrong. An override may set any of forward/up/up_sign (strings and numbers as in axis_hints), extra_rot [pitch, yaw, roll] applied after normalisation, and extra_loc [x, y, z] in centimetres added to the grip point. Re-run Tools/normalise_weapons.py after editing; meshes already stamped hac1 are re-baked only when listed in force.",
+  "overrides": {},
+  "force": []
+}

@@ -1,0 +1,2448 @@
+{
+ "map": "/Game/PolygonSciFiWorlds/Maps/Overview",
+ "actors": 1118,
+ "mesh_actors": 1109,
+ "families": [
+  [
+   "Bld_Pod",
+   86
+  ],
+  [
+   "Env_Plant",
+   73
+  ],
+  [
+   "Prop_Scav",
+   61
+  ],
+  [
+   "Bld_Scav",
+   55
+  ],
+  [
+   "Prop_Vendor",
+   48
+  ],
+  [
+   "Prop_Banner",
+   48
+  ],
+  [
+   "Bld_Corp",
+   48
+  ],
+  [
+   "Bld_Platform",
+   41
+  ],
+  [
+   "Prop_Alien",
+   36
+  ],
+  [
+   "Bld_Door",
+   36
+  ],
+  [
+   "Prop_Crate",
+   33
+  ],
+  [
+   "Bld_Greeble",
+   28
+  ],
+  [
+   "Env_Detail",
+   24
+  ],
+  [
+   "Prop_Symbol",
+   22
+  ],
+  [
+   "Bld_Vendor",
+   20
+  ],
+  [
+   "Prop_Drill",
+   19
+  ],
+  [
+   "Env_Artifact",
+   17
+  ],
+  [
+   "Env_Ground",
+   16
+  ],
+  [
+   "Env_Rock",
+   16
+  ],
+  [
+   "Bld_Window",
+   15
+  ],
+  [
+   "Prop_Monitor",
+   14
+  ],
+  [
+   "Prop_Billboard",
+   13
+  ],
+  [
+   "Prop_Skeleton",
+   13
+  ],
+  [
+   "Bld_Light",
+   13
+  ],
+  [
+   "Prop_Tether",
+   12
+  ],
+  [
+   "Prop_Antenna",
+   11
+  ],
+  [
+   "Bld_Crate",
+   11
+  ],
+  [
+   "Wep_Shield",
+   10
+  ],
+  [
+   "Env_Cliff",
+   10
+  ],
+  [
+   "Env_Skeleton",
+   10
+  ],
+  [
+   "Bld_Bridge",
+   9
+  ],
+  [
+   "Bld_Core",
+   9
+  ],
+  [
+   "Wep_Sword",
+   8
+  ],
+  [
+   "Prop_Canopy",
+   7
+  ],
+  [
+   "Prop_Poster",
+   7
+  ],
+  [
+   "Wep_BigAxe",
+   7
+  ],
+  [
+   "Wep_Dagger",
+   7
+  ],
+  [
+   "Env_Floating",
+   7
+  ],
+  [
+   "Bld_Elevator",
+   7
+  ],
+  [
+   "Prop_Cable",
+   6
+  ],
+  [
+   "Prop_Hydroponic",
+   6
+  ],
+  [
+   "Generic_Ground",
+   6
+  ],
+  [
+   "Env_Blob",
+   6
+  ],
+  [
+   "Env_Core",
+   6
+  ],
+  [
+   "Prop_Cardboard",
+   5
+  ],
+  [
+   "Prop_Syncola",
+   5
+  ],
+  [
+   "Prop_Vending",
+   5
+  ],
+  [
+   "Generic_Cloud",
+   5
+  ],
+  [
+   "Generic_Small",
+   5
+  ],
+  [
+   "Wep_SmallAxe",
+   5
+  ],
+  [
+   "Env_Road",
+   5
+  ],
+  [
+   "Env_Grass",
+   5
+  ],
+  [
+   "Env_LakeEdge",
+   5
+  ],
+  [
+   "Env_Snow",
+   5
+  ],
+  [
+   "Prop_Chair",
+   4
+  ],
+  [
+   "Prop_Pod",
+   4
+  ],
+  [
+   "Prop_PowerCell",
+   4
+  ],
+  [
+   "Prop_PowerCellCharger",
+   4
+  ],
+  [
+   "Prop_PowerGenerator",
+   4
+  ],
+  [
+   "Generic_Tree",
+   4
+  ],
+  [
+   "Env_Crater",
+   4
+  ],
+  [
+   "Bld_Planetary",
+   4
+  ],
+  [
+   "Prop_BatteryPack",
+   3
+  ],
+  [
+   "Prop_Table",
+   3
+  ],
+  [
+   "Gerneric_Grass",
+   3
+  ],
+  [
+   "Wep_Hammer",
+   3
+  ],
+  [
+   "Bld_LaunchPad",
+   3
+  ],
+  [
+   "Bld_Pillar",
+   3
+  ],
+  [
+   "Bld_Portal",
+   3
+  ],
+  [
+   "Prop_Bed",
+   2
+  ],
+  [
+   "Prop_Bench",
+   2
+  ],
+  [
+   "Prop_Bike",
+   2
+  ],
+  [
+   "Prop_Container",
+   2
+  ],
+  [
+   "Prop_Drone",
+   2
+  ],
+  [
+   "Prop_Locker",
+   2
+  ],
+  [
+   "Prop_Powerline",
+   2
+  ],
+  [
+   "Prop_SwipeCard",
+   2
+  ],
+  [
+   "Prop_TrashBin",
+   2
+  ],
+  [
+   "Prop_Sign",
+   2
+  ],
+  [
+   "Env_Asteroid",
+   2
+  ],
+  [
+   "Env_Cracked",
+   2
+  ],
+  [
+   "Bld_Column",
+   2
+  ],
+  [
+   "Bld_Railing",
+   2
+  ],
+  [
+   "Prop_Buoy",
+   1
+  ],
+  [
+   "Prop_CardReader",
+   1
+  ],
+  [
+   "Prop_Cash",
+   1
+  ],
+  [
+   "Prop_Fuel",
+   1
+  ],
+  [
+   "Prop_HoverPad",
+   1
+  ],
+  [
+   "Prop_Keyboard",
+   1
+  ],
+  [
+   "Prop_PDA",
+   1
+  ],
+  [
+   "Prop_Projection",
+   1
+  ],
+  [
+   "Prop_Scanner",
+   1
+  ],
+  [
+   "Prop_Sofa",
+   1
+  ],
+  [
+   "Prop_Suit",
+   1
+  ],
+  [
+   "Prop_Turbine",
+   1
+  ],
+  [
+   "Prop_Wall",
+   1
+  ],
+  [
+   "Generic_TreeDead",
+   1
+  ],
+  [
+   "Generic_TreeStump",
+   1
+  ],
+  [
+   "Wep_Missile",
+   1
+  ],
+  [
+   "Wep_Shotgun",
+   1
+  ],
+  [
+   "Bld_Overhang",
+   1
+  ],
+  [
+   "Bld_Tower",
+   1
+  ],
+  [
+   "Bld_Watertank",
+   1
+  ],
+  [
+   "Plane",
+   1
+  ]
+ ],
+ "materials_by_family": {
+  "Bld_Bridge": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    9
+   ]
+  ],
+  "Bld_Column": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    2
+   ]
+  ],
+  "Bld_Core": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    9
+   ]
+  ],
+  "Bld_Corp": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    39
+   ],
+   [
+    "M_PolygonScifiWorlds_Base_Glass_01",
+    7
+   ],
+   [
+    "MI_PolygonScifiWorlds_Glass_02",
+    3
+   ]
+  ],
+  "Bld_Crate": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    11
+   ]
+  ],
+  "Bld_Door": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    36
+   ]
+  ],
+  "Bld_Elevator": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    7
+   ]
+  ],
+  "Bld_Greeble": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    27
+   ],
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Bld_LaunchPad": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    3
+   ]
+  ],
+  "Bld_Light": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    13
+   ]
+  ],
+  "Bld_Overhang": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    1
+   ]
+  ],
+  "Bld_Pillar": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    2
+   ],
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Bld_Planetary": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    4
+   ]
+  ],
+  "Bld_Platform": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    41
+   ]
+  ],
+  "Bld_Pod": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    65
+   ],
+   [
+    "M_PolygonScifiWorlds_Base_Glass_01",
+    19
+   ],
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    2
+   ]
+  ],
+  "Bld_Portal": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    3
+   ]
+  ],
+  "Bld_Railing": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    2
+   ]
+  ],
+  "Bld_Scav": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    46
+   ],
+   [
+    "M_Metal_Rust_02",
+    5
+   ],
+   [
+    "M_PolygonScifiWorlds_Base_Glass_01",
+    3
+   ],
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Bld_Tower": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    1
+   ]
+  ],
+  "Bld_Vendor": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    17
+   ],
+   [
+    "M_PolygonScifiWorlds_Base_Glass_01",
+    2
+   ],
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Bld_Watertank": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    1
+   ]
+  ],
+  "Bld_Window": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    15
+   ]
+  ],
+  "Env_Artifact": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    17
+   ],
+   [
+    "MI_PolygonSciFiWorlds_Env_Triplanar_Corp_01",
+    2
+   ]
+  ],
+  "Env_Asteroid": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    2
+   ]
+  ],
+  "Env_Blob": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    4
+   ],
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    2
+   ]
+  ],
+  "Env_Cliff": [
+   [
+    "MI_PolygonSciFiWorlds_Env_Triplanar_Corp_01",
+    10
+   ]
+  ],
+  "Env_Core": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    6
+   ]
+  ],
+  "Env_Cracked": [
+   [
+    "MI_PolygonSciFiWorlds_Env_Triplanar_Corp_01",
+    2
+   ]
+  ],
+  "Env_Crater": [
+   [
+    "MI_PolygonSciFiWorlds_Env_Triplanar_Corp_01",
+    4
+   ]
+  ],
+  "Env_Detail": [
+   [
+    "MI_PolygonSciFiWorlds_Env_Triplanar_Corp_01",
+    22
+   ],
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ],
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    1
+   ]
+  ],
+  "Env_Floating": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    7
+   ]
+  ],
+  "Env_Grass": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    5
+   ]
+  ],
+  "Env_Ground": [
+   [
+    "MI_PolygonSciFiWorlds_Env_Triplanar_Corp_01",
+    12
+   ],
+   [
+    "M_Junk_01",
+    4
+   ],
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Env_LakeEdge": [
+   [
+    "MI_PolygonSciFiWorlds_Env_Triplanar_Corp_01",
+    5
+   ]
+  ],
+  "Env_Plant": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    61
+   ],
+   [
+    "MI_PolygonScifiWorlds_02_A",
+    9
+   ],
+   [
+    "M_PolygonScifiWorlds_Single_01",
+    3
+   ]
+  ],
+  "Env_Road": [
+   [
+    "MI_PolygonSciFiWorlds_Env_Triplanar_Corp_01",
+    5
+   ]
+  ],
+  "Env_Rock": [
+   [
+    "MI_PolygonSciFiWorlds_Env_Triplanar_Corp_01",
+    16
+   ]
+  ],
+  "Env_Skeleton": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    10
+   ]
+  ],
+  "Env_Snow": [
+   [
+    "MI_PolygonSciFiWorlds_Env_Triplanar_Corp_01",
+    5
+   ]
+  ],
+  "Generic_Cloud": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    4
+   ],
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Generic_Ground": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    6
+   ]
+  ],
+  "Generic_Small": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    4
+   ],
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Generic_Tree": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    4
+   ]
+  ],
+  "Generic_TreeDead": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    1
+   ]
+  ],
+  "Generic_TreeStump": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    1
+   ]
+  ],
+  "Gerneric_Grass": [
+   [
+    "MI_PolygonSciFiWorlds_Plant_01",
+    2
+   ],
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    1
+   ]
+  ],
+  "Plane": [
+   [
+    "BasicShapeMaterial",
+    1
+   ]
+  ],
+  "Prop_Alien": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    36
+   ]
+  ],
+  "Prop_Antenna": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    11
+   ]
+  ],
+  "Prop_Banner": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    48
+   ]
+  ],
+  "Prop_BatteryPack": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    3
+   ]
+  ],
+  "Prop_Bed": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    2
+   ]
+  ],
+  "Prop_Bench": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    2
+   ]
+  ],
+  "Prop_Bike": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    2
+   ]
+  ],
+  "Prop_Billboard": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    13
+   ],
+   [
+    "M_Sign_12",
+    2
+   ],
+   [
+    "M_Sign_02",
+    1
+   ],
+   [
+    "M_Sign_14",
+    1
+   ]
+  ],
+  "Prop_Buoy": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Prop_Cable": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    6
+   ]
+  ],
+  "Prop_Canopy": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    7
+   ]
+  ],
+  "Prop_CardReader": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Prop_Cardboard": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    5
+   ]
+  ],
+  "Prop_Cash": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Prop_Chair": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    4
+   ]
+  ],
+  "Prop_Container": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    2
+   ]
+  ],
+  "Prop_Crate": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    33
+   ]
+  ],
+  "Prop_Drill": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    19
+   ]
+  ],
+  "Prop_Drone": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    2
+   ]
+  ],
+  "Prop_Fuel": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Prop_HoverPad": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Prop_Hydroponic": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    6
+   ]
+  ],
+  "Prop_Keyboard": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Prop_Locker": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    2
+   ]
+  ],
+  "Prop_Monitor": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    14
+   ]
+  ],
+  "Prop_PDA": [
+   [
+    "M_PolygonScifiWorlds_Holograms_01",
+    1
+   ],
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Prop_Pod": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    4
+   ]
+  ],
+  "Prop_Poster": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    7
+   ],
+   [
+    "M_Sign_05",
+    1
+   ],
+   [
+    "M_Sign_09",
+    1
+   ],
+   [
+    "M_Sign_15",
+    1
+   ],
+   [
+    "M_Sign_07",
+    1
+   ],
+   [
+    "M_Sign_10",
+    1
+   ]
+  ],
+  "Prop_PowerCell": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    4
+   ]
+  ],
+  "Prop_PowerCellCharger": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    4
+   ]
+  ],
+  "Prop_PowerGenerator": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    4
+   ]
+  ],
+  "Prop_Powerline": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    2
+   ]
+  ],
+  "Prop_Projection": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Prop_Scanner": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Prop_Scav": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    65
+   ]
+  ],
+  "Prop_Sign": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    2
+   ]
+  ],
+  "Prop_Skeleton": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    13
+   ]
+  ],
+  "Prop_Sofa": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Prop_Suit": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Prop_SwipeCard": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    2
+   ]
+  ],
+  "Prop_Symbol": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    22
+   ]
+  ],
+  "Prop_Syncola": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    5
+   ]
+  ],
+  "Prop_Table": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    3
+   ]
+  ],
+  "Prop_Tether": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    12
+   ]
+  ],
+  "Prop_TrashBin": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    2
+   ]
+  ],
+  "Prop_Turbine": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Prop_Vending": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    4
+   ],
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    1
+   ],
+   [
+    "MI_CatFace_01",
+    1
+   ]
+  ],
+  "Prop_Vendor": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    49
+   ]
+  ],
+  "Prop_Wall": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Wep_BigAxe": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    7
+   ]
+  ],
+  "Wep_Dagger": [
+   [
+    "MI_PolygonScifiWorlds_01_A",
+    7
+   ]
+  ],
+  "Wep_Hammer": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    3
+   ]
+  ],
+  "Wep_Missile": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Wep_Shield": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    5
+   ],
+   [
+    "MI_PolygonScifiWorlds_Glass_01",
+    5
+   ]
+  ],
+  "Wep_Shotgun": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    1
+   ]
+  ],
+  "Wep_SmallAxe": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    5
+   ]
+  ],
+  "Wep_Sword": [
+   [
+    "M_PolygonSciFiWorlds_01_A_Alt",
+    8
+   ]
+  ]
+ },
+ "doorways": [
+  {
+   "mesh": "SM_Bld_Corp_Wall_Gate_01",
+   "at": [
+    81771.3,
+    -3111.3,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Door_Double_01",
+   "at": [
+    40970.3,
+    35951.1,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Double_01_Door_01",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_01_Door_02",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_01_Door_03",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Double_02",
+   "at": [
+    39781.3,
+    35951.1,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Double_02_Door_01",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_02_Door_02",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_02_Door_03",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_02_Door_04",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Double_03",
+   "at": [
+    46914.7,
+    37140.1,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Double_03_Door_01",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_03_Door_02",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_03_Lock_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Double_04",
+   "at": [
+    46914.7,
+    35951.1,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Double_04_Door_01",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_04_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Double_05",
+   "at": [
+    45725.7,
+    37140.1,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Door_Double_To_Single_01",
+   "at": [
+    48104.3,
+    37140.1,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Door_Garage_01",
+   "at": [
+    58320.0,
+    21623.3,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Garage_01_Door_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Garage_02",
+   "at": [
+    54033.3,
+    21623.3,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Garage_02_Door_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Single_01",
+   "at": [
+    35980.8,
+    29389.7,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Platform_Barrier_Short_01",
+     1
+    ],
+    [
+     "SM_Bld_Door_Single_01_Door_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Single_02",
+   "at": [
+    34501.1,
+    29389.7,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Single_02_Door_01",
+     1
+    ],
+    [
+     "SM_Bld_Door_Single_02_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Single_03",
+   "at": [
+    35610.7,
+    29389.7,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Single_03_Door_01",
+     1
+    ],
+    [
+     "SM_Bld_Door_Single_03_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Single_04",
+   "at": [
+    37461.6,
+    28279.2,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Platform_Small_07",
+     1
+    ],
+    [
+     "SM_Bld_Door_Single_04_Door_01",
+     1
+    ],
+    [
+     "SM_Bld_Door_Single_04_Door_02",
+     1
+    ],
+    [
+     "SM_Bld_Door_Single_04_Door_03",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Single_05",
+   "at": [
+    35240.5,
+    29389.7,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Single_05_Door_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Pod_Corridor_Round_Door_Single_01",
+   "at": [
+    46915.0,
+    34762.1,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Pod_Corridor_Square_Door_Double_01",
+   "at": [
+    43348.0,
+    34762.1,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Pod_Corridor_Square_Door_Single_01",
+   "at": [
+    42159.0,
+    34762.1,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Prop_Container_01_Door_01",
+   "at": [
+    11738.1,
+    32583.7,
+    143.2
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiWorlds_01_A_Alt"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Prop_Locker_01_Door_01",
+   "at": [
+    29319.6,
+    17511.1,
+    109.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiWorlds_01_A_Alt"
+   ],
+   "beside": [
+    [
+     "SM_Prop_Locker_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Env_Artifact_AlienRuin_07_Door_l_01",
+   "at": [
+    38550.0,
+    13472.0,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Env_Artifact_AlienRuin_07",
+     1
+    ],
+    [
+     "SM_Env_Artifact_AlienRuin_07_Door_r_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Env_Artifact_AlienRuin_07_Door_r_01",
+   "at": [
+    38550.0,
+    13472.0,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Env_Artifact_AlienRuin_07",
+     1
+    ],
+    [
+     "SM_Env_Artifact_AlienRuin_07_Door_l_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Corp_Loading_Bay_01_Cargo_Door_01",
+   "at": [
+    60605.7,
+    21706.6,
+    279.5
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Corp_Loading_Bay_01",
+     1
+    ],
+    [
+     "SM_Bld_Corp_Loading_Bay_01_Lift_01",
+     1
+    ],
+    [
+     "SM_Bld_Corp_Loading_Bay_01_Glass_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Corp_MobileSite_01_Door_01",
+   "at": [
+    62645.2,
+    5614.7,
+    465.6
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Corp_MobileSite_01_DoorGlass_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Corp_Wall_Gate_01_Door_01",
+   "at": [
+    82771.3,
+    -2951.3,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Door_Double_01_Door_01",
+   "at": [
+    40790.3,
+    35951.1,
+    13.4
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Double_01",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_01_Door_03",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Double_01_Door_02",
+   "at": [
+    41150.3,
+    35951.1,
+    13.4
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Double_01",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_01_Door_03",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Double_01_Door_03",
+   "at": [
+    40970.3,
+    35951.1,
+    329.1
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Double_01",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_01_Door_01",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_01_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Double_02_Door_01",
+   "at": [
+    39781.3,
+    35951.1,
+    -16.9
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Double_02",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_02_Door_02",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_02_Door_03",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_02_Door_04",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Double_02_Door_02",
+   "at": [
+    39781.3,
+    35951.1,
+    309.9
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Double_02",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_02_Door_01",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_02_Door_03",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_02_Door_04",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Double_03_Door_01",
+   "at": [
+    46743.9,
+    37140.1,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Double_03",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_03_Lock_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Double_03_Door_02",
+   "at": [
+    47085.5,
+    37140.1,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Double_03",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_03_Lock_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Double_04_Door_01",
+   "at": [
+    47090.7,
+    35951.1,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Double_04",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Double_04_Door_02",
+   "at": [
+    46738.7,
+    35951.1,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Double_04",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Garage_01_Door_01",
+   "at": [
+    58320.0,
+    21623.3,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Garage_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Garage_02_Door_01",
+   "at": [
+    54033.3,
+    21623.3,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Garage_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Single_01_Door_01",
+   "at": [
+    35908.0,
+    29389.7,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Single_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Single_02_Door_01",
+   "at": [
+    34501.1,
+    29389.7,
+    -6.7
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Single_02",
+     1
+    ],
+    [
+     "SM_Bld_Door_Single_02_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Single_02_Door_02",
+   "at": [
+    34501.1,
+    29389.7,
+    263.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Single_02",
+     1
+    ],
+    [
+     "SM_Bld_Door_Single_02_Door_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Single_03_Door_01",
+   "at": [
+    35610.7,
+    29393.4,
+    -11.3
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Single_03",
+     1
+    ],
+    [
+     "SM_Bld_Door_Single_03_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Single_04_Door_01",
+   "at": [
+    37365.0,
+    28279.2,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Single_04",
+     1
+    ],
+    [
+     "SM_Bld_Platform_Small_07",
+     1
+    ],
+    [
+     "SM_Bld_Door_Single_04_Door_02",
+     1
+    ],
+    [
+     "SM_Bld_Door_Single_04_Door_03",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Single_04_Door_02",
+   "at": [
+    37558.1,
+    28279.2,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Single_04",
+     1
+    ],
+    [
+     "SM_Bld_Platform_Small_07",
+     1
+    ],
+    [
+     "SM_Bld_Door_Single_04_Door_01",
+     1
+    ],
+    [
+     "SM_Bld_Door_Single_04_Door_03",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Single_04_Door_03",
+   "at": [
+    37461.6,
+    28279.2,
+    269.9
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Single_04",
+     1
+    ],
+    [
+     "SM_Bld_Platform_Small_07",
+     1
+    ],
+    [
+     "SM_Bld_Door_Single_04_Door_01",
+     1
+    ],
+    [
+     "SM_Bld_Door_Single_04_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Single_05_Door_01",
+   "at": [
+    35150.2,
+    29389.7,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Single_05",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Elevator_Hover_Double_02_Gate_01",
+   "at": [
+    44391.5,
+    33690.4,
+    61.1
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Elevator_Hover_Double_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Elevator_Hover_Double_02_Gate_02",
+   "at": [
+    44682.5,
+    33690.4,
+    61.1
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Elevator_Hover_Double_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Vendor_01_Door_01",
+   "at": [
+    45738.4,
+    35823.0,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Vendor_01",
+     1
+    ],
+    [
+     "SM_Bld_Vendor_01_Shutter_01",
+     1
+    ],
+    [
+     "SM_Bld_Vendor_01_Shutter_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Vendor_02_Door_01",
+   "at": [
+    45745.2,
+    34720.0,
+    111.9
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Vendor_02",
+     1
+    ],
+    [
+     "SM_Bld_Vendor_02_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Vendor_02_Door_02",
+   "at": [
+    45784.4,
+    34720.0,
+    111.9
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Vendor_02",
+     1
+    ],
+    [
+     "SM_Bld_Vendor_02_Door_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Vendor_05_Door_01",
+   "at": [
+    40950.8,
+    28929.1,
+    111.6
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiWorlds_01_A_Alt"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Vendor_05",
+     1
+    ],
+    [
+     "SM_Bld_Vendor_05_Window_01",
+     1
+    ],
+    [
+     "SM_Bld_Vendor_05_Window_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Vendor_07_Door_01",
+   "at": [
+    41036.0,
+    29788.1,
+    112.9
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Vendor_07",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Corp_Loading_Bay_01_Lift_01",
+   "at": [
+    60631.1,
+    21584.9,
+    19.2
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Corp_Loading_Bay_01",
+     1
+    ],
+    [
+     "SM_Bld_Corp_Loading_Bay_01_Cargo_Door_01",
+     1
+    ],
+    [
+     "SM_Bld_Corp_Loading_Bay_01_Glass_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Double_02_Door_03",
+   "at": [
+    39614.1,
+    35951.1,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Double_02",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_02_Door_01",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_02_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Double_02_Door_04",
+   "at": [
+    39949.5,
+    35951.1,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Double_02",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_02_Door_01",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_02_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Door_Single_03_Door_02",
+   "at": [
+    35610.7,
+    29389.7,
+    260.5
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Single_03",
+     1
+    ],
+    [
+     "SM_Bld_Door_Single_03_Door_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_LaunchPad_02_Door_01",
+   "at": [
+    -31240.0,
+    32588.8,
+    298.7
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_LaunchPad_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Corp_Loading_Bay_01_Arm_01_Lifter_01",
+   "at": [
+    60463.4,
+    22648.8,
+    516.2
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Door_Double_03_Lock_01",
+   "at": [
+    46914.7,
+    37138.7,
+    150.7
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Door_Double_03",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_03_Door_01",
+     1
+    ],
+    [
+     "SM_Bld_Door_Double_03_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Corp_MobileSite_01_DoorGlass_01",
+   "at": [
+    62795.2,
+    5599.7,
+    465.6
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonScifiWorlds_Glass_02"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Corp_MobileSite_01_Door_01",
+     1
+    ]
+   ]
+  }
+ ],
+ "lights": [
+  {
+   "class": "DirectionalLight",
+   "at": [
+    -43091.3,
+    877.5,
+    -1721.2
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 10.0,
+   "colour": "<Struct 'Color' (0x000001A841941AB8) {b: 255, g: 255, r: 255, a: 255}>",
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Env_Core_01",
+   "nearest_dist": 6629.7
+  },
+  {
+   "class": "SkyLight",
+   "at": [
+    11518.3,
+    34424.6,
+    23824.4
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 1.0,
+   "colour": "<Struct 'Color' (0x000001A8267E6BB8) {b: 255, g: 255, r: 255, a: 255}>",
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Drill_04_Leg_01",
+   "nearest_dist": 23538.4
+  }
+ ]
+}

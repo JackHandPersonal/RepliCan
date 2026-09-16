@@ -1,0 +1,1577 @@
+{
+ "Space/Wep_Pistol_01": {
+  "path": "/Game/RepliCan/Weapons/Space/SM_Wep_Pistol_01",
+  "tris": 573,
+  "x": [
+   -3.4,
+   3.4
+  ],
+  "y": [
+   -10.7,
+   30.8
+  ],
+  "z": [
+   -14.3,
+   11.8
+  ]
+ },
+ "Space/Wep_Rifle_01": {
+  "path": "/Game/RepliCan/Weapons/Space/SM_Wep_Rifle_01",
+  "tris": 1470,
+  "x": [
+   -19.8,
+   5.8
+  ],
+  "y": [
+   -34.3,
+   40.6
+  ],
+  "z": [
+   -13.8,
+   24.1
+  ]
+ },
+ "Space/Wep_Shotgun_01": {
+  "path": "/Game/RepliCan/Weapons/Space/SM_Wep_Shotgun_01",
+  "tris": 2164,
+  "x": [
+   -5.1,
+   5.2
+  ],
+  "y": [
+   -22.3,
+   55.4
+  ],
+  "z": [
+   -9.3,
+   18.5
+  ]
+ },
+ "Space/Wep_Sword_01": {
+  "path": "/Game/RepliCan/Weapons/Space/SM_Wep_Sword_01",
+  "tris": 474,
+  "x": [
+   -9.0,
+   8.4
+  ],
+  "y": [
+   -2.7,
+   2.7
+  ],
+  "z": [
+   -18.4,
+   116.1
+  ]
+ },
+ "Space/Wep_Sword_Double_01": {
+  "path": "/Game/RepliCan/Weapons/Space/SM_Wep_Sword_Double_01",
+  "tris": 642,
+  "x": [
+   -11.2,
+   11.2
+  ],
+  "y": [
+   -2.1,
+   2.1
+  ],
+  "z": [
+   -22.3,
+   103.4
+  ]
+ },
+ "Space/Wep_Shield_01": {
+  "path": "/Game/RepliCan/Weapons/Space/SM_Wep_Shield_01",
+  "tris": 406,
+  "x": [
+   -22.4,
+   22.4
+  ],
+  "y": [
+   -2.1,
+   9.8
+  ],
+  "z": [
+   -29.0,
+   38.7
+  ]
+ },
+ "Space/Wep_Shield_Extended_01": {
+  "path": "/Game/RepliCan/Weapons/Space/SM_Wep_Shield_Extended_01",
+  "tris": 482,
+  "x": [
+   -34.8,
+   34.8
+  ],
+  "y": [
+   -3.2,
+   9.8
+  ],
+  "z": [
+   -42.9,
+   79.3
+  ]
+ },
+ "Worlds/Wep_Alien_01": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Alien_01",
+  "tris": 1180,
+  "x": [
+   -4.0,
+   4.0
+  ],
+  "y": [
+   -18.0,
+   63.9
+  ],
+  "z": [
+   -13.0,
+   23.3
+  ]
+ },
+ "Worlds/Wep_Alien_02": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Alien_02",
+  "tris": 1358,
+  "x": [
+   -3.8,
+   3.8
+  ],
+  "y": [
+   -25.6,
+   70.1
+  ],
+  "z": [
+   -19.0,
+   16.9
+  ]
+ },
+ "Worlds/Wep_Alien_03": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Alien_03",
+  "tris": 1436,
+  "x": [
+   -7.3,
+   7.3
+  ],
+  "y": [
+   -27.5,
+   91.8
+  ],
+  "z": [
+   -14.7,
+   22.7
+  ]
+ },
+ "Worlds/Wep_Alien_04": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Alien_04",
+  "tris": 1197,
+  "x": [
+   -6.3,
+   6.3
+  ],
+  "y": [
+   -29.0,
+   95.3
+  ],
+  "z": [
+   -15.6,
+   26.5
+  ]
+ },
+ "Worlds/Wep_Assault_01": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Assault_01",
+  "tris": 1691,
+  "x": [
+   -3.8,
+   4.7
+  ],
+  "y": [
+   -29.4,
+   66.2
+  ],
+  "z": [
+   -19.3,
+   22.2
+  ]
+ },
+ "Worlds/Wep_Assault_02": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Assault_02",
+  "tris": 2252,
+  "x": [
+   -3.6,
+   3.6
+  ],
+  "y": [
+   -28.0,
+   63.3
+  ],
+  "z": [
+   -19.1,
+   21.7
+  ]
+ },
+ "Worlds/Wep_Assault_03": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Assault_03",
+  "tris": 1270,
+  "x": [
+   -5.3,
+   5.3
+  ],
+  "y": [
+   -24.1,
+   73.0
+  ],
+  "z": [
+   -20.9,
+   24.0
+  ]
+ },
+ "Worlds/Wep_GrenadeLauncher_01": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_GrenadeLauncher_01",
+  "tris": 2848,
+  "x": [
+   -19.3,
+   19.3
+  ],
+  "y": [
+   -46.9,
+   46.9
+  ],
+  "z": [
+   -27.3,
+   27.3
+  ]
+ },
+ "Worlds/Wep_Heavy_01": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Heavy_01",
+  "tris": 1988,
+  "x": [
+   -10.0,
+   10.0
+  ],
+  "y": [
+   -44.0,
+   83.3
+  ],
+  "z": [
+   -17.3,
+   44.0
+  ]
+ },
+ "Worlds/Wep_Heavy_02": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Heavy_02",
+  "tris": 2848,
+  "x": [
+   -15.7,
+   15.7
+  ],
+  "y": [
+   -17.3,
+   57.1
+  ],
+  "z": [
+   -15.1,
+   27.6
+  ]
+ },
+ "Worlds/Wep_Heavy_03": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Heavy_03",
+  "tris": 1588,
+  "x": [
+   -15.4,
+   15.4
+  ],
+  "y": [
+   -34.6,
+   70.3
+  ],
+  "z": [
+   -32.8,
+   18.1
+  ]
+ },
+ "Worlds/Wep_Launcher_01": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Launcher_01",
+  "tris": 3396,
+  "x": [
+   -15.3,
+   15.3
+  ],
+  "y": [
+   -80.1,
+   68.7
+  ],
+  "z": [
+   -15.0,
+   53.4
+  ]
+ },
+ "Worlds/Wep_Launcher_02": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Launcher_02",
+  "tris": 2340,
+  "x": [
+   -15.3,
+   15.3
+  ],
+  "y": [
+   -68.4,
+   86.8
+  ],
+  "z": [
+   -16.9,
+   47.6
+  ]
+ },
+ "Worlds/Wep_Launcher_03": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Launcher_03",
+  "tris": 2254,
+  "x": [
+   -12.8,
+   12.8
+  ],
+  "y": [
+   -74.8,
+   56.6
+  ],
+  "z": [
+   -13.4,
+   47.9
+  ]
+ },
+ "Worlds/Wep_Pistol_01": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Pistol_01",
+  "tris": 1250,
+  "x": [
+   -5.3,
+   5.3
+  ],
+  "y": [
+   -12.2,
+   23.9
+  ],
+  "z": [
+   -15.9,
+   16.6
+  ]
+ },
+ "Worlds/Wep_Pistol_02": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Pistol_02",
+  "tris": 1256,
+  "x": [
+   -4.0,
+   4.0
+  ],
+  "y": [
+   -7.7,
+   46.0
+  ],
+  "z": [
+   -7.2,
+   15.8
+  ]
+ },
+ "Worlds/Wep_Pistol_03": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Pistol_03",
+  "tris": 1022,
+  "x": [
+   -10.3,
+   10.3
+  ],
+  "y": [
+   -9.3,
+   25.4
+  ],
+  "z": [
+   -10.3,
+   21.5
+  ]
+ },
+ "Worlds/Wep_Pistol_04": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Pistol_04",
+  "tris": 1202,
+  "x": [
+   -4.4,
+   4.4
+  ],
+  "y": [
+   -7.5,
+   30.1
+  ],
+  "z": [
+   -10.9,
+   20.1
+  ]
+ },
+ "Worlds/Wep_Pistol_05": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Pistol_05",
+  "tris": 1272,
+  "x": [
+   -3.8,
+   3.8
+  ],
+  "y": [
+   -14.5,
+   37.5
+  ],
+  "z": [
+   -12.0,
+   14.3
+  ]
+ },
+ "Worlds/Wep_Pistol_06": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Pistol_06",
+  "tris": 986,
+  "x": [
+   -2.7,
+   2.7
+  ],
+  "y": [
+   -15.1,
+   23.1
+  ],
+  "z": [
+   -16.3,
+   14.0
+  ]
+ },
+ "Worlds/Wep_SMG_01": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SMG_01",
+  "tris": 2213,
+  "x": [
+   -7.8,
+   7.8
+  ],
+  "y": [
+   -13.5,
+   68.8
+  ],
+  "z": [
+   -19.8,
+   17.5
+  ]
+ },
+ "Worlds/Wep_SMG_02": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SMG_02",
+  "tris": 2176,
+  "x": [
+   -3.5,
+   3.5
+  ],
+  "y": [
+   -28.3,
+   40.9
+  ],
+  "z": [
+   -10.8,
+   19.0
+  ]
+ },
+ "Worlds/Wep_SMG_03": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SMG_03",
+  "tris": 2093,
+  "x": [
+   -4.0,
+   4.0
+  ],
+  "y": [
+   -43.1,
+   43.1
+  ],
+  "z": [
+   -19.6,
+   27.2
+  ]
+ },
+ "Worlds/Wep_Shotgun_01": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shotgun_01",
+  "tris": 1533,
+  "x": [
+   -7.9,
+   7.9
+  ],
+  "y": [
+   -23.8,
+   40.4
+  ],
+  "z": [
+   -6.7,
+   16.5
+  ]
+ },
+ "Worlds/Wep_Shotgun_02": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shotgun_02",
+  "tris": 1868,
+  "x": [
+   -4.5,
+   4.5
+  ],
+  "y": [
+   -28.8,
+   75.4
+  ],
+  "z": [
+   -9.9,
+   23.3
+  ]
+ },
+ "Worlds/Wep_Shotgun_03": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shotgun_03",
+  "tris": 1354,
+  "x": [
+   -4.4,
+   7.6
+  ],
+  "y": [
+   -26.1,
+   80.2
+  ],
+  "z": [
+   -12.1,
+   19.0
+  ]
+ },
+ "Worlds/Wep_Sniper_01": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sniper_01",
+  "tris": 1292,
+  "x": [
+   -7.0,
+   7.0
+  ],
+  "y": [
+   -27.0,
+   139.5
+  ],
+  "z": [
+   -22.3,
+   28.4
+  ]
+ },
+ "Worlds/Wep_Sniper_02": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sniper_02",
+  "tris": 1452,
+  "x": [
+   -6.5,
+   6.5
+  ],
+  "y": [
+   -29.0,
+   133.7
+  ],
+  "z": [
+   -18.5,
+   30.6
+  ]
+ },
+ "Worlds/Wep_Sniper_03": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sniper_03",
+  "tris": 1742,
+  "x": [
+   -8.0,
+   8.0
+  ],
+  "y": [
+   -27.2,
+   138.9
+  ],
+  "z": [
+   -10.2,
+   28.2
+  ]
+ },
+ "Worlds/Wep_Tool_01": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Tool_01",
+  "tris": 680,
+  "x": [
+   -5.3,
+   5.3
+  ],
+  "y": [
+   -8.3,
+   20.4
+  ],
+  "z": [
+   -18.1,
+   15.9
+  ]
+ },
+ "Worlds/Wep_Tool_02": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Tool_02",
+  "tris": 590,
+  "x": [
+   -4.5,
+   4.5
+  ],
+  "y": [
+   -14.3,
+   26.9
+  ],
+  "z": [
+   -12.4,
+   10.5
+  ]
+ },
+ "Worlds/Wep_BigAxe_01": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_01",
+  "tris": 954,
+  "x": [
+   -5.8,
+   5.8
+  ],
+  "y": [
+   -22.9,
+   22.9
+  ],
+  "z": [
+   -51.2,
+   69.1
+  ]
+ },
+ "Worlds/Wep_BigAxe_02": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_02",
+  "tris": 818,
+  "x": [
+   -5.1,
+   5.1
+  ],
+  "y": [
+   -10.4,
+   23.6
+  ],
+  "z": [
+   -49.9,
+   49.9
+  ]
+ },
+ "Worlds/Wep_BigAxe_03": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_03",
+  "tris": 1010,
+  "x": [
+   -4.1,
+   4.1
+  ],
+  "y": [
+   -23.6,
+   17.2
+  ],
+  "z": [
+   -42.8,
+   69.3
+  ]
+ },
+ "Worlds/Wep_BigAxe_04": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_04",
+  "tris": 852,
+  "x": [
+   -3.4,
+   3.4
+  ],
+  "y": [
+   -19.4,
+   19.4
+  ],
+  "z": [
+   -55.4,
+   55.5
+  ]
+ },
+ "Worlds/Wep_BigAxe_05": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_05",
+  "tris": 1245,
+  "x": [
+   -5.0,
+   5.0
+  ],
+  "y": [
+   -21.3,
+   21.3
+  ],
+  "z": [
+   -35.0,
+   59.6
+  ]
+ },
+ "Worlds/Wep_BigAxe_06": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_06",
+  "tris": 1120,
+  "x": [
+   -5.3,
+   5.3
+  ],
+  "y": [
+   -24.8,
+   24.8
+  ],
+  "z": [
+   -35.5,
+   67.1
+  ]
+ },
+ "Worlds/Wep_BigAxe_07": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_07",
+  "tris": 1336,
+  "x": [
+   -11.8,
+   11.8
+  ],
+  "y": [
+   -28.5,
+   32.0
+  ],
+  "z": [
+   -69.5,
+   69.5
+  ]
+ },
+ "Worlds/Wep_Dagger_01": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Dagger_01",
+  "tris": 414,
+  "x": [
+   -2.7,
+   2.8
+  ],
+  "y": [
+   -9.9,
+   10.1
+  ],
+  "z": [
+   -6.3,
+   43.1
+  ]
+ },
+ "Worlds/Wep_Dagger_02": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Dagger_02",
+  "tris": 257,
+  "x": [
+   -2.1,
+   2.1
+  ],
+  "y": [
+   -4.7,
+   4.7
+  ],
+  "z": [
+   -9.5,
+   40.1
+  ]
+ },
+ "Worlds/Wep_Dagger_03": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Dagger_03",
+  "tris": 348,
+  "x": [
+   -2.9,
+   2.9
+  ],
+  "y": [
+   -5.5,
+   11.1
+  ],
+  "z": [
+   -11.2,
+   45.4
+  ]
+ },
+ "Worlds/Wep_Dagger_04": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Dagger_04",
+  "tris": 402,
+  "x": [
+   -2.1,
+   2.1
+  ],
+  "y": [
+   -4.4,
+   11.7
+  ],
+  "z": [
+   -10.5,
+   42.1
+  ]
+ },
+ "Worlds/Wep_Dagger_05": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Dagger_05",
+  "tris": 337,
+  "x": [
+   -2.5,
+   2.5
+  ],
+  "y": [
+   -5.8,
+   5.8
+  ],
+  "z": [
+   -10.8,
+   40.5
+  ]
+ },
+ "Worlds/Wep_Dagger_06": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Dagger_06",
+  "tris": 544,
+  "x": [
+   -2.6,
+   2.6
+  ],
+  "y": [
+   -5.8,
+   5.8
+  ],
+  "z": [
+   -10.4,
+   41.0
+  ]
+ },
+ "Worlds/Wep_Dagger_07": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Dagger_07",
+  "tris": 294,
+  "x": [
+   -3.0,
+   3.0
+  ],
+  "y": [
+   -5.0,
+   5.9
+  ],
+  "z": [
+   -9.7,
+   40.5
+  ]
+ },
+ "Worlds/Wep_Hammer_02": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Hammer_02",
+  "tris": 1216,
+  "x": [
+   -13.3,
+   13.3
+  ],
+  "y": [
+   -28.1,
+   32.8
+  ],
+  "z": [
+   -67.1,
+   78.0
+  ]
+ },
+ "Worlds/Wep_Hammer_03": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Hammer_03",
+  "tris": 1576,
+  "x": [
+   -15.7,
+   15.7
+  ],
+  "y": [
+   -32.1,
+   32.1
+  ],
+  "z": [
+   -55.7,
+   93.7
+  ]
+ },
+ "Worlds/Wep_Shield_01": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shield_01",
+  "tris": 232,
+  "x": [
+   -31.8,
+   31.8
+  ],
+  "y": [
+   -2.5,
+   13.7
+  ],
+  "z": [
+   -56.2,
+   55.9
+  ]
+ },
+ "Worlds/Wep_Shield_02": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shield_02",
+  "tris": 940,
+  "x": [
+   -29.5,
+   29.5
+  ],
+  "y": [
+   -3.3,
+   9.4
+  ],
+  "z": [
+   -56.7,
+   56.7
+  ]
+ },
+ "Worlds/Wep_Shield_03": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shield_03",
+  "tris": 540,
+  "x": [
+   -29.5,
+   29.5
+  ],
+  "y": [
+   -2.5,
+   10.2
+  ],
+  "z": [
+   -46.0,
+   46.0
+  ]
+ },
+ "Worlds/Wep_Shield_04": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shield_04",
+  "tris": 734,
+  "x": [
+   -24.0,
+   24.0
+  ],
+  "y": [
+   -2.2,
+   13.0
+  ],
+  "z": [
+   -56.0,
+   56.0
+  ]
+ },
+ "Worlds/Wep_Shield_05": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shield_05",
+  "tris": 286,
+  "x": [
+   -22.3,
+   22.3
+  ],
+  "y": [
+   -2.5,
+   12.6
+  ],
+  "z": [
+   -41.0,
+   41.0
+  ]
+ },
+ "Worlds/Wep_SmallAxe_01": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SmallAxe_01",
+  "tris": 558,
+  "x": [
+   -4.4,
+   4.4
+  ],
+  "y": [
+   -11.0,
+   19.7
+  ],
+  "z": [
+   -25.6,
+   39.4
+  ]
+ },
+ "Worlds/Wep_SmallAxe_02": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SmallAxe_02",
+  "tris": 786,
+  "x": [
+   -5.7,
+   5.7
+  ],
+  "y": [
+   -13.9,
+   25.5
+  ],
+  "z": [
+   -24.4,
+   42.1
+  ]
+ },
+ "Worlds/Wep_SmallAxe_03": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SmallAxe_03",
+  "tris": 620,
+  "x": [
+   -4.6,
+   4.6
+  ],
+  "y": [
+   -12.4,
+   20.8
+  ],
+  "z": [
+   -24.2,
+   42.9
+  ]
+ },
+ "Worlds/Wep_SmallAxe_04": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SmallAxe_04",
+  "tris": 756,
+  "x": [
+   -4.1,
+   4.1
+  ],
+  "y": [
+   -12.2,
+   13.4
+  ],
+  "z": [
+   -24.3,
+   37.2
+  ]
+ },
+ "Worlds/Wep_SmallAxe_05": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SmallAxe_05",
+  "tris": 770,
+  "x": [
+   -4.6,
+   4.6
+  ],
+  "y": [
+   -13.7,
+   20.3
+  ],
+  "z": [
+   -28.9,
+   37.7
+  ]
+ },
+ "Worlds/Wep_Sword_01a": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sword_01a",
+  "tris": 490,
+  "x": [
+   -3.6,
+   3.6
+  ],
+  "y": [
+   -5.4,
+   5.4
+  ],
+  "z": [
+   -13.4,
+   80.6
+  ]
+ },
+ "Worlds/Wep_Sword_02": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sword_02",
+  "tris": 496,
+  "x": [
+   -4.5,
+   4.5
+  ],
+  "y": [
+   -9.6,
+   9.6
+  ],
+  "z": [
+   -19.6,
+   76.0
+  ]
+ },
+ "Worlds/Wep_Sword_03": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sword_03",
+  "tris": 558,
+  "x": [
+   -2.6,
+   2.6
+  ],
+  "y": [
+   -9.2,
+   10.9
+  ],
+  "z": [
+   -15.3,
+   77.5
+  ]
+ },
+ "Worlds/Wep_Sword_04": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sword_04",
+  "tris": 600,
+  "x": [
+   -3.9,
+   3.9
+  ],
+  "y": [
+   -7.5,
+   7.5
+  ],
+  "z": [
+   -12.1,
+   75.1
+  ]
+ },
+ "Worlds/Wep_Sword_05": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sword_05",
+  "tris": 446,
+  "x": [
+   -2.2,
+   2.2
+  ],
+  "y": [
+   -3.8,
+   11.5
+  ],
+  "z": [
+   -18.4,
+   75.4
+  ]
+ },
+ "Worlds/Wep_Sword_06": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sword_06",
+  "tris": 568,
+  "x": [
+   -2.4,
+   2.4
+  ],
+  "y": [
+   -10.5,
+   10.5
+  ],
+  "z": [
+   -12.0,
+   82.7
+  ]
+ },
+ "Worlds/Wep_Sword_07": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sword_07",
+  "tris": 548,
+  "x": [
+   -4.0,
+   4.0
+  ],
+  "y": [
+   -10.1,
+   10.1
+  ],
+  "z": [
+   -12.5,
+   79.4
+  ]
+ },
+ "Worlds/Wep_Sword_08": {
+  "path": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sword_08",
+  "tris": 504,
+  "x": [
+   -3.5,
+   3.5
+  ],
+  "y": [
+   -2.5,
+   9.1
+  ],
+  "z": [
+   -17.3,
+   65.3
+  ]
+ },
+ "CyberCity/Dagger_01": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Dagger_01",
+  "tris": 387,
+  "x": [
+   -2.8,
+   2.8
+  ],
+  "y": [
+   -4.3,
+   5.2
+  ],
+  "z": [
+   -11.5,
+   38.7
+  ],
+  "parts": []
+ },
+ "CyberCity/Dagger_02": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Dagger_02",
+  "tris": 500,
+  "x": [
+   -2.8,
+   2.8
+  ],
+  "y": [
+   -4.9,
+   4.9
+  ],
+  "z": [
+   -9.4,
+   42.0
+  ],
+  "parts": []
+ },
+ "CyberCity/Laser_Gun_01": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Laser_Gun_01",
+  "tris": 3735,
+  "x": [
+   -5.9,
+   5.9
+  ],
+  "y": [
+   -41.0,
+   63.4
+  ],
+  "z": [
+   -16.4,
+   27.0
+  ],
+  "parts": [
+   "SM_Wep_Laser_Gun_Trigger_01"
+  ]
+ },
+ "CyberCity/Paint_Gun_01": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Paint_Gun_01",
+  "tris": 674,
+  "x": [
+   -5.8,
+   6.9
+  ],
+  "y": [
+   -8.3,
+   28.9
+  ],
+  "z": [
+   -18.0,
+   15.1
+  ],
+  "parts": [
+   "SM_Wep_Paint_Gun_01_Trigger_01"
+  ]
+ },
+ "CyberCity/Pistol_01": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Pistol_01",
+  "tris": 1136,
+  "x": [
+   -3.5,
+   3.5
+  ],
+  "y": [
+   -16.7,
+   33.9
+  ],
+  "z": [
+   -18.9,
+   12.9
+  ],
+  "parts": [
+   "SM_Wep_Pistol_01_Trigger_01"
+  ]
+ },
+ "CyberCity/Rifle_01": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Rifle_01",
+  "tris": 1482,
+  "x": [
+   -5.0,
+   5.0
+  ],
+  "y": [
+   -32.7,
+   59.9
+  ],
+  "z": [
+   -18.9,
+   15.2
+  ],
+  "parts": [
+   "SM_Wep_Rifle_01_Trigger_01"
+  ]
+ },
+ "CyberCity/SMG_01": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_SMG_01",
+  "tris": 1588,
+  "x": [
+   -3.9,
+   3.9
+  ],
+  "y": [
+   -33.5,
+   30.1
+  ],
+  "z": [
+   -9.7,
+   19.3
+  ],
+  "parts": [
+   "SM_Wep_SMG_Trigger_01"
+  ]
+ },
+ "CyberCity/Shock_Stick_01": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shock_Stick_01",
+  "tris": 668,
+  "x": [
+   -4.3,
+   4.3
+  ],
+  "y": [
+   -5.5,
+   5.5
+  ],
+  "z": [
+   -14.2,
+   81.7
+  ],
+  "parts": []
+ },
+ "CyberCity/Shock_Stick_02": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shock_Stick_02",
+  "tris": 604,
+  "x": [
+   -5.4,
+   5.4
+  ],
+  "y": [
+   -27.4,
+   4.2
+  ],
+  "z": [
+   -26.0,
+   72.3
+  ],
+  "parts": []
+ },
+ "CyberCity/Shock_Stick_03": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shock_Stick_03",
+  "tris": 640,
+  "x": [
+   -11.0,
+   11.0
+  ],
+  "y": [
+   -9.7,
+   9.7
+  ],
+  "z": [
+   -63.0,
+   63.9
+  ],
+  "parts": []
+ },
+ "CyberCity/Shock_Stick_04": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shock_Stick_04",
+  "tris": 558,
+  "x": [
+   -6.8,
+   6.8
+  ],
+  "y": [
+   -5.9,
+   5.9
+  ],
+  "z": [
+   -25.7,
+   78.1
+  ],
+  "parts": []
+ },
+ "CyberCity/Shock_Stick_05": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shock_Stick_05",
+  "tris": 442,
+  "x": [
+   -6.0,
+   6.0
+  ],
+  "y": [
+   -5.8,
+   11.7
+  ],
+  "z": [
+   -20.0,
+   77.6
+  ],
+  "parts": []
+ },
+ "CyberCity/Shuriken_01": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shuriken_01",
+  "tris": 572,
+  "x": [
+   -9.4,
+   11.1
+  ],
+  "y": [
+   -10.1,
+   10.9
+  ],
+  "z": [
+   0.0,
+   2.2
+  ],
+  "parts": []
+ },
+ "CyberCity/Shuriken_03": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shuriken_03",
+  "tris": 870,
+  "x": [
+   -13.2,
+   13.2
+  ],
+  "y": [
+   -7.4,
+   15.2
+  ],
+  "z": [
+   -0.0,
+   1.6
+  ],
+  "parts": []
+ },
+ "CyberCity/Shuriken_05": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shuriken_05",
+  "tris": 132,
+  "x": [
+   -3.3,
+   3.3
+  ],
+  "y": [
+   -11.1,
+   18.0
+  ],
+  "z": [
+   -2.8,
+   2.8
+  ],
+  "parts": []
+ },
+ "CyberCity/Sniper_Rifle_01": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Sniper_Rifle_01",
+  "tris": 3534,
+  "x": [
+   -7.6,
+   7.7
+  ],
+  "y": [
+   -37.0,
+   144.6
+  ],
+  "z": [
+   -15.6,
+   14.4
+  ],
+  "parts": [
+   "SM_Wep_Sniper_Rifle_Magazine_01",
+   "SM_Wep_Sniper_Rifle_Scope_01",
+   "SM_Wep_Sniper_Rifle_Slide_01",
+   "SM_Wep_Sniper_Rifle_Trigger_01"
+  ]
+ },
+ "CyberCity/Sword_01": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Sword_01",
+  "tris": 686,
+  "x": [
+   -7.7,
+   7.7
+  ],
+  "y": [
+   -12.2,
+   6.9
+  ],
+  "z": [
+   -26.8,
+   119.0
+  ],
+  "parts": []
+ },
+ "CyberCity/Sword_02": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Sword_02",
+  "tris": 696,
+  "x": [
+   -7.7,
+   7.7
+  ],
+  "y": [
+   -12.4,
+   6.7
+  ],
+  "z": [
+   -26.8,
+   119.0
+  ],
+  "parts": []
+ },
+ "CyberCity/Sword_03": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Sword_03",
+  "tris": 628,
+  "x": [
+   -4.6,
+   4.9
+  ],
+  "y": [
+   -9.1,
+   10.0
+  ],
+  "z": [
+   -22.9,
+   123.5
+  ],
+  "parts": []
+ },
+ "CyberCity/Sword_04": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Sword_04",
+  "tris": 762,
+  "x": [
+   -6.4,
+   6.4
+  ],
+  "y": [
+   -16.2,
+   16.2
+  ],
+  "z": [
+   -17.2,
+   126.0
+  ],
+  "parts": []
+ },
+ "CyberCity/Sword_05": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Sword_05",
+  "tris": 478,
+  "x": [
+   -4.0,
+   4.0
+  ],
+  "y": [
+   -15.0,
+   14.3
+  ],
+  "z": [
+   -18.1,
+   131.2
+  ],
+  "parts": []
+ },
+ "CyberCity/Sword_06": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Sword_06",
+  "tris": 478,
+  "x": [
+   -5.0,
+   5.0
+  ],
+  "y": [
+   -4.8,
+   4.9
+  ],
+  "z": [
+   -19.4,
+   128.3
+  ],
+  "parts": []
+ },
+ "CyberCity/Sword_07": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Sword_07",
+  "tris": 706,
+  "x": [
+   -3.9,
+   3.9
+  ],
+  "y": [
+   -21.7,
+   21.7
+  ],
+  "z": [
+   -23.0,
+   125.3
+  ],
+  "parts": []
+ },
+ "CyberCity/Sword_08": {
+  "path": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Sword_08",
+  "tris": 510,
+  "x": [
+   -4.2,
+   4.2
+  ],
+  "y": [
+   -11.8,
+   12.5
+  ],
+  "z": [
+   -23.5,
+   118.8
+  ],
+  "parts": []
+ }
+}

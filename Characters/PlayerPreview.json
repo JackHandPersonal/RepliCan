@@ -1,0 +1,147 @@
+{
+	"name": "PlayerPreview",
+	"type": "Modular",
+	"baseMesh": "",
+	"material": "",
+	"gender": "Male",
+	"locomotion": "",
+	"parts":
+	{
+		"CutTorso": "/Game/RepliCan/CutLibrary/SciFiSpace/Cryo_Male_01_Torso.Cryo_Male_01_Torso",
+		"CutArms": "/Game/RepliCan/CutLibrary/SciFiSpace/Cryo_Male_01_Arms.Cryo_Male_01_Arms",
+		"CutLegs": "/Game/RepliCan/CutLibrary/SciFiSpace/Cryo_Male_01_Legs.Cryo_Male_01_Legs",
+		"CutHead": "/Game/RepliCan/CutLibrary/SciFiSpace/BR_SpaceSoldier_Male_01_Head.BR_SpaceSoldier_Male_01_Head"
+	},
+	"kit": "SciFi",
+	"face":
+	{
+		"bEnabled": false,
+		"noseMesh": "/Game/Characters/KnightDemo/SM_Nose.SM_Nose",
+		"noseLocation":
+		{
+			"x": 6.8899998664855957,
+			"y": 13,
+			"z": 0
+		},
+		"noseRotation":
+		{
+			"pitch": -90,
+			"yaw": 0,
+			"roll": 0
+		},
+		"bMouthDecal": true,
+		"mouthLocation":
+		{
+			"x": -1.059999942779541,
+			"y": 13.699999809265137,
+			"z": 0
+		},
+		"mouthRotation":
+		{
+			"pitch": 0,
+			"yaw": -90,
+			"roll": -90
+		},
+		"mouthScale": 0.5,
+		"mouthTint":
+		{
+			"r": 1,
+			"g": 1,
+			"b": 1,
+			"a": 1
+		},
+		"expression": "Neutral",
+		"bAutoBlink": true,
+		"hairMesh": "",
+		"facialHairMesh": "",
+		"headGearMesh": "",
+		"headGearLocation":
+		{
+			"x": 0,
+			"y": 0,
+			"z": 0
+		},
+		"headGearScale": 1
+	},
+	"colors":
+	{
+	},
+	"weaponMesh": "",
+	"weaponLocation":
+	{
+		"x": -7,
+		"y": 2,
+		"z": 0
+	},
+	"weaponRotation":
+	{
+		"pitch": 0,
+		"yaw": -90,
+		"roll": 0
+	},
+	"weaponScale":
+	{
+		"x": 1,
+		"y": 1,
+		"z": 1
+	},
+	"armPose": "",
+	"armPoseWeight": 1,
+	"gait":
+	{
+		"stanceWidthDegrees": 0,
+		"movingStanceWidthDegrees": 5,
+		"toeOutDegrees": 0,
+		"hunchDegrees": 0,
+		"leanDegrees": 0,
+		"armSwingScale": 1,
+		"bounceScale": 1,
+		"sway": 0,
+		"cadenceScale": 1,
+		"stumble": 0,
+		"limpAmount": 0,
+		"limpSide": "Left"
+	},
+	"fingerCurlDegrees": -60,
+	"thumbCurlDegrees": 40,
+	"scale":
+	{
+		"x": 1,
+		"y": 1,
+		"z": 1
+	},
+	"speedMultiplier": 1,
+	"tags": [],
+	"description": "Preview unit.",
+	"comment": "",
+	"idleAnimations": [],
+	"gazeTargets": [],
+	"gazeHoldMin": 1.7999999523162842,
+	"gazeHoldMax": 4.5,
+	"gazeTurnSpeed": 0,
+	"remoteCamera":
+	{
+		"offset":
+		{
+			"x": 58,
+			"y": 10,
+			"z": 14
+		},
+		"lookOffset":
+		{
+			"x": 0,
+			"y": 0,
+			"z": 1
+		},
+		"fov": 36,
+		"roll": 0
+	},
+	"skinTint":
+	{
+		"r": 0,
+		"g": 0,
+		"b": 0,
+		"a": 0
+	},
+	"stubbleFade": 0
+}

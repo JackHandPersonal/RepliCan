@@ -1,0 +1,332 @@
+{
+ "map": "/Game/PolygonSciFiSpace/Maps/Demonstration_Exterior",
+ "actors": 119,
+ "mesh_actors": 95,
+ "families": [
+  [
+   "Ship_Transport",
+   18
+  ],
+  [
+   "Env_Debris",
+   17
+  ],
+  [
+   "Env_Asteroid",
+   13
+  ],
+  [
+   "Ship_Stealth",
+   10
+  ],
+  [
+   "Env_Planet",
+   7
+  ],
+  [
+   "Ship_Fighter",
+   7
+  ],
+  [
+   "Ship_Station",
+   6
+  ],
+  [
+   "Ship_Cruiser",
+   4
+  ],
+  [
+   "Ship_Bomber",
+   3
+  ],
+  [
+   "Veh_WarpGate",
+   2
+  ],
+  [
+   "Ship_Galactic",
+   2
+  ],
+  [
+   "Template_Map",
+   1
+  ],
+  [
+   "Sphere",
+   1
+  ],
+  [
+   "Ship_Colossal",
+   1
+  ],
+  [
+   "Ship_Massive",
+   1
+  ],
+  [
+   "Env_Rubble",
+   1
+  ],
+  [
+   "Veh_Drone",
+   1
+  ]
+ ],
+ "materials_by_family": {
+  "Env_Asteroid": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    11
+   ],
+   [
+    "M_PolygonSciFiSpace_Planets_Lines",
+    1
+   ],
+   [
+    "M_PolygonSciFiSpace_Space_Planets",
+    1
+   ]
+  ],
+  "Env_Debris": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    17
+   ]
+  ],
+  "Env_Planet": [
+   [
+    "M_PolygonSciFiSpace_Planet_Lines_Inst_02",
+    3
+   ],
+   [
+    "M_PolygonSciFiSpace_Planet_Inst_02",
+    2
+   ],
+   [
+    "M_PolygonSciFiSpace_Planets_Lines",
+    1
+   ],
+   [
+    "M_FX_Planet_Rings",
+    1
+   ]
+  ],
+  "Env_Rubble": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Ship_Bomber": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    3
+   ]
+  ],
+  "Ship_Colossal": [
+   [
+    "M_PolygonSciFiSpace_Ship",
+    1
+   ]
+  ],
+  "Ship_Cruiser": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    4
+   ]
+  ],
+  "Ship_Fighter": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    7
+   ]
+  ],
+  "Ship_Galactic": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Ship_Massive": [
+   [
+    "M_PolygonSciFiSpace_Ship",
+    1
+   ]
+  ],
+  "Ship_Station": [
+   [
+    "M_PolygonSciFiSpace_Station",
+    6
+   ]
+  ],
+  "Ship_Stealth": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    10
+   ]
+  ],
+  "Ship_Transport": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    18
+   ]
+  ],
+  "Sphere": [
+   [
+    "M_FX_Skybox",
+    1
+   ]
+  ],
+  "Template_Map": [
+   [
+    "DefaultMaterial",
+    1
+   ]
+  ],
+  "Veh_Drone": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Veh_WarpGate": [
+   [
+    "M_PolygonSciFiSpace_Station",
+    2
+   ]
+  ]
+ },
+ "doorways": [
+  {
+   "mesh": "SM_Veh_WarpGate_Outer_01",
+   "at": [
+    -54100.0,
+    194900.0,
+    47300.0
+   ],
+   "yaw": -30.0,
+   "materials": [
+    "M_PolygonSciFiSpace_Station"
+   ],
+   "beside": [
+    [
+     "SM_Veh_WarpGate_Inner_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Veh_WarpGate_Inner_01",
+   "at": [
+    -54100.0,
+    194900.0,
+    47300.0
+   ],
+   "yaw": -30.0,
+   "materials": [
+    "M_PolygonSciFiSpace_Station"
+   ],
+   "beside": [
+    [
+     "SM_Veh_WarpGate_Outer_01",
+     1
+    ]
+   ]
+  }
+ ],
+ "lights": [
+  {
+   "class": "DirectionalLight",
+   "at": [
+    100.0,
+    8024.3,
+    10487.2
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 1.0,
+   "colour": "<Struct 'Color' (0x000001A7B2498CB8) {b: 255, g: 245, r: 201, a: 255}>",
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Ship_Bomber_02",
+   "nearest_dist": 8505.2
+  },
+  {
+   "class": "SkyLight",
+   "at": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 0.5,
+   "colour": "<Struct 'Color' (0x000001A6F2A848B8) {b: 255, g: 255, r: 255, a: 255}>",
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Ship_Station_01",
+   "nearest_dist": 1.7,
+   "offset_in_mesh_frame": [
+    1.2,
+    1.0,
+    0.8
+   ]
+  },
+  {
+   "class": "DirectionalLight",
+   "at": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 3.2380950450897217,
+   "colour": "<Struct 'Color' (0x000001A7B24986B8) {b: 255, g: 121, r: 176, a: 255}>",
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Ship_Station_01",
+   "nearest_dist": 1.7,
+   "offset_in_mesh_frame": [
+    1.2,
+    1.0,
+    0.8
+   ]
+  },
+  {
+   "class": "DirectionalLight",
+   "at": [
+    1.0,
+    1.0,
+    23437.2
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 6.6666669845581055,
+   "colour": "<Struct 'Color' (0x000001A7B2497AB8) {b: 98, g: 173, r: 255, a: 255}>",
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Ship_Stealth_04",
+   "nearest_dist": 16926.4
+  },
+  {
+   "class": "DirectionalLight",
+   "at": [
+    35925.7,
+    14510.2,
+    9052.6
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 0.9523810148239136,
+   "colour": "<Struct 'Color' (0x000001A7B24980B8) {b: 219, g: 255, r: 0, a: 255}>",
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Ship_Bomber_02",
+   "nearest_dist": 8437.2
+  }
+ ]
+}

@@ -1,0 +1,97 @@
+{
+ "start": "greet",
+ "nodes": {
+  "greet": {
+   "text": [
+    "Look who's up and walking. [pause 0.4] How's the new body treating you?",
+    "Hey. [pause 0.3] Still with us? Good."
+   ],
+   "choices": [
+    {
+     "text": "What happens now?",
+     "next": "now"
+    },
+    {
+     "text": "About that thirteen thousand...",
+     "next": "debt",
+     "once": true
+    },
+    {
+     "text": "Where are we?",
+     "next": "where"
+    },
+    {
+     "text": "Never mind.",
+     "end": true
+    }
+   ]
+  },
+  "now": {
+   "text": "Now you work it off. [pause 0.4] Jun will get you kitted out, and we'll find you something *useful* to do. Preferably something that doesn't get you killed again. ~That costs extra.~",
+   "choices": [
+    {
+     "text": "What kind of work?",
+     "next": "work"
+    },
+    {
+     "text": "Back to the other questions.",
+     "next": "greet"
+    }
+   ]
+  },
+  "work": {
+   "text": "Salvage, escort, the occasional retrieval. [pause 0.5] Prompt Critical Services goes where the insurance won't. You'd be surprised how often that's the same place twice.",
+   "choices": [
+    {
+     "text": "Sounds dangerous.",
+     "next": "dangerous"
+    },
+    {
+     "text": "Fine. I'm in.",
+     "next": "greet",
+     "set": "agreed_to_work"
+    }
+   ]
+  },
+  "dangerous": {
+   "text": "That's what the replicant contract is *for*. [pause 0.4] Stay within download range and the worst case is a bad afternoon and another line on the invoice.",
+   "choices": [
+    {
+     "text": "Reassuring.",
+     "next": "greet"
+    }
+   ]
+  },
+  "debt": {
+   "text": "Thirteen thousand, plus whatever you break between now and payday. [pause 0.5] Helion Credit is very patient and very thorough. I'd focus on the patient part.",
+   "choices": [
+    {
+     "text": "I didn't ask to be brought back.",
+     "next": "consent"
+    },
+    {
+     "text": "Understood.",
+     "next": "greet"
+    }
+   ]
+  },
+  "consent": {
+   "text": "Nobody does, sweetheart. [pause 0.4] Implied consent. It's in the brochure. ~There is no brochure.~",
+   "choices": [
+    {
+     "text": "...",
+     "next": "greet"
+    }
+   ]
+  },
+  "where": {
+   "text": "A PCS field station, bolted to a rock nobody wanted. [pause 0.4] Two rooms, one airlock, and the best decant tank money didn't buy. Home, for now.",
+   "choices": [
+    {
+     "text": "Cosy.",
+     "next": "greet"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,85 @@
+{
+ "found": [
+  "/Game/ModularCharacters/ModularParts/Polygon_Modular_Fantasy_Hero_Instance_Main",
+  "/Game/ModularCharacters/Materials/ModularFantasyHeroCharacters",
+  "/Game/ModularCharacters/Materials/Mask"
+ ],
+ "parent": "/Game/ModularCharacters/Materials/ModularFantasyHeroCharacters.ModularFantasyHeroCharacters",
+ "scalars": {},
+ "vectors": {
+  "Color_Primary": [
+   0.078,
+   0.145,
+   0.205,
+   0.0
+  ],
+  "Color_Secondary": [
+   0.638,
+   0.371,
+   0.072,
+   1.0
+  ],
+  "Color_Leather_Primary": [
+   0.065,
+   0.036,
+   0.023,
+   1.0
+  ],
+  "Color_Leather_Secondary": [
+   0.114,
+   0.089,
+   0.063,
+   1.0
+  ],
+  "Color_Metal_Secondary": [
+   0.098,
+   0.117,
+   0.13,
+   1.0
+  ],
+  "Color_Metal_Primary": [
+   0.314,
+   0.332,
+   0.352,
+   1.0
+  ],
+  "Color_Metal_Dark": [
+   0.026,
+   0.032,
+   0.038,
+   1.0
+  ],
+  "Color_Hair": [
+   0.056,
+   0.037,
+   0.016,
+   1.0
+  ],
+  "Color_Skin": [
+   1.0,
+   0.604,
+   0.423,
+   1.0
+  ],
+  "Color_Stubble": [
+   0.61,
+   0.451,
+   0.356,
+   1.0
+  ],
+  "Color_Scar": [
+   0.847,
+   0.429,
+   0.309,
+   1.0
+  ],
+  "Color_BodyArt": [
+   0.042,
+   0.296,
+   0.533,
+   1.0
+  ]
+ },
+ "textures": {},
+ "static_switches": []
+}

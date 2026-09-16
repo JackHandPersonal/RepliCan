@@ -1,0 +1,110 @@
+{
+ "name": "Poster Runner",
+ "type": "Single",
+ "baseMesh": "/Game/PolygonSciFiSpace/Meshes/CharactersUE4/SK_Chr_Crew_Male_01.SK_Chr_Crew_Male_01",
+ "material": "/Game/PolygonSciFiSpace/Materials/Alternates/M_PolygonSciFiSpace_01_B.M_PolygonSciFiSpace_01_B",
+ "gender": "Male",
+ "locomotion": "",
+ "parts": {},
+ "face": {
+  "bEnabled": true,
+  "noseMesh": "/Game/Characters/KnightDemo/SM_Nose.SM_Nose",
+  "noseLocation": {
+   "x": 6.89,
+   "y": 13,
+   "z": 0
+  },
+  "noseRotation": {
+   "pitch": -90,
+   "yaw": 0,
+   "roll": 0
+  },
+  "bMouthDecal": false,
+  "mouthLocation": {
+   "x": -1.06,
+   "y": 13.7,
+   "z": 0
+  },
+  "mouthRotation": {
+   "pitch": 0,
+   "yaw": -90,
+   "roll": -90
+  },
+  "mouthScale": 0.5,
+  "mouthTint": {
+   "r": 1,
+   "g": 1,
+   "b": 1,
+   "a": 1
+  },
+  "expression": "Neutral",
+  "bAutoBlink": true,
+  "hairMesh": "",
+  "headGearMesh": "/Game/PolygonSciFiSpace/Meshes/CharactersUE4/Attachments/SM_Chr_Attach_Hat_Crew_01.SM_Chr_Attach_Hat_Crew_01",
+  "headGearLocation": {
+   "x": 0,
+   "y": 0,
+   "z": 0
+  },
+  "headGearScale": 1.0
+ },
+ "colors": {},
+ "weaponMesh": "",
+ "weaponLocation": {
+  "x": -7,
+  "y": 2,
+  "z": 0
+ },
+ "weaponRotation": {
+  "pitch": 0,
+  "yaw": -90,
+  "roll": 0
+ },
+ "armPose": "None",
+ "armPoseWeight": 0,
+ "gait": {
+  "stanceWidthDegrees": 0,
+  "movingStanceWidthDegrees": 5,
+  "toeOutDegrees": 2,
+  "hunchDegrees": 4,
+  "leanDegrees": 0,
+  "armSwingScale": 0.9,
+  "bounceScale": 1,
+  "sway": 0,
+  "cadenceScale": 1.05,
+  "stumble": 0,
+  "limpAmount": 0,
+  "limpSide": "Left"
+ },
+ "fingerCurlDegrees": -60,
+ "thumbCurlDegrees": -40,
+ "scale": {
+  "x": 1,
+  "y": 1,
+  "z": 1
+ },
+ "speedMultiplier": 1,
+ "tags": [
+  "poster"
+ ],
+ "description": "Crew, in a hurry.",
+ "comment": "",
+ "idleAnimations": [
+  "/Game/Characters/Animations/SyntyBaseLocomotion/Masculine/Locomotion/Run/A_Run_F_Masc.A_Run_F_Masc"
+ ],
+ "remoteCamera": {
+  "offset": {
+   "x": 270,
+   "y": -210,
+   "z": -95
+  },
+  "lookOffset": {
+   "x": 20,
+   "y": 10,
+   "z": -55
+  },
+  "fov": 54,
+  "roll": -7
+ },
+ "gazeTargets": []
+}

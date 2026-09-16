@@ -1,0 +1,532 @@
+{
+ "actors": {
+  "officer": {
+   "character": "HannahMartinez",
+   "relativeTo": "world",
+   "offset": [
+    470,
+    720,
+    0
+   ],
+   "yaw": 180,
+   "facePlayer": false
+  },
+  "tech": {
+   "character": "LiJun",
+   "relativeTo": "world",
+   "offset": [
+    533,
+    645,
+    0
+   ],
+   "yaw": 60,
+   "facePlayer": false
+  }
+ },
+ "steps": [
+  {
+   "place": {
+    "who": "player",
+    "at": [
+     300,
+     660,
+     60
+    ],
+    "yaw": 90,
+    "hidden": true
+   }
+  },
+  {
+   "blink": {
+    "openMin": 0.12,
+    "openMax": 0.42,
+    "closedSeconds": 1.7,
+    "openSeconds": 0.8,
+    "darkStart": 1.0,
+    "darkEnd": 0.72,
+    "darkSeconds": 10
+   }
+  },
+  {
+   "look": {
+    "anchor": "world",
+    "offset": [
+     300,
+     625,
+     128
+    ],
+    "targets": [
+     "officer.head",
+     "tech.head"
+    ],
+    "period": 2.6,
+    "seconds": 0,
+    "fov": 72,
+    "turnSpeed": 0.5,
+    "wander": 2.4
+   }
+  },
+  {
+   "wait": 15.6
+  },
+  {
+   "blink": {
+    "openMin": 0.0,
+    "openMax": 0.0,
+    "closedSeconds": 90,
+    "openSeconds": 0.1,
+    "darkStart": 0.72,
+    "darkEnd": 0.97,
+    "darkSeconds": 2.0
+   }
+  },
+  {
+   "ambient": {
+    "volume": 0.0,
+    "seconds": 2.5
+   }
+  },
+  {
+   "wait": 3.0
+  },
+  {
+   "shock": {
+    "file": "electric_shock.wav",
+    "build": 2.2,
+    "spasm": 0.9,
+    "volume": 0.8
+   }
+  },
+  {
+   "blink": {
+    "openMin": 0.95,
+    "openMax": 1.0,
+    "lift": 0.08,
+    "closedSeconds": 0.12,
+    "openSeconds": 1.6,
+    "darkStart": 0.97,
+    "darkEnd": 0.08,
+    "darkSeconds": 0.5
+   }
+  },
+  {
+   "ambient": {
+    "volume": 1.0,
+    "seconds": 3.0
+   }
+  },
+  {
+   "wait": 1.8
+  },
+  {
+   "blink": {
+    "openMin": 0.32,
+    "openMax": 0.55,
+    "closedSeconds": 0.7,
+    "openSeconds": 2.4,
+    "darkStart": 0.08,
+    "darkEnd": 0.2,
+    "darkSeconds": 2.0
+   }
+  },
+  {
+   "look": {
+    "anchor": "world",
+    "offset": [
+     300,
+     625,
+     128
+    ],
+    "targets": [
+     "officer.head"
+    ],
+    "period": 999,
+    "seconds": 0,
+    "fov": 72,
+    "yawBias": 12,
+    "turnSpeed": 2.6,
+    "wander": 0.8
+   }
+  },
+  {
+   "wait": 1.4
+  },
+  {
+   "label": "skip_intro"
+  },
+  {
+   "say": {
+    "who": "officer",
+    "text": "Yeah, see Jun, it's fine. No problem. [pause 0.5] Can you hear me?"
+   }
+  },
+  {
+   "choice": [
+    {
+     "text": "..."
+    }
+   ]
+  },
+  {
+   "say": {
+    "who": "officer",
+    "text": "Blink if you can hear me. [pause 0.6] HA! Yeah, you're with us?"
+   }
+  },
+  {
+   "choice": [
+    {
+     "text": "...um.."
+    }
+   ]
+  },
+  {
+   "say": {
+    "who": "officer",
+    "text": "Ok, so... [pause 0.7] ...we have some great news! You're alive! Thanks to the fine folks at Prompt Critical Services... [pause 0.4] that's us... [pause 0.4] You're alive."
+   }
+  },
+  {
+   "choice": [
+    {
+     "text": "..wh..."
+    }
+   ]
+  },
+  {
+   "say": {
+    "who": "officer",
+    "text": "Right! It's pretty exciting! Now, it's not all good news, so it's probably good that you're already lying down... [pause 0.6] See, while you're alive right now, you were - technically - killed six days ago."
+   }
+  },
+  {
+   "choice": [
+    {
+     "text": "..."
+    }
+   ]
+  },
+  {
+   "say": {
+    "who": "officer",
+    "text": "Yeah. I'm told your ship came under boarding attack, the entire crew was killed. We were actually there to recover one of the ship's senior officers, grabbed you by mistake, but now... [pause 0.5] here you are. A replicant."
+   }
+  },
+  {
+   "choice": [
+    {
+     "text": "...rrrrgh.."
+    }
+   ]
+  },
+  {
+   "say": {
+    "who": "officer",
+    "text": "Right! A replicant! That means that, so long as you perish within download range of a MindMap compatible consciousness recorder, you can be restored, good as new! It's not the cheapest thing in the world, but it works... [pause 0.5] Oh, which reminds me, by being resurrected by Prompt Critical Services, you have granted implied consent to assume all unrecovered costs related to your rescue, transport and replication."
+   }
+  },
+  {
+   "choice": [
+    {
+     "text": "..."
+    }
+   ]
+  },
+  {
+   "say": {
+    "who": "officer",
+    "text": "Yeah, because we're not exactly sure who you are, we were not able to directly deduct from a trusted account, so we've gone ahead and created you an account with Helion Credit, in the amount of.... [pause 0.8] -13,000 credits."
+   }
+  },
+  {
+   "choice": [
+    {
+     "text": "..."
+    }
+   ]
+  },
+  {
+   "panel": "hide"
+  },
+  {
+   "blink": {
+    "openMin": 0.55,
+    "openMax": 0.85,
+    "closedSeconds": 0.35,
+    "openSeconds": 3.6,
+    "darkStart": 0.2,
+    "darkEnd": 0.12,
+    "darkSeconds": 6.0
+   }
+  },
+  {
+   "look": {
+    "anchor": "world",
+    "offset": [
+     300,
+     625,
+     128
+    ],
+    "targets": [
+     "world:-200,660,110"
+    ],
+    "period": 999,
+    "seconds": 0,
+    "fov": 72,
+    "turnSpeed": 0.9,
+    "wander": 2.0
+   }
+  },
+  {
+   "wait": 1.8
+  },
+  {
+   "move": {
+    "to": [
+     215,
+     660,
+     150
+    ],
+    "seconds": 2.2,
+    "sway": 0.8
+   }
+  },
+  {
+   "wait": 0.8
+  },
+  {
+   "move": {
+    "to": [
+     215,
+     660,
+     172
+    ],
+    "seconds": 1.8,
+    "sway": 1.4
+   }
+  },
+  {
+   "wait": 1.0
+  },
+  {
+   "look": {
+    "anchor": "world",
+    "offset": [
+     215,
+     660,
+     172
+    ],
+    "targets": [
+     "world:230,980,90"
+    ],
+    "period": 999,
+    "seconds": 0,
+    "fov": 72,
+    "turnSpeed": 0.8,
+    "wander": 1.8
+   }
+  },
+  {
+   "move": {
+    "to": [
+     205,
+     790,
+     168
+    ],
+    "seconds": 2.6,
+    "sway": 1.8
+   }
+  },
+  {
+   "move": {
+    "to": [
+     230,
+     920,
+     170
+    ],
+    "seconds": 2.6,
+    "sway": 2.0
+   }
+  },
+  {
+   "look": {
+    "anchor": "world",
+    "offset": [
+     230,
+     920,
+     170
+    ],
+    "targets": [
+     "officer.head"
+    ],
+    "period": 999,
+    "seconds": 0,
+    "fov": 72,
+    "turnSpeed": 0.8,
+    "wander": 1.6
+   }
+  },
+  {
+   "move": {
+    "to": [
+     320,
+     960,
+     167
+    ],
+    "seconds": 2.4,
+    "sway": 2.0
+   }
+  },
+  {
+   "move": {
+    "to": [
+     405,
+     985,
+     169
+    ],
+    "seconds": 2.6,
+    "sway": 1.9
+   }
+  },
+  {
+   "move": {
+    "to": [
+     480,
+     935,
+     168
+    ],
+    "seconds": 2.4,
+    "sway": 1.6
+   }
+  },
+  {
+   "look": {
+    "anchor": "world",
+    "offset": [
+     480,
+     935,
+     168
+    ],
+    "targets": [
+     "officer.head",
+     "tech.head"
+    ],
+    "period": 4.5,
+    "seconds": 0,
+    "fov": 72,
+    "turnSpeed": 0.9,
+    "wander": 1.7
+   }
+  },
+  {
+   "wait": 2.4
+  },
+  {
+   "label": "skip_walk"
+  },
+  {
+   "turn": {
+    "who": "officer",
+    "yaw": 118,
+    "seconds": 1.4
+   }
+  },
+  {
+   "say": {
+    "who": "officer",
+    "text": "So... [pause 0.7] Like I said, I guess we don't really know who you are... [pause 0.5] What's your name?"
+   }
+  },
+  {
+   "choice": [
+    {
+     "text": "*cough*  *coughcough*"
+    }
+   ]
+  },
+  {
+   "panel": "hide"
+  },
+  {
+   "label": "chooser"
+  },
+  {
+   "appearance": true
+  },
+  {
+   "goto": "coincidence",
+   "if": "name=Repli Can"
+  },
+  {
+   "say": {
+    "who": "officer",
+    "text": "{name}? [pause 0.6] Is that right?"
+   }
+  },
+  {
+   "goto": "confirm"
+  },
+  {
+   "label": "coincidence"
+  },
+  {
+   "say": {
+    "who": "officer",
+    "text": "Hahaha! [pause 0.4] That'd be a real coincidence! [pause 0.9] ...oh. [pause 0.6] You're serious?"
+   }
+  },
+  {
+   "label": "confirm"
+  },
+  {
+   "choice": [
+    {
+     "text": "Yes. *cough*",
+     "goto": "named"
+    },
+    {
+     "text": "No",
+     "goto": "chooser"
+    }
+   ]
+  },
+  {
+   "label": "named"
+  },
+  {
+   "say": {
+    "who": "officer",
+    "text": "Ok, I've got you in the system. [pause 0.5] You're in room four. [pause 0.4] Out the door, right, second door on your right. [pause 0.5] Ok?"
+   }
+  },
+  {
+   "choice": [
+    {
+     "text": "..."
+    }
+   ]
+  },
+  {
+   "panel": "hide"
+  },
+  {
+   "wait": 0.8
+  },
+  {
+   "release": {
+    "goal": [
+     -1339,
+     1928,
+     100
+    ],
+    "radius": 150,
+    "speed": 120
+   }
+  }
+ ],
+ "unskippable": true,
+ "skips": [
+  "skip_intro",
+  "skip_walk"
+ ]
+}

@@ -1,0 +1,114 @@
+{
+ "name": "WeaponTestBlade",
+ "type": "Single",
+ "baseMesh": "/Game/PolygonSciFiSpace/Meshes/CharactersUE4/SK_Chr_Crew_Female_01.SK_Chr_Crew_Female_01",
+ "material": "/Game/PolygonSciFiSpace/Materials/Alternates/M_PolygonSciFiSpace_01_B.M_PolygonSciFiSpace_01_B",
+ "gender": "Female",
+ "locomotion": "",
+ "parts": {},
+ "face": {
+  "bEnabled": true,
+  "noseMesh": "/Game/Characters/KnightDemo/SM_Nose.SM_Nose",
+  "noseLocation": {
+   "x": 6.89,
+   "y": 13,
+   "z": 0
+  },
+  "noseRotation": {
+   "pitch": -90,
+   "yaw": 0,
+   "roll": 0
+  },
+  "bMouthDecal": false,
+  "mouthLocation": {
+   "x": -1.06,
+   "y": 13.7,
+   "z": 0
+  },
+  "mouthRotation": {
+   "pitch": 0,
+   "yaw": -90,
+   "roll": -90
+  },
+  "mouthScale": 0.5,
+  "mouthTint": {
+   "r": 1,
+   "g": 1,
+   "b": 1,
+   "a": 1
+  },
+  "expression": "Neutral",
+  "bAutoBlink": true,
+  "hairMesh": "",
+  "headGearMesh": "",
+  "headGearLocation": {
+   "x": 0,
+   "y": 0,
+   "z": 0
+  },
+  "headGearScale": 1.0
+ },
+ "colors": {},
+ "weaponMesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sword_02.SM_Wep_Sword_02",
+ "weaponLocation": {
+  "x": -7,
+  "y": 2,
+  "z": 0
+ },
+ "weaponRotation": {
+  "pitch": 0,
+  "yaw": -90,
+  "roll": 0
+ },
+ "armPose": "",
+ "armPoseWeight": 0,
+ "gait": {
+  "stanceWidthDegrees": 0,
+  "movingStanceWidthDegrees": 4,
+  "toeOutDegrees": 0,
+  "hunchDegrees": 0,
+  "leanDegrees": 0,
+  "armSwingScale": 0.85,
+  "bounceScale": 0.9,
+  "sway": 0,
+  "cadenceScale": 1,
+  "stumble": 0,
+  "limpAmount": 0,
+  "limpSide": "Left"
+ },
+ "fingerCurlDegrees": 0,
+ "thumbCurlDegrees": 0,
+ "scale": {
+  "x": 1,
+  "y": 1,
+  "z": 1
+ },
+ "speedMultiplier": 1,
+ "tags": [],
+ "description": "weapon grip test",
+ "comment": "The numbers are fine. The numbers are always fine.",
+ "idleAnimations": [],
+ "weaponScale": {
+  "x": 1,
+  "y": 1,
+  "z": 1
+ },
+ "gazeTargets": [],
+ "gazeHoldMin": 3.5,
+ "gazeHoldMax": 8.0,
+ "gazeTurnSpeed": 1.4,
+ "remoteCamera": {
+  "offset": {
+   "x": 150,
+   "y": 90,
+   "z": -20
+  },
+  "lookOffset": {
+   "x": 0,
+   "y": 20,
+   "z": -60
+  },
+  "fov": 50,
+  "roll": 0
+ }
+}

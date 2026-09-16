@@ -1,0 +1,5 @@
+{
+ "_": "Measured by Tools/derive_grip_socket.py from the Lyra rifle idle. Feed to Tools/add_grip_sockets.py.",
+ "location": [-4.48, -0.44, -1.44],
+ "rotation": [4.20, 154.56, 19.83]
+}

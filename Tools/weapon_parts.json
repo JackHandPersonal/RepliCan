@@ -1,0 +1,2684 @@
+{
+ "CyberCity/Dagger_01": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Dagger_01",
+  "tris": 387,
+  "bore_z": -0.12,
+  "components": 3,
+  "optic_candidates": []
+ },
+ "CyberCity/Dagger_02": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Dagger_02",
+  "tris": 500,
+  "bore_z": -0.27,
+  "components": 3,
+  "optic_candidates": []
+ },
+ "CyberCity/Laser_Gun_01": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Laser_Gun_01",
+  "tris": 3735,
+  "bore_z": 8.77,
+  "components": 10,
+  "optic_candidates": [
+   {
+    "tris": 308,
+    "x": [
+     46.3,
+     72.4
+    ],
+    "y": [
+     -2.4,
+     2.5
+    ],
+    "z": [
+     16.3,
+     18.0
+    ]
+   },
+   {
+    "tris": 164,
+    "x": [
+     27.9,
+     39.7
+    ],
+    "y": [
+     -2.9,
+     2.9
+    ],
+    "z": [
+     17.1,
+     23.9
+    ]
+   }
+  ]
+ },
+ "CyberCity/Paint_Gun_01": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Paint_Gun_01",
+  "tris": 674,
+  "bore_z": 6.94,
+  "components": 10,
+  "optic_candidates": [
+   {
+    "tris": 64,
+    "x": [
+     -1.4,
+     21.4
+    ],
+    "y": [
+     -6.9,
+     5.8
+    ],
+    "z": [
+     9.5,
+     21.1
+    ]
+   },
+   {
+    "tris": 40,
+    "x": [
+     24.1,
+     27.0
+    ],
+    "y": [
+     -1.2,
+     1.2
+    ],
+    "z": [
+     14.3,
+     17.2
+    ]
+   },
+   {
+    "tris": 40,
+    "x": [
+     18.3,
+     21.7
+    ],
+    "y": [
+     -2.8,
+     0.1
+    ],
+    "z": [
+     9.6,
+     12.6
+    ]
+   },
+   {
+    "tris": 40,
+    "x": [
+     -1.7,
+     2.3
+    ],
+    "y": [
+     -0.3,
+     3.1
+    ],
+    "z": [
+     9.4,
+     12.8
+    ]
+   }
+  ]
+ },
+ "CyberCity/Pistol_01": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Pistol_01",
+  "tris": 1136,
+  "bore_z": 11.54,
+  "components": 12,
+  "optic_candidates": [
+   {
+    "tris": 70,
+    "x": [
+     25.9,
+     30.0
+    ],
+    "y": [
+     -1.7,
+     1.7
+    ],
+    "z": [
+     13.8,
+     17.2
+    ]
+   }
+  ]
+ },
+ "CyberCity/Rifle_01": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Rifle_01",
+  "tris": 1482,
+  "bore_z": 8.24,
+  "components": 14,
+  "optic_candidates": [
+   {
+    "tris": 122,
+    "x": [
+     5.1,
+     59.6
+    ],
+    "y": [
+     -2.6,
+     2.6
+    ],
+    "z": [
+     9.7,
+     19.9
+    ]
+   },
+   {
+    "tris": 70,
+    "x": [
+     51.4,
+     68.9
+    ],
+    "y": [
+     -3.1,
+     3.1
+    ],
+    "z": [
+     10.5,
+     20.2
+    ]
+   }
+  ]
+ },
+ "CyberCity/SMG_01": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_SMG_01",
+  "tris": 1588,
+  "bore_z": 8.68,
+  "components": 5,
+  "optic_candidates": []
+ },
+ "CyberCity/Shock_Stick_01": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shock_Stick_01",
+  "tris": 668,
+  "bore_z": 3.04,
+  "components": 9,
+  "optic_candidates": [
+   {
+    "tris": 76,
+    "x": [
+     -0.3,
+     8.9
+    ],
+    "y": [
+     -1.7,
+     1.7
+    ],
+    "z": [
+     6.0,
+     8.6
+    ]
+   },
+   {
+    "tris": 30,
+    "x": [
+     8.4,
+     32.7
+    ],
+    "y": [
+     -1.1,
+     1.1
+    ],
+    "z": [
+     6.5,
+     8.1
+    ]
+   }
+  ]
+ },
+ "CyberCity/Shock_Stick_02": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shock_Stick_02",
+  "tris": 604,
+  "bore_z": 14.57,
+  "components": 2,
+  "optic_candidates": []
+ },
+ "CyberCity/Shock_Stick_03": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shock_Stick_03",
+  "tris": 640,
+  "bore_z": 6.07,
+  "components": 3,
+  "optic_candidates": []
+ },
+ "CyberCity/Shock_Stick_04": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shock_Stick_04",
+  "tris": 558,
+  "bore_z": 3.76,
+  "components": 2,
+  "optic_candidates": []
+ },
+ "CyberCity/Shock_Stick_05": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shock_Stick_05",
+  "tris": 442,
+  "bore_z": 3.23,
+  "components": 3,
+  "optic_candidates": []
+ },
+ "CyberCity/Shuriken_01": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shuriken_01",
+  "tris": 572,
+  "bore_z": -0.53,
+  "components": 4,
+  "optic_candidates": [
+   {
+    "tris": 112,
+    "x": [
+     -2.7,
+     7.4
+    ],
+    "y": [
+     0.5,
+     1.7
+    ],
+    "z": [
+     1.4,
+     11.1
+    ]
+   }
+  ]
+ },
+ "CyberCity/Shuriken_03": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shuriken_03",
+  "tris": 870,
+  "bore_z": -4.61,
+  "components": 10,
+  "optic_candidates": [
+   {
+    "tris": 166,
+    "x": [
+     -2.5,
+     2.9
+    ],
+    "y": [
+     -1.3,
+     -0.2
+    ],
+    "z": [
+     2.8,
+     15.2
+    ]
+   },
+   {
+    "tris": 144,
+    "x": [
+     -3.7,
+     4.0
+    ],
+    "y": [
+     -1.6,
+     -0.0
+    ],
+    "z": [
+     -3.4,
+     3.4
+    ]
+   },
+   {
+    "tris": 38,
+    "x": [
+     -0.3,
+     0.7
+    ],
+    "y": [
+     -0.7,
+     -0.0
+    ],
+    "z": [
+     5.9,
+     9.0
+    ]
+   },
+   {
+    "tris": 38,
+    "x": [
+     -0.3,
+     0.7
+    ],
+    "y": [
+     -1.5,
+     -0.8
+    ],
+    "z": [
+     6.0,
+     9.1
+    ]
+   }
+  ]
+ },
+ "CyberCity/Shuriken_05": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shuriken_05",
+  "tris": 132,
+  "bore_z": -0.0,
+  "components": 2,
+  "optic_candidates": []
+ },
+ "CyberCity/Sniper_Rifle_01": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Sniper_Rifle_01",
+  "tris": 3534,
+  "bore_z": 8.16,
+  "components": 19,
+  "optic_candidates": [
+   {
+    "tris": 140,
+    "x": [
+     -4.7,
+     38.4
+    ],
+    "y": [
+     -6.5,
+     6.5
+    ],
+    "z": [
+     10.3,
+     20.1
+    ]
+   }
+  ]
+ },
+ "CyberCity/Sword_01": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Sword_01",
+  "tris": 686,
+  "bore_z": -6.16,
+  "components": 3,
+  "optic_candidates": []
+ },
+ "CyberCity/Sword_02": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Sword_02",
+  "tris": 696,
+  "bore_z": -6.33,
+  "components": 3,
+  "optic_candidates": []
+ },
+ "CyberCity/Sword_03": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Sword_03",
+  "tris": 628,
+  "bore_z": -0.44,
+  "components": 1,
+  "optic_candidates": []
+ },
+ "CyberCity/Sword_04": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Sword_04",
+  "tris": 762,
+  "bore_z": -0.02,
+  "components": 3,
+  "optic_candidates": []
+ },
+ "CyberCity/Sword_05": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Sword_05",
+  "tris": 478,
+  "bore_z": -0.5,
+  "components": 4,
+  "optic_candidates": []
+ },
+ "CyberCity/Sword_06": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Sword_06",
+  "tris": 478,
+  "bore_z": -0.03,
+  "components": 4,
+  "optic_candidates": [
+   {
+    "tris": 70,
+    "x": [
+     5.8,
+     11.7
+    ],
+    "y": [
+     -3.0,
+     2.9
+    ],
+    "z": [
+     2.0,
+     5.0
+    ]
+   }
+  ]
+ },
+ "CyberCity/Sword_07": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Sword_07",
+  "tris": 706,
+  "bore_z": 0.25,
+  "components": 6,
+  "optic_candidates": []
+ },
+ "CyberCity/Sword_08": {
+  "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Sword_08",
+  "tris": 510,
+  "bore_z": 0.22,
+  "components": 3,
+  "optic_candidates": []
+ },
+ "Horror/Wep_Axe_01": {
+  "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Axe_01",
+  "tris": 296,
+  "bore_z": 2.52,
+  "components": 1,
+  "optic_candidates": []
+ },
+ "Horror/Wep_Blow_Torch_01": {
+  "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Blow_Torch_01",
+  "tris": 888,
+  "bore_z": 15.39,
+  "components": 9,
+  "optic_candidates": []
+ },
+ "Horror/Wep_Drill_01": {
+  "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Drill_01",
+  "tris": 2000,
+  "bore_z": 3.63,
+  "components": 17,
+  "optic_candidates": [
+   {
+    "tris": 92,
+    "x": [
+     5.7,
+     20.7
+    ],
+    "y": [
+     -7.2,
+     7.2
+    ],
+    "z": [
+     14.4,
+     22.3
+    ]
+   },
+   {
+    "tris": 78,
+    "x": [
+     26.9,
+     40.7
+    ],
+    "y": [
+     -6.2,
+     6.2
+    ],
+    "z": [
+     13.5,
+     16.6
+    ]
+   }
+  ]
+ },
+ "Horror/Wep_Flamethrower_01": {
+  "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Flamethrower_01",
+  "tris": 2143,
+  "bore_z": 4.57,
+  "components": 17,
+  "optic_candidates": [
+   {
+    "tris": 288,
+    "x": [
+     86.8,
+     98.4
+    ],
+    "y": [
+     -2.9,
+     2.9
+    ],
+    "z": [
+     7.0,
+     14.9
+    ]
+   },
+   {
+    "tris": 139,
+    "x": [
+     22.3,
+     46.8
+    ],
+    "y": [
+     -3.1,
+     1.5
+    ],
+    "z": [
+     9.8,
+     19.9
+    ]
+   },
+   {
+    "tris": 138,
+    "x": [
+     42.5,
+     74.7
+    ],
+    "y": [
+     -3.7,
+     3.7
+    ],
+    "z": [
+     9.0,
+     16.4
+    ]
+   },
+   {
+    "tris": 52,
+    "x": [
+     29.6,
+     45.3
+    ],
+    "y": [
+     2.2,
+     2.7
+    ],
+    "z": [
+     6.7,
+     11.2
+    ]
+   },
+   {
+    "tris": 52,
+    "x": [
+     29.6,
+     45.3
+    ],
+    "y": [
+     -2.7,
+     -2.2
+    ],
+    "z": [
+     6.7,
+     11.2
+    ]
+   },
+   {
+    "tris": 48,
+    "x": [
+     80.7,
+     91.3
+    ],
+    "y": [
+     -2.2,
+     2.2
+    ],
+    "z": [
+     8.5,
+     13.4
+    ]
+   },
+   {
+    "tris": 42,
+    "x": [
+     30.9,
+     70.5
+    ],
+    "y": [
+     -1.9,
+     1.9
+    ],
+    "z": [
+     8.8,
+     13.1
+    ]
+   },
+   {
+    "tris": 40,
+    "x": [
+     91.1,
+     99.7
+    ],
+    "y": [
+     -1.3,
+     1.3
+    ],
+    "z": [
+     9.0,
+     13.0
+    ]
+   }
+  ]
+ },
+ "Horror/Wep_Hammer_01": {
+  "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Hammer_01",
+  "tris": 336,
+  "bore_z": 0.41,
+  "components": 2,
+  "optic_candidates": []
+ },
+ "Horror/Wep_Knife_01": {
+  "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Knife_01",
+  "tris": 778,
+  "bore_z": -0.63,
+  "components": 1,
+  "optic_candidates": []
+ },
+ "Horror/Wep_Laser_Cutter_01": {
+  "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Laser_Cutter_01",
+  "tris": 1192,
+  "bore_z": 7.52,
+  "components": 18,
+  "optic_candidates": []
+ },
+ "Horror/Wep_Mining_Laser_01": {
+  "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Mining_Laser_01",
+  "tris": 2289,
+  "bore_z": 3.5,
+  "components": 24,
+  "optic_candidates": [
+   {
+    "tris": 188,
+    "x": [
+     75.8,
+     131.6
+    ],
+    "y": [
+     -4.1,
+     4.1
+    ],
+    "z": [
+     17.2,
+     27.6
+    ]
+   },
+   {
+    "tris": 70,
+    "x": [
+     -4.6,
+     4.8
+    ],
+    "y": [
+     -6.2,
+     6.2
+    ],
+    "z": [
+     17.5,
+     28.0
+    ]
+   },
+   {
+    "tris": 70,
+    "x": [
+     9.3,
+     18.7
+    ],
+    "y": [
+     -6.2,
+     6.2
+    ],
+    "z": [
+     17.5,
+     28.0
+    ]
+   },
+   {
+    "tris": 70,
+    "x": [
+     35.0,
+     39.7
+    ],
+    "y": [
+     -6.3,
+     6.3
+    ],
+    "z": [
+     11.2,
+     16.9
+    ]
+   },
+   {
+    "tris": 67,
+    "x": [
+     68.0,
+     104.4
+    ],
+    "y": [
+     -5.4,
+     5.4
+    ],
+    "z": [
+     15.6,
+     29.4
+    ]
+   },
+   {
+    "tris": 52,
+    "x": [
+     105.3,
+     109.3
+    ],
+    "y": [
+     -5.8,
+     5.8
+    ],
+    "z": [
+     8.3,
+     18.4
+    ]
+   },
+   {
+    "tris": 52,
+    "x": [
+     116.3,
+     120.2
+    ],
+    "y": [
+     -5.8,
+     5.8
+    ],
+    "z": [
+     8.3,
+     18.4
+    ]
+   },
+   {
+    "tris": 32,
+    "x": [
+     71.2,
+     78.1
+    ],
+    "y": [
+     1.2,
+     2.9
+    ],
+    "z": [
+     18.3,
+     19.8
+    ]
+   },
+   {
+    "tris": 32,
+    "x": [
+     71.1,
+     78.1
+    ],
+    "y": [
+     -0.9,
+     0.9
+    ],
+    "z": [
+     24.3,
+     25.7
+    ]
+   },
+   {
+    "tris": 32,
+    "x": [
+     71.0,
+     78.1
+    ],
+    "y": [
+     -2.9,
+     -1.2
+    ],
+    "z": [
+     18.3,
+     19.8
+    ]
+   }
+  ]
+ },
+ "Horror/Wep_Rifle_01": {
+  "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Rifle_01",
+  "tris": 1770,
+  "bore_z": 9.26,
+  "components": 2,
+  "optic_candidates": []
+ },
+ "Horror/Wep_Shock_Stick_01": {
+  "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Shock_Stick_01",
+  "tris": 1050,
+  "bore_z": 4.65,
+  "components": 9,
+  "optic_candidates": []
+ },
+ "Horror/Wep_Surgical_Tool_01": {
+  "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Surgical_Tool_01",
+  "tris": 952,
+  "bore_z": 6.72,
+  "components": 11,
+  "optic_candidates": [
+   {
+    "tris": 26,
+    "x": [
+     1.7,
+     3.6
+    ],
+    "y": [
+     0.4,
+     2.3
+    ],
+    "z": [
+     8.1,
+     9.2
+    ]
+   },
+   {
+    "tris": 26,
+    "x": [
+     1.7,
+     3.6
+    ],
+    "y": [
+     -2.3,
+     -0.4
+    ],
+    "z": [
+     8.1,
+     9.2
+    ]
+   }
+  ]
+ },
+ "Horror/Wep_Surgical_Tool_02": {
+  "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Surgical_Tool_02",
+  "tris": 502,
+  "bore_z": 5.46,
+  "components": 4,
+  "optic_candidates": []
+ },
+ "Horror/Wep_Welder_01": {
+  "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Welder_01",
+  "tris": 1188,
+  "bore_z": 10.56,
+  "components": 10,
+  "optic_candidates": []
+ },
+ "Horror/Wep_Wrench_01": {
+  "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Wrench_01",
+  "tris": 266,
+  "bore_z": -3.18,
+  "components": 3,
+  "optic_candidates": []
+ },
+ "Space/Wep_Pistol_01": {
+  "mesh": "/Game/RepliCan/Weapons/Space/SM_Wep_Pistol_01",
+  "tris": 573,
+  "bore_z": 11.54,
+  "components": 3,
+  "optic_candidates": []
+ },
+ "Space/Wep_Rifle_01": {
+  "mesh": "/Game/RepliCan/Weapons/Space/SM_Wep_Rifle_01",
+  "tris": 1470,
+  "bore_z": 11.61,
+  "components": 9,
+  "optic_candidates": []
+ },
+ "Space/Wep_Shield_01": {
+  "mesh": "/Game/RepliCan/Weapons/Space/SM_Wep_Shield_01",
+  "tris": 406,
+  "bore_z": 1.81,
+  "components": 5,
+  "optic_candidates": [
+   {
+    "tris": 42,
+    "x": [
+     6.8,
+     9.8
+    ],
+    "y": [
+     -4.2,
+     4.2
+    ],
+    "z": [
+     13.8,
+     23.5
+    ]
+   }
+  ]
+ },
+ "Space/Wep_Shield_Extended_01": {
+  "mesh": "/Game/RepliCan/Weapons/Space/SM_Wep_Shield_Extended_01",
+  "tris": 482,
+  "bore_z": 18.24,
+  "components": 6,
+  "optic_candidates": []
+ },
+ "Space/Wep_Shotgun_01": {
+  "mesh": "/Game/RepliCan/Weapons/Space/SM_Wep_Shotgun_01",
+  "tris": 2164,
+  "bore_z": 7.01,
+  "components": 20,
+  "optic_candidates": [
+   {
+    "tris": 156,
+    "x": [
+     11.0,
+     31.1
+    ],
+    "y": [
+     -1.0,
+     1.2
+    ],
+    "z": [
+     11.9,
+     13.4
+    ]
+   },
+   {
+    "tris": 102,
+    "x": [
+     47.4,
+     66.8
+    ],
+    "y": [
+     -1.1,
+     1.4
+    ],
+    "z": [
+     12.8,
+     15.2
+    ]
+   },
+   {
+    "tris": 48,
+    "x": [
+     65.6,
+     70.3
+    ],
+    "y": [
+     -0.8,
+     0.8
+    ],
+    "z": [
+     12.5,
+     15.6
+    ]
+   },
+   {
+    "tris": 26,
+    "x": [
+     23.5,
+     25.0
+    ],
+    "y": [
+     0.8,
+     4.2
+    ],
+    "z": [
+     8.9,
+     10.0
+    ]
+   }
+  ]
+ },
+ "Space/Wep_Sword_01": {
+  "mesh": "/Game/RepliCan/Weapons/Space/SM_Wep_Sword_01",
+  "tris": 474,
+  "bore_z": -0.28,
+  "components": 4,
+  "optic_candidates": []
+ },
+ "Space/Wep_Sword_Double_01": {
+  "mesh": "/Game/RepliCan/Weapons/Space/SM_Wep_Sword_Double_01",
+  "tris": 642,
+  "bore_z": 0.0,
+  "components": 4,
+  "optic_candidates": [
+   {
+    "tris": 32,
+    "x": [
+     5.0,
+     91.1
+    ],
+    "y": [
+     -0.8,
+     0.8
+    ],
+    "z": [
+     1.6,
+     11.2
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Alien_01": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Alien_01",
+  "tris": 1180,
+  "bore_z": 8.19,
+  "components": 6,
+  "optic_candidates": [
+   {
+    "tris": 24,
+    "x": [
+     25.8,
+     34.8
+    ],
+    "y": [
+     -3.1,
+     3.1
+    ],
+    "z": [
+     12.9,
+     17.7
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Alien_02": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Alien_02",
+  "tris": 1358,
+  "bore_z": 7.31,
+  "components": 7,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Alien_03": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Alien_03",
+  "tris": 1436,
+  "bore_z": 6.4,
+  "components": 6,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Alien_04": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Alien_04",
+  "tris": 1197,
+  "bore_z": 10.04,
+  "components": 11,
+  "optic_candidates": [
+   {
+    "tris": 116,
+    "x": [
+     63.4,
+     107.0
+    ],
+    "y": [
+     -5.3,
+     5.3
+    ],
+    "z": [
+     12.9,
+     25.7
+    ]
+   },
+   {
+    "tris": 60,
+    "x": [
+     19.7,
+     80.3
+    ],
+    "y": [
+     -2.3,
+     2.3
+    ],
+    "z": [
+     11.1,
+     17.9
+    ]
+   },
+   {
+    "tris": 24,
+    "x": [
+     -3.0,
+     19.5
+    ],
+    "y": [
+     -0.8,
+     0.8
+    ],
+    "z": [
+     17.4,
+     23.4
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Assault_01": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Assault_01",
+  "tris": 1691,
+  "bore_z": 13.94,
+  "components": 20,
+  "optic_candidates": [
+   {
+    "tris": 40,
+    "x": [
+     -5.7,
+     2.9
+    ],
+    "y": [
+     -4.3,
+     -0.0
+    ],
+    "z": [
+     19.2,
+     29.7
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Assault_02": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Assault_02",
+  "tris": 2252,
+  "bore_z": 13.63,
+  "components": 12,
+  "optic_candidates": [
+   {
+    "tris": 32,
+    "x": [
+     28.3,
+     38.5
+    ],
+    "y": [
+     -3.3,
+     3.3
+    ],
+    "z": [
+     15.6,
+     18.5
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Assault_03": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Assault_03",
+  "tris": 1270,
+  "bore_z": 11.98,
+  "components": 18,
+  "optic_candidates": [
+   {
+    "tris": 76,
+    "x": [
+     4.3,
+     44.1
+    ],
+    "y": [
+     -1.7,
+     1.7
+    ],
+    "z": [
+     16.0,
+     23.1
+    ]
+   },
+   {
+    "tris": 50,
+    "x": [
+     30.9,
+     39.3
+    ],
+    "y": [
+     -3.2,
+     3.2
+    ],
+    "z": [
+     15.8,
+     24.8
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_BigAxe_01": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_01",
+  "tris": 954,
+  "bore_z": 0.0,
+  "components": 6,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_BigAxe_02": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_02",
+  "tris": 818,
+  "bore_z": 6.61,
+  "components": 5,
+  "optic_candidates": [
+   {
+    "tris": 66,
+    "x": [
+     20.8,
+     32.4
+    ],
+    "y": [
+     -1.7,
+     1.7
+    ],
+    "z": [
+     8.7,
+     20.3
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_BigAxe_03": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_03",
+  "tris": 1010,
+  "bore_z": -3.2,
+  "components": 3,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_BigAxe_04": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_04",
+  "tris": 852,
+  "bore_z": 0.0,
+  "components": 8,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_BigAxe_05": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_05",
+  "tris": 1245,
+  "bore_z": -0.0,
+  "components": 9,
+  "optic_candidates": [
+   {
+    "tris": 92,
+    "x": [
+     26.8,
+     40.9
+    ],
+    "y": [
+     -1.1,
+     1.1
+    ],
+    "z": [
+     9.4,
+     17.5
+    ]
+   },
+   {
+    "tris": 72,
+    "x": [
+     20.5,
+     47.4
+    ],
+    "y": [
+     -0.6,
+     0.6
+    ],
+    "z": [
+     4.4,
+     21.3
+    ]
+   },
+   {
+    "tris": 24,
+    "x": [
+     32.9,
+     34.6
+    ],
+    "y": [
+     -1.7,
+     1.7
+    ],
+    "z": [
+     9.0,
+     14.5
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_BigAxe_06": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_06",
+  "tris": 1120,
+  "bore_z": 0.0,
+  "components": 8,
+  "optic_candidates": [
+   {
+    "tris": 154,
+    "x": [
+     27.8,
+     51.2
+    ],
+    "y": [
+     -0.8,
+     0.8
+    ],
+    "z": [
+     3.4,
+     16.4
+    ]
+   },
+   {
+    "tris": 38,
+    "x": [
+     25.2,
+     54.6
+    ],
+    "y": [
+     -0.3,
+     0.3
+    ],
+    "z": [
+     10.9,
+     24.8
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_BigAxe_07": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_07",
+  "tris": 1336,
+  "bore_z": 0.0,
+  "components": 13,
+  "optic_candidates": [
+   {
+    "tris": 76,
+    "x": [
+     39.3,
+     45.2
+    ],
+    "y": [
+     -2.6,
+     2.6
+    ],
+    "z": [
+     5.7,
+     11.8
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Dagger_01": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Dagger_01",
+  "tris": 414,
+  "bore_z": 0.0,
+  "components": 5,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Dagger_02": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Dagger_02",
+  "tris": 257,
+  "bore_z": -0.58,
+  "components": 3,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Dagger_03": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Dagger_03",
+  "tris": 348,
+  "bore_z": 1.84,
+  "components": 4,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Dagger_04": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Dagger_04",
+  "tris": 402,
+  "bore_z": 1.84,
+  "components": 5,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Dagger_05": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Dagger_05",
+  "tris": 337,
+  "bore_z": -0.92,
+  "components": 4,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Dagger_06": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Dagger_06",
+  "tris": 544,
+  "bore_z": 0.37,
+  "components": 4,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Dagger_07": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Dagger_07",
+  "tris": 294,
+  "bore_z": 0.65,
+  "components": 5,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_GrenadeLauncher_01": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_GrenadeLauncher_01",
+  "tris": 2848,
+  "bore_z": 9.25,
+  "components": 19,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Hammer_02": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Hammer_02",
+  "tris": 1216,
+  "bore_z": 1.06,
+  "components": 7,
+  "optic_candidates": [
+   {
+    "tris": 90,
+    "x": [
+     -3.6,
+     47.8
+    ],
+    "y": [
+     -13.3,
+     13.3
+    ],
+    "z": [
+     14.3,
+     30.2
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Hammer_03": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Hammer_03",
+  "tris": 1576,
+  "bore_z": 0.0,
+  "components": 24,
+  "optic_candidates": [
+   {
+    "tris": 40,
+    "x": [
+     32.7,
+     40.9
+    ],
+    "y": [
+     -3.5,
+     3.5
+    ],
+    "z": [
+     26.1,
+     32.1
+    ]
+   },
+   {
+    "tris": 40,
+    "x": [
+     51.3,
+     59.4
+    ],
+    "y": [
+     -3.5,
+     3.5
+    ],
+    "z": [
+     26.1,
+     32.1
+    ]
+   },
+   {
+    "tris": 40,
+    "x": [
+     42.0,
+     50.1
+    ],
+    "y": [
+     -3.5,
+     3.5
+    ],
+    "z": [
+     26.1,
+     32.1
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Heavy_01": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Heavy_01",
+  "tris": 1988,
+  "bore_z": 16.56,
+  "components": 26,
+  "optic_candidates": [
+   {
+    "tris": 132,
+    "x": [
+     36.1,
+     56.1
+    ],
+    "y": [
+     -5.1,
+     5.1
+    ],
+    "z": [
+     33.9,
+     45.7
+    ]
+   },
+   {
+    "tris": 54,
+    "x": [
+     81.7,
+     103.5
+    ],
+    "y": [
+     -3.0,
+     3.0
+    ],
+    "z": [
+     18.6,
+     24.6
+    ]
+   },
+   {
+    "tris": 48,
+    "x": [
+     40.8,
+     48.8
+    ],
+    "y": [
+     -6.3,
+     6.3
+    ],
+    "z": [
+     32.7,
+     46.9
+    ]
+   },
+   {
+    "tris": 30,
+    "x": [
+     36.1,
+     39.4
+    ],
+    "y": [
+     -1.5,
+     1.5
+    ],
+    "z": [
+     43.1,
+     47.8
+    ]
+   },
+   {
+    "tris": 26,
+    "x": [
+     10.0,
+     23.5
+    ],
+    "y": [
+     -1.9,
+     1.9
+    ],
+    "z": [
+     20.6,
+     22.4
+    ]
+   },
+   {
+    "tris": 24,
+    "x": [
+     39.6,
+     53.1
+    ],
+    "y": [
+     -2.5,
+     2.5
+    ],
+    "z": [
+     29.2,
+     34.1
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Heavy_02": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Heavy_02",
+  "tris": 2848,
+  "bore_z": 6.09,
+  "components": 19,
+  "optic_candidates": [
+   {
+    "tris": 188,
+    "x": [
+     24.6,
+     37.4
+    ],
+    "y": [
+     -3.4,
+     3.5
+    ],
+    "z": [
+     11.0,
+     17.8
+    ]
+   },
+   {
+    "tris": 168,
+    "x": [
+     43.3,
+     68.2
+    ],
+    "y": [
+     -6.2,
+     6.2
+    ],
+    "z": [
+     8.2,
+     20.6
+    ]
+   },
+   {
+    "tris": 92,
+    "x": [
+     24.8,
+     42.5
+    ],
+    "y": [
+     -15.7,
+     15.7
+    ],
+    "z": [
+     13.0,
+     23.6
+    ]
+   },
+   {
+    "tris": 66,
+    "x": [
+     -4.3,
+     26.4
+    ],
+    "y": [
+     -4.9,
+     4.9
+    ],
+    "z": [
+     12.8,
+     24.7
+    ]
+   },
+   {
+    "tris": 60,
+    "x": [
+     7.4,
+     19.0
+    ],
+    "y": [
+     -6.5,
+     6.5
+    ],
+    "z": [
+     16.2,
+     21.2
+    ]
+   },
+   {
+    "tris": 40,
+    "x": [
+     9.2,
+     21.7
+    ],
+    "y": [
+     -0.8,
+     0.8
+    ],
+    "z": [
+     25.4,
+     29.9
+    ]
+   },
+   {
+    "tris": 40,
+    "x": [
+     5.7,
+     25.8
+    ],
+    "y": [
+     -5.9,
+     5.9
+    ],
+    "z": [
+     11.7,
+     21.8
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Heavy_03": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Heavy_03",
+  "tris": 1588,
+  "bore_z": 14.26,
+  "components": 17,
+  "optic_candidates": [
+   {
+    "tris": 104,
+    "x": [
+     -2.8,
+     60.4
+    ],
+    "y": [
+     -5.5,
+     5.5
+    ],
+    "z": [
+     18.8,
+     29.5
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Launcher_01": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Launcher_01",
+  "tris": 3396,
+  "bore_z": 17.97,
+  "components": 22,
+  "optic_candidates": [
+   {
+    "tris": 108,
+    "x": [
+     17.6,
+     49.8
+    ],
+    "y": [
+     -4.6,
+     4.6
+    ],
+    "z": [
+     25.0,
+     34.7
+    ]
+   },
+   {
+    "tris": 52,
+    "x": [
+     5.2,
+     48.8
+    ],
+    "y": [
+     -3.4,
+     3.4
+    ],
+    "z": [
+     21.5,
+     39.1
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Launcher_02": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Launcher_02",
+  "tris": 2340,
+  "bore_z": 20.31,
+  "components": 12,
+  "optic_candidates": [
+   {
+    "tris": 28,
+    "x": [
+     3.1,
+     28.6
+    ],
+    "y": [
+     -3.1,
+     3.1
+    ],
+    "z": [
+     39.9,
+     45.5
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Launcher_03": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Launcher_03",
+  "tris": 2254,
+  "bore_z": 20.52,
+  "components": 15,
+  "optic_candidates": [
+   {
+    "tris": 74,
+    "x": [
+     3.6,
+     34.5
+    ],
+    "y": [
+     -1.3,
+     1.3
+    ],
+    "z": [
+     27.4,
+     37.0
+    ]
+   },
+   {
+    "tris": 38,
+    "x": [
+     25.8,
+     34.6
+    ],
+    "y": [
+     -2.4,
+     2.4
+    ],
+    "z": [
+     26.1,
+     30.9
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Pistol_01": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Pistol_01",
+  "tris": 1250,
+  "bore_z": 11.45,
+  "components": 9,
+  "optic_candidates": [
+   {
+    "tris": 110,
+    "x": [
+     6.5,
+     16.4
+    ],
+    "y": [
+     -3.1,
+     3.1
+    ],
+    "z": [
+     16.4,
+     19.3
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Pistol_02": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Pistol_02",
+  "tris": 1256,
+  "bore_z": 11.73,
+  "components": 11,
+  "optic_candidates": [
+   {
+    "tris": 128,
+    "x": [
+     24.3,
+     47.0
+    ],
+    "y": [
+     -1.3,
+     1.3
+    ],
+    "z": [
+     15.9,
+     17.6
+    ]
+   },
+   {
+    "tris": 64,
+    "x": [
+     2.7,
+     8.3
+    ],
+    "y": [
+     -0.6,
+     0.6
+    ],
+    "z": [
+     13.2,
+     17.9
+    ]
+   },
+   {
+    "tris": 60,
+    "x": [
+     7.4,
+     11.6
+    ],
+    "y": [
+     -0.9,
+     0.9
+    ],
+    "z": [
+     17.2,
+     19.0
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Pistol_03": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Pistol_03",
+  "tris": 1022,
+  "bore_z": 15.42,
+  "components": 14,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Pistol_04": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Pistol_04",
+  "tris": 1202,
+  "bore_z": 9.77,
+  "components": 16,
+  "optic_candidates": [
+   {
+    "tris": 70,
+    "x": [
+     29.7,
+     33.8
+    ],
+    "y": [
+     -1.7,
+     1.7
+    ],
+    "z": [
+     15.5,
+     18.9
+    ]
+   },
+   {
+    "tris": 66,
+    "x": [
+     15.2,
+     32.4
+    ],
+    "y": [
+     -1.4,
+     1.4
+    ],
+    "z": [
+     20.6,
+     25.0
+    ]
+   },
+   {
+    "tris": 24,
+    "x": [
+     -2.2,
+     3.8
+    ],
+    "y": [
+     -0.9,
+     0.9
+    ],
+    "z": [
+     16.3,
+     21.7
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Pistol_05": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Pistol_05",
+  "tris": 1272,
+  "bore_z": 10.55,
+  "components": 11,
+  "optic_candidates": [
+   {
+    "tris": 204,
+    "x": [
+     -0.1,
+     12.6
+    ],
+    "y": [
+     -1.5,
+     1.5
+    ],
+    "z": [
+     16.8,
+     19.7
+    ]
+   },
+   {
+    "tris": 24,
+    "x": [
+     4.7,
+     6.7
+    ],
+    "y": [
+     -1.6,
+     1.6
+    ],
+    "z": [
+     15.5,
+     17.9
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Pistol_06": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Pistol_06",
+  "tris": 986,
+  "bore_z": 8.98,
+  "components": 9,
+  "optic_candidates": [
+   {
+    "tris": 194,
+    "x": [
+     8.5,
+     27.9
+    ],
+    "y": [
+     -2.7,
+     2.7
+    ],
+    "z": [
+     16.0,
+     21.4
+    ]
+   },
+   {
+    "tris": 118,
+    "x": [
+     10.6,
+     30.7
+    ],
+    "y": [
+     -2.3,
+     2.3
+    ],
+    "z": [
+     12.1,
+     16.7
+    ]
+   },
+   {
+    "tris": 24,
+    "x": [
+     -0.4,
+     9.2
+    ],
+    "y": [
+     -0.5,
+     0.5
+    ],
+    "z": [
+     17.4,
+     19.7
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_SMG_01": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SMG_01",
+  "tris": 2213,
+  "bore_z": 9.79,
+  "components": 11,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_SMG_02": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SMG_02",
+  "tris": 2176,
+  "bore_z": 14.46,
+  "components": 9,
+  "optic_candidates": [
+   {
+    "tris": 148,
+    "x": [
+     8.3,
+     21.8
+    ],
+    "y": [
+     -1.4,
+     1.4
+    ],
+    "z": [
+     17.3,
+     21.1
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_SMG_03": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SMG_03",
+  "tris": 2093,
+  "bore_z": 14.04,
+  "components": 13,
+  "optic_candidates": [
+   {
+    "tris": 136,
+    "x": [
+     16.5,
+     22.8
+    ],
+    "y": [
+     -3.8,
+     3.8
+    ],
+    "z": [
+     23.1,
+     30.7
+    ]
+   },
+   {
+    "tris": 116,
+    "x": [
+     6.2,
+     9.6
+    ],
+    "y": [
+     -3.4,
+     3.4
+    ],
+    "z": [
+     23.5,
+     30.6
+    ]
+   },
+   {
+    "tris": 80,
+    "x": [
+     9.5,
+     18.0
+    ],
+    "y": [
+     -3.1,
+     3.1
+    ],
+    "z": [
+     23.8,
+     30.0
+    ]
+   },
+   {
+    "tris": 28,
+    "x": [
+     9.4,
+     18.6
+    ],
+    "y": [
+     -1.0,
+     1.0
+    ],
+    "z": [
+     21.5,
+     25.0
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Shield_01": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shield_01",
+  "tris": 232,
+  "bore_z": -6.94,
+  "components": 3,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Shield_02": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shield_02",
+  "tris": 940,
+  "bore_z": 0.0,
+  "components": 11,
+  "optic_candidates": [
+   {
+    "tris": 60,
+    "x": [
+     5.0,
+     7.4
+    ],
+    "y": [
+     -13.6,
+     13.5
+    ],
+    "z": [
+     49.4,
+     56.7
+    ]
+   },
+   {
+    "tris": 48,
+    "x": [
+     8.2,
+     9.0
+    ],
+    "y": [
+     -6.7,
+     6.7
+    ],
+    "z": [
+     11.7,
+     15.2
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Shield_03": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shield_03",
+  "tris": 540,
+  "bore_z": 0.07,
+  "components": 5,
+  "optic_candidates": [
+   {
+    "tris": 48,
+    "x": [
+     9.0,
+     9.8
+    ],
+    "y": [
+     -6.7,
+     6.7
+    ],
+    "z": [
+     11.7,
+     15.2
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Shield_04": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shield_04",
+  "tris": 734,
+  "bore_z": 0.0,
+  "components": 7,
+  "optic_candidates": [
+   {
+    "tris": 32,
+    "x": [
+     8.0,
+     11.5
+    ],
+    "y": [
+     -9.7,
+     9.7
+    ],
+    "z": [
+     8.4,
+     18.2
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Shield_05": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shield_05",
+  "tris": 286,
+  "bore_z": 0.0,
+  "components": 5,
+  "optic_candidates": [
+   {
+    "tris": 32,
+    "x": [
+     7.7,
+     11.1
+    ],
+    "y": [
+     -9.7,
+     9.7
+    ],
+    "z": [
+     8.4,
+     18.2
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Shotgun_01": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shotgun_01",
+  "tris": 1533,
+  "bore_z": 7.48,
+  "components": 15,
+  "optic_candidates": [
+   {
+    "tris": 72,
+    "x": [
+     14.7,
+     41.0
+    ],
+    "y": [
+     -7.9,
+     7.9
+    ],
+    "z": [
+     8.6,
+     14.3
+    ]
+   },
+   {
+    "tris": 38,
+    "x": [
+     17.2,
+     25.4
+    ],
+    "y": [
+     -1.7,
+     1.8
+    ],
+    "z": [
+     13.2,
+     17.1
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Shotgun_02": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shotgun_02",
+  "tris": 1868,
+  "bore_z": 10.04,
+  "components": 10,
+  "optic_candidates": [
+   {
+    "tris": 118,
+    "x": [
+     7.7,
+     71.0
+    ],
+    "y": [
+     -1.1,
+     1.1
+    ],
+    "z": [
+     15.1,
+     21.9
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Shotgun_03": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shotgun_03",
+  "tris": 1354,
+  "bore_z": 4.09,
+  "components": 12,
+  "optic_candidates": [
+   {
+    "tris": 42,
+    "x": [
+     16.5,
+     26.5
+    ],
+    "y": [
+     -4.5,
+     1.3
+    ],
+    "z": [
+     6.9,
+     11.6
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_SmallAxe_01": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SmallAxe_01",
+  "tris": 558,
+  "bore_z": 11.01,
+  "components": 2,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_SmallAxe_02": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SmallAxe_02",
+  "tris": 786,
+  "bore_z": 4.55,
+  "components": 3,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_SmallAxe_03": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SmallAxe_03",
+  "tris": 620,
+  "bore_z": 4.21,
+  "components": 2,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_SmallAxe_04": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SmallAxe_04",
+  "tris": 756,
+  "bore_z": 2.22,
+  "components": 6,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_SmallAxe_05": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SmallAxe_05",
+  "tris": 770,
+  "bore_z": 3.25,
+  "components": 8,
+  "optic_candidates": [
+   {
+    "tris": 44,
+    "x": [
+     -1.6,
+     19.1
+    ],
+    "y": [
+     -1.8,
+     1.8
+    ],
+    "z": [
+     4.7,
+     14.5
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Sniper_01": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sniper_01",
+  "tris": 1292,
+  "bore_z": 13.94,
+  "components": 13,
+  "optic_candidates": [
+   {
+    "tris": 154,
+    "x": [
+     -1.5,
+     38.4
+    ],
+    "y": [
+     -5.1,
+     5.1
+    ],
+    "z": [
+     31.8,
+     39.3
+    ]
+   },
+   {
+    "tris": 80,
+    "x": [
+     -3.3,
+     50.6
+    ],
+    "y": [
+     -3.7,
+     3.7
+    ],
+    "z": [
+     15.4,
+     23.0
+    ]
+   },
+   {
+    "tris": 26,
+    "x": [
+     6.6,
+     23.0
+    ],
+    "y": [
+     -3.6,
+     3.6
+    ],
+    "z": [
+     22.0,
+     26.6
+    ]
+   },
+   {
+    "tris": 24,
+    "x": [
+     8.4,
+     18.5
+    ],
+    "y": [
+     -1.6,
+     1.6
+    ],
+    "z": [
+     26.6,
+     29.7
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Sniper_02": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sniper_02",
+  "tris": 1452,
+  "bore_z": 7.28,
+  "components": 20,
+  "optic_candidates": [
+   {
+    "tris": 140,
+    "x": [
+     5.8,
+     48.8
+    ],
+    "y": [
+     -6.5,
+     6.5
+    ],
+    "z": [
+     19.3,
+     29.1
+    ]
+   },
+   {
+    "tris": 116,
+    "x": [
+     2.8,
+     41.1
+    ],
+    "y": [
+     -5.2,
+     5.2
+    ],
+    "z": [
+     18.9,
+     28.0
+    ]
+   },
+   {
+    "tris": 60,
+    "x": [
+     14.7,
+     34.2
+    ],
+    "y": [
+     -5.8,
+     5.8
+    ],
+    "z": [
+     21.1,
+     24.5
+    ]
+   },
+   {
+    "tris": 26,
+    "x": [
+     128.7,
+     135.4
+    ],
+    "y": [
+     -0.9,
+     0.9
+    ],
+    "z": [
+     11.3,
+     18.0
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Sniper_03": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sniper_03",
+  "tris": 1742,
+  "bore_z": 9.04,
+  "components": 17,
+  "optic_candidates": [
+   {
+    "tris": 112,
+    "x": [
+     27.2,
+     52.2
+    ],
+    "y": [
+     -1.9,
+     1.9
+    ],
+    "z": [
+     14.8,
+     17.0
+    ]
+   },
+   {
+    "tris": 92,
+    "x": [
+     -1.2,
+     28.3
+    ],
+    "y": [
+     -7.4,
+     7.4
+    ],
+    "z": [
+     19.0,
+     28.5
+    ]
+   },
+   {
+    "tris": 52,
+    "x": [
+     12.4,
+     14.6
+    ],
+    "y": [
+     -8.0,
+     8.0
+    ],
+    "z": [
+     14.8,
+     25.3
+    ]
+   },
+   {
+    "tris": 44,
+    "x": [
+     3.2,
+     4.9
+    ],
+    "y": [
+     -8.0,
+     8.0
+    ],
+    "z": [
+     15.8,
+     24.2
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Sword_01a": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sword_01a",
+  "tris": 490,
+  "bore_z": -0.19,
+  "components": 5,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Sword_02": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sword_02",
+  "tris": 496,
+  "bore_z": 0.0,
+  "components": 5,
+  "optic_candidates": [
+   {
+    "tris": 26,
+    "x": [
+     1.2,
+     65.2
+    ],
+    "y": [
+     -0.7,
+     0.7
+    ],
+    "z": [
+     1.0,
+     5.0
+    ]
+   }
+  ]
+ },
+ "Worlds/Wep_Sword_03": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sword_03",
+  "tris": 558,
+  "bore_z": 0.4,
+  "components": 5,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Sword_04": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sword_04",
+  "tris": 600,
+  "bore_z": 0.54,
+  "components": 8,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Sword_05": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sword_05",
+  "tris": 446,
+  "bore_z": 3.17,
+  "components": 6,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Sword_06": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sword_06",
+  "tris": 568,
+  "bore_z": 0.78,
+  "components": 5,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Sword_07": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sword_07",
+  "tris": 548,
+  "bore_z": 0.0,
+  "components": 5,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Sword_08": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Sword_08",
+  "tris": 504,
+  "bore_z": 4.62,
+  "components": 2,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Tool_01": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Tool_01",
+  "tris": 680,
+  "bore_z": -2.47,
+  "components": 3,
+  "optic_candidates": []
+ },
+ "Worlds/Wep_Tool_02": {
+  "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Tool_02",
+  "tris": 590,
+  "bore_z": 5.37,
+  "components": 6,
+  "optic_candidates": []
+ }
+}

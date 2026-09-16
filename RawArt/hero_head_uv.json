@@ -1,0 +1,66 @@
+{
+ "SK_Chr_Head_Male_00": {
+  "path": "/Game/ModularCharacters/ModularParts/SK_Chr_Head_Male_00.SK_Chr_Head_Male_00",
+  "tris": 160,
+  "uv_cells": {
+   "80,1808": {
+    "tris": 76,
+    "z": [
+     145.8,
+     169.0
+    ],
+    "front": 12
+   },
+   "80,1936": {
+    "tris": 64,
+    "z": [
+     150.1,
+     177.5
+    ],
+    "front": 32
+   },
+   "16,2016": {
+    "tris": 20,
+    "z": [
+     165.8,
+     168.3
+    ],
+    "front": 20
+   }
+  },
+  "skeleton": "/Game/ModularCharacters/SK_Character_Base_01_Skeleton.SK_Character_Base_01_Skeleton",
+  "bones": null
+ },
+ "SK_Chr_Head_Female_00": {
+  "path": "/Game/ModularCharacters/ModularParts/SK_Chr_Head_Female_00.SK_Chr_Head_Female_00",
+  "tris": 174,
+  "uv_cells": {
+   "16,2016": {
+    "tris": 26,
+    "z": [
+     165.0,
+     166.8
+    ],
+    "front": 26
+   },
+   "80,1808": {
+    "tris": 140,
+    "z": [
+     145.0,
+     177.5
+    ],
+    "front": 42
+   },
+   "80,1664": {
+    "tris": 8,
+    "z": [
+     158.1,
+     159.2
+    ],
+    "front": 8
+   }
+  },
+  "skeleton": "/Game/ModularCharacters/SK_Character_Base_01_Skeleton.SK_Character_Base_01_Skeleton",
+  "bones": null
+ }
+}

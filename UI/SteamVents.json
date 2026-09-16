@@ -1,0 +1,4 @@
+{
+ "_": "Written by Tools/facility_layout.py. UAmbientPlayer reads it to hang a positional hiss on every vent that has one, so the coordinates live in exactly one place.",
+ "vents": []
+}

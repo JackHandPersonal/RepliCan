@@ -1,0 +1,15 @@
+{
+ "remote": true,
+ "start": "call",
+ "nodes": {
+  "call": {
+   "text": "There you are. [pause 0.4] Listen: there's a box in your room. Your PCS complimentary gear. [pause 0.3] Crack it open, get dressed, and then come find me. [pause 0.4] Take your time. ~Not too much time.~",
+   "choices": [
+    {
+     "text": "...got it.",
+     "end": true
+    }
+   ]
+  }
+ }
+}

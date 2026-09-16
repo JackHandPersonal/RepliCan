@@ -1,0 +1,132 @@
+{
+ "Male_src": {
+  "tris": 303,
+  "z": [
+   149.1,
+   179.0
+  ],
+  "border": null,
+  "hair": {
+   "hair z155 back": 31,
+   "hair z160 back": 12,
+   "hair z160 front": 4,
+   "hair z165 back": 12,
+   "hair z165 front": 28,
+   "hair z165 mid": 8,
+   "hair z170 back": 7,
+   "hair z170 front": 26,
+   "hair z170 mid": 4,
+   "hair z175 back": 4,
+   "hair z175 front": 14,
+   "hair z175 mid": 5
+  },
+  "low": {
+   "hair z155 back": 31,
+   "hair z160 back": 12,
+   "hair z160 front": 4,
+   "skin z145 front": 2,
+   "skin z150 back": 6,
+   "skin z150 front": 14,
+   "skin z150 mid": 2,
+   "skin z155 back": 8,
+   "skin z155 front": 20,
+   "skin z155 mid": 8,
+   "skin z160 back": 8,
+   "skin z160 front": 6,
+   "skin z160 mid": 6
+  }
+ },
+ "Male_pc": {
+  "tris": 151,
+  "z": [
+   147.3,
+   177.5
+  ],
+  "border": null,
+  "hair": {},
+  "low": {
+   "skin z145 front": 3,
+   "skin z145 mid": 2,
+   "skin z150 back": 6,
+   "skin z150 front": 10,
+   "skin z150 mid": 2,
+   "skin z155 back": 8,
+   "skin z155 front": 20,
+   "skin z155 mid": 8,
+   "skin z160 back": 8,
+   "skin z160 front": 6,
+   "skin z160 mid": 6
+  }
+ },
+ "Female_src": {
+  "tris": 401,
+  "z": [
+   149.3,
+   179.7
+  ],
+  "border": null,
+  "hair": {
+   "hair z145 back": 5,
+   "hair z150 back": 18,
+   "hair z155 back": 18,
+   "hair z155 front": 4,
+   "hair z160 back": 8,
+   "hair z160 front": 23,
+   "hair z160 mid": 1,
+   "hair z165 back": 10,
+   "hair z165 front": 68,
+   "hair z165 mid": 9,
+   "hair z170 back": 8,
+   "hair z170 front": 26,
+   "hair z170 mid": 3,
+   "hair z175 back": 12,
+   "hair z175 front": 21,
+   "hair z175 mid": 5
+  },
+  "low": {
+   "hair z145 back": 5,
+   "hair z150 back": 18,
+   "hair z155 back": 18,
+   "hair z155 front": 4,
+   "hair z160 back": 8,
+   "hair z160 front": 23,
+   "hair z160 mid": 1,
+   "other z155 front": 8,
+   "other z160 front": 2,
+   "skin z150 back": 6,
+   "skin z150 front": 12,
+   "skin z150 mid": 2,
+   "skin z155 back": 8,
+   "skin z155 front": 20,
+   "skin z155 mid": 10,
+   "skin z160 back": 8,
+   "skin z160 front": 12,
+   "skin z160 mid": 6
+  }
+ },
+ "Female_pc": {
+  "tris": 171,
+  "z": [
+   147.7,
+   177.2
+  ],
+  "border": null,
+  "hair": {},
+  "low": {
+   "other z155 front": 8,
+   "other z160 front": 2,
+   "skin z145 back": 2,
+   "skin z145 front": 1,
+   "skin z145 mid": 2,
+   "skin z150 back": 6,
+   "skin z150 front": 10,
+   "skin z150 mid": 2,
+   "skin z155 back": 8,
+   "skin z155 front": 20,
+   "skin z155 mid": 10,
+   "skin z160 back": 8,
+   "skin z160 front": 12,
+   "skin z160 mid": 6
+  }
+ }
+}

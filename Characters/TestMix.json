@@ -1,0 +1,115 @@
+{
+ "name": "Test Mix",
+ "type": "Modular",
+ "baseMesh": "",
+ "material": "",
+ "gender": "Male",
+ "locomotion": "",
+ "parts": {
+  "CutHead": "/Game/RepliCan/CutLibrary/SciFiSpace/Crew_Male_01_Head.Crew_Male_01_Head",
+  "CutTorso": "/Game/RepliCan/CutLibrary/CyberCity/Male_Soldier_01_Torso.Male_Soldier_01_Torso",
+  "CutArms": "/Game/RepliCan/CutLibrary/SciFiWorlds/Scavenger_01_Arms.Scavenger_01_Arms",
+  "CutLegs": "/Game/RepliCan/CutLibrary/SciFiSpace/Crew_Female_01_Legs.Crew_Female_01_Legs"
+ },
+ "face": {
+  "bEnabled": true,
+  "noseMesh": "/Game/Characters/KnightDemo/SM_Nose.SM_Nose",
+  "noseLocation": {
+   "x": 6.89,
+   "y": 13,
+   "z": 0
+  },
+  "noseRotation": {
+   "pitch": -90,
+   "yaw": 0,
+   "roll": 0
+  },
+  "bMouthDecal": false,
+  "mouthLocation": {
+   "x": -1.06,
+   "y": 13.7,
+   "z": 0
+  },
+  "mouthRotation": {
+   "pitch": 0,
+   "yaw": -90,
+   "roll": -90
+  },
+  "mouthScale": 0.5,
+  "mouthTint": {
+   "r": 1,
+   "g": 1,
+   "b": 1,
+   "a": 1
+  },
+  "expression": "Neutral",
+  "bAutoBlink": true,
+  "hairMesh": "",
+  "headGearMesh": ""
+ },
+ "colors": {},
+ "weaponMesh": "",
+ "weaponLocation": {
+  "x": -7,
+  "y": 2,
+  "z": 0
+ },
+ "weaponRotation": {
+  "pitch": 0,
+  "yaw": -90,
+  "roll": 0
+ },
+ "armPose": "None",
+ "armPoseWeight": 0,
+ "gait": {
+  "stanceWidthDegrees": 0,
+  "movingStanceWidthDegrees": 5,
+  "toeOutDegrees": 2,
+  "hunchDegrees": 4,
+  "leanDegrees": 0,
+  "armSwingScale": 0.9,
+  "bounceScale": 1,
+  "sway": 0,
+  "cadenceScale": 1.05,
+  "stumble": 0,
+  "limpAmount": 0,
+  "limpSide": "Left"
+ },
+ "fingerCurlDegrees": -60,
+ "thumbCurlDegrees": -40,
+ "scale": {
+  "x": 1,
+  "y": 1,
+  "z": 1
+ },
+ "speedMultiplier": 1,
+ "tags": [
+  "npc"
+ ],
+ "description": "Assembled from four packs' worth of parts.",
+ "comment": "",
+ "idleAnimations": [],
+ "remoteCamera": {
+  "offset": {
+   "x": 300,
+   "y": 60,
+   "z": -50
+  },
+  "lookOffset": {
+   "x": 0,
+   "y": 0,
+   "z": -62
+  },
+  "fov": 42,
+  "roll": 0
+ },
+ "skinTint": {
+  "r": 0,
+  "g": 0,
+  "b": 0,
+  "a": 0
+ },
+ "stubbleFade": 0,
+ "kit": "SciFi",
+ "gazeTargets": []
+}

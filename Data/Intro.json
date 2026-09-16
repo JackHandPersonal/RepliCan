@@ -1,0 +1,23 @@
+{
+  "charsPerSecond": 42,
+  "lines": [
+    { "text": "REPLICANT ACTIVATION SUITE  //  build 0.1", "pause": 0.9 },
+    { "text": "unit designation: YOU", "pause": 0.5 },
+    { "text": "", "pause": 0.3 },
+    { "text": "> mounting memory core ............ partial", "pause": 0.6 },
+    { "text": "> last recorded event: battle. details: [REDACTED]", "pause": 0.9 },
+    { "text": "> subject status at time of record: deceased", "pause": 1.1 },
+    { "text": "", "pause": 0.3 },
+    { "text": "Good news. That was the old you.", "pause": 0.9 },
+    { "text": "You are a semi-organic fabrication built to resemble the person who died.", "pause": 0.8 },
+    { "text": "The resemblance is rated 'convincing at conversational distance'.", "pause": 1.0 },
+    { "text": "", "pause": 0.3 },
+    { "text": "Some memories were recovered. Some were reconstructed. We will not say which.", "pause": 1.0 },
+    { "text": "Nobody has explained the battle. Nobody intends to.", "pause": 1.0 },
+    { "text": "", "pause": 0.3 },
+    { "text": "> limbs ........................... 4/4", "pause": 0.4 },
+    { "text": "> optimism ........................ mandatory", "pause": 0.8 },
+    { "text": "", "pause": 0.3 },
+    { "text": "You can do this. That is not encouragement. It is the product name.", "pause": 1.4 }
+  ]
+}

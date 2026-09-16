@@ -1,0 +1,205 @@
+{
+	"name": "Player",
+	"attributes":
+	{
+		"brawn": 5,
+		"agility": 5,
+		"endurance": 5,
+		"cognition": 5,
+		"tech": 5,
+		"presence": 5
+	},
+	"type": "Modular",
+	"baseMesh": "",
+	"material": "",
+	"gender": "Male",
+	"locomotion": "",
+	"parts":
+	{
+		"CutTorso": "/Game/RepliCan/PlayerCharacter/SK_PC_Male_01_Torso.SK_PC_Male_01_Torso",
+		"CutArms": "/Game/RepliCan/PlayerCharacter/SK_PC_Male_01_Arms.SK_PC_Male_01_Arms",
+		"CutLegs": "/Game/RepliCan/PlayerCharacter/SK_PC_Male_01_Legs.SK_PC_Male_01_Legs",
+		"CutHead": "/Game/RepliCan/PlayerCharacter/SK_PC_Male_02_Head.SK_PC_Male_02_Head"
+	},
+	"kit": "SciFi",
+	"face":
+	{
+		"bEnabled": true,
+		"noseMesh": "/Game/Characters/KnightDemo/SM_Nose.SM_Nose",
+		"noseLocation":
+		{
+			"x": 6.8899998664855957,
+			"y": 13,
+			"z": 0
+		},
+		"noseRotation":
+		{
+			"pitch": -90,
+			"yaw": 0,
+			"roll": 0
+		},
+		"noseScale":
+		{
+			"x": 1,
+			"y": 1,
+			"z": 1.2999999523162842
+		},
+		"browMesh": "/Game/RepliCan/PlayerCharacter/Hero/SM_Hero_Eyebrow_Male_01.SM_Hero_Eyebrow_Male_01",
+		"browLocation":
+		{
+			"x": 11.699999809265137,
+			"y": 12.300000190734863,
+			"z": 4.3000001907348633
+		},
+		"browTilt": 0,
+		"browScale":
+		{
+			"x": 1,
+			"y": 1,
+			"z": 1
+		},
+		"hairColor":
+		{
+			"r": 0.019999999552965164,
+			"g": 0.019999999552965164,
+			"b": 0.02500000037252903,
+			"a": 1
+		},
+		"bMouthDecal": false,
+		"mouthLocation":
+		{
+			"x": -1.059999942779541,
+			"y": 13.699999809265137,
+			"z": 0
+		},
+		"mouthRotation":
+		{
+			"pitch": 0,
+			"yaw": -90,
+			"roll": -90
+		},
+		"mouthScale": 0.5,
+		"mouthTint":
+		{
+			"r": 1,
+			"g": 1,
+			"b": 1,
+			"a": 1
+		},
+		"expression": "Neutral",
+		"bAutoBlink": true,
+		"hairMesh": "/Game/RepliCan/PlayerCharacter/Hero/SM_Hero_Hair_08.SM_Hero_Hair_08",
+		"facialHairMesh": "/Game/PolygonSciFiWorlds/Models/CharactersUE4Mannequin/Attachments/SM_Chr_Attach_Beard_01.SM_Chr_Attach_Beard_01",
+		"headGearMesh": "",
+		"headGearLocation":
+		{
+			"x": 0,
+			"y": 0,
+			"z": 0
+		},
+		"headGearScale": 1,
+		"headGearBadgeMaterial": "",
+		"headGearBadgeLocation":
+		{
+			"x": 0,
+			"y": 0,
+			"z": 0
+		},
+		"headGearBadgeRotation":
+		{
+			"pitch": 0,
+			"yaw": 0,
+			"roll": 0
+		},
+		"headGearBadgeSize":
+		{
+			"x": 5,
+			"y": 4
+		}
+	},
+	"colors":
+	{
+	},
+	"weaponMesh": "",
+	"weaponLocation":
+	{
+		"x": -7,
+		"y": 2,
+		"z": 0
+	},
+	"weaponRotation":
+	{
+		"pitch": 0,
+		"yaw": -90,
+		"roll": 0
+	},
+	"weaponScale":
+	{
+		"x": 1,
+		"y": 1,
+		"z": 1
+	},
+	"armPose": "/Game/Characters/Animations/SyntySwordCombat/Idle/Base/A_Idle_Base_Sword.A_Idle_Base_Sword",
+	"armPoseWeight": 0,
+	"gait":
+	{
+		"stanceWidthDegrees": 0,
+		"movingStanceWidthDegrees": 5,
+		"toeOutDegrees": 0,
+		"hunchDegrees": 0,
+		"leanDegrees": 0,
+		"armSwingScale": 1,
+		"bounceScale": 1,
+		"sway": 0,
+		"cadenceScale": 1,
+		"stumble": 0,
+		"limpAmount": 0,
+		"limpSide": "Left"
+	},
+	"fingerCurlDegrees": -60,
+	"thumbCurlDegrees": 40,
+	"scale":
+	{
+		"x": 1,
+		"y": 1,
+		"z": 1
+	},
+	"speedMultiplier": 1,
+	"tags": [
+		"player"
+	],
+	"description": "You. Approximately.",
+	"displayName": "Repli Can",
+	"comment": "",
+	"idleAnimations": [],
+	"gazeTargets": [],
+	"gazeHoldMin": 1.7999999523162842,
+	"gazeHoldMax": 4.5,
+	"gazeTurnSpeed": 0,
+	"remoteCamera":
+	{
+		"offset":
+		{
+			"x": 58,
+			"y": 10,
+			"z": 14
+		},
+		"lookOffset":
+		{
+			"x": 0,
+			"y": 0,
+			"z": 1
+		},
+		"fov": 36,
+		"roll": 0
+	},
+	"skinTint":
+	{
+		"r": 0.55000001192092896,
+		"g": 0.33000001311302185,
+		"b": 0.18000000715255737,
+		"a": 1
+	},
+	"stubbleFade": 1,
+	"headStubbleFade": 1
+}

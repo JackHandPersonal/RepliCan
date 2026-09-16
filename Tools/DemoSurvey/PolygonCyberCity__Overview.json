@@ -1,0 +1,1708 @@
+{
+ "map": "/Game/PolygonCyberCity/Maps/Overview",
+ "actors": 812,
+ "mesh_actors": 807,
+ "families": [
+  [
+   "Chr_Attach",
+   46
+  ],
+  [
+   "Prop_Drone",
+   36
+  ],
+  [
+   "Bld_Base",
+   35
+  ],
+  [
+   "Bld_Pipe",
+   30
+  ],
+  [
+   "Prop_Pipe",
+   28
+  ],
+  [
+   "Prop_Holo",
+   25
+  ],
+  [
+   "Prop_Food",
+   23
+  ],
+  [
+   "Prop_Greebles",
+   23
+  ],
+  [
+   "Prop_Poster",
+   21
+  ],
+  [
+   "Prop_Junk",
+   20
+  ],
+  [
+   "Prop_Satellite",
+   20
+  ],
+  [
+   "Prop_Street",
+   19
+  ],
+  [
+   "Prop_Wires",
+   18
+  ],
+  [
+   "Prop_Billboard",
+   17
+  ],
+  [
+   "Prop_Crate",
+   17
+  ],
+  [
+   "Prop_Canopy",
+   16
+  ],
+  [
+   "Prop_Robot",
+   15
+  ],
+  [
+   "Prop_Drink",
+   14
+  ],
+  [
+   "Prop_Hover",
+   14
+  ],
+  [
+   "Prop_Lamp",
+   13
+  ],
+  [
+   "Bld_Block",
+   13
+  ],
+  [
+   "Prop_Monitor",
+   12
+  ],
+  [
+   "Prop_Tool",
+   12
+  ],
+  [
+   "Wep_Missile",
+   11
+  ],
+  [
+   "Wep_Sword",
+   10
+  ],
+  [
+   "Prop_Assembly",
+   9
+  ],
+  [
+   "Prop_Cardboard",
+   9
+  ],
+  [
+   "Prop_Manholes",
+   8
+  ],
+  [
+   "Prop_Antenna",
+   7
+  ],
+  [
+   "Prop_Fridge",
+   7
+  ],
+  [
+   "Prop_Pills",
+   7
+  ],
+  [
+   "Prop_Power",
+   7
+  ],
+  [
+   "Prop_Traffic",
+   7
+  ],
+  [
+   "Env_Junk",
+   7
+  ],
+  [
+   "Prop_Claw",
+   6
+  ],
+  [
+   "Prop_Greeble",
+   6
+  ],
+  [
+   "Prop_Handheld",
+   6
+  ],
+  [
+   "Prop_Old",
+   6
+  ],
+  [
+   "Prop_Robotic",
+   6
+  ],
+  [
+   "Prop_Server",
+   6
+  ],
+  [
+   "Prop_Snack",
+   6
+  ],
+  [
+   "Prop_Trash",
+   6
+  ],
+  [
+   "Veh_Truck",
+   6
+  ],
+  [
+   "Wep_Shock",
+   5
+  ],
+  [
+   "Wep_Sniper",
+   5
+  ],
+  [
+   "Prop_Camera",
+   5
+  ],
+  [
+   "Prop_Hibernation",
+   5
+  ],
+  [
+   "Prop_Hologram",
+   5
+  ],
+  [
+   "Prop_Pill",
+   5
+  ],
+  [
+   "Env_Hologram",
+   5
+  ],
+  [
+   "Char_Fancy",
+   5
+  ],
+  [
+   "Bld_Background",
+   4
+  ],
+  [
+   "Prop_Charge",
+   4
+  ],
+  [
+   "Prop_Computer",
+   4
+  ],
+  [
+   "Prop_NeonSign",
+   4
+  ],
+  [
+   "Prop_Shelf",
+   4
+  ],
+  [
+   "Prop_Target",
+   4
+  ],
+  [
+   "Prop_Vending",
+   4
+  ],
+  [
+   "Chr_Robot",
+   4
+  ],
+  [
+   "Wep_Shuriken",
+   3
+  ],
+  [
+   "Prop_Cellphone",
+   3
+  ],
+  [
+   "Prop_Plates",
+   3
+  ],
+  [
+   "Prop_Recycle",
+   3
+  ],
+  [
+   "Prop_Rug",
+   3
+  ],
+  [
+   "Prop_Shield",
+   3
+  ],
+  [
+   "Prop_Syringe",
+   3
+  ],
+  [
+   "Prop_Water",
+   3
+  ],
+  [
+   "Prop_Weapon",
+   3
+  ],
+  [
+   "Wep_Dagger",
+   2
+  ],
+  [
+   "Wep_Grenade",
+   2
+  ],
+  [
+   "Wep_Laser",
+   2
+  ],
+  [
+   "Wep_Paint",
+   2
+  ],
+  [
+   "Wep_Pistol",
+   2
+  ],
+  [
+   "Wep_Rifle",
+   2
+  ],
+  [
+   "Wep_SMG",
+   2
+  ],
+  [
+   "Prop_Bench",
+   2
+  ],
+  [
+   "Prop_Cuff",
+   2
+  ],
+  [
+   "Prop_Electrical",
+   2
+  ],
+  [
+   "Prop_Lantern",
+   2
+  ],
+  [
+   "Prop_Laser",
+   2
+  ],
+  [
+   "Prop_Noodle",
+   2
+  ],
+  [
+   "Prop_Propane",
+   2
+  ],
+  [
+   "Prop_Shower",
+   2
+  ],
+  [
+   "Prop_Stool",
+   2
+  ],
+  [
+   "Bld_Metal",
+   2
+  ],
+  [
+   "Veh_Food",
+   2
+  ],
+  [
+   "Veh_Train",
+   2
+  ],
+  [
+   "Char_Attach",
+   2
+  ],
+  [
+   "Chr_Rich",
+   2
+  ],
+  [
+   "Chr_Mercenary",
+   2
+  ],
+  [
+   "Wep_Charm",
+   1
+  ],
+  [
+   "Prop_Barricade",
+   1
+  ],
+  [
+   "Prop_Bin",
+   1
+  ],
+  [
+   "Prop_Bunk",
+   1
+  ],
+  [
+   "Prop_Console",
+   1
+  ],
+  [
+   "Prop_Desk",
+   1
+  ],
+  [
+   "Prop_Drug",
+   1
+  ],
+  [
+   "Prop_Fire",
+   1
+  ],
+  [
+   "Prop_Graffiti",
+   1
+  ],
+  [
+   "Prop_Hammock",
+   1
+  ],
+  [
+   "Prop_Hospital",
+   1
+  ],
+  [
+   "Prop_Information",
+   1
+  ],
+  [
+   "Prop_IV",
+   1
+  ],
+  [
+   "Prop_Keyboard",
+   1
+  ],
+  [
+   "Prop_Medical",
+   1
+  ],
+  [
+   "Prop_Plushie",
+   1
+  ],
+  [
+   "Prop_Powerpole",
+   1
+  ],
+  [
+   "Prop_Radio",
+   1
+  ],
+  [
+   "Prop_Single",
+   1
+  ],
+  [
+   "Prop_Sink",
+   1
+  ],
+  [
+   "Prop_Slime",
+   1
+  ],
+  [
+   "Prop_Small",
+   1
+  ],
+  [
+   "Prop_Work",
+   1
+  ],
+  [
+   "Veh_Cart",
+   1
+  ],
+  [
+   "Veh_Luxury",
+   1
+  ],
+  [
+   "Veh_SUV",
+   1
+  ],
+  [
+   "Chr_Street",
+   1
+  ],
+  [
+   "Chr_Helper",
+   1
+  ],
+  [
+   "Chr_Male",
+   1
+  ],
+  [
+   "Chr_Female",
+   1
+  ],
+  [
+   "Chr_Cat",
+   1
+  ],
+  [
+   "Chr_Cyborg",
+   1
+  ],
+  [
+   "Chr_Racer",
+   1
+  ],
+  [
+   "Chr_PleasureBot",
+   1
+  ]
+ ],
+ "materials_by_family": {
+  "Bld_Background": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ],
+   [
+    "MI_PolygonCyberCity_01_B",
+    1
+   ],
+   [
+    "MI_PolygonCyberCity_01_C",
+    1
+   ]
+  ],
+  "Bld_Base": [
+   [
+    "M_Wall_01_A",
+    27
+   ],
+   [
+    "M_Wall_01_A_Triplanar",
+    10
+   ],
+   [
+    "MI_PolygonCyberCity_01_A",
+    8
+   ],
+   [
+    "M_Glass_01_A",
+    3
+   ],
+   [
+    "M_Floor_01",
+    2
+   ],
+   [
+    "M_Wall_11_A_Triplanar",
+    2
+   ]
+  ],
+  "Bld_Block": [
+   [
+    "M_Parallax_Full_01",
+    13
+   ]
+  ],
+  "Bld_Metal": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Bld_Pipe": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    30
+   ]
+  ],
+  "Char_Attach": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Char_Fancy": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    5
+   ]
+  ],
+  "Chr_Attach": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    47
+   ],
+   [
+    "MI_PolygonCyberCity_03_B",
+    1
+   ]
+  ],
+  "Chr_Cat": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Chr_Cyborg": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Chr_Female": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Chr_Helper": [
+   [
+    "MI_PolygonCyberCity_Triplanar_02_A",
+    1
+   ],
+   [
+    "MI_PolygonCyberCity_03_C",
+    1
+   ]
+  ],
+  "Chr_Male": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Chr_Mercenary": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Chr_PleasureBot": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Chr_Racer": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Chr_Rich": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Chr_Robot": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    4
+   ]
+  ],
+  "Chr_Street": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Env_Hologram": [
+   [
+    "M_Hologram_Basic_02_B",
+    3
+   ],
+   [
+    "M_Hologram_Basic_02_A",
+    2
+   ]
+  ],
+  "Env_Junk": [
+   [
+    "M_Junk",
+    7
+   ]
+  ],
+  "Prop_Antenna": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    7
+   ]
+  ],
+  "Prop_Assembly": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    9
+   ]
+  ],
+  "Prop_Barricade": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Bench": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Prop_Billboard": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    7
+   ],
+   [
+    "M_Billboard_02_B",
+    4
+   ],
+   [
+    "M_Billboard_01_A",
+    3
+   ],
+   [
+    "M_Billboard_01_Damaged",
+    3
+   ]
+  ],
+  "Prop_Bin": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Bunk": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Camera": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    5
+   ]
+  ],
+  "Prop_Canopy": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    16
+   ]
+  ],
+  "Prop_Cardboard": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    9
+   ]
+  ],
+  "Prop_Cellphone": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    3
+   ]
+  ],
+  "Prop_Charge": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    3
+   ],
+   [
+    "M_Hologram_Signs",
+    1
+   ]
+  ],
+  "Prop_Claw": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    5
+   ],
+   [
+    "M_Glass_Transparent_01",
+    1
+   ]
+  ],
+  "Prop_Computer": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    4
+   ]
+  ],
+  "Prop_Console": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Crate": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    17
+   ]
+  ],
+  "Prop_Cuff": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Prop_Desk": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Drink": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    14
+   ]
+  ],
+  "Prop_Drone": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    36
+   ]
+  ],
+  "Prop_Drug": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Electrical": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Prop_Fire": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Food": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    20
+   ],
+   [
+    "M_Hologram_Text",
+    3
+   ]
+  ],
+  "Prop_Fridge": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    4
+   ],
+   [
+    "M_Hologram_Text",
+    3
+   ]
+  ],
+  "Prop_Graffiti": [
+   [
+    "M_Graffiti_03",
+    1
+   ]
+  ],
+  "Prop_Greeble": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    6
+   ]
+  ],
+  "Prop_Greebles": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    23
+   ]
+  ],
+  "Prop_Hammock": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Handheld": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    3
+   ],
+   [
+    "M_Hologram_Text",
+    3
+   ]
+  ],
+  "Prop_Hibernation": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    4
+   ],
+   [
+    "M_Glass_Transparent_01",
+    1
+   ]
+  ],
+  "Prop_Holo": [
+   [
+    "M_Hologram_Signs",
+    17
+   ],
+   [
+    "MI_PolygonCyberCity_01_A",
+    5
+   ],
+   [
+    "M_Hologram_Basic_02_B",
+    4
+   ]
+  ],
+  "Prop_Hologram": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    5
+   ]
+  ],
+  "Prop_Hospital": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Hover": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    14
+   ]
+  ],
+  "Prop_IV": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Information": [
+   [
+    "M_Posters_01",
+    1
+   ],
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Junk": [
+   [
+    "M_Posters_01",
+    14
+   ],
+   [
+    "MI_PolygonCyberCity_01_A",
+    6
+   ]
+  ],
+  "Prop_Keyboard": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Lamp": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    12
+   ],
+   [
+    "M_Glass_Transparent_01",
+    1
+   ]
+  ],
+  "Prop_Lantern": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Prop_Laser": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Prop_Manholes": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    8
+   ]
+  ],
+  "Prop_Medical": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Monitor": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    7
+   ],
+   [
+    "M_Hologram_Text",
+    5
+   ]
+  ],
+  "Prop_NeonSign": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    4
+   ]
+  ],
+  "Prop_Noodle": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Prop_Old": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    6
+   ]
+  ],
+  "Prop_Pill": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    5
+   ]
+  ],
+  "Prop_Pills": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    7
+   ]
+  ],
+  "Prop_Pipe": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    28
+   ]
+  ],
+  "Prop_Plates": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    3
+   ]
+  ],
+  "Prop_Plushie": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Poster": [
+   [
+    "M_Posters_01",
+    21
+   ]
+  ],
+  "Prop_Power": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    6
+   ],
+   [
+    "M_Hologram_Basic_01_A",
+    1
+   ]
+  ],
+  "Prop_Powerpole": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Propane": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Prop_Radio": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Recycle": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    3
+   ]
+  ],
+  "Prop_Robot": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    15
+   ]
+  ],
+  "Prop_Robotic": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    6
+   ]
+  ],
+  "Prop_Rug": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    3
+   ]
+  ],
+  "Prop_Satellite": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    20
+   ],
+   [
+    "M_Hologram_Basic_01_A",
+    10
+   ]
+  ],
+  "Prop_Server": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    5
+   ],
+   [
+    "M_Glass_Transparent_Shiny",
+    1
+   ]
+  ],
+  "Prop_Shelf": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    4
+   ]
+  ],
+  "Prop_Shield": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ],
+   [
+    "M_Hologram_Basic_01_A",
+    1
+   ]
+  ],
+  "Prop_Shower": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ],
+   [
+    "M_Hologram_Basic_01_A",
+    1
+   ]
+  ],
+  "Prop_Single": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Sink": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Slime": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Small": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Prop_Snack": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    6
+   ]
+  ],
+  "Prop_Stool": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Prop_Street": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    18
+   ],
+   [
+    "M_Glass_Transparent_01",
+    1
+   ]
+  ],
+  "Prop_Syringe": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    3
+   ]
+  ],
+  "Prop_Target": [
+   [
+    "M_Hologram_Basic_01_A",
+    4
+   ]
+  ],
+  "Prop_Tool": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    12
+   ]
+  ],
+  "Prop_Traffic": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    5
+   ],
+   [
+    "M_Hologram_Signs",
+    2
+   ]
+  ],
+  "Prop_Trash": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    5
+   ],
+   [
+    "M_Hologram_Posters_01_A",
+    1
+   ]
+  ],
+  "Prop_Vending": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    3
+   ],
+   [
+    "MI_PolygonCyberCity_01_B",
+    1
+   ],
+   [
+    "M_Glass_Transparent_Shiny",
+    1
+   ]
+  ],
+  "Prop_Water": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    3
+   ]
+  ],
+  "Prop_Weapon": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    3
+   ]
+  ],
+  "Prop_Wires": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    18
+   ]
+  ],
+  "Prop_Work": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Veh_Cart": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Veh_Food": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ],
+   [
+    "M_Glass_Transparent_Shiny",
+    1
+   ]
+  ],
+  "Veh_Luxury": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ],
+   [
+    "M_Glass_Transparent_01",
+    1
+   ]
+  ],
+  "Veh_SUV": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ],
+   [
+    "M_Glass_01_A",
+    1
+   ],
+   [
+    "M_Glass_Transparent_01",
+    1
+   ]
+  ],
+  "Veh_Train": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ],
+   [
+    "M_Glass_Transparent_01",
+    2
+   ],
+   [
+    "M_Hologram_Text",
+    1
+   ]
+  ],
+  "Veh_Truck": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    7
+   ],
+   [
+    "M_Glass_Transparent_01",
+    2
+   ]
+  ],
+  "Wep_Charm": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    1
+   ]
+  ],
+  "Wep_Dagger": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Wep_Grenade": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Wep_Laser": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Wep_Missile": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    11
+   ]
+  ],
+  "Wep_Paint": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Wep_Pistol": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Wep_Rifle": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Wep_SMG": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    2
+   ]
+  ],
+  "Wep_Shock": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    5
+   ]
+  ],
+  "Wep_Shuriken": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    3
+   ]
+  ],
+  "Wep_Sniper": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    5
+   ]
+  ],
+  "Wep_Sword": [
+   [
+    "MI_PolygonCyberCity_01_A",
+    10
+   ]
+  ]
+ },
+ "doorways": [
+  {
+   "mesh": "SM_Bld_Pipe_Large_Hatch_01",
+   "at": [
+    -4809.1,
+    -16261.0,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonCyberCity_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Pipe_Hatch_Valve",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Pipe_Large_Hatch_02",
+   "at": [
+    -4223.1,
+    -16256.6,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonCyberCity_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Base_Door_01",
+   "at": [
+    -2875.0,
+    -14261.9,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonCyberCity_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Base_Door_Large_01",
+   "at": [
+    -4588.4,
+    -14261.9,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonCyberCity_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Base_Wall_Door_01",
+   "at": [
+    -4088.1,
+    -15400.0,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_Wall_01_A",
+    "MI_PolygonCyberCity_01_A",
+    "M_Wall_01_A_Triplanar"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Base_Wall_Door_Double_01",
+   "at": [
+    -4657.1,
+    -15400.0,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_Wall_01_A",
+    "MI_PolygonCyberCity_01_A",
+    "M_Wall_01_A_Triplanar"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Base_Wall_Door_Double_Large_01",
+   "at": [
+    -5226.2,
+    -15400.0,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_Wall_11_A_Triplanar",
+    "MI_PolygonCyberCity_01_A",
+    "M_Wall_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Bld_Base_Wall_Door_Large_01",
+   "at": [
+    -2950.0,
+    -15400.0,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_Wall_01_A_Triplanar",
+    "MI_PolygonCyberCity_01_A",
+    "M_Wall_01_A"
+   ],
+   "beside": []
+  },
+  {
+   "mesh": "SM_Prop_Electrical_Box_01_Door_01",
+   "at": [
+    -6860.6,
+    -14224.2,
+    91.8
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonCyberCity_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Prop_Electrical_Box_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Prop_Fridge_01_Door_01",
+   "at": [
+    -27776.1,
+    -15476.5,
+    124.1
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonCyberCity_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Prop_Fridge_01",
+     1
+    ],
+    [
+     "SM_Prop_Fridge_01_Door_02",
+     1
+    ],
+    [
+     "SM_Prop_Fridge_01_Glass_03",
+     1
+    ],
+    [
+     "SM_Prop_Fridge_01_Glass_01",
+     1
+    ],
+    [
+     "SM_Prop_Fridge_01_Glass_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Prop_Server_01_Door_01",
+   "at": [
+    -20019.1,
+    -13218.0,
+    120.6
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonCyberCity_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Prop_Server_01",
+     1
+    ],
+    [
+     "SM_Prop_Server_01_Blade_01",
+     1
+    ],
+    [
+     "SM_Prop_Server_01_Blade_02",
+     1
+    ],
+    [
+     "SM_Prop_Server_01_Blade_03",
+     1
+    ],
+    [
+     "SM_Prop_Server_01_Glass_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Pipe_Hatch_Valve",
+   "at": [
+    -4789.3,
+    -16311.5,
+    -0.1
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonCyberCity_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Pipe_Large_Hatch_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Prop_Fridge_01_Door_02",
+   "at": [
+    -27584.6,
+    -15483.5,
+    49.6
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "MI_PolygonCyberCity_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Prop_Fridge_01",
+     1
+    ],
+    [
+     "SM_Prop_Fridge_01_Door_01",
+     1
+    ],
+    [
+     "SM_Prop_Fridge_01_Glass_03",
+     1
+    ],
+    [
+     "SM_Prop_Fridge_01_Glass_01",
+     1
+    ],
+    [
+     "SM_Prop_Fridge_01_Glass_02",
+     1
+    ]
+   ]
+  }
+ ],
+ "lights": [
+  {
+   "class": "SkyLight",
+   "at": [
+    -21927.9,
+    564.3,
+    9863.9
+   ],
+   "mobility": "<ComponentMobility.STATIONARY: 1>",
+   "intensity": 1.0,
+   "colour": "<Struct 'Color' (0x000001A86C252FB8) {b: 255, g: 255, r: 255, a: 255}>",
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_NeonSign_01",
+   "nearest_dist": 16589.8
+  },
+  {
+   "class": "DirectionalLight",
+   "at": [
+    -25821.2,
+    -5320.3,
+    2575.8
+   ],
+   "mobility": "<ComponentMobility.STATIONARY: 1>",
+   "intensity": 2.8848860263824463,
+   "colour": "<Struct 'Color' (0x000001A8693838B8) {b: 255, g: 255, r: 255, a: 255}>",
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Vending_Machine_01_Insert_01",
+   "nearest_dist": 8561.8
+  }
+ ]
+}

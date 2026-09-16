@@ -1,0 +1,4921 @@
+{
+ "map": "/Game/PolygonSciFiSpace/Maps/Demonstration_Interior",
+ "actors": 1448,
+ "mesh_actors": 1376,
+ "families": [
+  [
+   "Bld_Wall",
+   343
+  ],
+  [
+   "Bld_Floor",
+   179
+  ],
+  [
+   "Bld_Ceiling",
+   144
+  ],
+  [
+   "Prop_Crate",
+   72
+  ],
+  [
+   "Prop_Detail",
+   47
+  ],
+  [
+   "Prop_Plant",
+   45
+  ],
+  [
+   "Prop_Medical",
+   43
+  ],
+  [
+   "Hud_ScreenPreset",
+   41
+  ],
+  [
+   "Bld_Crew",
+   30
+  ],
+  [
+   "Bld_Bridge",
+   29
+  ],
+  [
+   "Prop_Oxygen",
+   29
+  ],
+  [
+   "Prop_Stool",
+   26
+  ],
+  [
+   "Prop_Missile",
+   25
+  ],
+  [
+   "Prop_Barrel",
+   21
+  ],
+  [
+   "Prop_Desk",
+   17
+  ],
+  [
+   "Prop_Cart",
+   16
+  ],
+  [
+   "Prop_Greeble",
+   16
+  ],
+  [
+   "Prop_Light",
+   15
+  ],
+  [
+   "Prop_FoodTray",
+   14
+  ],
+  [
+   "Prop_CryoBed",
+   12
+  ],
+  [
+   "Prop_Buttons",
+   12
+  ],
+  [
+   "SignBorder_Number",
+   12
+  ],
+  [
+   "Bld_Lift",
+   11
+  ],
+  [
+   "Bld_Hydroponics",
+   9
+  ],
+  [
+   "Prop_Chr",
+   9
+  ],
+  [
+   "Prop_AirVent",
+   8
+  ],
+  [
+   "Prop_Hose",
+   8
+  ],
+  [
+   "Prop_CornerTable",
+   8
+  ],
+  [
+   "Prop_CornerSeat",
+   8
+  ],
+  [
+   "Prop_Screen",
+   7
+  ],
+  [
+   "Bld_Corridor",
+   6
+  ],
+  [
+   "Prop_Battery",
+   6
+  ],
+  [
+   "Prop_FoodPacket",
+   6
+  ],
+  [
+   "Prop_MissleRack",
+   5
+  ],
+  [
+   "Prop_Pillar",
+   5
+  ],
+  [
+   "Prop_ControlPanel",
+   5
+  ],
+  [
+   "Sign_CrewQuarters",
+   5
+  ],
+  [
+   "Prop_CenterTube",
+   4
+  ],
+  [
+   "Prop_SquareTable",
+   4
+  ],
+  [
+   "Prop_MedicalArms",
+   4
+  ],
+  [
+   "Prop_MapTable",
+   4
+  ],
+  [
+   "Prop_Stairs",
+   3
+  ],
+  [
+   "Prop_Table",
+   3
+  ],
+  [
+   "Prop_Panel",
+   3
+  ],
+  [
+   "Prop_EnergyPort",
+   3
+  ],
+  [
+   "Prop_Bed",
+   3
+  ],
+  [
+   "Sign_Hydroponics",
+   3
+  ],
+  [
+   "Prop_Ladder",
+   2
+  ],
+  [
+   "Prop_Decontamination",
+   2
+  ],
+  [
+   "Prop_Engine",
+   2
+  ],
+  [
+   "Prop_Tank",
+   2
+  ],
+  [
+   "Prop_HandScanner",
+   2
+  ],
+  [
+   "Prop_StairsPlatform",
+   2
+  ],
+  [
+   "Bld_HangerExteriorDoor",
+   2
+  ],
+  [
+   "Sign_Exit",
+   2
+  ],
+  [
+   "Sign_ScienceLab",
+   2
+  ],
+  [
+   "Sign_Kitchen",
+   2
+  ],
+  [
+   "Sign_MedicalBay",
+   2
+  ],
+  [
+   "Prop_Mine",
+   2
+  ],
+  [
+   "Sign_Bridge",
+   2
+  ],
+  [
+   "Sign_Hanger",
+   2
+  ],
+  [
+   "Prop_Test",
+   2
+  ],
+  [
+   "Bld_Hanger",
+   1
+  ],
+  [
+   "Bld_HangerCeiling",
+   1
+  ],
+  [
+   "Bld_HangerFloor",
+   1
+  ],
+  [
+   "Bld_Landing",
+   1
+  ],
+  [
+   "Bld_HangerPlatform",
+   1
+  ],
+  [
+   "Prop_Sink",
+   1
+  ],
+  [
+   "Prop_Satellite",
+   1
+  ],
+  [
+   "Prop_Antenna",
+   1
+  ],
+  [
+   "SignBorder_Plant",
+   1
+  ],
+  [
+   "Sign_AirLock",
+   1
+  ],
+  [
+   "Prop_DeadZub",
+   1
+  ],
+  [
+   "SignBorder_Medical",
+   1
+  ],
+  [
+   "SignBorder_Nuclear",
+   1
+  ],
+  [
+   "SignBorder_Fix",
+   1
+  ],
+  [
+   "Prop_Toilet",
+   1
+  ],
+  [
+   "SignBorder_Fire",
+   1
+  ],
+  [
+   "Sphere",
+   1
+  ],
+  [
+   "Bld_HangerGlass",
+   1
+  ]
+ ],
+ "materials_by_family": {
+  "Bld_Bridge": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    28
+   ],
+   [
+    "M_PolygonSciFiSpace_Glass_01",
+    1
+   ]
+  ],
+  "Bld_Ceiling": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    144
+   ]
+  ],
+  "Bld_Corridor": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    6
+   ]
+  ],
+  "Bld_Crew": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    30
+   ]
+  ],
+  "Bld_Floor": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    179
+   ]
+  ],
+  "Bld_Hanger": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Bld_HangerCeiling": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Bld_HangerExteriorDoor": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Bld_HangerFloor": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Bld_HangerGlass": [
+   [
+    "M_PolygonSciFiSpace_Glass_01",
+    1
+   ]
+  ],
+  "Bld_HangerPlatform": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Bld_Hydroponics": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    9
+   ]
+  ],
+  "Bld_Landing": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Bld_Lift": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    11
+   ]
+  ],
+  "Bld_Wall": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    328
+   ],
+   [
+    "M_PolygonSciFiSpace_Glass_01",
+    15
+   ]
+  ],
+  "Hud_ScreenPreset": [
+   [
+    "M_PolygonSciFiSpace_Hud",
+    41
+   ],
+   [
+    "M_PolygonSciFiSpace_Hud_Glass",
+    41
+   ]
+  ],
+  "Prop_AirVent": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    8
+   ]
+  ],
+  "Prop_Antenna": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Barrel": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    21
+   ]
+  ],
+  "Prop_Battery": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    6
+   ]
+  ],
+  "Prop_Bed": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    3
+   ]
+  ],
+  "Prop_Buttons": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    12
+   ]
+  ],
+  "Prop_Cart": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    16
+   ]
+  ],
+  "Prop_CenterTube": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ],
+   [
+    "M_PolygonSciFiSpace_Glass_01",
+    2
+   ]
+  ],
+  "Prop_Chr": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    9
+   ]
+  ],
+  "Prop_ControlPanel": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    5
+   ]
+  ],
+  "Prop_CornerSeat": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    8
+   ]
+  ],
+  "Prop_CornerTable": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    8
+   ]
+  ],
+  "Prop_Crate": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    72
+   ]
+  ],
+  "Prop_CryoBed": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    8
+   ],
+   [
+    "M_PolygonSciFiSpace_Glass_01",
+    4
+   ]
+  ],
+  "Prop_DeadZub": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Decontamination": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Prop_Desk": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    17
+   ]
+  ],
+  "Prop_Detail": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    47
+   ]
+  ],
+  "Prop_EnergyPort": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    3
+   ]
+  ],
+  "Prop_Engine": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Prop_FoodPacket": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    6
+   ]
+  ],
+  "Prop_FoodTray": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    14
+   ]
+  ],
+  "Prop_Greeble": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    16
+   ]
+  ],
+  "Prop_HandScanner": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Prop_Hose": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    8
+   ]
+  ],
+  "Prop_Ladder": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Prop_Light": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    15
+   ]
+  ],
+  "Prop_MapTable": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    4
+   ]
+  ],
+  "Prop_Medical": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    38
+   ],
+   [
+    "M_PolygonSciFiSpace_Glass_01",
+    5
+   ]
+  ],
+  "Prop_MedicalArms": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    4
+   ]
+  ],
+  "Prop_Mine": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Prop_Missile": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    25
+   ]
+  ],
+  "Prop_MissleRack": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    5
+   ]
+  ],
+  "Prop_Oxygen": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    29
+   ]
+  ],
+  "Prop_Panel": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    3
+   ]
+  ],
+  "Prop_Pillar": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    5
+   ]
+  ],
+  "Prop_Plant": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    45
+   ]
+  ],
+  "Prop_Satellite": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_Screen": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    7
+   ]
+  ],
+  "Prop_Sink": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "Prop_SquareTable": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    4
+   ]
+  ],
+  "Prop_Stairs": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    3
+   ]
+  ],
+  "Prop_StairsPlatform": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Prop_Stool": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    26
+   ]
+  ],
+  "Prop_Table": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    3
+   ]
+  ],
+  "Prop_Tank": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    2
+   ]
+  ],
+  "Prop_Test": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ],
+   [
+    "M_PolygonSciFiSpace_Glass_01",
+    1
+   ]
+  ],
+  "Prop_Toilet": [
+   [
+    "M_PolygonSciFiSpace_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Fire": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Fix": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Medical": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Nuclear": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "SignBorder_Number": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    12
+   ]
+  ],
+  "SignBorder_Plant": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "Sign_AirLock": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    1
+   ]
+  ],
+  "Sign_Bridge": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    2
+   ]
+  ],
+  "Sign_CrewQuarters": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    5
+   ]
+  ],
+  "Sign_Exit": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    2
+   ]
+  ],
+  "Sign_Hanger": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    2
+   ]
+  ],
+  "Sign_Hydroponics": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    3
+   ]
+  ],
+  "Sign_Kitchen": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    2
+   ]
+  ],
+  "Sign_MedicalBay": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    2
+   ]
+  ],
+  "Sign_ScienceLab": [
+   [
+    "M_PolygonSciFiSpace_Signs_01_A",
+    2
+   ]
+  ],
+  "Sphere": [
+   [
+    "M_FX_Skybox",
+    1
+   ]
+  ]
+ },
+ "doorways": [
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_03",
+   "at": [
+    -1509.5,
+    -3494.4,
+    151.6
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_010",
+     1
+    ],
+    [
+     "SM_Bld_Floor_08",
+     1
+    ],
+    [
+     "SM_Prop_Greeble_Panel_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_01",
+     1
+    ],
+    [
+     "SM_Sign_Exit_02",
+     1
+    ],
+    [
+     "SM_Sign_Hanger_01",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_02",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_02",
+   "at": [
+    500.0,
+    2000.0,
+    0.0
+   ],
+   "yaw": 90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Wall_05",
+     1
+    ],
+    [
+     "SM_Prop_CornerTable_01",
+     1
+    ],
+    [
+     "SM_Sign_Hydroponics_02",
+     1
+    ],
+    [
+     "SM_SignBorder_Fix_01",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_02",
+   "at": [
+    1250.8,
+    -3497.1,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_08",
+     3
+    ],
+    [
+     "SM_Bld_Wall_01",
+     3
+    ],
+    [
+     "SM_Bld_Ceiling_02",
+     2
+    ],
+    [
+     "SM_Bld_Ceiling_01",
+     2
+    ],
+    [
+     "SM_Bld_Floor_07",
+     1
+    ],
+    [
+     "SM_Prop_Greeble_Panel_01",
+     1
+    ],
+    [
+     "SM_Bld_HangerExteriorDoor_02",
+     1
+    ],
+    [
+     "SM_SignBorder_Number_06",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_02",
+   "at": [
+    -250.3,
+    -3497.5,
+    502.4
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Wall_01",
+     3
+    ],
+    [
+     "SM_Bld_Ceiling_02",
+     2
+    ],
+    [
+     "SM_Bld_Ceiling_01",
+     2
+    ],
+    [
+     "SM_Bld_Floor_08",
+     1
+    ],
+    [
+     "SM_Prop_Tank_01",
+     1
+    ],
+    [
+     "SM_Prop_Greeble_Panel_01",
+     1
+    ],
+    [
+     "SM_Prop_HandScanner_01",
+     1
+    ],
+    [
+     "SM_Prop_Detail_Tank_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_04",
+   "at": [
+    -2500.0,
+    500.0,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_Small_03",
+     1
+    ],
+    [
+     "SM_Prop_Desk_End_01",
+     1
+    ],
+    [
+     "SM_Prop_Desk_Small_01",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_03",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_04",
+   "at": [
+    -1500.0,
+    0.0,
+    0.0
+   ],
+   "yaw": -90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_Small_03",
+     1
+    ],
+    [
+     "SM_Prop_Ladder_Handles_01",
+     1
+    ],
+    [
+     "SM_SignBorder_Plant_01",
+     1
+    ],
+    [
+     "SM_Sign_Hydroponics_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_02",
+   "at": [
+    -500.0,
+    2000.0,
+    0.0
+   ],
+   "yaw": 90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Floor_010",
+     1
+    ],
+    [
+     "SM_Bld_Wall_02",
+     1
+    ],
+    [
+     "SM_Prop_CornerTable_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_02",
+   "at": [
+    -500.0,
+    3500.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Bridge_Chair_Captain_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Corner_Pillar_05",
+     1
+    ],
+    [
+     "SM_Prop_Detail_Machine_01",
+     1
+    ],
+    [
+     "SM_Sign_Bridge_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_02",
+   "at": [
+    500.0,
+    3500.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Bridge_Chair_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Corner_Pillar_05",
+     1
+    ],
+    [
+     "SM_Sign_Bridge_01",
+     1
+    ],
+    [
+     "SM_Hud_ScreenPreset_02",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_02",
+   "at": [
+    2500.0,
+    -2500.0,
+    0.0
+   ],
+   "yaw": 90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_Small_04",
+     3
+    ],
+    [
+     "SM_Bld_Floor_Small_02",
+     1
+    ],
+    [
+     "SM_Bld_Floor_08",
+     1
+    ],
+    [
+     "SM_Bld_Floor_Small_03",
+     1
+    ],
+    [
+     "SM_Bld_Wall_01_Alt",
+     1
+    ],
+    [
+     "SM_Prop_Plant_Vase_01",
+     1
+    ],
+    [
+     "SM_Prop_FoodTray_03",
+     1
+    ],
+    [
+     "SM_Prop_Detail_Pipe_Pillar_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_02",
+   "at": [
+    -1000.0,
+    3000.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_07",
+     1
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Floor_Small_02",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Glass_04",
+     1
+    ],
+    [
+     "SM_Bld_Wall_04",
+     1
+    ],
+    [
+     "SM_Bld_Corridor_Single_Arch_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Corner_Pillar_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Corner_Pillar_Wide_04",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_02",
+   "at": [
+    1000.0,
+    3000.0,
+    0.0
+   ],
+   "yaw": -0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_Small_02",
+     2
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Corner_Pillar_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Exterior_Window_02",
+     1
+    ],
+    [
+     "SM_Sign_MedicalBay_01",
+     1
+    ],
+    [
+     "SM_Prop_Greeble_Panel_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Corner_Pillar_Wide_04",
+     1
+    ],
+    [
+     "SM_SignBorder_Nuclear_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_04",
+   "at": [
+    -2055.7,
+    569.9,
+    250.0
+   ],
+   "yaw": -110.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_Small_03",
+     2
+    ],
+    [
+     "SM_Bld_Floor_010",
+     1
+    ],
+    [
+     "SM_Prop_Medical_Cart_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_01_Alt",
+     1
+    ],
+    [
+     "SM_Prop_AirVent_Small_01",
+     1
+    ],
+    [
+     "SM_Sign_Hydroponics_01",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_03",
+     1
+    ],
+    [
+     "SM_Hud_ScreenPreset_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Lift_Wall_01",
+   "at": [
+    -1000.0,
+    -3000.0,
+    500.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Lift_Wall_Door_01",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Wall_Door_02",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Door_02",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Door_01",
+     2
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Lift_01",
+     1
+    ],
+    [
+     "SM_Bld_Lift_Wall_01",
+     1
+    ],
+    [
+     "SM_Bld_Corridor_Double_Arch_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Lift_01",
+   "at": [
+    -1000.0,
+    -3000.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Lift_Wall_01",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Wall_Door_01",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Wall_Door_02",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Door_02",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Door_01",
+     2
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Corridor_Double_Arch_02",
+     1
+    ],
+    [
+     "SM_Prop_Plant_Vase_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Lift_Wall_01",
+   "at": [
+    -1000.0,
+    -3000.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Lift_Wall_Door_01",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Wall_Door_02",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Door_02",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Door_01",
+     2
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Lift_Wall_01",
+     1
+    ],
+    [
+     "SM_Bld_Lift_01",
+     1
+    ],
+    [
+     "SM_Bld_Corridor_Double_Arch_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_03",
+   "at": [
+    -500.0,
+    -1050.0,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Wall_Doorframe_Door_03",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_03",
+   "at": [
+    -500.0,
+    -1050.0,
+    450.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Wall_Doorframe_03",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_03",
+   "at": [
+    -500.0,
+    -2000.0,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_08",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_Door_03",
+     1
+    ],
+    [
+     "SM_Prop_Medical_Cart_02",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_03",
+   "at": [
+    -500.0,
+    -2000.0,
+    450.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_08",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_03",
+     1
+    ],
+    [
+     "SM_Prop_Medical_Cart_02",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_02",
+   "at": [
+    2000.0,
+    -1000.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_Small_04",
+     3
+    ],
+    [
+     "SM_Bld_Floor_Small_02",
+     2
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Wall_01_Alt",
+     1
+    ],
+    [
+     "SM_Prop_Plant_Vase_01",
+     1
+    ],
+    [
+     "SM_Prop_Battery_03",
+     1
+    ],
+    [
+     "SM_Sign_Kitchen_01",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_04",
+   "at": [
+    -2500.0,
+    -3500.0,
+    0.0
+   ],
+   "yaw": 180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Prop_Decontamination_Shower_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_02",
+   "at": [
+    3000.0,
+    -500.0,
+    0.0
+   ],
+   "yaw": -90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_Small_Hand_Rail_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_04_Alt",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Glass_04_Alt",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Exterior_01",
+     1
+    ],
+    [
+     "SM_Prop_Medical_Cart_Bare_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Pillar_02",
+     1
+    ],
+    [
+     "SM_Sign_AirLock_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_02",
+   "at": [
+    -2000.0,
+    -3000.0,
+    0.0
+   ],
+   "yaw": -90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Prop_Decontamination_Shower_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_EscPod_Hatch_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Esc_Hatch_Door_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_02",
+   "at": [
+    -2500.0,
+    -3000.0,
+    0.0
+   ],
+   "yaw": -90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Wall_Tube_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_06",
+     1
+    ],
+    [
+     "SM_Prop_Decontamination_Shower_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_EscPod_Hatch_01",
+   "at": [
+    2500.0,
+    -3500.0,
+    500.0
+   ],
+   "yaw": 90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_08",
+     2
+    ],
+    [
+     "SM_Bld_Ceiling_02",
+     2
+    ],
+    [
+     "SM_Prop_Plant_Vase_01",
+     2
+    ],
+    [
+     "SM_Bld_Floor_07",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Corner_Pillar_05",
+     1
+    ],
+    [
+     "SM_Bld_Wall_01",
+     1
+    ],
+    [
+     "SM_Bld_HangerExteriorDoor_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Esc_Hatch_Door_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_02",
+   "at": [
+    1000.0,
+    -1000.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Wall_Pods_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Pods_Glass_01",
+     1
+    ],
+    [
+     "SM_Bld_Crew_Kitchen_01",
+     1
+    ],
+    [
+     "SM_Sign_CrewQuarters_01",
+     1
+    ],
+    [
+     "SM_Prop_Chr_Male_Cryo_01",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_EscPod_Hatch_01",
+   "at": [
+    -2000.0,
+    -3000.0,
+    500.0
+   ],
+   "yaw": -90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Wall_Doorframe_02",
+     1
+    ],
+    [
+     "SM_Prop_Decontamination_Shower_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Esc_Hatch_Door_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_06",
+   "at": [
+    500.0,
+    -500.0,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_010",
+     1
+    ],
+    [
+     "SM_Bld_Wall_01_Alt",
+     1
+    ],
+    [
+     "SM_Bld_Crew_Blank_01",
+     1
+    ],
+    [
+     "SM_Sign_CrewQuarters_01",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_03",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Door_01",
+   "at": [
+    794.5,
+    -490.8,
+    10.7
+   ],
+   "yaw": -80.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Crew_Blank_01",
+     1
+    ],
+    [
+     "SM_Bld_Crew_Blank_02",
+     1
+    ],
+    [
+     "SM_Sign_CrewQuarters_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_06",
+   "at": [
+    500.0,
+    1000.0,
+    0.0
+   ],
+   "yaw": 0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_07",
+     1
+    ],
+    [
+     "SM_Bld_Crew_Blank_01",
+     1
+    ],
+    [
+     "SM_Bld_Crew_Shower_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Door_01",
+     1
+    ],
+    [
+     "SM_Sign_CrewQuarters_01",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_03",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Door_01",
+   "at": [
+    700.0,
+    1000.0,
+    0.0
+   ],
+   "yaw": 90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_07",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_06",
+     1
+    ],
+    [
+     "SM_Bld_Crew_Blank_01",
+     1
+    ],
+    [
+     "SM_Bld_Crew_Shower_01",
+     1
+    ],
+    [
+     "SM_Sign_CrewQuarters_01",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_03",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_06",
+   "at": [
+    -500.0,
+    500.0,
+    0.0
+   ],
+   "yaw": 90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_010",
+     1
+    ],
+    [
+     "SM_Bld_Crew_Beds_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Door_01",
+     1
+    ],
+    [
+     "SM_Sign_CrewQuarters_01",
+     1
+    ],
+    [
+     "SM_Prop_Plant_Vase_02",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_03",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Door_01",
+   "at": [
+    -500.0,
+    700.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_010",
+     1
+    ],
+    [
+     "SM_Bld_Crew_Beds_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_06",
+     1
+    ],
+    [
+     "SM_Sign_CrewQuarters_01",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_03",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_02",
+   "at": [
+    2000.0,
+    -500.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_04",
+     1
+    ],
+    [
+     "SM_Bld_Wall_03",
+     1
+    ],
+    [
+     "SM_Prop_Detail_Machine_01",
+     1
+    ],
+    [
+     "SM_Sign_ScienceLab_01",
+     1
+    ],
+    [
+     "SM_Prop_Greeble_Panel_01",
+     1
+    ],
+    [
+     "SM_Prop_Hose_01",
+     1
+    ],
+    [
+     "SM_SignBorder_Fire_01",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_03",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_06",
+   "at": [
+    -500.0,
+    -500.0,
+    0.0
+   ],
+   "yaw": 90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_010",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Corner_Pillar_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Door_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_01",
+     1
+    ],
+    [
+     "SM_Prop_Detail_Machine_01",
+     1
+    ],
+    [
+     "SM_Sign_CrewQuarters_01",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_03",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Door_01",
+   "at": [
+    -500.0,
+    -300.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_010",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Corner_Pillar_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_06",
+     1
+    ],
+    [
+     "SM_Bld_Wall_01",
+     1
+    ],
+    [
+     "SM_Prop_Detail_Machine_01",
+     1
+    ],
+    [
+     "SM_Sign_CrewQuarters_01",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_03",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_02",
+   "at": [
+    2000.0,
+    1000.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Wall_01",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_Pipes_Straight_01",
+     1
+    ],
+    [
+     "SM_Prop_Medical_Cart_02",
+     1
+    ],
+    [
+     "SM_Sign_ScienceLab_01",
+     1
+    ],
+    [
+     "SM_Prop_Greeble_Panel_01",
+     1
+    ],
+    [
+     "SM_Prop_Plant_Vase_01",
+     1
+    ],
+    [
+     "SM_Prop_Crate_Wide_Lid_01",
+     1
+    ],
+    [
+     "SM_Prop_Crate_Wide_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_02",
+   "at": [
+    1000.0,
+    -3000.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_010",
+     1
+    ],
+    [
+     "SM_Bld_Wall_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_05",
+     1
+    ],
+    [
+     "SM_Prop_Medical_Cart_02",
+     1
+    ],
+    [
+     "SM_Prop_HandScanner_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Pillar_05",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_03",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_Door_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_HangerExteriorDoor_01",
+   "at": [
+    2625.9,
+    -3484.6,
+    9.5
+   ],
+   "yaw": -90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_08",
+     2
+    ],
+    [
+     "SM_Bld_Ceiling_02",
+     2
+    ],
+    [
+     "SM_Prop_Plant_Vase_01",
+     2
+    ],
+    [
+     "SM_Bld_Floor_07",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Corner_Pillar_05",
+     1
+    ],
+    [
+     "SM_Bld_Wall_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_EscPod_Hatch_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Esc_Hatch_Door_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_HangerExteriorDoor_02",
+   "at": [
+    1412.0,
+    -3502.8,
+    -0.8
+   ],
+   "yaw": -90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_08",
+     2
+    ],
+    [
+     "SM_Bld_Wall_01",
+     2
+    ],
+    [
+     "SM_Bld_Floor_07",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_Door_02",
+     1
+    ],
+    [
+     "SM_Prop_Greeble_Panel_01",
+     1
+    ],
+    [
+     "SM_SignBorder_Number_06",
+     1
+    ],
+    [
+     "SM_Sign_Exit_02",
+     1
+    ],
+    [
+     "SM_Sign_Hanger_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_04",
+   "at": [
+    -2948.8,
+    -3543.8,
+    261.8
+   ],
+   "yaw": 40.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_07",
+     1
+    ],
+    [
+     "SM_Bld_Wall_06",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_04",
+   "at": [
+    -1429.8,
+    -445.6,
+    257.8
+   ],
+   "yaw": 160.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_Small_03",
+     2
+    ],
+    [
+     "SM_Prop_Desk_End_01",
+     1
+    ],
+    [
+     "SM_Prop_Desk_Small_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_01_Alt",
+     1
+    ],
+    [
+     "SM_SignBorder_Number_04",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_03",
+     1
+    ],
+    [
+     "SM_Hud_ScreenPreset_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Esc_Hatch_Door_01",
+   "at": [
+    2500.0,
+    -3500.0,
+    500.0
+   ],
+   "yaw": 90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_08",
+     2
+    ],
+    [
+     "SM_Bld_Ceiling_02",
+     2
+    ],
+    [
+     "SM_Prop_Plant_Vase_01",
+     2
+    ],
+    [
+     "SM_Bld_Floor_07",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Corner_Pillar_05",
+     1
+    ],
+    [
+     "SM_Bld_Wall_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_EscPod_Hatch_01",
+     1
+    ],
+    [
+     "SM_Bld_HangerExteriorDoor_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Sign_AirLock_01",
+   "at": [
+    2986.1,
+    -749.1,
+    371.7
+   ],
+   "yaw": 90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_Signs_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Wall_Pillar_02",
+     2
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Floor_Small_Hand_Rail_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_02",
+     1
+    ],
+    [
+     "SM_Bld_Wall_04_Alt",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Glass_04_Alt",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Exterior_Window_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Exterior_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Esc_Hatch_Door_01",
+   "at": [
+    -2000.0,
+    -3000.0,
+    500.0
+   ],
+   "yaw": -90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Wall_Doorframe_02",
+     1
+    ],
+    [
+     "SM_Prop_Decontamination_Shower_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_EscPod_Hatch_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_02",
+   "at": [
+    500.0,
+    2250.0,
+    0.0
+   ],
+   "yaw": 90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Wall_02",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_02",
+     1
+    ],
+    [
+     "SM_Bld_Wall_05",
+     1
+    ],
+    [
+     "SM_Sign_Hydroponics_02",
+     1
+    ],
+    [
+     "SM_SignBorder_Fix_01",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_02",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_02",
+   "at": [
+    1250.0,
+    3000.0,
+    0.0
+   ],
+   "yaw": -0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_011",
+     2
+    ],
+    [
+     "SM_Bld_Floor_Small_02",
+     2
+    ],
+    [
+     "SM_Bld_Wall_Pillar_02",
+     2
+    ],
+    [
+     "SM_Bld_Wall_05",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Corner_Pillar_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Exterior_Window_02",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_02",
+     1
+    ],
+    [
+     "SM_Prop_Hose_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_02",
+   "at": [
+    250.0,
+    3500.0,
+    0.0
+   ],
+   "yaw": -0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Wall_Corner_Pillar_05",
+     2
+    ],
+    [
+     "SM_Bld_Bridge_Chair_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_02",
+     1
+    ],
+    [
+     "SM_Bld_Wall_05",
+     1
+    ],
+    [
+     "SM_Sign_Bridge_01",
+     1
+    ],
+    [
+     "SM_Hud_ScreenPreset_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_02",
+   "at": [
+    -750.0,
+    3500.0,
+    0.0
+   ],
+   "yaw": -0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Wall_Corner_Pillar_05",
+     2
+    ],
+    [
+     "SM_Bld_Bridge_Floor_01",
+     1
+    ],
+    [
+     "SM_Bld_Bridge_Platform_01",
+     1
+    ],
+    [
+     "SM_Bld_Bridge_Rear_Wall_01",
+     1
+    ],
+    [
+     "SM_Bld_Bridge_Walls_01",
+     1
+    ],
+    [
+     "SM_Bld_Bridge_Wall_Details_01",
+     1
+    ],
+    [
+     "SM_Bld_Bridge_Console_Corner_01",
+     1
+    ],
+    [
+     "SM_Bld_Bridge_Console_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_02",
+   "at": [
+    -1250.0,
+    3000.0,
+    0.0
+   ],
+   "yaw": -0.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_Small_02",
+     2
+    ],
+    [
+     "SM_Bld_Wall_Pillar_02",
+     2
+    ],
+    [
+     "SM_Bld_Floor_07",
+     1
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Wall_02",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Glass_04",
+     1
+    ],
+    [
+     "SM_Bld_Wall_04",
+     1
+    ],
+    [
+     "SM_Bld_Corridor_Single_Arch_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Lift_Wall_Door_01",
+   "at": [
+    -1000.0,
+    -3000.0,
+    500.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Lift_Wall_01",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Wall_Door_02",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Door_02",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Door_01",
+     2
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Lift_01",
+     1
+    ],
+    [
+     "SM_Bld_Corridor_Double_Arch_02",
+     1
+    ],
+    [
+     "SM_Prop_Plant_Vase_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Lift_Wall_Door_02",
+   "at": [
+    -1000.0,
+    -3000.0,
+    500.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Lift_Wall_01",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Wall_Door_01",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Door_02",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Door_01",
+     2
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Lift_01",
+     1
+    ],
+    [
+     "SM_Bld_Corridor_Double_Arch_02",
+     1
+    ],
+    [
+     "SM_Prop_Plant_Vase_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Lift_Door_02",
+   "at": [
+    -1000.0,
+    -3000.0,
+    500.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Lift_Wall_01",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Wall_Door_01",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Wall_Door_02",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Door_01",
+     2
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Lift_01",
+     1
+    ],
+    [
+     "SM_Bld_Corridor_Double_Arch_02",
+     1
+    ],
+    [
+     "SM_Prop_Plant_Vase_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Lift_Door_01",
+   "at": [
+    -1000.0,
+    -3000.0,
+    500.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Lift_Wall_01",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Wall_Door_01",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Wall_Door_02",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Door_02",
+     2
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Lift_01",
+     1
+    ],
+    [
+     "SM_Bld_Corridor_Double_Arch_02",
+     1
+    ],
+    [
+     "SM_Prop_Plant_Vase_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Lift_Wall_Door_01",
+   "at": [
+    -1000.0,
+    -3000.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Lift_Wall_01",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Wall_Door_02",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Door_02",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Door_01",
+     2
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Lift_01",
+     1
+    ],
+    [
+     "SM_Bld_Corridor_Double_Arch_02",
+     1
+    ],
+    [
+     "SM_Prop_Plant_Vase_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Lift_Wall_Door_02",
+   "at": [
+    -1000.0,
+    -3000.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Lift_Wall_01",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Wall_Door_01",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Door_02",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Door_01",
+     2
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Lift_01",
+     1
+    ],
+    [
+     "SM_Bld_Corridor_Double_Arch_02",
+     1
+    ],
+    [
+     "SM_Prop_Plant_Vase_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Lift_Door_02",
+   "at": [
+    -1000.0,
+    -3000.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Lift_Wall_01",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Wall_Door_01",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Wall_Door_02",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Door_01",
+     2
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Lift_01",
+     1
+    ],
+    [
+     "SM_Bld_Corridor_Double_Arch_02",
+     1
+    ],
+    [
+     "SM_Prop_Plant_Vase_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Lift_Door_01",
+   "at": [
+    -1000.0,
+    -3000.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Lift_Wall_01",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Wall_Door_01",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Wall_Door_02",
+     2
+    ],
+    [
+     "SM_Bld_Lift_Door_02",
+     2
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Lift_01",
+     1
+    ],
+    [
+     "SM_Bld_Corridor_Double_Arch_02",
+     1
+    ],
+    [
+     "SM_Prop_Plant_Vase_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_02",
+   "at": [
+    1750.0,
+    -1000.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_Small_04",
+     3
+    ],
+    [
+     "SM_Bld_Floor_Small_02",
+     2
+    ],
+    [
+     "SM_Bld_Ceiling_01",
+     2
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Floor_08",
+     1
+    ],
+    [
+     "SM_Bld_Wall_01_Alt",
+     1
+    ],
+    [
+     "SM_Bld_Wall_05",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_02",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_02",
+   "at": [
+    1750.0,
+    -500.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Floor_04",
+     2
+    ],
+    [
+     "SM_Bld_Ceiling_03",
+     2
+    ],
+    [
+     "SM_Bld_Wall_01_Alt",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_02",
+     1
+    ],
+    [
+     "SM_Bld_Wall_03",
+     1
+    ],
+    [
+     "SM_Sign_ScienceLab_01",
+     1
+    ],
+    [
+     "SM_Prop_Greeble_Panel_01",
+     1
+    ],
+    [
+     "SM_SignBorder_Fire_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_02",
+   "at": [
+    3000.0,
+    -750.0,
+    0.0
+   ],
+   "yaw": -90.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Wall_Pillar_02",
+     2
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Floor_Small_Hand_Rail_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_02",
+     1
+    ],
+    [
+     "SM_Bld_Wall_04_Alt",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Glass_04_Alt",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Exterior_Window_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Exterior_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_02",
+   "at": [
+    750.0,
+    -1000.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Ceiling_01",
+     2
+    ],
+    [
+     "SM_Bld_Floor_07",
+     1
+    ],
+    [
+     "SM_Bld_Floor_011",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Pods_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Pods_Glass_01",
+     1
+    ],
+    [
+     "SM_Bld_Crew_Blank_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_02",
+     1
+    ],
+    [
+     "SM_Bld_Crew_Kitchen_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_02",
+   "at": [
+    1750.0,
+    1000.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Ceiling_01",
+     2
+    ],
+    [
+     "SM_Bld_Wall_01",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_02",
+     1
+    ],
+    [
+     "SM_Bld_Wall_03",
+     1
+    ],
+    [
+     "SM_Bld_Ceiling_Pipes_Straight_01",
+     1
+    ],
+    [
+     "SM_Sign_ScienceLab_01",
+     1
+    ],
+    [
+     "SM_Prop_Greeble_Panel_01",
+     1
+    ]
+   ]
+  },
+  {
+   "mesh": "SM_Bld_Wall_Doorframe_Door_02",
+   "at": [
+    750.0,
+    -3000.0,
+    0.0
+   ],
+   "yaw": -180.0,
+   "materials": [
+    "M_PolygonSciFiSpace_01_A"
+   ],
+   "beside": [
+    [
+     "SM_Bld_Wall_01",
+     3
+    ],
+    [
+     "SM_Bld_Floor_010",
+     2
+    ],
+    [
+     "SM_Bld_Wall_Pillar_05",
+     2
+    ],
+    [
+     "SM_Bld_Ceiling_03",
+     2
+    ],
+    [
+     "SM_Bld_Wall_05",
+     1
+    ],
+    [
+     "SM_Bld_Wall_Doorframe_02",
+     1
+    ],
+    [
+     "SM_Prop_HandScanner_01",
+     1
+    ]
+   ]
+  }
+ ],
+ "lights": [
+  {
+   "class": "DirectionalLight",
+   "at": [
+    100.0,
+    -200.0,
+    570.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 3.1415927410125732,
+   "colour": "<Struct 'Color' (0x000001A6FF9862B8) {b: 255, g: 255, r: 255, a: 255}>",
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Bld_Crew_Blank_01",
+   "nearest_dist": 580.9
+  },
+  {
+   "class": "SkyLight",
+   "at": [
+    0.0,
+    0.0,
+    690.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 1.5,
+   "colour": "<Struct 'Color' (0x000001A7094939B8) {b: 255, g: 255, r: 255, a: 255}>",
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Sign_CrewQuarters_01",
+   "nearest_dist": 684.5
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    950.0,
+    -5094.7,
+    757.5
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 1000.0,
+   "radius": 10000.0,
+   "colour": "<Struct 'Color' (0x000001A7111E48B8) {b: 255, g: 255, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Missile_01",
+   "nearest_dist": 616.6
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -600.0,
+    -4950.0,
+    900.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 1000.0,
+   "radius": 10000.0,
+   "colour": "<Struct 'Color' (0x000001A70A6725B8) {b: 255, g: 255, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Hud_ScreenPreset_02",
+   "nearest_dist": 828.1
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -800.0,
+    3900.0,
+    310.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 6.215981960296631,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A7115C61B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Hud_ScreenPreset_01",
+   "nearest_dist": 318.9,
+   "offset_in_mesh_frame": [
+    -160.0,
+    190.0,
+    200.0
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    200.0,
+    3900.0,
+    310.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 11.868782043457031,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A7115C57B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Hud_ScreenPreset_02",
+   "nearest_dist": 386.9,
+   "offset_in_mesh_frame": [
+    160.0,
+    290.0,
+    200.0
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -248.4,
+    3793.5,
+    327.7
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 5.425310134887695,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A711457FB8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Hud_ScreenPreset_01",
+   "nearest_dist": 217.8,
+   "offset_in_mesh_frame": [
+    -68.4,
+    -176.5,
+    107.7
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    1996.7,
+    -1520.0,
+    289.9
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 36.0,
+   "radius": 1000.0,
+   "colour": "<Struct 'Color' (0x000001A71145E3B8) {b: 255, g: 255, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Bld_Ceiling_03",
+   "nearest_dist": 290.6,
+   "offset_in_mesh_frame": [
+    -3.3,
+    -20.0,
+    289.9
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -800.0,
+    4582.0,
+    310.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 20.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A71145EDB8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Hud_ScreenPreset_03",
+   "nearest_dist": 331.9,
+   "offset_in_mesh_frame": [
+    20.1,
+    -192.0,
+    270.0
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    200.0,
+    4582.0,
+    310.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 20.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A71145F7B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Hud_ScreenPreset_03",
+   "nearest_dist": 360.8,
+   "offset_in_mesh_frame": [
+    290.0,
+    -78.0,
+    200.0
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -227.3,
+    4438.3,
+    233.1
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 7.010735988616943,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A711450CB8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Hud_ScreenPreset_03",
+   "nearest_dist": 288.4,
+   "offset_in_mesh_frame": [
+    -137.3,
+    -221.7,
+    123.1
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    1996.7,
+    -2490.0,
+    289.9
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 36.0,
+   "radius": 1000.0,
+   "colour": "<Struct 'Color' (0x000001A70949EDB8) {b: 255, g: 255, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Bld_Wall_01",
+   "nearest_dist": 210.4,
+   "offset_in_mesh_frame": [
+    3.3,
+    -10.0,
+    -210.1
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    1582.9,
+    3251.4,
+    310.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 10.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A70949C5B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Hose_01",
+   "nearest_dist": 368.2,
+   "offset_in_mesh_frame": [
+    164.6,
+    114.9,
+    308.6
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    747.5,
+    3235.9,
+    329.8
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 10.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A709497FB8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Bld_Wall_Corner_Pillar_01",
+   "nearest_dist": 475.1
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -739.9,
+    3235.7,
+    311.2
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 20.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A709490CB8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Sign_Bridge_01",
+   "nearest_dist": 257.4,
+   "offset_in_mesh_frame": [
+    16.4,
+    -500.8,
+    -118.6
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -1705.2,
+    3235.7,
+    311.2
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 20.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A70A6707B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Screen_Small_02",
+   "nearest_dist": 298.8,
+   "offset_in_mesh_frame": [
+    9.5,
+    176.2,
+    92.3
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -1743.3,
+    1240.0,
+    319.9
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 8.0,
+   "radius": 1000.0,
+   "colour": "<Struct 'Color' (0x000001A70A672FB8) {b: 255, g: 255, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Light_Small_08",
+   "nearest_dist": 339.6,
+   "offset_in_mesh_frame": [
+    257.7,
+    173.7,
+    136.8
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    747.5,
+    1245.9,
+    329.8
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 35.3167724609375,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A7094952B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Sign_CrewQuarters_01",
+   "nearest_dist": 238.4,
+   "offset_in_mesh_frame": [
+    -6.1,
+    474.7,
+    45.3
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -739.9,
+    1245.7,
+    311.2
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 20.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A70A6711B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Light_Small_08",
+   "nearest_dist": 360.7,
+   "offset_in_mesh_frame": [
+    290.4,
+    163.4,
+    138.1
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    747.5,
+    -764.1,
+    329.8
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 35.3167724609375,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A70A671BB8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Sign_CrewQuarters_01",
+   "nearest_dist": 224.0,
+   "offset_in_mesh_frame": [
+    -3.5,
+    441.8,
+    -74.3
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -739.9,
+    -764.3,
+    311.2
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 7.999964237213135,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A70A6739B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Bld_Wall_Doorframe_Door_03",
+   "nearest_dist": 398.1,
+   "offset_in_mesh_frame": [
+    -239.9,
+    285.7,
+    -138.8
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    1722.5,
+    2760.3,
+    345.1
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 20.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A70949ACB8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_CryoBed_Lid_01",
+   "nearest_dist": 302.1,
+   "offset_in_mesh_frame": [
+    17.0,
+    288.3,
+    -88.4
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    2757.5,
+    -764.1,
+    329.8
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 35.3167724609375,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A70A674DB8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Sign_AirLock_01",
+   "nearest_dist": 232.9,
+   "offset_in_mesh_frame": [
+    -29.9,
+    457.3,
+    -83.7
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    1722.5,
+    1744.9,
+    345.1
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 20.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A70A6743B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Hud_ScreenPreset_02",
+   "nearest_dist": 160.2,
+   "offset_in_mesh_frame": [
+    109.9,
+    -67.5,
+    95.1
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    1209.5,
+    2760.3,
+    345.1
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 20.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A70A6757B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Sign_MedicalBay_01",
+   "nearest_dist": 257.6,
+   "offset_in_mesh_frame": [
+    -77.1,
+    -507.0,
+    -49.1
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    1209.5,
+    1744.9,
+    345.1
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 20.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A70A6761B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Stairs_04",
+   "nearest_dist": 344.8,
+   "offset_in_mesh_frame": [
+    -34.6,
+    -20.9,
+    342.4
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    742.1,
+    2760.3,
+    345.1
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 20.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A70A676BB8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Cart_Filled_01",
+   "nearest_dist": 357.8,
+   "offset_in_mesh_frame": [
+    91.2,
+    39.9,
+    343.7
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    742.1,
+    1744.9,
+    345.1
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 20.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A70A6775B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Light_Small_08",
+   "nearest_dist": 445.8
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    747.5,
+    -3244.1,
+    329.8
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 20.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A70A677FB8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Bld_Floor_08",
+   "nearest_dist": 340.9,
+   "offset_in_mesh_frame": [
+    255.9,
+    -147.5,
+    -170.2
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -499.9,
+    -3244.3,
+    311.2
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 20.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A70A6789B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Bld_Wall_01",
+   "nearest_dist": 308.7,
+   "offset_in_mesh_frame": [
+    -0.1,
+    244.3,
+    -188.8
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    2757.5,
+    -3244.1,
+    329.8
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 20.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A7115C70B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Bld_Floor_08",
+   "nearest_dist": 345.3,
+   "offset_in_mesh_frame": [
+    255.9,
+    -157.5,
+    -170.2
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    251.8,
+    1744.9,
+    312.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 35.3167724609375,
+   "radius": 500.0,
+   "colour": "<Struct 'Color' (0x000001A7115C16B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_CornerTable_01",
+   "nearest_dist": 311.9,
+   "offset_in_mesh_frame": [
+    -10.8,
+    -4.6,
+    311.7
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -287.2,
+    1744.9,
+    312.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 35.3167724609375,
+   "radius": 500.0,
+   "colour": "<Struct 'Color' (0x000001A7115C4DB8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Screen_08",
+   "nearest_dist": 224.1,
+   "offset_in_mesh_frame": [
+    39.2,
+    -10.2,
+    220.4
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    251.8,
+    2680.8,
+    312.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 35.3167724609375,
+   "radius": 500.0,
+   "colour": "<Struct 'Color' (0x000001A7115C11B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Screen_03",
+   "nearest_dist": 231.6,
+   "offset_in_mesh_frame": [
+    43.8,
+    -56.0,
+    220.4
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -287.2,
+    2680.8,
+    312.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 35.3167724609375,
+   "radius": 500.0,
+   "colour": "<Struct 'Color' (0x000001A7115C34B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_CornerTable_01",
+   "nearest_dist": 321.8,
+   "offset_in_mesh_frame": [
+    75.5,
+    -26.8,
+    311.7
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -499.9,
+    -2514.3,
+    311.2
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 20.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A7115C52B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Bld_Ceiling_02",
+   "nearest_dist": 311.6,
+   "offset_in_mesh_frame": [
+    -14.3,
+    -0.1,
+    311.2
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -499.9,
+    -1504.3,
+    311.2
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 20.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A7115C25B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Bld_Ceiling_02",
+   "nearest_dist": 311.3,
+   "offset_in_mesh_frame": [
+    -4.3,
+    -0.1,
+    311.2
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -2345.7,
+    -348.2,
+    58.4
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 54.37164306640625,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A7115C6BB8) {b: 255, g: 250, r: 173, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_CenterTube_01",
+   "nearest_dist": 58.5,
+   "offset_in_mesh_frame": [
+    4.3,
+    1.8,
+    58.4
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -2345.7,
+    -348.2,
+    478.4
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 54.37164306640625,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A7115C2FB8) {b: 255, g: 250, r: 173, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_CenterTube_02",
+   "nearest_dist": 78.5,
+   "offset_in_mesh_frame": [
+    4.3,
+    1.8,
+    78.4
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -2945.7,
+    41.8,
+    88.4
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 54.37164306640625,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A7115C43B8) {b: 255, g: 250, r: 173, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Hud_ScreenPreset_01",
+   "nearest_dist": 43.4,
+   "offset_in_mesh_frame": [
+    -1.2,
+    37.6,
+    -21.6
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -1955.7,
+    -938.2,
+    88.4
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 54.37164306640625,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A7115CE8B8) {b: 255, g: 250, r: 173, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Hud_ScreenPreset_02",
+   "nearest_dist": 28.6,
+   "offset_in_mesh_frame": [
+    -2.2,
+    -18.6,
+    -21.6
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -2945.7,
+    41.8,
+    478.4
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 54.37164306640625,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A711452FB8) {b: 255, g: 250, r: 173, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Hud_ScreenPreset_01",
+   "nearest_dist": 370.3,
+   "offset_in_mesh_frame": [
+    -1.2,
+    37.6,
+    368.4
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -1955.7,
+    -938.2,
+    478.4
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 54.37164306640625,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A7114516B8) {b: 255, g: 250, r: 173, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Hud_ScreenPreset_02",
+   "nearest_dist": 368.8,
+   "offset_in_mesh_frame": [
+    -2.2,
+    -18.6,
+    368.4
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    2737.5,
+    1245.9,
+    329.8
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 35.3167724609375,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A7114525B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_MedicalArms_01",
+   "nearest_dist": 71.4,
+   "offset_in_mesh_frame": [
+    -6.0,
+    -11.7,
+    -70.2
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -2749.9,
+    -3244.3,
+    271.2
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 20.0,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A7114539B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Bld_Wall_Doorframe_Door_04",
+   "nearest_dist": 359.7,
+   "offset_in_mesh_frame": [
+    344.9,
+    101.7,
+    9.4
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -2999.9,
+    -4724.3,
+    271.2
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 35.3167724609375,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A7114543B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Bld_Ceiling_02",
+   "nearest_dist": 276.6,
+   "offset_in_mesh_frame": [
+    0.1,
+    275.7,
+    21.2
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -1443.8,
+    1930.8,
+    312.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 35.3167724609375,
+   "radius": 500.0,
+   "colour": "<Struct 'Color' (0x000001A711454DB8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Bld_Floor_07",
+   "nearest_dist": 324.5,
+   "offset_in_mesh_frame": [
+    56.2,
+    -69.2,
+    312.0
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -1443.8,
+    2672.2,
+    312.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 35.3167724609375,
+   "radius": 500.0,
+   "colour": "<Struct 'Color' (0x000001A7114557B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_MedicalArms_01",
+   "nearest_dist": 245.4,
+   "offset_in_mesh_frame": [
+    -193.8,
+    122.2,
+    -88.0
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    747.5,
+    -2504.1,
+    239.8
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 35.3167724609375,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A7114561B8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Barrel_01",
+   "nearest_dist": 333.0,
+   "offset_in_mesh_frame": [
+    50.0,
+    -225.8,
+    239.6
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -1955.7,
+    31.8,
+    258.4
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 54.37164306640625,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A711456BB8) {b: 255, g: 250, r: 173, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Hud_ScreenPreset_02",
+   "nearest_dist": 299.0,
+   "offset_in_mesh_frame": [
+    125.5,
+    -248.8,
+    108.4
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    1753.2,
+    472.7,
+    328.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 8.0,
+   "radius": 1000.0,
+   "colour": "<Struct 'Color' (0x000001A70949CFB8) {b: 0, g: 51, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Mine_01",
+   "nearest_dist": 144.6,
+   "offset_in_mesh_frame": [
+    22.7,
+    10.7,
+    142.4
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -1753.8,
+    1750.8,
+    72.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 35.0,
+   "radius": 300.0,
+   "colour": "<Struct 'Color' (0x000001A7114575B8) {b: 254, g: 255, r: 0, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Medical_Tube_01",
+   "nearest_dist": 72.1,
+   "offset_in_mesh_frame": [
+    -0.8,
+    -3.8,
+    72.0
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -1753.8,
+    2250.8,
+    72.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 35.0,
+   "radius": 300.0,
+   "colour": "<Struct 'Color' (0x000001A7114589B8) {b: 254, g: 255, r: 0, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Medical_Tube_01",
+   "nearest_dist": 72.1,
+   "offset_in_mesh_frame": [
+    -0.8,
+    -3.8,
+    72.0
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -1753.8,
+    2750.8,
+    72.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 35.0,
+   "radius": 300.0,
+   "colour": "<Struct 'Color' (0x000001A7114593B8) {b: 254, g: 255, r: 0, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Medical_Tube_01",
+   "nearest_dist": 72.1,
+   "offset_in_mesh_frame": [
+    -0.8,
+    -3.8,
+    72.0
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -1753.8,
+    1750.8,
+    262.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 35.0,
+   "radius": 300.0,
+   "colour": "<Struct 'Color' (0x000001A711459DB8) {b: 254, g: 255, r: 0, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Medical_Tube_01",
+   "nearest_dist": 262.0,
+   "offset_in_mesh_frame": [
+    -0.8,
+    -3.8,
+    262.0
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -1753.8,
+    2250.8,
+    262.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 35.0,
+   "radius": 300.0,
+   "colour": "<Struct 'Color' (0x000001A71145A7B8) {b: 254, g: 255, r: 0, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Chr_Female_Cryo_02",
+   "nearest_dist": 72.6,
+   "offset_in_mesh_frame": [
+    -4.9,
+    0.9,
+    72.4
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -1753.8,
+    2750.8,
+    262.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 35.0,
+   "radius": 300.0,
+   "colour": "<Struct 'Color' (0x000001A71145B1B8) {b: 254, g: 255, r: 0, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": true,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Chr_Male_Cryo_02",
+   "nearest_dist": 65.5,
+   "offset_in_mesh_frame": [
+    0.7,
+    3.8,
+    65.4
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -732.4,
+    2249.4,
+    312.0
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 20.0,
+   "radius": 500.0,
+   "colour": "<Struct 'Color' (0x000001A71145BBB8) {b: 216, g: 244, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Bld_Floor_011",
+   "nearest_dist": 462.1
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -525.1,
+    -4381.4,
+    273.4
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 160.0,
+   "radius": 505.1711730957031,
+   "colour": "<Struct 'Color' (0x000001A71145C5B8) {b: 0, g: 135, r: 255, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Prop_Buttons_09",
+   "nearest_dist": 202.0,
+   "offset_in_mesh_frame": [
+    2.2,
+    80.3,
+    185.3
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -1199.9,
+    -254.3,
+    311.2
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 7.999964237213135,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A71145CFB8) {b: 255, g: 242, r: 148, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Sign_Hydroponics_01",
+   "nearest_dist": 259.8,
+   "offset_in_mesh_frame": [
+    91.2,
+    -451.3,
+    241.0
+   ]
+  },
+  {
+   "class": "PointLight",
+   "at": [
+    -2259.9,
+    765.7,
+    311.2
+   ],
+   "mobility": "<ComponentMobility.MOVABLE: 2>",
+   "intensity": 7.999964237213135,
+   "radius": 612.4703369140625,
+   "colour": "<Struct 'Color' (0x000001A71145D9B8) {b: 255, g: 242, r: 148, a: 255}>",
+   "units": "<LightUnits.CANDELAS: 1>",
+   "source_radius": 0.0,
+   "temperature": 6500.0,
+   "use_temperature": false,
+   "shadows": false,
+   "volumetric": 1.0,
+   "nearest": "SM_Bld_Wall_Doorframe_Door_04",
+   "nearest_dist": 289.5,
+   "offset_in_mesh_frame": [
+    -114.2,
+    -258.9,
+    61.2
+   ]
+  }
+ ]
+}

@@ -1,0 +1,57 @@
+{
+ "start": "greet",
+ "nodes": {
+  "greet": {
+   "text": [
+    "Neural sync holding. [pause 0.3] Don't do anything sudden for a day or two.",
+    "Hm? [pause 0.3] Oh. You. Any headaches, double vision, phantom limbs?"
+   ],
+   "choices": [
+    {
+     "text": "How did the decant go?",
+     "next": "decant"
+    },
+    {
+     "text": "What's with the tablet?",
+     "next": "tablet",
+     "once": true
+    },
+    {
+     "text": "I'm fine.",
+     "end": true
+    }
+   ]
+  },
+  "decant": {
+   "text": "Ninety-four percent fidelity on the first pass, which is better than the paperwork deserved. [pause 0.4] The gaps fill in. Mostly. Don't go looking for them.",
+   "choices": [
+    {
+     "text": "What's in the gaps?",
+     "next": "gaps"
+    },
+    {
+     "text": "Good enough.",
+     "next": "greet"
+    }
+   ]
+  },
+  "gaps": {
+   "text": "Whatever the recorder missed. Names, faces, the last few minutes before the boarding. [pause 0.5] ~Nobody misses the last few minutes.~",
+   "choices": [
+    {
+     "text": "Thanks, I think.",
+     "next": "greet"
+    }
+   ]
+  },
+  "tablet": {
+   "text": "Your numbers. Hannah's numbers. The station's numbers. [pause 0.4] Somebody has to keep score, and Hannah rounds up.",
+   "choices": [
+    {
+     "text": "Back to the other questions.",
+     "next": "greet"
+    }
+   ]
+  }
+ }
+}
