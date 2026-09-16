@@ -1,0 +1,55 @@
+{
+ "_": "Screen faces of monitor props, as fractions of the mesh's local bounds: 'front' is the local axis the screen faces (+y is a Synty prop's front), 'inset' the bezel on the left as a fraction of the width ('inset_right' for the right when it differs), 'bottom' the stand and lower bezel as a fraction of the height, 'top' the upper bezel, 'recess' how many cm the glass sits behind the front face. Any placed prop with one of these meshes and an action:Use tag is a terminal. Tune by eye.",
+ "SM_Prop_Screen_Small_01": {
+  "front": "+y",
+  "inset": 0.09,
+  "inset_right": 0.19,
+  "bottom": 0.14,
+  "top": 0.12,
+  "recess": 2.5
+ },
+ "SM_Prop_Screen_Small_02": {
+  "front": "+y",
+  "inset": 0.09,
+  "inset_right": 0.19,
+  "bottom": 0.14,
+  "top": 0.12,
+  "recess": 2.5
+ },
+ "SM_Prop_Screen_Large_01": {
+  "front": "+y",
+  "inset": 0.06,
+  "bottom": 0.12,
+  "top": 0.05
+ },
+ "SM_Prop_Monitor_01": {
+  "front": "+y",
+  "inset": 0.07,
+  "bottom": 0.18,
+  "top": 0.06
+ },
+ "SM_Prop_Monitor_02": {
+  "front": "+y",
+  "inset": 0.07,
+  "bottom": 0.18,
+  "top": 0.06
+ },
+ "SM_Prop_Monitor_03": {
+  "front": "+y",
+  "inset": 0.07,
+  "bottom": 0.18,
+  "top": 0.06
+ },
+ "SM_Prop_Monitor_04": {
+  "front": "+y",
+  "inset": 0.07,
+  "bottom": 0.18,
+  "top": 0.06
+ },
+ "SM_Prop_Detail_Panel_01": {
+  "front": "+y",
+  "inset": 0.1,
+  "bottom": 0.1,
+  "top": 0.1
+ }
+}

@@ -46,6 +46,7 @@ struct FSheetSpec
 	FString InventoryCaption = TEXT("==[ INVENTORY ]=");
 	// gear
 	FString GearCaption = TEXT("==[ EQUIPMENT ]="); float GearCell = 64.0f;
+	FString QuickbarCaption = TEXT("--[ QUICKBAR ]-");   // ten squares, 1-0: the keys that draw or use what sits in them
 	TArray<FSheetGearSlot> Slots;
 	TArray<FIntVector> Spacers;   // (row, col, width px): empty cells that hold a column open
 	FString InfoCaption = TEXT("==[ INFO ]=");

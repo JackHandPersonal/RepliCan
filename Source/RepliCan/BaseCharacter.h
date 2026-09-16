@@ -603,6 +603,16 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	float MouseLookSensitivity = 1.0f;
+	// Down the sights the same hand movement turns the view this much less: fine aim on a
+	// narrower view, the way a scoped camera slows the mouse. 1 = no change.
+	UPROPERTY(EditAnywhere, Category = "Weapon|Aim", meta = (ClampMin = "0.05", ClampMax = "1.0")) float AimSensitivityScale = 0.5f;
+	// Down the sights the round leaves the muzzle along the bore, which runs parallel to the
+	// sight line and below it (height over bore, from the catalogue's muzzle and optic points).
+	// 0 keeps it parallel: a near wall takes the round that much under the point of aim. A range
+	// here converges the bore on the sight line at that distance, the way a sighted-in rifle does.
+	UPROPERTY(EditAnywhere, Category = "Weapon|Aim", meta = (ClampMin = "0.0")) float ZeroRangeCm = 0.0f;
+	// Off for now (the user's call, 2026-09-16): shots follow the sight line exactly. Switch on to shoot from the muzzle along the bore.
+	UPROPERTY(EditAnywhere, Category = "Weapon|Aim") bool bHeightOverBore = false;
 
 	// Discrete zoom levels, closest/first-person first -- one mouse wheel
 	// click (Alt+Wheel) steps one entry up or down this array rather than
@@ -1314,11 +1324,17 @@ public:
 	// idle for the stance's aim-down-sights pose.
 	UFUNCTION(BlueprintCallable, Category = "Weapon") void SetAiming(bool bNewAiming);
 	UFUNCTION(BlueprintPure, Category = "Weapon") bool IsAiming() const { return bAiming; }
+	float LookScale() const;   // mouse look scale for the current carry (slower in ADS)
 
 	// One-shot upper-body action -- "Fire", "Reload", "Equip", "Melee",
 	// "DryFire". False when no stance in the fallback chain ships that clip,
 	// which is a normal answer rather than an error (Shotgun has no Equip).
 	UFUNCTION(BlueprintCallable, Category = "Weapon") bool PlayWeaponAction(const FString& Clip);
+	// A flinch: the clip over the upper body for its length, then the stance pose (or nothing) comes back.
+	bool PlayHitReaction(class UAnimSequence* Clip);
+	bool PlayDeathClip(class UAnimSequence* Clip);   // the whole body, from the root
+	// A swing: the upper body in third person, the arm alone in first (a swinging spine would carry the camera).
+	bool PlayMeleeClip(class UAnimSequence* Clip);
 	UFUNCTION(BlueprintPure, Category = "Weapon") bool IsWeaponBusy() const { return WeaponActionLeft > 0.0f; }
 
 	// Half-angle of the cone the next shot can land in. Steady and crouched and
@@ -1393,8 +1409,51 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Weapon|Sway") float SwayLateralCm = 1.6f;      // side to side, at full run
 	UPROPERTY(EditAnywhere, Category = "Weapon|Sway") float SwayVerticalCm = 1.1f;     // the dip at each step, at full run
 	UPROPERTY(EditAnywhere, Category = "Weapon|Sway") float SwayRollDegrees = 1.4f;    // the roll that goes with the lateral swing
-	UPROPERTY(EditAnywhere, Category = "Weapon|Sway") float SwayStepsPerSecond = 2.3f; // stride rate at full run; slower gaits scale it down
+	UPROPERTY(EditAnywhere, Category = "Weapon|Sway") float SwayStepsPerSecond = 1.5f; // stride cycles per second at full run (two footfalls each: three a second, a sprint's cadence); slower gaits scale it down
+	// AIM SWAY: the point of aim wanders, as a held weapon does. Largest shouldered (the stock in
+	// the shoulder, the arms carrying the rest), a touch more from the hip, a fraction of that in
+	// ADS with the cheek welded and both hands on it; none at low ready, where nothing is aimed.
+	// A heavy weapon sways more, an agile character less, and Brawn carries part of the weight.
+	// Degrees of half-amplitude for a 50/50 character holding 3 kg; see AimSwayTargetDeg.
+	UPROPERTY(EditAnywhere, Category = "Weapon|Sway") float AimSwayShoulderedDeg = 1.2f;
+	UPROPERTY(EditAnywhere, Category = "Weapon|Sway") float AimSwayHipDeg = 1.6f;
+	UPROPERTY(EditAnywhere, Category = "Weapon|Sway") float AimSwayAdsDeg = 0.35f;
+	UPROPERTY(EditAnywhere, Category = "Weapon|Sway") float AimSwayScale = 1.0f;   // one knob over all of it (the AimSway exec)
+	float WeaponMassKg = 3.0f;                                     // the held weapon, from the catalogue
+	void SetWeaponMass(float Kg) { WeaponMassKg = Kg > 0.0f ? Kg : 3.0f; }
+	FRotator GetAimSway() const { return AimSway; }               // this frame's wander (the HUD draws the reticle where the aim really is)
+	float AimSwayTargetDeg() const;                                // the amplitude the posture, the weapon and the character call for
+	FRotator AimRotationSteady() const;                            // the aim without the sway: what the sway is added to
+	FRotator AimSway = FRotator::ZeroRotator;                      // added to the aim and to the weapon's placement
+	float AimSwayAmplitude = 0.0f;                                 // eased toward the target so a posture change does not snap
+	float AimSwayClock = 0.0f;
+	void TickAimSway(float DeltaSeconds);
+	// WHAT VITALITY DOES TO THE BODY (the points live in UVitalityComponent; ShotReactions keeps
+	// the score and calls these). An injured leg: a quarter off the speed, no running, a hitch
+	// in the stride on that side. An injured trigger arm: the cone and the sway a quarter worse.
+	// Dead: the body lets go and falls. Revive puts it all back, for testing.
+	void NoteInjury(const FString& Region, bool bDestroyed);
+	void Die(const FVector& ShotDir);
+	void Revive();
+	bool IsDead() const { return bDead; }
+	bool bDead = false;
+	bool bLegInjured = false, bLegInjuredLeft = false;
+	float AimInjuryScale = 1.0f;
+	UPROPERTY(EditAnywhere, Category = "Vitality") float LimpDipCm = 5.0f;   // how far the body drops on the bad leg's step
+	float LimpApplied = 0.0f;
+	bool bLimpWasCrouched = false;
+	FTransform DeadMeshRelative;
+	void TickLimp(float DeltaSeconds);
 	UPROPERTY(EditAnywhere, Category = "Weapon|Sway") float SwayAdsScale = 0.15f;      // what survives in the sights
+	// RELOAD HANDLING: for the clip's length the weapon is worked rather than aimed -- pulled
+	// in, dropped, tilted toward the body and rocked -- and the hands, which follow it, read as
+	// doing something. Peaks mid-clip and settles back by the end.
+	UPROPERTY(EditAnywhere, Category = "Weapon|Reload") float ReloadDropCm = 6.0f;
+	UPROPERTY(EditAnywhere, Category = "Weapon|Reload") float ReloadPullCm = 4.0f;
+	UPROPERTY(EditAnywhere, Category = "Weapon|Reload") float ReloadSideCm = 2.0f;
+	UPROPERTY(EditAnywhere, Category = "Weapon|Reload") float ReloadRollDegrees = 22.0f;
+	UPROPERTY(EditAnywhere, Category = "Weapon|Reload") float ReloadPitchDegrees = 10.0f;
+	float ReloadLeft = 0.0f, ReloadTotal = 0.0f;
 	float SwayPhase = 0.0f;      // radians, one stride cycle per 2 pi
 	float SwayAmount = 0.0f;     // smoothed 0..1 fraction of run speed
 	FVector2D SwayOffset = FVector2D::ZeroVector;   // eye space: lateral, vertical (cm)
@@ -1479,6 +1538,14 @@ public:
 	void SetWeaponForeGrip(const FVector& ForeGripLocal, bool bHasForeGrip, float ForeGripPitch = 0.0f);
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void SetWeaponHipFire(bool bHipFire);
+	// A blade or a hammer: never sight-aligned, never aimed; it rides the hand and the swing clips move the arm.
+	void SetWeaponMelee(bool bMelee);
+	// Something carried in the off hand (the controller's hold-to-carry): the support-hand IK
+	// reaches for it instead of a fore grip while it is held.
+	void SetCarried(class UPrimitiveComponent* What, float Radius) { CarriedByHand = What; CarriedHandRadius = Radius; }
+	TWeakObjectPtr<class UPrimitiveComponent> CarriedByHand;
+	float CarriedHandRadius = 0.0f;
+	bool bWeaponMelee = false;
 
 	// How strongly each hand is pulled onto the weapon. The support hand is the one that
 	// matters: it is the hand that visibly misses the handguard when the animation was made
@@ -1541,10 +1608,10 @@ public:
 	// The kick comes back. Without recovery every shot walks the view up permanently and the
 	// player is forever dragging it down; with it the view settles over this long, which is
 	// what makes a burst feel like a burst rather than a climb.
-	UPROPERTY(EditAnywhere, Category = "Weapon|Recoil", meta = (ClampMin = "0.0")) float RecoilRecoverSeconds = 0.15f;
+	UPROPERTY(EditAnywhere, Category = "Weapon|Recoil", meta = (ClampMin = "0.0")) float RecoilRecoverSeconds = 0.22f;
 	// How much of each kick is given back. 1 returns exactly to the pre-shot aim; a little less
 	// leaves a trace of climb to fight, which is what sustained fire should cost.
-	UPROPERTY(EditAnywhere, Category = "Weapon|Recoil", meta = (ClampMin = "0.0", ClampMax = "1.0")) float RecoilRecoverFraction = 0.85f;
+	UPROPERTY(EditAnywhere, Category = "Weapon|Recoil", meta = (ClampMin = "0.0", ClampMax = "1.0")) float RecoilRecoverFraction = 0.8f;
 	// The four postures kick differently. This, with the spread cone, is what makes them FEEL
 	// different rather than merely look different.
 	UPROPERTY(EditAnywhere, Category = "Weapon|Recoil") float RecoilScaleADS = 0.6f;

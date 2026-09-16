@@ -34,7 +34,7 @@ FSheetSpec FSheetSpec::Defaults()
 	Slot(TEXT("Feet"), 2, 5, true, TEXT("below"), { TEXT("Boots"), TEXT("Feet") });
 	S.Spacers.Add(FIntVector(1, 2, 36));
 	S.StatRows = { TEXT("DESIGNATION  REPLICANT"), TEXT("CLASS        SEMI-ORGANIC"), TEXT("SERIES       7"), TEXT("STATUS       ACTIVE"), TEXT("MEMORY       PARTIAL"), TEXT(""),
-	               TEXT("--[ VITALS ]-"), TEXT("PULSE        --"), TEXT("SYNC         --"), TEXT("CHARGE       --"), TEXT(""),
+	               TEXT("--[ VITALS ]-"), TEXT("VITALITY     {Vitality}"), TEXT("STAMINA      {Stamina}"), TEXT(""),
 	               TEXT("--[ STANDING ]-"), TEXT("ACCOUNT      SEE LEDGER"), TEXT("INFRACTIONS  0") };
 	return S;
 }
@@ -70,7 +70,7 @@ namespace
 		if (Root->TryGetObjectField(TEXT("inventory"), O)) { Num(*O, TEXT("columns"), Out.InventoryColumns); Num(*O, TEXT("cell"), Out.InventoryCell); Num(*O, TEXT("gap"), Out.InventoryGap); Str(*O, TEXT("caption"), Out.InventoryCaption); }
 		if (Root->TryGetObjectField(TEXT("gear"), O))
 		{
-			Str(*O, TEXT("caption"), Out.GearCaption); Num(*O, TEXT("cell"), Out.GearCell); Str(*O, TEXT("info_caption"), Out.InfoCaption);
+			Str(*O, TEXT("caption"), Out.GearCaption); Num(*O, TEXT("cell"), Out.GearCell); Str(*O, TEXT("info_caption"), Out.InfoCaption); Str(*O, TEXT("quickbar_caption"), Out.QuickbarCaption);
 			const TArray<TSharedPtr<FJsonValue>>* Sp = nullptr;
 			if ((*O)->TryGetArrayField(TEXT("spacers"), Sp) && Sp)
 			{

@@ -1,5 +1,11 @@
 #include "SettingsWidget.h"
 #include "CrtStyle.h"
+#include "CrtRuleWidget.h"
+#include "SheetSpec.h"
+#include "Components/Border.h"
+#include "Components/ScrollBox.h"
+#include "Components/ScrollBoxSlot.h"
+#include "Components/SizeBox.h"
 #include "RepliCanUserSettings.h"
 #include "EnvironmentDirector.h"
 #include "InputBindings.h"
@@ -16,8 +22,24 @@
 void USettingsWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
+	// The same box the character sheet sits in -- the panel colour and inset, a header rule with
+	// the title set into it and the [ X ] at its end -- with the rows in a column down the middle
+	// that scrolls if it ever outgrows the box. Rebuild dresses or undresses it for the context.
+	Root = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("SettingsRoot"));
+	WidgetTree->RootWidget = Root;
+	UVerticalBox* Outer = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SettingsOuter"));
+	Root->SetContent(Outer);
+	HeaderBox = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SettingsHeader"));
+	Outer->AddChildToVerticalBox(HeaderBox)->SetPadding(FMargin(0, 0, 0, 12));
+	UScrollBox* Scroll = WidgetTree->ConstructWidget<UScrollBox>(UScrollBox::StaticClass(), TEXT("SettingsScroll"));
+	Scroll->SetScrollBarVisibility(ESlateVisibility::Collapsed);
+	UVerticalBoxSlot* ScrollSlot = Outer->AddChildToVerticalBox(Scroll);
+	ScrollSlot->SetSize(ESlateSizeRule::Fill);
+	ColumnFit = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SettingsFit"));
+	Scroll->AddChild(ColumnFit);
+	if (UScrollBoxSlot* FitSlot = Cast<UScrollBoxSlot>(ColumnFit->Slot)) { FitSlot->SetHorizontalAlignment(HAlign_Center); }
 	Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SettingsColumn"));
-	WidgetTree->RootWidget = Column;
+	ColumnFit->AddChild(Column);
 }
 
 UWidget* USettingsWidget::Heading(UVerticalBox* Into, const FString& Title)
@@ -57,6 +79,26 @@ void USettingsWidget::Rebuild(bool bTitleContext)
 	bTitle = bTitleContext;
 	Column->ClearChildren();
 	KeyRowLabels.Reset(); ButtonActions.Reset(); KeyHint = nullptr; CapturingAction = NAME_None;
+	// Dressed as the character sheet's dialog in the pause context; bare inside the title screen's own frame.
+	if (Root) { Root->SetBrushColor(bShowBack ? Crt::Panel : FLinearColor::Transparent); Root->SetPadding(bShowBack ? FMargin(34.0f, 26.0f) : FMargin(0.0f)); }
+	if (ColumnFit) { if (bShowBack) { ColumnFit->SetWidthOverride(760.0f); } else { ColumnFit->ClearWidthOverride(); } }
+	if (HeaderBox)
+	{
+		HeaderBox->ClearChildren();
+		HeaderBox->SetVisibility(bShowBack ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+		if (bShowBack)
+		{
+			const FSheetSpec& S = FSheetSpec::Get();
+			HeaderBox->AddChildToHorizontalBox(Crt::FixedText(WidgetTree, S.HeaderLeft, S.RuleSize, Crt::Faint))->SetVerticalAlignment(VAlign_Center);
+			HeaderBox->AddChildToHorizontalBox(Crt::FixedText(WidgetTree, bKeysPage ? TEXT("SETTINGS / KEYS") : TEXT("SETTINGS"), S.NameSize, Crt::Green))->SetVerticalAlignment(VAlign_Center);
+			UHorizontalBoxSlot* RuleSlot = HeaderBox->AddChildToHorizontalBox(UCrtRuleWidget::Make(GetOwningPlayer(), S.HeaderRight, S.RuleSize, Crt::Faint));
+			RuleSlot->SetSize(ESlateSizeRule::Fill); RuleSlot->SetVerticalAlignment(VAlign_Center);
+			if (!S.HeaderEnd.IsEmpty()) { HeaderBox->AddChildToHorizontalBox(Crt::FixedText(WidgetTree, S.HeaderEnd, S.RuleSize, Crt::Faint))->SetVerticalAlignment(VAlign_Center); }
+			UButton* Close = Crt::Button(WidgetTree, TEXT("[ X ]"), S.NameSize, Crt::Green);
+			Close->OnClicked.AddDynamic(this, &USettingsWidget::OnBack);
+			HeaderBox->AddChildToHorizontalBox(Close)->SetPadding(FMargin(12, 0, 0, 0));
+		}
+	}
 	if (bKeysPage) { BuildKeysPage(); return; }
 	BuildMainPage();
 }
@@ -69,7 +111,7 @@ void USettingsWidget::BuildMainPage()
 	PestsLabel = nullptr; PestRateLabel = nullptr; AOStrengthLabel = nullptr;
 	EnvExposureLabel = nullptr; EnvFogDensityLabel = nullptr; EnvDustDensityLabel = nullptr;
 
-	Column->AddChildToVerticalBox(Crt::Text(WidgetTree, TEXT("SETTINGS"), 34, Crt::Green, ETextJustify::Center))->SetPadding(FMargin(0, 0, 0, 8));
+	if (!bShowBack) { Column->AddChildToVerticalBox(Crt::Text(WidgetTree, TEXT("SETTINGS"), 34, Crt::Green, ETextJustify::Center))->SetPadding(FMargin(0, 0, 0, 8)); }   // in the pause context the header rule carries the title
 
 	Heading(Column, TEXT("display"));
 	UButton* Fullscreen = Crt::Button(WidgetTree, TEXT("< WINDOWED >"), 17);
@@ -193,14 +235,7 @@ void USettingsWidget::BuildMainPage()
 	}
 
 	Column->AddChildToVerticalBox(Crt::Text(WidgetTree, TEXT("dim entries are not wired yet"), 12, Crt::Faint))->SetPadding(FMargin(0, 16, 0, 0));
-	if (bShowBack)
-	{
-		UButton* Back = Crt::Button(WidgetTree, TEXT("BACK"), 18, Crt::DimGreen);
-		Back->OnClicked.AddDynamic(this, &USettingsWidget::OnBack);
-		UVerticalBoxSlot* BackSlot = Column->AddChildToVerticalBox(Back);
-		BackSlot->SetHorizontalAlignment(HAlign_Center);
-		BackSlot->SetPadding(FMargin(0, 18, 0, 0));
-	}
+	// The way out is the [ X ] in the header rule, as on the character sheet.
 	RefreshRows();
 }
 

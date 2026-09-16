@@ -11,8 +11,8 @@
 
 namespace ItemFields
 {
-	enum class EType : uint8 { Text, Number, Bool, List, Measured };
-	enum class EScope : uint8 { All, Weapons, Armor, Items };   // Items: everything that is not a weapon
+	enum class EType : uint8 { Text, Number, Bool, List, Measured, Points, Enum };   // Enum: one of a fixed set of names, listed in the hint in order   // Points: a list of x, y, z triples, "x, y, z; x, y, z"
+	enum class EScope : uint8 { All, Weapons, Armor, Items, Optics, Gear };   // Gear: weapons and optics both   // Items: everything that is not a weapon; Optics: the optics block's parts
 
 	struct FField
 	{
@@ -32,9 +32,18 @@ namespace ItemFields
 		{ TEXT("fore_grip"),     TEXT("FORE GRIP"),     TEXT("POINTS"),   EType::List,     EScope::Weapons, TEXT("x, y, z: where the support hand closes (green)") },
 		{ TEXT("muzzle"),        TEXT("MUZZLE"),        TEXT("POINTS"),   EType::List,     EScope::Weapons, TEXT("x, y, z: where the shot leaves (white)") },
 		{ TEXT("optic_mount"),   TEXT("OPTIC MOUNT"),   TEXT("POINTS"),   EType::List,     EScope::Weapons, TEXT("x, y, z: where a fitted optic bolts on (cyan)") },
+		{ TEXT("shoulder"),      TEXT("SHOULDER"),      TEXT("POINTS"),   EType::List,     EScope::Weapons, TEXT("x, y, z: where the stock meets the shoulder (magenta); in space behind a stockless weapon") },
+		{ TEXT("attachments"),   TEXT("ATTACHMENTS"),   TEXT("POINTS"),   EType::Points,   EScope::Weapons, TEXT("x, y, z; x, y, z ... accessory mounts (orange): where a light, laser or grip clamps on; [ + ATTACH ] in the legend adds one") },
+		// An optic's own points, in ITS space (Tools/bake_optic_part.py sets a part's base on z 0, centred).
+		{ TEXT("mount"),         TEXT("MOUNT"),         TEXT("POINTS"),   EType::List,     EScope::Optics,  TEXT("x, y, z: the point of the optic that sits on the weapon's OPTIC MOUNT (cyan); its origin unless moved") },
+		{ TEXT("eye"),           TEXT("EYE"),           TEXT("POINTS"),   EType::List,     EScope::Optics,  TEXT("x, y, z: the window centre the aim line runs through (yellow); on the weapon it lands at OPTIC MOUNT + EYE - MOUNT") },
+		{ TEXT("source"),        TEXT("SOURCE"),        TEXT("OPTIC"),    EType::Text,     EScope::Optics,  TEXT("the pack part this optic was baked from") },
 		{ TEXT("sight_pitch"),   TEXT("SIGHT PITCH"),   TEXT("POINTS"),   EType::Number,   EScope::Weapons, TEXT("degrees the weapon is pitched so the sight line meets the shot") },
 		{ TEXT("fore_grip_pitch"), TEXT("FORE GRIP PITCH"), TEXT("POINTS"), EType::Number, EScope::Weapons, TEXT("degrees the support palm is pitched onto the guard") },
 		// identity
+		// A weapon or an optic is known by MAKE and MODEL (Docs/Arms_Manufacturers.md); "name" stays underneath as the record's identity.
+		{ TEXT("make"),          TEXT("MAKE"),          TEXT("IDENTITY"), EType::Text,     EScope::Gear,    TEXT("the manufacturer: see Docs/Arms_Manufacturers.md") },
+		{ TEXT("model"),         TEXT("MODEL"),         TEXT("IDENTITY"), EType::Text,     EScope::Gear,    TEXT("the model, as it would read on the receiver") },
 		{ TEXT("category"),      TEXT("CATEGORY"),      TEXT("IDENTITY"), EType::Text,     EScope::Items,   TEXT("the Reference tab it lives on: armor equipment consumables other (a weapon is always a weapon)") },
 		{ TEXT("kind"),          TEXT("KIND"),          TEXT("IDENTITY"), EType::Text,     EScope::All,     TEXT("the type gameplay matches on: Pistol, Helmet, Medkit, Keycard, Drink") },
 		{ TEXT("tags"),          TEXT("TAGS"),          TEXT("IDENTITY"), EType::List,     EScope::All,     TEXT("free labels, comma separated: medical, alien, contraband, quest") },
@@ -68,14 +77,20 @@ namespace ItemFields
 		// weapon
 		{ TEXT("damage"),        TEXT("DAMAGE"),        TEXT("WEAPON"),   EType::Number,   EScope::Weapons, TEXT("per shot or swing") },
 		{ TEXT("fire_rate"),     TEXT("FIRE RATE"),     TEXT("WEAPON"),   EType::Number,   EScope::Weapons, TEXT("per second") },
-		{ TEXT("fire_modes"),    TEXT("FIRE MODES"),    TEXT("WEAPON"),   EType::List,     EScope::Weapons, TEXT("semi, auto -- the selector's positions; empty is semi only") },
-		{ TEXT("ammo_kind"),     TEXT("AMMO"),          TEXT("WEAPON"),   EType::Text,     EScope::Weapons, TEXT("light medium heavy shell cell rocket none") },
+		// melee
+		{ TEXT("hands"),         TEXT("HANDS"),         TEXT("MELEE"),    EType::Number,   EScope::Weapons, TEXT("1 or 2 (2: the two-handed hold, when it exists)") },
+		{ TEXT("attack_set"),    TEXT("ATTACK SET"),    TEXT("MELEE"),    EType::Enum,     EScope::Weapons, TEXT("blade light heavy") },
+		{ TEXT("blunt"),         TEXT("BLUNT"),         TEXT("MELEE"),    EType::Bool,     EScope::Weapons, TEXT("no cuts: a shove and a stagger instead") },
+		{ TEXT("fire_modes"),    TEXT("FIRE MODES"),    TEXT("WEAPON"),   EType::List,     EScope::Weapons, TEXT("semi, burst, auto, laser -- the selector's positions in order; empty is semi only") },
+		{ TEXT("ammo_kind"),     TEXT("AMMO"),          TEXT("WEAPON"),   EType::Enum,     EScope::Weapons, TEXT("none light medium heavy shell cell rocket") },
 		{ TEXT("magazine"),      TEXT("MAGAZINE"),      TEXT("WEAPON"),   EType::Number,   EScope::Weapons, TEXT("rounds") },
 		{ TEXT("reload_s"),      TEXT("RELOAD S"),      TEXT("WEAPON"),   EType::Number,   EScope::Weapons, TEXT("") },
 		{ TEXT("spread_hip"),    TEXT("SPREAD HIP"),    TEXT("WEAPON"),   EType::Number,   EScope::Weapons, TEXT("degrees") },
 		{ TEXT("spread_aim"),    TEXT("SPREAD AIM"),    TEXT("WEAPON"),   EType::Number,   EScope::Weapons, TEXT("degrees") },
 		{ TEXT("recoil"),        TEXT("RECOIL"),        TEXT("WEAPON"),   EType::Number,   EScope::Weapons, TEXT("degrees of kick") },
+		{ TEXT("moa"),           TEXT("ACCURACY MOA"),  TEXT("WEAPON"),   EType::Number,   EScope::Weapons, TEXT("the weapon's own group in minutes of angle, on top of the stance spread: 5 is a combat rifle, 1 a match rifle") },
 		{ TEXT("range_m"),       TEXT("RANGE M"),       TEXT("WEAPON"),   EType::Number,   EScope::Weapons, TEXT("") },
+		{ TEXT("skin"),          TEXT("SKIN"),          TEXT("WEAPON"),   EType::Text,     EScope::Weapons, TEXT("the material variant it wears, e.g. M_PolygonSciFiSpace_02_C (the sheet's SKIN button cycles the pack's lettered paints); empty = the mesh's own") },
 		{ TEXT("optic"),         TEXT("OPTIC"),         TEXT("WEAPON"),   EType::Text,     EScope::Weapons, TEXT("an optics key from Weapons.json (the OPTIC cycle above lists them), or empty for irons") },
 		// armour
 		{ TEXT("armor_value"),   TEXT("ARMOR"),         TEXT("ARMOUR"),   EType::Number,   EScope::Armor,   TEXT("") },
@@ -93,12 +108,16 @@ namespace ItemFields
 
 	// The groups in the order a person tunes them: what is dragged in the viewer first, then
 	// the numbers that make a weapon a weapon, then how it is used, then everything else.
-	inline const TCHAR* GroupOrder[] = { TEXT("POINTS"), TEXT("WEAPON"), TEXT("USE"), TEXT("INVENTORY"), TEXT("PHYSICAL"), TEXT("ARMOUR"), TEXT("AUDIO"), TEXT("IDENTITY"), TEXT("REVIEW") };
+	inline const TCHAR* GroupOrder[] = { TEXT("POINTS"), TEXT("WEAPON"), TEXT("MELEE"), TEXT("OPTIC"), TEXT("USE"), TEXT("INVENTORY"), TEXT("PHYSICAL"), TEXT("ARMOUR"), TEXT("AUDIO"), TEXT("IDENTITY"), TEXT("REVIEW") };
 
 	inline bool Applies(const FField& F, const FString& Category)
 	{
+		// An optic carries its own fields and the review pair only: it is a part, not an item.
+		if (Category == TEXT("optics")) { return F.Scope == EScope::Optics || F.Scope == EScope::Gear || FCString::Strcmp(F.Key, TEXT("hidden")) == 0 || FCString::Strcmp(F.Key, TEXT("reviewdate")) == 0; }
 		switch (F.Scope)
 		{
+		case EScope::Optics:  return false;
+		case EScope::Gear:    return Category == TEXT("weapons");
 		case EScope::Weapons: return Category == TEXT("weapons");
 		case EScope::Armor:   return Category == TEXT("armor");
 		case EScope::Items:   return Category != TEXT("weapons");

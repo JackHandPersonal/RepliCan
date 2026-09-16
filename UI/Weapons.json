@@ -55,7 +55,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -16.82,
+    -0.03,
+    -0.1
+   ],
+   "make": "Ochre & Sons",
+   "model": "Street Dagger 01",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": false
   },
   "CyberCity/Dagger_02": {
    "name": "Street Dagger 02",
@@ -111,7 +121,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -13.61,
+    0,
+    -0.07
+   ],
+   "make": "Ochre & Sons",
+   "model": "Street Dagger 02",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": false
   },
   "CyberCity/Laser_Gun_01": {
    "name": "Street Laser Gun 01",
@@ -176,7 +196,7 @@
    "durability_max": 0,
    "damage": 28,
    "fire_rate": 9,
-   "ammo_kind": "medium",
+   "ammo_kind": "cell",
    "magazine": 30,
    "reload_s": 2.4,
    "spread_hip": 3,
@@ -194,7 +214,18 @@
    "sound_use": "equip",
    "glow": true,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -26.6,
+    0,
+    0.45
+   ],
+   "make": "Coherent Light Company",
+   "model": "Street Laser Gun 01",
+   "moa": 5,
+   "fire_modes": [
+    "laser"
+   ]
   },
   "CyberCity/Paint_Gun_01": {
    "name": "Street Paint Gun 01",
@@ -277,7 +308,10 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "make": "Paint Gun Pete's",
+   "model": "Street Paint Gun 01",
+   "moa": 5
   },
   "CyberCity/Pistol_01": {
    "name": "Street Pistol 01",
@@ -286,7 +320,7 @@
    "description": "A compact sidearm. Light, quick to draw, and honest about its limits. Pattern 1 of the street issue.",
    "icon": "CyberCity_Pistol_01",
    "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Pistol_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_pistol",
    "ranged": true,
    "muzzle": [
@@ -312,12 +346,12 @@
     20.45
    ],
    "fore_grip": [
-    12,
-    0,
-    1.64
+    1.5,
+    -2.2,
+    -1.5
    ],
    "sight_pitch": 0.24,
-   "fore_grip_pitch": 8,
+   "fore_grip_pitch": 0,
    "tags": [],
    "material": "metal",
    "volume_l": 1,
@@ -342,7 +376,7 @@
    "reload_s": 1.6,
    "spread_hip": 3.5,
    "spread_aim": 0.8,
-   "recoil": 1.2,
+   "recoil": 2.6,
    "range_m": 40,
    "physics_on_drop": true,
    "bounce": 0.2,
@@ -355,7 +389,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "make": "Kato Pattern Works",
+   "model": "Street Pistol 01",
+   "hip_fire": false,
+   "grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "fire_modes": [],
+   "skin": "MI_PolygonCyberCity_03_C",
+   "optic": "",
+   "moa": 5
   },
   "CyberCity/Rifle_01": {
    "name": "Street Rifle 01",
@@ -438,7 +482,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -22.62,
+    0,
+    11.08
+   ],
+   "make": "Sixth Ward Machine Co.",
+   "model": "Street Rifle 01",
+   "moa": 5
   },
   "CyberCity/SMG_01": {
    "name": "Street SMG 01",
@@ -521,7 +573,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -26.56,
+    0,
+    8
+   ],
+   "make": "Kato Pattern Works",
+   "model": "Street SMG 01",
+   "moa": 5
   },
   "CyberCity/Shock_Stick_01": {
    "name": "Street Shock Stick 01",
@@ -604,7 +664,10 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "make": "Kato Pattern Works",
+   "model": "Street Shock Stick 01",
+   "moa": 5
   },
   "CyberCity/Shock_Stick_02": {
    "name": "Street Shock Stick 02",
@@ -687,7 +750,10 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "make": "Kato Pattern Works",
+   "model": "Street Shock Stick 02",
+   "moa": 5
   },
   "CyberCity/Shock_Stick_03": {
    "name": "Street Shock Stick 03",
@@ -770,7 +836,10 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "make": "Kato Pattern Works",
+   "model": "Street Shock Stick 03",
+   "moa": 5
   },
   "CyberCity/Shock_Stick_04": {
    "name": "Street Shock Stick 04",
@@ -853,7 +922,10 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "make": "Kato Pattern Works",
+   "model": "Street Shock Stick 04",
+   "moa": 5
   },
   "CyberCity/Shock_Stick_05": {
    "name": "Street Shock Stick 05",
@@ -936,7 +1008,10 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "make": "Kato Pattern Works",
+   "model": "Street Shock Stick 05",
+   "moa": 5
   },
   "CyberCity/Shuriken_01": {
    "name": "Street Shuriken 01",
@@ -992,7 +1067,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Harrow Street Cutlery",
+   "model": "Street Shuriken 01",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": false
   },
   "CyberCity/Shuriken_03": {
    "name": "Street Shuriken 03",
@@ -1048,7 +1133,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -12.17,
+    -0.76,
+    -7.44
+   ],
+   "make": "Harrow Street Cutlery",
+   "model": "Street Shuriken 03",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": false
   },
   "CyberCity/Shuriken_05": {
    "name": "Street Shuriken 05",
@@ -1104,7 +1199,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Harrow Street Cutlery",
+   "model": "Street Shuriken 05",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": false
   },
   "CyberCity/Sniper_Rifle_01": {
    "name": "Street Marksman Rifle Rifle 01",
@@ -1182,7 +1287,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -20.44,
+    -0.04,
+    9.25
+   ],
+   "make": "Sixth Ward Machine Co.",
+   "model": "Street Marksman Rifle Rifle 01",
+   "moa": 5
   },
   "CyberCity/Sword_01": {
    "name": "Street Sword 01",
@@ -1238,7 +1351,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -40.56,
+    0.07,
+    -1.84
+   ],
+   "make": "Ochre & Sons",
+   "model": "Street Sword 01",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "CyberCity/Sword_02": {
    "name": "Street Sword 02",
@@ -1294,7 +1417,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -40.5,
+    0.07,
+    -2.01
+   ],
+   "make": "Ochre & Sons",
+   "model": "Street Sword 02",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "CyberCity/Sword_03": {
    "name": "Street Sword 03",
@@ -1350,7 +1483,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -34.42,
+    0,
+    -1.92
+   ],
+   "make": "Ochre & Sons",
+   "model": "Street Sword 03",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "CyberCity/Sword_04": {
    "name": "Street Sword 04",
@@ -1406,7 +1549,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -25.61,
+    0,
+    0
+   ],
+   "make": "Ochre & Sons",
+   "model": "Street Sword 04",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "CyberCity/Sword_05": {
    "name": "Street Sword 05",
@@ -1462,7 +1615,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -27.1,
+    0.07,
+    0
+   ],
+   "make": "Ochre & Sons",
+   "model": "Street Sword 05",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "CyberCity/Sword_06": {
    "name": "Street Sword 06",
@@ -1518,7 +1681,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -29.14,
+    0.02,
+    -0.09
+   ],
+   "make": "Ochre & Sons",
+   "model": "Street Sword 06",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "CyberCity/Sword_07": {
    "name": "Street Sword 07",
@@ -1574,7 +1747,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -34.67,
+    0,
+    0
+   ],
+   "make": "Ochre & Sons",
+   "model": "Street Sword 07",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "CyberCity/Sword_08": {
    "name": "Street Sword 08",
@@ -1630,7 +1813,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -35.43,
+    -0.14,
+    0
+   ],
+   "make": "Ochre & Sons",
+   "model": "Street Sword 08",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "Space/Wep_Pistol_01": {
    "name": "Fleet Pistol 01",
@@ -1665,12 +1858,12 @@
     15.22
    ],
    "fore_grip": [
-    16,
-    0,
-    4.22
+    1.5,
+    -2.2,
+    -1.5
    ],
    "sight_pitch": 0,
-   "fore_grip_pitch": 5.88,
+   "fore_grip_pitch": 0,
    "tags": [],
    "material": "metal",
    "volume_l": 1,
@@ -1695,7 +1888,7 @@
    "reload_s": 1.6,
    "spread_hip": 3.5,
    "spread_aim": 0.8,
-   "recoil": 1.2,
+   "recoil": 2.6,
    "range_m": 40,
    "physics_on_drop": true,
    "bounce": 0.2,
@@ -1708,7 +1901,10 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "make": "Helion Standard Arms",
+   "model": "Fleet Pistol 01",
+   "moa": 5
   },
   "Space/Wep_Rifle_01": {
    "name": "Fleet Rifle 01",
@@ -1791,7 +1987,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -44.58,
+    0,
+    5.01
+   ],
+   "make": "Helion Standard Arms",
+   "model": "Fleet Rifle 01",
+   "moa": 5
   },
   "Space/Wep_Shield_01": {
    "name": "Fleet Shield 01",
@@ -1847,7 +2051,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Helion Standard Arms",
+   "model": "Fleet Shield 01",
+   "moa": 5
   },
   "Space/Wep_Shield_Extended_01": {
    "name": "Fleet Shield Extended 01",
@@ -1903,7 +2115,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Helion Standard Arms",
+   "model": "Fleet Shield Extended 01",
+   "moa": 5
   },
   "Space/Wep_Shotgun_01": {
    "name": "Fleet Shotgun 01",
@@ -1986,7 +2206,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Dockside Foundry",
+   "model": "Fleet Shotgun 01",
+   "moa": 5
   },
   "Space/Wep_Sword_01": {
    "name": "Fleet Sword 01",
@@ -2042,7 +2270,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -27.45,
+    0,
+    -0.28
+   ],
+   "make": "Helion Standard Arms",
+   "model": "Fleet Sword 01",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "Space/Wep_Sword_Double_01": {
    "name": "Fleet Sword Double 01",
@@ -2098,7 +2336,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -33.58,
+    0,
+    0
+   ],
+   "make": "Helion Standard Arms",
+   "model": "Fleet Sword Double 01",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "Worlds/Wep_Alien_01": {
    "name": "Frontier Alien Weapon 01",
@@ -2107,7 +2355,7 @@
    "description": "Not made for human hands. It works anyway, which is the unsettling part. Pattern 1 of the frontier issue.",
    "icon": "Worlds_Wep_Alien_01",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Alien_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_alien",
    "ranged": true,
    "muzzle": [
@@ -2133,9 +2381,9 @@
     15.4
    ],
    "fore_grip": [
-    61,
+    56.26,
     0,
-    1.15
+    -3.08
    ],
    "sight_pitch": 3.67,
    "grip_reseated": [
@@ -2200,7 +2448,26 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Unattributed",
+   "model": "Frontier Alien Weapon 01",
+   "hip_fire": false,
+   "grip": [
+    17.31,
+    0,
+    0
+   ],
+   "optic_mount": [],
+   "attachments": [],
+   "fire_modes": [],
+   "skin": "",
+   "optic": "",
+   "moa": 5
   },
   "Worlds/Wep_Alien_02": {
    "name": "Frontier Alien Weapon 02",
@@ -2302,7 +2569,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -41.39,
+    -0.05,
+    15.6
+   ],
+   "make": "Unattributed",
+   "model": "Frontier Alien Weapon 02",
+   "moa": 5
   },
   "Worlds/Wep_Alien_03": {
    "name": "Frontier Alien Weapon 03",
@@ -2404,7 +2679,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -17.52,
+    0,
+    16.43
+   ],
+   "make": "Unattributed",
+   "model": "Frontier Alien Weapon 03",
+   "moa": 5
   },
   "Worlds/Wep_Alien_04": {
    "name": "Frontier Alien Weapon 04",
@@ -2515,7 +2798,15 @@
    "glow": false,
    "hidden": false,
    "reviewdate": "",
-   "body_mesh": "/Game/RepliCan/Weapons/Worlds/Body/SM_Wep_Alien_04_Body.SM_Wep_Alien_04_Body"
+   "body_mesh": "/Game/RepliCan/Weapons/Worlds/Body/SM_Wep_Alien_04_Body.SM_Wep_Alien_04_Body",
+   "shoulder": [
+    -16.4,
+    0,
+    11.91
+   ],
+   "make": "Unattributed",
+   "model": "Frontier Alien Weapon 04",
+   "moa": 5
   },
   "Worlds/Wep_Assault_01": {
    "name": "Frontier Assault Rifle 01",
@@ -2562,9 +2853,9 @@
    ],
    "optic": "RedDot_02",
    "optic_mount": [
-    0.2,
-    0.4,
-    16.66
+    8,
+    0,
+    17.85
    ],
    "parts": {
     "mag": "/Game/RepliCan/Weapons/Worlds/Parts/SM_Wep_Assault_01_Mag_01.SM_Wep_Assault_01_Mag_01",
@@ -2634,7 +2925,7 @@
    "reload_s": 2.4,
    "spread_hip": 3,
    "spread_aim": 0.6,
-   "recoil": 1.5,
+   "recoil": 2.2,
    "range_m": 80,
    "physics_on_drop": true,
    "bounce": 0.2,
@@ -2653,7 +2944,15 @@
    "fire_modes": [
     "semi",
     "auto"
-   ]
+   ],
+   "shoulder": [
+    -26.12,
+    0,
+    12.69
+   ],
+   "make": "Vestergaard Dynamics",
+   "model": "Frontier Assault Rifle 01",
+   "moa": 5
   },
   "Worlds/Wep_Assault_02": {
    "name": "Frontier Assault Rifle 02",
@@ -2792,7 +3091,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -46.81,
+    0,
+    12.29
+   ],
+   "make": "Vestergaard Dynamics",
+   "model": "Frontier Assault Rifle 02",
+   "moa": 5
   },
   "Worlds/Wep_Assault_03": {
    "name": "Frontier Assault Rifle 03",
@@ -2905,7 +3212,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -34.46,
+    0,
+    7.82
+   ],
+   "make": "Vestergaard Dynamics",
+   "model": "Frontier Assault Rifle 03",
+   "moa": 5
   },
   "Worlds/Wep_BigAxe_01": {
    "name": "Frontier Great Axe 01",
@@ -2928,7 +3243,7 @@
    "material": "metal",
    "volume_l": 1,
    "mass_kg": 1.2,
-   "hands": 1,
+   "hands": 2,
    "hold": "Weapon",
    "stack_max": 1,
    "bulk": 2,
@@ -2961,7 +3276,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -68.1,
+    0,
+    -0.4
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Great Axe 01",
+   "moa": 5,
+   "attack_set": "heavy",
+   "blunt": false
   },
   "Worlds/Wep_BigAxe_02": {
    "name": "Frontier Great Axe 02",
@@ -2984,7 +3309,7 @@
    "material": "metal",
    "volume_l": 1,
    "mass_kg": 1.2,
-   "hands": 1,
+   "hands": 2,
    "hold": "Weapon",
    "stack_max": 1,
    "bulk": 2,
@@ -3017,7 +3342,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -66.36,
+    0,
+    -2.3
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Great Axe 02",
+   "moa": 5,
+   "attack_set": "heavy",
+   "blunt": false
   },
   "Worlds/Wep_BigAxe_03": {
    "name": "Frontier Great Axe 03",
@@ -3040,7 +3375,7 @@
    "material": "metal",
    "volume_l": 1,
    "mass_kg": 1.2,
-   "hands": 1,
+   "hands": 2,
    "hold": "Weapon",
    "stack_max": 1,
    "bulk": 2,
@@ -3073,7 +3408,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -56.73,
+    0,
+    -4.23
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Great Axe 03",
+   "moa": 5,
+   "attack_set": "heavy",
+   "blunt": false
   },
   "Worlds/Wep_BigAxe_04": {
    "name": "Frontier Great Axe 04",
@@ -3096,7 +3441,7 @@
    "material": "metal",
    "volume_l": 1,
    "mass_kg": 1.2,
-   "hands": 1,
+   "hands": 2,
    "hold": "Weapon",
    "stack_max": 1,
    "bulk": 2,
@@ -3129,7 +3474,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -73.81,
+    0,
+    0
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Great Axe 04",
+   "moa": 5,
+   "attack_set": "heavy",
+   "blunt": false
   },
   "Worlds/Wep_BigAxe_05": {
    "name": "Frontier Great Axe 05",
@@ -3152,7 +3507,7 @@
    "material": "metal",
    "volume_l": 1,
    "mass_kg": 1.2,
-   "hands": 1,
+   "hands": 2,
    "hold": "Weapon",
    "stack_max": 1,
    "bulk": 2,
@@ -3185,7 +3540,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -46.27,
+    0,
+    0
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Great Axe 05",
+   "moa": 5,
+   "attack_set": "heavy",
+   "blunt": false
   },
   "Worlds/Wep_BigAxe_06": {
    "name": "Frontier Great Axe 06",
@@ -3208,7 +3573,7 @@
    "material": "metal",
    "volume_l": 1,
    "mass_kg": 1.2,
-   "hands": 1,
+   "hands": 2,
    "hold": "Weapon",
    "stack_max": 1,
    "bulk": 2,
@@ -3241,7 +3606,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -46.94,
+    0,
+    0
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Great Axe 06",
+   "moa": 5,
+   "attack_set": "heavy",
+   "blunt": false
   },
   "Worlds/Wep_BigAxe_07": {
    "name": "Frontier Great Axe 07",
@@ -3264,7 +3639,7 @@
    "material": "metal",
    "volume_l": 1,
    "mass_kg": 1.2,
-   "hands": 1,
+   "hands": 2,
    "hold": "Weapon",
    "stack_max": 1,
    "bulk": 2,
@@ -3297,7 +3672,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -92.88,
+    0,
+    7.32
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Great Axe 07",
+   "moa": 5,
+   "attack_set": "heavy",
+   "blunt": false
   },
   "Worlds/Wep_Dagger_01": {
    "name": "Frontier Dagger 01",
@@ -3353,7 +3738,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Dagger 01",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": false
   },
   "Worlds/Wep_Dagger_02": {
    "name": "Frontier Dagger 02",
@@ -3409,7 +3804,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -13.73,
+    0,
+    -3.59
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Dagger 02",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": false
   },
   "Worlds/Wep_Dagger_03": {
    "name": "Frontier Dagger 03",
@@ -3465,7 +3870,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -16.35,
+    0,
+    -0.04
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Dagger 03",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": false
   },
   "Worlds/Wep_Dagger_04": {
    "name": "Frontier Dagger 04",
@@ -3521,7 +3936,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -15.28,
+    0,
+    1.21
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Dagger 04",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": false
   },
   "Worlds/Wep_Dagger_05": {
    "name": "Frontier Dagger 05",
@@ -3577,7 +4002,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -15.67,
+    0,
+    -0.76
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Dagger 05",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": false
   },
   "Worlds/Wep_Dagger_06": {
    "name": "Frontier Dagger 06",
@@ -3633,7 +4068,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -15.12,
+    -0.07,
+    0.17
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Dagger 06",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": false
   },
   "Worlds/Wep_Dagger_07": {
    "name": "Frontier Dagger 07",
@@ -3689,7 +4134,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -14.06,
+    -0.02,
+    -1.89
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Dagger 07",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": false
   },
   "Worlds/Wep_GrenadeLauncher_01": {
    "name": "Frontier Grenade Launcher 01",
@@ -3774,7 +4229,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -72.11,
+    0,
+    23.08
+   ],
+   "make": "Kessler-Rand Armaments",
+   "model": "Frontier Grenade Launcher 01",
+   "moa": 5
   },
   "Worlds/Wep_Hammer_02": {
    "name": "Frontier Hammer 02",
@@ -3797,7 +4260,7 @@
    "material": "metal",
    "volume_l": 1,
    "mass_kg": 1.2,
-   "hands": 1,
+   "hands": 2,
    "hold": "Weapon",
    "stack_max": 1,
    "bulk": 2,
@@ -3830,7 +4293,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -96.34,
+    0,
+    0
+   ],
+   "make": "Vestergaard Dynamics",
+   "model": "Frontier Hammer 02",
+   "moa": 5,
+   "attack_set": "heavy",
+   "blunt": true
   },
   "Worlds/Wep_Hammer_03": {
    "name": "Frontier Hammer 03",
@@ -3853,7 +4326,7 @@
    "material": "metal",
    "volume_l": 1,
    "mass_kg": 1.2,
-   "hands": 1,
+   "hands": 2,
    "hold": "Weapon",
    "stack_max": 1,
    "bulk": 2,
@@ -3886,7 +4359,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -79.78,
+    0,
+    0
+   ],
+   "make": "Vestergaard Dynamics",
+   "model": "Frontier Hammer 03",
+   "moa": 5,
+   "attack_set": "heavy",
+   "blunt": true
   },
   "Worlds/Wep_Heavy_01": {
    "name": "Frontier Heavy Gun 01",
@@ -4000,7 +4483,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -22.8,
+    0,
+    7.54
+   ],
+   "make": "Vestergaard Dynamics",
+   "model": "Frontier Heavy Gun 01",
+   "moa": 5
   },
   "Worlds/Wep_Heavy_02": {
    "name": "Frontier Heavy Gun 02",
@@ -4126,7 +4617,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Vestergaard Dynamics",
+   "model": "Frontier Heavy Gun 02",
+   "moa": 5
   },
   "Worlds/Wep_Heavy_03": {
    "name": "Frontier Heavy Gun 03",
@@ -4239,7 +4738,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -37.22,
+    0,
+    13.57
+   ],
+   "make": "Vestergaard Dynamics",
+   "model": "Frontier Heavy Gun 03",
+   "moa": 5
   },
   "Worlds/Wep_Launcher_01": {
    "name": "Frontier Launcher 01",
@@ -4339,7 +4846,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -67.51,
+    0,
+    18.18
+   ],
+   "make": "Kessler-Rand Armaments",
+   "model": "Frontier Launcher 01",
+   "moa": 5
   },
   "Worlds/Wep_Launcher_02": {
    "name": "Frontier Launcher 02",
@@ -4439,7 +4954,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -121.3,
+    0,
+    24.9
+   ],
+   "make": "Kessler-Rand Armaments",
+   "model": "Frontier Launcher 02",
+   "moa": 5
   },
   "Worlds/Wep_Launcher_03": {
    "name": "Frontier Launcher 03",
@@ -4552,7 +5075,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -47.46,
+    0,
+    20.52
+   ],
+   "make": "Kessler-Rand Armaments",
+   "model": "Frontier Launcher 03",
+   "moa": 5
   },
   "Worlds/Wep_Pistol_01": {
    "name": "Frontier Pistol 01",
@@ -4587,9 +5118,9 @@
     20.08
    ],
    "fore_grip": [
-    15,
-    0,
-    0.56
+    1.5,
+    -2.2,
+    -1.5
    ],
    "sight_pitch": 0.68,
    "grip_reseated": [
@@ -4627,7 +5158,7 @@
      ]
     ]
    },
-   "fore_grip_pitch": -5.94,
+   "fore_grip_pitch": 0,
    "tags": [],
    "material": "metal",
    "volume_l": 1,
@@ -4652,7 +5183,7 @@
    "reload_s": 1.6,
    "spread_hip": 3.5,
    "spread_aim": 0.8,
-   "recoil": 1.2,
+   "recoil": 2.6,
    "range_m": 40,
    "physics_on_drop": true,
    "bounce": 0.2,
@@ -4666,7 +5197,10 @@
    "glow": false,
    "hidden": false,
    "reviewdate": "",
-   "body_mesh": "/Game/RepliCan/Weapons/Worlds/Body/SM_Wep_Pistol_01_Body.SM_Wep_Pistol_01_Body"
+   "body_mesh": "/Game/RepliCan/Weapons/Worlds/Body/SM_Wep_Pistol_01_Body.SM_Wep_Pistol_01_Body",
+   "make": "Vestergaard Dynamics",
+   "model": "Frontier Pistol 01",
+   "moa": 5
   },
   "Worlds/Wep_Pistol_02": {
    "name": "Frontier Pistol 02",
@@ -4701,9 +5235,9 @@
     18.41
    ],
    "fore_grip": [
-    21,
-    0,
-    3.62
+    1.5,
+    -2.2,
+    -1.5
    ],
    "sight_pitch": 1.26,
    "parts": {
@@ -4749,7 +5283,7 @@
      ]
     ]
    },
-   "fore_grip_pitch": -4.58,
+   "fore_grip_pitch": 0,
    "tags": [],
    "material": "metal",
    "volume_l": 1,
@@ -4774,7 +5308,7 @@
    "reload_s": 1.6,
    "spread_hip": 3.5,
    "spread_aim": 0.8,
-   "recoil": 1.2,
+   "recoil": 2.6,
    "range_m": 40,
    "physics_on_drop": true,
    "bounce": 0.2,
@@ -4787,7 +5321,10 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "make": "Vestergaard Dynamics",
+   "model": "Frontier Pistol 02",
+   "moa": 5
   },
   "Worlds/Wep_Pistol_03": {
    "name": "Frontier Pistol 03",
@@ -4822,9 +5359,9 @@
     23.33
    ],
    "fore_grip": [
-    17,
-    0,
-    5.06
+    1.5,
+    -2.2,
+    -1.5
    ],
    "sight_pitch": 0,
    "parts": {
@@ -4844,7 +5381,7 @@
      ]
     ]
    },
-   "fore_grip_pitch": 8,
+   "fore_grip_pitch": 0,
    "tags": [],
    "material": "metal",
    "volume_l": 1,
@@ -4869,7 +5406,7 @@
    "reload_s": 1.6,
    "spread_hip": 3.5,
    "spread_aim": 0.8,
-   "recoil": 1.2,
+   "recoil": 2.6,
    "range_m": 40,
    "physics_on_drop": true,
    "bounce": 0.2,
@@ -4882,7 +5419,10 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "make": "Vestergaard Dynamics",
+   "model": "Frontier Pistol 03",
+   "moa": 5
   },
   "Worlds/Wep_Pistol_04": {
    "name": "Frontier Pistol 04",
@@ -4917,9 +5457,9 @@
     23.55
    ],
    "fore_grip": [
-    16,
-    0,
-    0.35
+    1.5,
+    -2.2,
+    -1.5
    ],
    "sight_pitch": 0,
    "parts": {
@@ -4952,7 +5492,7 @@
      ]
     ]
    },
-   "fore_grip_pitch": -8,
+   "fore_grip_pitch": 0,
    "tags": [],
    "material": "metal",
    "volume_l": 1,
@@ -4977,7 +5517,7 @@
    "reload_s": 1.6,
    "spread_hip": 3.5,
    "spread_aim": 0.8,
-   "recoil": 1.2,
+   "recoil": 2.6,
    "range_m": 40,
    "physics_on_drop": true,
    "bounce": 0.2,
@@ -4990,16 +5530,19 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "make": "Vestergaard Dynamics",
+   "model": "Frontier Pistol 04",
+   "moa": 5
   },
   "Worlds/Wep_Pistol_05": {
    "name": "Frontier Pistol 05",
    "kind": "Pistol",
    "pack": "Worlds",
-   "description": "A compact sidearm. Light, quick to draw, and honest about its limits. Pattern 5 of the frontier issue.",
+   "description": "It rides the border between weapon and pest control device, but it comes with a handy desktop charging base.",
    "icon": "Worlds_Wep_Pistol_05",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Pistol_05",
-   "keep": false,
+   "keep": true,
    "sound": "wep_pistol",
    "ranged": true,
    "muzzle": [
@@ -5025,9 +5568,9 @@
     13.23
    ],
    "fore_grip": [
-    11,
-    0,
-    5.13
+    1.5,
+    -2.2,
+    -1.5
    ],
    "sight_pitch": 0,
    "parts": {
@@ -5060,7 +5603,7 @@
      ]
     ]
    },
-   "fore_grip_pitch": 8,
+   "fore_grip_pitch": 0,
    "tags": [],
    "material": "metal",
    "volume_l": 1,
@@ -5078,14 +5621,14 @@
    "cooldown_s": 0,
    "effects": [],
    "durability_max": 0,
-   "damage": 22,
+   "damage": 5,
    "fire_rate": 5,
    "ammo_kind": "light",
    "magazine": 12,
    "reload_s": 1.6,
    "spread_hip": 3.5,
    "spread_aim": 0.8,
-   "recoil": 1.2,
+   "recoil": 0,
    "range_m": 40,
    "physics_on_drop": true,
    "bounce": 0.2,
@@ -5099,7 +5642,19 @@
    "glow": false,
    "hidden": false,
    "reviewdate": "",
-   "body_mesh": "/Game/RepliCan/Weapons/Worlds/Body/SM_Wep_Pistol_05_Body.SM_Wep_Pistol_05_Body"
+   "body_mesh": "/Game/RepliCan/Weapons/Worlds/Body/SM_Wep_Pistol_05_Body.SM_Wep_Pistol_05_Body",
+   "make": "Mikita",
+   "model": "BugBuster",
+   "moa": 5,
+   "hip_fire": false,
+   "grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "fire_modes": [
+    "laser"
+   ],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_Pistol_06": {
    "name": "Frontier Pistol 06",
@@ -5134,9 +5689,9 @@
     20.98
    ],
    "fore_grip": [
-    17,
-    0,
-    -3.92
+    1.5,
+    -2.2,
+    -1.5
    ],
    "sight_pitch": -4.18,
    "parts": {
@@ -5156,7 +5711,7 @@
      ]
     ]
    },
-   "fore_grip_pitch": -8,
+   "fore_grip_pitch": 0,
    "tags": [],
    "material": "metal",
    "volume_l": 1,
@@ -5181,7 +5736,7 @@
    "reload_s": 1.6,
    "spread_hip": 3.5,
    "spread_aim": 0.8,
-   "recoil": 1.2,
+   "recoil": 2.6,
    "range_m": 40,
    "physics_on_drop": true,
    "bounce": 0.2,
@@ -5194,7 +5749,10 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "make": "Vestergaard Dynamics",
+   "model": "Frontier Pistol 06",
+   "moa": 5
   },
   "Worlds/Wep_SMG_01": {
    "name": "Frontier SMG 01",
@@ -5307,7 +5865,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -31.4,
+    0,
+    13.73
+   ],
+   "make": "Vestergaard Dynamics",
+   "model": "Frontier SMG 01",
+   "moa": 5
   },
   "Worlds/Wep_SMG_02": {
    "name": "Frontier SMG 02",
@@ -5390,7 +5956,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -39.58,
+    0,
+    9.2
+   ],
+   "make": "Vestergaard Dynamics",
+   "model": "Frontier SMG 02",
+   "moa": 5
   },
   "Worlds/Wep_SMG_03": {
    "name": "Frontier SMG 03",
@@ -5504,7 +6078,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -49.69,
+    0.01,
+    14.97
+   ],
+   "make": "Vestergaard Dynamics",
+   "model": "Frontier SMG 03",
+   "moa": 5
   },
   "Worlds/Wep_Shield_01": {
    "name": "Frontier Shield 01",
@@ -5560,7 +6142,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Bastion Civil Systems",
+   "model": "Frontier Shield 01",
+   "moa": 5
   },
   "Worlds/Wep_Shield_02": {
    "name": "Frontier Shield 02",
@@ -5616,7 +6206,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Bastion Civil Systems",
+   "model": "Frontier Shield 02",
+   "moa": 5
   },
   "Worlds/Wep_Shield_03": {
    "name": "Frontier Shield 03",
@@ -5672,7 +6270,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Bastion Civil Systems",
+   "model": "Frontier Shield 03",
+   "moa": 5
   },
   "Worlds/Wep_Shield_04": {
    "name": "Frontier Shield 04",
@@ -5728,7 +6334,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Bastion Civil Systems",
+   "model": "Frontier Shield 04",
+   "moa": 5
   },
   "Worlds/Wep_Shield_05": {
    "name": "Frontier Shield 05",
@@ -5784,7 +6398,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Bastion Civil Systems",
+   "model": "Frontier Shield 05",
+   "moa": 5
   },
   "Worlds/Wep_Shotgun_01": {
    "name": "Frontier Shotgun 01",
@@ -5897,7 +6519,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Tolliver Arms Cooperative",
+   "model": "Frontier Shotgun 01",
+   "moa": 5
   },
   "Worlds/Wep_Shotgun_02": {
    "name": "Frontier Shotgun 02",
@@ -6010,7 +6640,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -21.83,
+    0,
+    8.45
+   ],
+   "make": "Tolliver Arms Cooperative",
+   "model": "Frontier Shotgun 02",
+   "moa": 5
   },
   "Worlds/Wep_Shotgun_03": {
    "name": "Frontier Shotgun 03",
@@ -6123,7 +6761,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -20.38,
+    0,
+    -3.33
+   ],
+   "make": "Tolliver Arms Cooperative",
+   "model": "Frontier Shotgun 03",
+   "moa": 5
   },
   "Worlds/Wep_SmallAxe_01": {
    "name": "Frontier Hand Axe 01",
@@ -6179,7 +6825,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -38.69,
+    0,
+    -0.04
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Hand Axe 01",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "Worlds/Wep_SmallAxe_02": {
    "name": "Frontier Hand Axe 02",
@@ -6235,7 +6891,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -36.84,
+    0,
+    -1.25
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Hand Axe 02",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "Worlds/Wep_SmallAxe_03": {
    "name": "Frontier Hand Axe 03",
@@ -6291,7 +6957,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -36.56,
+    0,
+    2.84
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Hand Axe 03",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "Worlds/Wep_SmallAxe_04": {
    "name": "Frontier Hand Axe 04",
@@ -6347,7 +7023,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -36.6,
+    0,
+    0.11
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Hand Axe 04",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "Worlds/Wep_SmallAxe_05": {
    "name": "Frontier Hand Axe 05",
@@ -6403,7 +7089,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -43.73,
+    0,
+    -0.13
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Hand Axe 05",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "Worlds/Wep_Sniper_01": {
    "name": "Frontier Marksman Rifle 01",
@@ -6516,7 +7212,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -43.66,
+    0,
+    14.28
+   ],
+   "make": "Cairn Outfitting",
+   "model": "Frontier Marksman Rifle 01",
+   "moa": 5
   },
   "Worlds/Wep_Sniper_02": {
    "name": "Frontier Marksman Rifle 02",
@@ -6643,7 +7347,15 @@
    "glow": false,
    "hidden": false,
    "reviewdate": "",
-   "body_mesh": "/Game/RepliCan/Weapons/Worlds/Body/SM_Wep_Sniper_02_Body.SM_Wep_Sniper_02_Body"
+   "body_mesh": "/Game/RepliCan/Weapons/Worlds/Body/SM_Wep_Sniper_02_Body.SM_Wep_Sniper_02_Body",
+   "shoulder": [
+    -24.84,
+    0,
+    14.49
+   ],
+   "make": "Cairn Outfitting",
+   "model": "Frontier Marksman Rifle 02",
+   "moa": 5
   },
   "Worlds/Wep_Sniper_03": {
    "name": "Frontier Marksman Rifle 03",
@@ -6770,7 +7482,15 @@
    "glow": false,
    "hidden": false,
    "reviewdate": "",
-   "body_mesh": "/Game/RepliCan/Weapons/Worlds/Body/SM_Wep_Sniper_03_Body.SM_Wep_Sniper_03_Body"
+   "body_mesh": "/Game/RepliCan/Weapons/Worlds/Body/SM_Wep_Sniper_03_Body.SM_Wep_Sniper_03_Body",
+   "shoulder": [
+    -35.76,
+    0,
+    4.12
+   ],
+   "make": "Cairn Outfitting",
+   "model": "Frontier Marksman Rifle 03",
+   "moa": 5
   },
   "Worlds/Wep_Sword_01a": {
    "name": "Frontier Sword 01a",
@@ -6826,7 +7546,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -19.8,
+    0,
+    0.14
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Sword 01a",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "Worlds/Wep_Sword_02": {
    "name": "Frontier Sword 02",
@@ -6882,7 +7612,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -29.38,
+    0,
+    0
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Sword 02",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "Worlds/Wep_Sword_03": {
    "name": "Frontier Sword 03",
@@ -6938,7 +7678,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -22.72,
+    0,
+    0.13
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Sword 03",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "Worlds/Wep_Sword_04": {
    "name": "Frontier Sword 04",
@@ -6994,7 +7744,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -17.82,
+    0,
+    -2.39
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Sword 04",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "Worlds/Wep_Sword_05": {
    "name": "Frontier Sword 05",
@@ -7050,7 +7810,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -27.57,
+    0,
+    0.53
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Sword 05",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "Worlds/Wep_Sword_06": {
    "name": "Frontier Sword 06",
@@ -7106,7 +7876,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -17.52,
+    0,
+    0.67
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Sword 06",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "Worlds/Wep_Sword_07": {
    "name": "Frontier Sword 07",
@@ -7162,7 +7942,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -18.34,
+    0,
+    0
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Sword 07",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "Worlds/Wep_Sword_08": {
    "name": "Frontier Sword 08",
@@ -7218,7 +8008,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -25.74,
+    0,
+    1.02
+   ],
+   "make": "Ochre & Sons",
+   "model": "Frontier Sword 08",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false
   },
   "Worlds/Wep_Tool_01": {
    "name": "Frontier Tool 01",
@@ -7276,7 +8076,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -22.81,
+    0,
+    3.86
+   ],
+   "make": "Sunder Industrial",
+   "model": "Frontier Tool 01",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": true
   },
   "Worlds/Wep_Tool_02": {
    "name": "Frontier Tool 02",
@@ -7334,7 +8144,17 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -20.48,
+    -0.06,
+    -8.96
+   ],
+   "make": "Sunder Industrial",
+   "model": "Frontier Tool 02",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": true
   },
   "Horror/Wep_Rifle_01": {
    "name": "Rifle 01",
@@ -7422,7 +8242,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -34.08,
+    0,
+    9.61
+   ],
+   "make": "Northlight Defense Group",
+   "model": "Rifle 01",
+   "moa": 5
   },
   "Horror/Wep_Flamethrower_01": {
    "name": "Flamethrower 01",
@@ -7504,7 +8332,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Kessler-Rand Armaments",
+   "model": "Flamethrower 01",
+   "moa": 5
   },
   "Horror/Wep_Laser_Cutter_01": {
    "name": "Laser Cutter 01",
@@ -7586,7 +8422,18 @@
    "sound_use": "equip",
    "glow": true,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Vane Mining Systems",
+   "model": "Laser Cutter 01",
+   "moa": 5,
+   "fire_modes": [
+    "laser"
+   ]
   },
   "Horror/Wep_Mining_Laser_01": {
    "name": "Mining Laser 01",
@@ -7668,7 +8515,18 @@
    "sound_use": "equip",
    "glow": true,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Vane Mining Systems",
+   "model": "Mining Laser 01",
+   "moa": 5,
+   "fire_modes": [
+    "laser"
+   ]
   },
   "Horror/Wep_Blow_Torch_01": {
    "name": "Blow Torch 01",
@@ -7723,7 +8581,18 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -13.28,
+    0,
+    4.82
+   ],
+   "make": "Northlight Defense Group",
+   "model": "Blow Torch 01",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": true,
+   "stance": "Blade"
   },
   "Horror/Wep_Welder_01": {
    "name": "Welder 01",
@@ -7778,7 +8647,18 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Northlight Defense Group",
+   "model": "Welder 01",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": true,
+   "stance": "Blade"
   },
   "Horror/Wep_Drill_01": {
    "name": "Drill 01",
@@ -7833,7 +8713,18 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -12.47,
+    -0.03,
+    -11.77
+   ],
+   "make": "Northlight Defense Group",
+   "model": "Drill 01",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": true,
+   "stance": "Blade"
   },
   "Horror/Wep_Axe_01": {
    "name": "Axe 01",
@@ -7888,7 +8779,18 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -64.52,
+    0,
+    0.41
+   ],
+   "make": "Northlight Defense Group",
+   "model": "Axe 01",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false,
+   "stance": "Blade"
   },
   "Horror/Wep_Hammer_01": {
    "name": "Hammer 01",
@@ -7910,7 +8812,7 @@
    "material": "metal",
    "volume_l": 1,
    "mass_kg": 4,
-   "hands": 1,
+   "hands": 2,
    "hold": "Weapon",
    "stack_max": 1,
    "bulk": 2,
@@ -7943,7 +8845,18 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -32.63,
+    0,
+    0
+   ],
+   "make": "Northlight Defense Group",
+   "model": "Hammer 01",
+   "moa": 5,
+   "attack_set": "heavy",
+   "blunt": true,
+   "stance": "Blade"
   },
   "Horror/Wep_Knife_01": {
    "name": "Knife 01",
@@ -7998,7 +8911,18 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -14.78,
+    0.21,
+    0.06
+   ],
+   "make": "Northlight Defense Group",
+   "model": "Knife 01",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": false,
+   "stance": "Blade"
   },
   "Horror/Wep_Wrench_01": {
    "name": "Wrench 01",
@@ -8019,8 +8943,8 @@
    "tags": [],
    "material": "metal",
    "volume_l": 1,
-   "mass_kg": 1.5,
-   "hands": 1,
+   "mass_kg": 3.6,
+   "hands": 2,
    "hold": "Weapon",
    "stack_max": 1,
    "bulk": 2,
@@ -8033,7 +8957,7 @@
    "cooldown_s": 0,
    "effects": [],
    "durability_max": 0,
-   "damage": 8,
+   "damage": 34,
    "fire_rate": 1,
    "ammo_kind": "none",
    "magazine": 0,
@@ -8053,7 +8977,18 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -41.33,
+    0,
+    0
+   ],
+   "make": "Northlight Defense Group",
+   "model": "Wrench 01",
+   "moa": 5,
+   "attack_set": "heavy",
+   "blunt": true,
+   "stance": "Blade"
   },
   "Horror/Wep_Shock_Stick_01": {
    "name": "Shock Stick 01",
@@ -8108,7 +9043,18 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -14.67,
+    0,
+    2.64
+   ],
+   "make": "Sunder Industrial",
+   "model": "Shock Stick 01",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": true,
+   "stance": "Blade"
   },
   "Horror/Wep_Surgical_Tool_01": {
    "name": "Surgical Tool 01",
@@ -8165,7 +9111,18 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -18.34,
+    -0.62,
+    -1.35
+   ],
+   "make": "Sunder Industrial",
+   "model": "Surgical Tool 01",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": false,
+   "stance": "Blade"
   },
   "Horror/Wep_Surgical_Tool_02": {
    "name": "Surgical Tool 02",
@@ -8222,7 +9179,18 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Sunder Industrial",
+   "model": "Surgical Tool 02",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": false,
+   "stance": "Blade"
   },
   "Police/Wep_Pistol_01": {
    "name": "Pistol 01",
@@ -8251,11 +9219,11 @@
     12.93
    ],
    "fore_grip": [
-    10,
-    0,
-    1.1
+    1.5,
+    -2.2,
+    -1.5
    ],
-   "fore_grip_pitch": 4.02,
+   "fore_grip_pitch": 0,
    "sight_pitch": -0.57,
    "sight": [
     2.67,
@@ -8286,7 +9254,7 @@
    "reload_s": 1.6,
    "spread_hip": 3.5,
    "spread_aim": 0.8,
-   "recoil": 1.2,
+   "recoil": 2.6,
    "range_m": 40,
    "physics_on_drop": true,
    "bounce": 0.2,
@@ -8299,7 +9267,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Meridian Public Order",
+   "model": "Pistol 01",
+   "moa": 5
   },
   "Police/Wep_Revolver_01": {
    "name": "Revolver 01",
@@ -8313,7 +9289,7 @@
    "ranged": true,
    "muzzle": [
     36.69,
-    -0.0,
+    0,
     13.24
    ],
    "space": "hac1",
@@ -8328,11 +9304,11 @@
     16.17
    ],
    "fore_grip": [
-    19,
-    0,
-    8.84
+    1.5,
+    -2.2,
+    -1.5
    ],
-   "fore_grip_pitch": 8,
+   "fore_grip_pitch": 0,
    "sight_pitch": -2.54,
    "sight": [
     8.8,
@@ -8363,7 +9339,7 @@
    "reload_s": 1.6,
    "spread_hip": 3.5,
    "spread_aim": 0.8,
-   "recoil": 1.2,
+   "recoil": 2.6,
    "range_m": 40,
    "physics_on_drop": true,
    "bounce": 0.2,
@@ -8376,7 +9352,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Meridian Public Order",
+   "model": "Revolver 01",
+   "moa": 5
   },
   "Police/Wep_Rifle_01": {
    "name": "Rifle 01",
@@ -8458,7 +9442,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -39.37,
+    0,
+    7.79
+   ],
+   "make": "Bastion Civil Systems",
+   "model": "Rifle 01",
+   "moa": 5
   },
   "Police/Wep_Shotgun_01": {
    "name": "Shotgun 01",
@@ -8472,7 +9464,7 @@
    "ranged": true,
    "muzzle": [
     67.82,
-    0.0,
+    0,
     11.44
    ],
    "space": "hac1",
@@ -8535,7 +9527,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Meridian Public Order",
+   "model": "Shotgun 01",
+   "moa": 5
   },
   "Police/Wep_DoubleBarrel_01": {
    "name": "DoubleBarrel 01",
@@ -8612,7 +9612,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Meridian Public Order",
+   "model": "DoubleBarrel 01",
+   "moa": 5
   },
   "Police/Wep_Sniper_01": {
    "name": "Sniper 01",
@@ -8626,7 +9634,7 @@
    "ranged": true,
    "muzzle": [
     149.81,
-    -0.0,
+    0,
     7.84
    ],
    "space": "hac1",
@@ -8694,7 +9702,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Meridian Public Order",
+   "model": "Sniper 01",
+   "moa": 5
   },
   "Police/Wep_Launcher_01": {
    "name": "Launcher 01",
@@ -8708,7 +9724,7 @@
    "ranged": true,
    "muzzle": [
     74.69,
-    0.0,
+    0,
     11.46
    ],
    "space": "hac1",
@@ -8776,7 +9792,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Kessler-Rand Armaments",
+   "model": "Launcher 01",
+   "moa": 5
   },
   "Police/Wep_Stungun_01": {
    "name": "Stungun 01",
@@ -8790,7 +9814,7 @@
    "ranged": true,
    "muzzle": [
     27.98,
-    -0.0,
+    0,
     10.55
    ],
    "space": "hac1",
@@ -8853,7 +9877,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Meridian Public Order",
+   "model": "Stungun 01",
+   "moa": 5
   },
   "Police/Wep_Stungun_02": {
    "name": "Stungun 02",
@@ -8908,7 +9940,18 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Meridian Public Order",
+   "model": "Stungun 02",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": true,
+   "stance": "Blade"
   },
   "Police/Wep_Stun_Baton_01": {
    "name": "Stun Baton 01",
@@ -8963,7 +10006,18 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Meridian Public Order",
+   "model": "Stun Baton 01",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": true,
+   "stance": "Blade"
   },
   "Police/Wep_Baton_01": {
    "name": "Baton 01",
@@ -8985,7 +10039,7 @@
    "material": "metal",
    "volume_l": 1,
    "mass_kg": 4,
-   "hands": 1,
+   "hands": 2,
    "hold": "Weapon",
    "stack_max": 1,
    "bulk": 2,
@@ -9018,7 +10072,18 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -23.43,
+    0,
+    0
+   ],
+   "make": "Meridian Public Order",
+   "model": "Baton 01",
+   "moa": 5,
+   "attack_set": "heavy",
+   "blunt": true,
+   "stance": "Blade"
   },
   "Police/Wep_Baton_02": {
    "name": "Baton 02",
@@ -9040,7 +10105,7 @@
    "material": "metal",
    "volume_l": 1,
    "mass_kg": 4,
-   "hands": 1,
+   "hands": 2,
    "hold": "Weapon",
    "stack_max": 1,
    "bulk": 2,
@@ -9073,7 +10138,18 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -34.71,
+    0,
+    0
+   ],
+   "make": "Meridian Public Order",
+   "model": "Baton 02",
+   "moa": 5,
+   "attack_set": "heavy",
+   "blunt": true,
+   "stance": "Blade"
   },
   "Police/Wep_Door_Ram_01": {
    "name": "Door Ram 01",
@@ -9095,7 +10171,7 @@
    "material": "metal",
    "volume_l": 1,
    "mass_kg": 4,
-   "hands": 1,
+   "hands": 2,
    "hold": "Weapon",
    "stack_max": 1,
    "bulk": 2,
@@ -9128,7 +10204,18 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -61.01,
+    -0.06,
+    -17.35
+   ],
+   "make": "Meridian Public Order",
+   "model": "Door Ram 01",
+   "moa": 5,
+   "attack_set": "heavy",
+   "blunt": true,
+   "stance": "Blade"
   },
   "SciFiCity/Wep_Pistol_01": {
    "name": "Pistol 01",
@@ -9142,7 +10229,7 @@
    "ranged": true,
    "muzzle": [
     33.75,
-    -0.0,
+    0,
     14.62
    ],
    "space": "hac1",
@@ -9157,11 +10244,11 @@
     22.4
    ],
    "fore_grip": [
-    20,
-    0,
-    5.2
+    1.5,
+    -2.2,
+    -1.5
    ],
-   "fore_grip_pitch": 2.5,
+   "fore_grip_pitch": 0,
    "sight_pitch": -1.52,
    "sight": [
     3.97,
@@ -9192,7 +10279,7 @@
    "reload_s": 1.6,
    "spread_hip": 3.5,
    "spread_aim": 0.8,
-   "recoil": 1.2,
+   "recoil": 2.6,
    "range_m": 40,
    "physics_on_drop": true,
    "bounce": 0.2,
@@ -9205,7 +10292,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Sixth Ward Machine Co.",
+   "model": "Pistol 01",
+   "moa": 5
   },
   "SciFiCity/Wep_Revolver_01": {
    "name": "Revolver 01",
@@ -9219,7 +10314,7 @@
    "ranged": true,
    "muzzle": [
     63.61,
-    -0.0,
+    0,
     11.67
    ],
    "space": "hac1",
@@ -9239,11 +10334,11 @@
     17.44
    ],
    "fore_grip": [
-    30,
-    0,
-    1.62
+    1.5,
+    -2.2,
+    -1.5
    ],
-   "fore_grip_pitch": 8,
+   "fore_grip_pitch": 0,
    "sight_pitch": 0,
    "sight": [
     18.88,
@@ -9274,7 +10369,7 @@
    "reload_s": 1.6,
    "spread_hip": 3.5,
    "spread_aim": 0.8,
-   "recoil": 1.2,
+   "recoil": 2.6,
    "range_m": 40,
    "physics_on_drop": true,
    "bounce": 0.2,
@@ -9287,7 +10382,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Sixth Ward Machine Co.",
+   "model": "Revolver 01",
+   "moa": 5
   },
   "SciFiCity/Wep_MachinePistol_Gen1_01": {
    "name": "MachinePistol Gen1 01",
@@ -9369,7 +10472,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Sixth Ward Machine Co.",
+   "model": "MachinePistol Gen1 01",
+   "moa": 5
   },
   "SciFiCity/Wep_MachinePistol_Gen2_01": {
    "name": "MachinePistol Gen2 01",
@@ -9451,7 +10562,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -73.22,
+    0.89,
+    23.54
+   ],
+   "make": "Sixth Ward Machine Co.",
+   "model": "MachinePistol Gen2 01",
+   "moa": 5
   },
   "SciFiCity/Wep_SMG_01": {
    "name": "SMG 01",
@@ -9465,7 +10584,7 @@
    "ranged": true,
    "muzzle": [
     36.75,
-    -0.0,
+    0,
     21.37
    ],
    "space": "hac1",
@@ -9528,7 +10647,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Sixth Ward Machine Co.",
+   "model": "SMG 01",
+   "moa": 5
   },
   "SciFiCity/Wep_Rifle_Small_01": {
    "name": "Rifle Small 01",
@@ -9610,7 +10737,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -25.01,
+    -0.68,
+    10.88
+   ],
+   "make": "Northlight Defense Group",
+   "model": "Rifle Small 01",
+   "moa": 5
   },
   "SciFiCity/Wep_Rifle_Base_01": {
    "name": "Rifle Base 01",
@@ -9692,7 +10827,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -31.34,
+    -0.68,
+    10.3
+   ],
+   "make": "Northlight Defense Group",
+   "model": "Rifle Base 01",
+   "moa": 5
   },
   "SciFiCity/Wep_Rifle_Laser_01": {
    "name": "Rifle Laser 01",
@@ -9706,7 +10849,7 @@
    "ranged": true,
    "muzzle": [
     68.12,
-    -0.0,
+    0,
     18.46
    ],
    "space": "hac1",
@@ -9756,7 +10899,7 @@
    "durability_max": 0,
    "damage": 28,
    "fire_rate": 9,
-   "ammo_kind": "medium",
+   "ammo_kind": "cell",
    "magazine": 30,
    "reload_s": 2.4,
    "spread_hip": 3,
@@ -9774,7 +10917,18 @@
    "sound_use": "equip",
    "glow": true,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -36.58,
+    0,
+    12.37
+   ],
+   "make": "Northlight Defense Group",
+   "model": "Rifle Laser 01",
+   "moa": 5,
+   "fire_modes": [
+    "laser"
+   ]
   },
   "SciFiCity/Wep_Rifle_Plasma_01": {
    "name": "Rifle Plasma 01",
@@ -9856,7 +11010,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -17.2,
+    0,
+    0.44
+   ],
+   "make": "Aurex Beamworks",
+   "model": "Rifle Plasma 01",
+   "moa": 5
   },
   "SciFiCity/Wep_Rifle_Plasma_02": {
    "name": "Rifle Plasma 02",
@@ -9870,7 +11032,7 @@
    "ranged": true,
    "muzzle": [
     73.2,
-    -0.0,
+    0,
     10.49
    ],
    "space": "hac1",
@@ -9938,7 +11100,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -12.45,
+    0,
+    0.94
+   ],
+   "make": "Aurex Beamworks",
+   "model": "Rifle Plasma 02",
+   "moa": 5
   },
   "SciFiCity/Wep_Rifle_Plasma_03": {
    "name": "Rifle Plasma 03",
@@ -9952,7 +11122,7 @@
    "ranged": true,
    "muzzle": [
     80.86,
-    -0.0,
+    0,
     8.99
    ],
    "space": "hac1",
@@ -10020,7 +11190,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -12.45,
+    0,
+    0.71
+   ],
+   "make": "Aurex Beamworks",
+   "model": "Rifle Plasma 03",
+   "moa": 5
   },
   "SciFiCity/Wep_Shotgun_Plasma_01": {
    "name": "Shotgun Plasma 01",
@@ -10034,7 +11212,7 @@
    "ranged": true,
    "muzzle": [
     87.78,
-    0.0,
+    0,
     9.33
    ],
    "space": "hac1",
@@ -10102,7 +11280,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -16.43,
+    0,
+    1.89
+   ],
+   "make": "Aurex Beamworks",
+   "model": "Shotgun Plasma 01",
+   "moa": 5
   },
   "SciFiCity/Wep_Sniper_01": {
    "name": "Sniper 01",
@@ -10184,7 +11370,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -35.4,
+    -0.48,
+    8.85
+   ],
+   "make": "Sixth Ward Machine Co.",
+   "model": "Sniper 01",
+   "moa": 5
   },
   "SciFiCity/Wep_Sniper_Plasma_02": {
    "name": "Sniper Plasma 02",
@@ -10198,7 +11392,7 @@
    "ranged": true,
    "muzzle": [
     96.13,
-    -0.0,
+    0,
     15.35
    ],
    "space": "hac1",
@@ -10266,7 +11460,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -35.18,
+    0,
+    6.05
+   ],
+   "make": "Aurex Beamworks",
+   "model": "Sniper Plasma 02",
+   "moa": 5
   },
   "SciFiCity/Wep_Syringe_Gun_01": {
    "name": "Syringe Gun 01",
@@ -10281,7 +11483,7 @@
    "muzzle": [
     40.66,
     -0.38,
-    13.0
+    13
    ],
    "space": "hac1",
    "rear_sight": [
@@ -10295,11 +11497,11 @@
     16.33
    ],
    "fore_grip": [
-    18,
-    0,
-    6.81
+    1.5,
+    -2.2,
+    -1.5
    ],
-   "fore_grip_pitch": -4.54,
+   "fore_grip_pitch": 0,
    "sight_pitch": 4.56,
    "sight": [
     7.88,
@@ -10332,7 +11534,7 @@
    "reload_s": 1.6,
    "spread_hip": 3.5,
    "spread_aim": 0.8,
-   "recoil": 1.2,
+   "recoil": 2.6,
    "range_m": 40,
    "physics_on_drop": true,
    "bounce": 0.2,
@@ -10345,7 +11547,15 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Sixth Ward Machine Co.",
+   "model": "Syringe Gun 01",
+   "moa": 5
   },
   "SciFiCity/Wep_Knife_01": {
    "name": "Knife 01",
@@ -10400,7 +11610,18 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -11.7,
+    0,
+    0.24
+   ],
+   "make": "Sixth Ward Machine Co.",
+   "model": "Knife 01",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": false,
+   "stance": "Blade"
   },
   "SciFiCity/Wep_Shiv_01": {
    "name": "Shiv 01",
@@ -10455,7 +11676,18 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -28,
+    0,
+    7
+   ],
+   "make": "Sixth Ward Machine Co.",
+   "model": "Shiv 01",
+   "moa": 5,
+   "attack_set": "light",
+   "blunt": false,
+   "stance": "Blade"
   },
   "SciFiCity/Wep_Sword_01": {
    "name": "Sword 01",
@@ -10510,7 +11742,18 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": ""
+   "reviewdate": "",
+   "shoulder": [
+    -14.19,
+    0,
+    -0.03
+   ],
+   "make": "Sixth Ward Machine Co.",
+   "model": "Sword 01",
+   "moa": 5,
+   "attack_set": "blade",
+   "blunt": false,
+   "stance": "Blade"
   }
  },
  "_stance": "A weapon names a stance, never an animation. A stance is a folder of clips under /Game/Characters/Animations/Lyra/<Stance>/ named <MM|MF>_<Stance>_<Clip>; the game composes that path rather than looking anything up. See Docs/HeldAssetStandard.md part 3.",
@@ -10527,7 +11770,42 @@
     "spine_02"
    ],
    "fallback": "",
-   "two_handed": false
+   "two_handed": true,
+   "carry": {
+    "shouldered": [
+     48,
+     4,
+     -14
+    ],
+    "hip": [
+     30,
+     12,
+     -26
+    ],
+    "low_ready": [
+     26,
+     10,
+     -32
+    ],
+    "low_ready_first_person": [
+     30,
+     8,
+     -14
+    ],
+    "ads": [
+     56.0,
+     0.0,
+     0.0
+    ]
+   },
+   "_carry": "where the grip sits in the eye frame (x forward, y right, z up, cm) per posture: arms out for a pistol; a first guess, tune in play",
+   "_ads": "the rear sight this far out from the eye, on the eye line, down the sights: arm's length for a pistol (a rifle keeps the character default at the cheek)",
+   "elbow_down": 0.75,
+   "grip_nudge": [
+    0.0,
+    0.0,
+    3.5
+   ]
   },
   "Shotgun": {
    "roots": [
@@ -10541,8 +11819,56 @@
     "clavicle_r"
    ],
    "fallback": "",
-   "two_handed": false
-  }
+   "two_handed": false,
+   "clips": {
+    "Idle_Hipfire": "/Game/Characters/Animations/SyntySwordCombat/Idle/Base/A_Idle_Base_Sword"
+   }
+  },
+  "Pistol1H": {
+   "roots": [
+    "clavicle_r"
+   ],
+   "fallback": "Pistol",
+   "two_handed": false,
+   "carry": {
+    "shouldered": [
+     50.0,
+     10.0,
+     -13.0
+    ],
+    "hip": [
+     30.0,
+     16.0,
+     -27.0
+    ],
+    "low_ready": [
+     26.0,
+     14.0,
+     -33.0
+    ],
+    "low_ready_first_person": [
+     30.0,
+     12.0,
+     -15.0
+    ],
+    "ads": [
+     60.0,
+     0.0,
+     0.0
+    ]
+   },
+   "_note": "one-handed pistol: the Pistol clips (fallback) applied from the right clavicle down, so only the gun arm takes the hold and the other arm keeps the body’s own motion; not two-handed, so no support hand reaches for it; carried 6 cm further right than the two-handed hold, in line with the shoulder rather than the chest -- a first guess, tune in play",
+   "_ads": "the rear sight this far out from the eye, on the eye line, down the sights: arm's length for a pistol (a rifle keeps the character default at the cheek)",
+   "elbow_down": 0.6,
+   "grip_nudge": [
+    0.0,
+    0.0,
+    3.5
+   ]
+  },
+  "_elbow_down": "0..1: how far the hand IK pulls the elbows toward down-and-out from the clip's own bend; pistols hold the arms out and want it, rifles keep the clip's elbows",
+  "_grip_nudge": "x forward, y right, z up, cm, in the weapon frame: moves where the trigger hand closes for every weapon on the stance. Pistols: the hand up the grip, under the slide (a first guess; tune in play)",
+  "_clips": "a clip name (Idle_Hipfire, Idle_ADS, Equip, Reload) -> an asset path, used before the Lyra folder; the Blade stance rests on the sword set's own idle"
  },
  "_stance_by_kind": "Which stance each catalogue kind uses. An individual weapon may override it with its own 'stance' field.",
  "stance_by_kind": {
@@ -10578,7 +11904,10 @@
     2.2
    ],
    "sit": 2.2,
-   "name": "RDS-1 reflex sight"
+   "name": "RDS-1 reflex sight",
+   "make": "Halcyon Optics",
+   "model": "RDS-1 reflex sight",
+   "icon": "Optic_RedDot_01"
   },
   "SM_Wep_Scope_Alien_01": {
    "mesh": "/Game/RepliCan/Weapons/Optics/SM_Wep_Scope_Alien_01.SM_Wep_Scope_Alien_01",
@@ -10591,7 +11920,10 @@
     0,
     7.97,
     7.72
-   ]
+   ],
+   "make": "Unattributed",
+   "model": "Scope Alien 01",
+   "icon": "Optic_Scope_Alien_01"
   },
   "SM_Wep_Scope_Small_01": {
    "mesh": "/Game/RepliCan/Weapons/Optics/SM_Wep_Scope_Small_01.SM_Wep_Scope_Small_01",
@@ -10604,7 +11936,10 @@
     0,
     0,
     2.03
-   ]
+   ],
+   "make": "Meridian Sightworks",
+   "model": "Scope Small 01",
+   "icon": "Optic_Scope_Small_01"
   },
   "SM_Wep_Scope_Small_02": {
    "mesh": "/Game/RepliCan/Weapons/Optics/SM_Wep_Scope_Small_02.SM_Wep_Scope_Small_02",
@@ -10617,7 +11952,10 @@
     0,
     0,
     0
-   ]
+   ],
+   "make": "Meridian Sightworks",
+   "model": "Scope Small 02",
+   "icon": "Optic_Scope_Small_02"
   },
   "SM_Wep_Scope_Small_03": {
    "mesh": "/Game/RepliCan/Weapons/Optics/SM_Wep_Scope_Small_03.SM_Wep_Scope_Small_03",
@@ -10630,7 +11968,10 @@
     0,
     -0.99,
     0
-   ]
+   ],
+   "make": "Meridian Sightworks",
+   "model": "Scope Small 03",
+   "icon": "Optic_Scope_Small_03"
   },
   "SM_Wep_Scope_Sniper_01": {
    "mesh": "/Game/RepliCan/Weapons/Optics/SM_Wep_Scope_Sniper_01.SM_Wep_Scope_Sniper_01",
@@ -10643,7 +11984,10 @@
     0,
     0,
     7.16
-   ]
+   ],
+   "make": "Vestergaard Precision",
+   "model": "Scope Sniper 01",
+   "icon": "Optic_Scope_Sniper_01"
   },
   "SM_Wep_Scope_Sniper_02": {
    "mesh": "/Game/RepliCan/Weapons/Optics/SM_Wep_Scope_Sniper_02.SM_Wep_Scope_Sniper_02",
@@ -10656,7 +12000,10 @@
     0,
     0,
     5.26
-   ]
+   ],
+   "make": "Vestergaard Precision",
+   "model": "Scope Sniper 02",
+   "icon": "Optic_Scope_Sniper_02"
   },
   "SM_Wep_Scope_Sniper_03": {
    "mesh": "/Game/RepliCan/Weapons/Optics/SM_Wep_Scope_Sniper_03.SM_Wep_Scope_Sniper_03",
@@ -10669,7 +12016,10 @@
     0,
     5.75,
     5.96
-   ]
+   ],
+   "make": "Vestergaard Precision",
+   "model": "Scope Sniper 03",
+   "icon": "Optic_Scope_Sniper_03"
   },
   "SM_Wep_Scope_Unique_01": {
    "mesh": "/Game/RepliCan/Weapons/Optics/SM_Wep_Scope_Unique_01.SM_Wep_Scope_Unique_01",
@@ -10682,18 +12032,22 @@
     0,
     0,
     8.26
-   ]
+   ],
+   "make": "Kesh Provenance",
+   "model": "Scope Unique 01",
+   "icon": "Optic_Scope_Unique_01"
   },
   "RedDot_02": {
    "mesh": "/Game/RepliCan/Optics/SM_Optic_RedDot_02",
    "eye": [
-    -0.36,
-    0.0,
-    5.23
+    0,
+    0,
+    4.2
    ],
-   "sit": 5.23,
+   "sit": 4.2,
    "name": "RDS-2 reflex sight",
-   "source": "/Game/PolygonSciFiWorlds/Models/Weapons/Parts/SM_Wep_Assault_02_RedDot_01"
+   "source": "/Game/PolygonSciFiWorlds/Models/Weapons/Parts/SM_Wep_Assault_02_RedDot_01",
+   "icon": "Optic_RedDot_02"
   }
  }
 }

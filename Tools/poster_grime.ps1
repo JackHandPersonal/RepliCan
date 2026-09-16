@@ -9,7 +9,7 @@
 # where damp sat, runs where water came down it, a general grey haze, and wear at the edges where
 # people and equipment brushed past. Done in one compiled pass because a per-pixel PowerShell
 # loop over a 1700 x 1050 image takes minutes.
-param([double]$Strength = 1.0)
+param([double]$Strength = 1.0, [string]$Only = "")   # -Only T_Poster_IronGate: just that one, its usual seed
 
 Add-Type -AssemblyName System.Drawing
 $dir = "C:\Dev\Games\RepliCan\RawArt"
@@ -148,6 +148,7 @@ $seed = 1
 foreach ($f in $sources) {
   $base = $f.BaseName -replace '_Upright$', ''
   $clean = Join-Path $dir ("{0}_Clean.png" -f $base)
+  if ($Only -and $base -ne $Only) { $seed += 7; continue }   # same seed per poster as a full run
   # Keep an untouched copy the first time, so re-running does not pile dirt on dirt.
   if (-not (Test-Path $clean)) { Copy-Item $f.FullName $clean }
   $out = Join-Path $dir ("{0}_Upright.png" -f $base)

@@ -20,7 +20,7 @@ local Y 0..89, the ROOM is on their local +Y side; Pillar_Wide is 150 x
 150 from its origin; Ceiling_01's visible underside is coffered: z 420 in
 the middle column of the tile (x 200..300), 400 along its x edges, 427 to
 446 elsewhere (its top is at 449)."""
-import unreal, json, os, io
+import unreal, re, json, os, io
 B = '/Game/PolygonSciFiSpace/Meshes/Buildings/'
 P = '/Game/PolygonSciFiSpace/Meshes/Props/'
 GRIME = '/Game/RepliCan/Materials/M_Facility_Grime'
@@ -115,6 +115,7 @@ REMOVE |= {'Hall_Wall_E', 'Hall_Pillar_SE', 'Hall_Pillar_NE', 'Caf_Wall_W1'}   #
 REMOVE |= {'Cabin_S1_Footlocker', 'Cabin_S1_Footlocker_Lid'}   # now a loot box actor
 REMOVE |= {'Cabin_S1_Shower'}   # replicants do not shower
 REMOVE |= {'Foyer_DoorFrame_N', 'Foyer_DoorLeaves_N'}   # the lift shaft wall is the door there now
+REMOVE |= {'Cabin_%s%d_Number' % (side, k) for side in 'SN' for k in range(4)}   # the LED number plates beside the cabin doors: stencil planes over the doors now (removals run before the hall section, so this lives up here)
 # The first service deck (30 x 15 m, labelled Sub_) is retired: the basement is being built up
 # ITERATIVELY now, one room at a time, starting with a 3 x 5 at the foot of the lift (S10_).
 REMOVE |= {l for l in existing if l.startswith('Sub_')}
@@ -175,7 +176,85 @@ def may_move(label):
     return (bool(REPOSITION) and label.startswith(REPOSITION)) or label in REPOSITION_EXACT
 
 
+
+# ---- Interactables: everything a person could act on ------------------------------------------
+# The reticle-menu system (outline, the small menu, E; the actor tag is still "inspectable").
+# Every placed prop (anything that is not a building piece, a light, or pipework) gets the tag
+# with a name, a line and an action unless its placement gave tags of its own. Catalogue items
+# (UI/Items.json, matched by mesh) come with their own name and description and can be taken;
+# the rest are named from the mesh and given what a thing of that kind does.
+RETAG_ALL = True   # one run: every auto-tagged prop is revised so the tags land on what is already placed (retire after)
+ITEM_BY_MESH = {}
+try:
+    for _k, _e in json.load(open('C:/Dev/Games/RepliCan/UI/Items.json', encoding='utf-8'))['items'].items():
+        _m = (_e.get('mesh') or '').split('.')[0]
+        if _m: ITEM_BY_MESH[_m] = _e
+except Exception as _ex:
+    print('items catalogue not read:', _ex)
+_NOT_A_THING = ('Light', 'Pipe', 'Wires', 'Cable', 'Hose', 'Vent', 'Greeble', 'Detail_', 'Wall_Panel', 'Strut', 'Connector', 'Camera_01_Arm', 'Fog', 'Haze', 'Ceiling', 'Trim', 'Rail')
+_KINDS = [   # (stem match, name, action, the line)
+    ('Vending', 'Vending machine', 'Use', 'A vending machine. It takes credits it does not mean to give back.'),
+    ('Crate', 'Crate', 'Open', 'A shipping crate. Sealed, or sealed enough.'),
+    ('Barrel', 'Barrel', 'Inspect', 'A drum of something the label no longer says.'),
+    ('Buttons', 'Button panel', 'Use', 'A panel of buttons. Some of them still do something.'),
+    ('Stool', 'Stool', 'Sit', 'A metal stool, bolted where it stands.'),
+    ('Bench', 'Bench', 'Sit', 'A bench. Nobody has sat on it in a while.'),
+    ('Chair', 'Chair', 'Sit', 'A chair that has seen shifts.'),
+    ('StickyNote', 'Note', 'Read', 'A note stuck where it would be seen.'),
+    ('Screen', 'Terminal', 'Use', 'A station terminal. The screen is on; that is not the same as working.'),
+    ('Keyboard', 'Keyboard', 'Use', 'A keyboard, keys worn to blanks.'),
+    ('Joystick', 'Control stick', 'Use', 'A control stick for something that is not here.'),
+    ('HandScanner', 'Hand scanner', 'Use', 'A palm reader. It wants a palm it knows.'),
+    ('Work_Bench', 'Workbench', 'Use', 'A workbench, tools chained to it.'),
+    ('WorkBench', 'Workbench', 'Use', 'A workbench, tools chained to it.'),
+    ('Table', 'Table', 'Inspect', 'A table. Bolted down, like everything worth stealing.'),
+    ('Oxygen_Tank', 'Oxygen tank', 'Inspect', 'An oxygen tank. The gauge reads what it reads.'),
+    ('Medical_Cart', 'Medical cart', 'Inspect', 'A medical cart, mostly emptied.'),
+    ('Medical', 'Medical unit', 'Use', 'A medical unit. It knows more about you than you do.'),
+    ('Generator', 'Generator', 'Use', 'A generator, humming at the edge of hearing.'),
+    ('Bin', 'Bin', 'Inspect', 'A bin. Somebody has been through it already.'),
+    ('Weapon_Rack', 'Weapon rack', 'Inspect', 'A weapon rack. Empty brackets, mostly.'),
+    ('Test', 'Test tubes', 'Inspect', 'Test tubes in a rack, labelled in a hand that gave up.'),
+    ('Sink', 'Sink', 'Use', 'A sink. The water is recycled, and tastes it.'),
+    ('Fridge', 'Fridge', 'Open', 'A fridge. Something in it has a name written on it.'),
+    ('Locker', 'Locker', 'Open', 'A steel locker. Somebody else\'s, once.'),
+    ('Cart', 'Cart', 'Inspect', 'A cart, wheels locked.'),
+    ('Tank', 'Tank', 'Inspect', 'A pressure tank. Do not tap it.'),
+    ('Sign', 'Sign', 'Read', 'A sign, still legible.'),
+    ('Pad', 'Data pad', 'Use', 'A data pad, screen cracked, still lit.'),
+]
+def auto_tags(path, yaw, scale):
+    name = path.rsplit('/', 1)[-1].split('.')[0]
+    if not name.startswith('SM_Prop_'): return None
+    stem = name[8:]
+    if any(x in stem for x in _NOT_A_THING): return None
+    item = ITEM_BY_MESH.get(path.split('.')[0])
+    if item:
+        tags = ['inspectable', 'name:' + (item.get('name') or stem.replace('_', ' ')), 'desc:' + (item.get('description') or ''), 'action:Take']
+        use = (item.get('use') or '').lower()
+        if use == 'read': tags.append('action:Read')
+        elif use == 'activate': tags.append('action:Use')
+        tags.append('action:Inspect')
+        return tags
+    for key, disp, action, line in _KINDS:
+        if key in stem:
+            tags = ['inspectable', 'name:' + disp, 'desc:' + line, 'action:' + action]
+            if action == 'Sit':
+                mesh = unreal.load_asset(path); b = mesh.get_bounds() if mesh else None
+                top = (b.origin.z + b.box_extent.z) * (scale[2] if scale else 1.0) if b else 66.0
+                if key == 'Chair': top *= 0.5   # the seat, not the back
+                tags.append('seat:%.0f,%.0f,4,38' % (top, yaw + 90.0))   # a prop's front is its local +Y: sit facing it
+            if action != 'Inspect': tags.append('action:Inspect')
+            return tags
+    disp = re.sub(r'_[0-9]+$', '', stem).replace('_', ' ')
+    return ['inspectable', 'name:' + disp, 'desc:Station fittings. Nothing special about it.', 'action:Inspect']
+def apply_tags(a, tags, auto):
+    if tags is not None: a.set_editor_property('tags', [unreal.Name(t) for t in tags])
+    elif auto: a.set_editor_property('tags', [unreal.Name(t) for t in auto])
+
 def mesh_actor(path, x, y, z=0.0, yaw=0.0, roll=0.0, pitch=0.0, scale=None, mat=True, material=None, tags=None, label=None):
+    auto = auto_tags(path, yaw, scale) if tags is None else None
+    if auto and RETAG_ALL and label: REVISE.add(label)
     def override(c):
         mm = unreal.load_asset(material) if material else None
         if mm:
@@ -189,7 +268,7 @@ def mesh_actor(path, x, y, z=0.0, yaw=0.0, roll=0.0, pitch=0.0, scale=None, mat=
         if mat and grime:
             for i in range(c.get_num_materials()): c.set_material(i, grime)
         override(c)
-        if tags is not None: a.set_editor_property('tags', [unreal.Name(t) for t in tags])
+        apply_tags(a, tags, auto)
         return a
     def revise(a):
         mesh = unreal.load_asset(path)
@@ -210,7 +289,7 @@ def mesh_actor(path, x, y, z=0.0, yaw=0.0, roll=0.0, pitch=0.0, scale=None, mat=
         if scale: a.set_actor_scale3d(unreal.Vector(x=scale[0], y=scale[1], z=scale[2]))
         override(c)
         c.set_mobility(unreal.ComponentMobility.STATIC)
-        if tags is not None: a.set_editor_property('tags', [unreal.Name(t) for t in tags])
+        apply_tags(a, tags, auto)
     return spawn, revise
 
 # ---- Steam and vapour ----------------------------------------------------------------------
@@ -969,7 +1048,7 @@ def cctv(label, fx, fy, psi, phi=0.0, z=345.0):
 # (no camera in the cabin: a replicant's room is not watched, or at least not visibly)
 # LED signs over the three double doors, on their foyer-side lintel plates.
 door_sign('Sign_Door_Bay', 250.0, H + WALL_T, 0.0, 'PROMPT CRITICAL|SERVICES')
-door_sign('Sign_Door_Hall', CX, HY + CELL, -90.0, 'REPLICANT CABINS|CREW HALL  S1-S4')
+door_sign('Sign_Door_Hall', CX, HY + CELL, -90.0, 'REPLICANT CABINS|CREW HALL  1-8')
 door_sign('Sign_Door_Caf', GX, HY, 90.0, 'CAFETERIA|INOPERATIVE')
 
 # ---- The crew hall: 7 tiles west from the foyer door, four cabins on each side ----
@@ -1010,7 +1089,34 @@ def hall_side(side):
     blank('Hall_%s_Blank_5' % side, CX - HN * CELL, 'SM_Bld_Crew_Blank_01')
 hall_side('N'); hall_side('S')
 for t in range(HN):
-    fixture('Hall_Fixture_%d' % t, hall_tile_x(t) + 250.0, HY + 272.5, CEIL_MID, intensity=24.0, shadows=(t == 3), yaw=90)   # long axis along the hall
+    fixture('Hall_Fixture_%d' % t, hall_tile_x(t) + 250.0, HY + 272.5, CEIL_MID, intensity=24.0, shadows=(t == 3), yaw=90, tags=['lightid:hall'])   # long axis along the hall; the hall switches' Hall action
+
+# ---- Hall room numbers and light switches ----
+# Numbers run from the foyer end, odd on the left (north) walking west and even on the right
+# (south): N0 1, S0 2, N1 3, S1 4 ... which keeps cabin S1 as room four, the way the intro has it.
+# Numbers over the doors: stencil digits on masked planes, the way the PCS signs are done (the
+# LED plates beside the doors did not read). They sit on the flat band of Doorframe_06 above
+# its opening: local y 9.5 from z 208 to 228, measured by rays through the mesh. The Engine
+# plane's image top is its local -Y and its right its local +X, so roll 90 (facing +Y: the S
+# doors) shows the digit upright and roll -90 (the N doors) shows it turned half round; those
+# take the _F twin of the texture (Tools/import_door_numbers.py makes both).
+DOOR_NUM_Z, DOOR_NUM_Y, DOOR_NUM_SIZE = 218.0, 9.9, 0.2   # centre height; off the frame's origin plane; a 20 cm plane
+for k, x in enumerate(CAB_X):
+    sign('Cabin_S%d_Num' % k, 'M_Sign_Door_Num_%d' % (2 * k + 2), x + 250.0, HY + 52.5 + DOOR_NUM_Y, DOOR_NUM_Z, 0, 90, DOOR_NUM_SIZE, DOOR_NUM_SIZE)          # the S door: sliding_door(x, HY + 52.5, 0), opening centred at local x 250
+    sign('Cabin_N%d_Num' % k, 'M_Sign_Door_Num_%d_F' % (2 * k + 1), x + 250.0, HY + CELL + 22.5 - DOOR_NUM_Y, DOOR_NUM_Z, 0, -90, DOOR_NUM_SIZE, DOOR_NUM_SIZE)  # the N door: sliding_door(x + 500, HY + CELL + 22.5, 180)
+# Two-way switching for the hall lights: the cabin panel's button box (cut out of Blank_02 by
+# Tools/cut_from_click.py, so it keeps the wall's own coordinates: local x 42..73, z 134..175 on
+# the painted face) placed with the transform of the hall blank it sits on, one at each end.
+# The box is RECESSED into Blank_02; the hall blanks are flat Blank_01, so on them the piece is
+# pushed out until its whole depth stands proud of the wall face (scratch switch_restore.py
+# measured and moved the placed ones; hand placement wins on reruns).
+HALL_BUTTON = '/Game/RepliCan/Cut/SM_Crew_Blank_02_Button'
+def hall_switch(label, side, x0):
+    y = HY + CELL if side == 'N' else HY
+    place(label, HALL_BUTTON, x0 + (250.0 if side == 'N' else 0.0), y, 0, yaw=(180.0 if side == 'N' else 0.0),
+          tags=['inspectable', 'name:Lights', 'desc:A switch panel for the hall lights. Its twin at the other end does the same.', 'action:Hall', 'toggle:Hall=hall'])
+hall_switch('Hall_Switch_E', 'S', CX - 250.0)        # by the foyer door, on Hall_S_Blank_0
+hall_switch('Hall_Switch_W', 'S', CX - HN * CELL)    # at the dead end, on Hall_S_Blank_5
 
 # ---- Cabin S1, room four: the crew cabin (its siblings will be copies of this) ----
 def cabin(tag, x0, y0, door_side):
@@ -1028,7 +1134,11 @@ def cabin(tag, x0, y0, door_side):
     near_e = 0.0 if north else 250.0        # E line walks from y0 up
     # The east blank's button box is cut out into its own inspectable piece (Cabin_S1_Blank_Button,
     # placed by hand from the scratch cut_button.py); the wall uses the copy without those polygons.
-    line_piece(tag + '_Blank', 'E', x0, y0, 'SM_Bld_Crew_Blank_02', offset=near_e)   # (a cut piece, when one exists, is made by Tools/cut_feature.py and swapped in by hand)
+    # S1's button box is also its own actor, Cabin_S1_Blank_Button: the same polygons cut out of this
+    # panel (Tools/cut_from_click.py), placed on the wall's transform and pushed one centimetre
+    # proud along the wall normal so it draws over the panel's own box and the reticle can outline
+    # it. The wall stays the whole panel (the NoButton copy's hole did not line up with the piece).
+    line_piece(tag + '_Blank', 'E', x0, y0, 'SM_Bld_Crew_Blank_02', offset=near_e)
     line_piece(tag + '_Desk', 'E', x0, y0, 'SM_Bld_Crew_Desk_01', offset=250.0 - near_e)
     def ly(v): return y0 + (v if north else CELL - v)     # cabin-local y, mirrored for a south cabin
     def lyaw(v): return v if north else -v
@@ -1036,7 +1146,7 @@ def cabin(tag, x0, y0, door_side):
     # Locker and footlocker against the east blank, by the door; stool and terminal at the desk niche.
     # Props whose front is their local +y and that face -x (into the room) keep yaw 90 in both mirror cases.
     place(tag + '_Locker', WP + 'SM_Prop_Locker_01', ex - 35.0, ly(82.0), 0, yaw=90, mat=False)
-    loot_box(tag + '_Box', ex - 36.0, ly(192.0), lyaw(90) + 6.0, ['Pocket pistol'])   # a few degrees off square: hand placed   # a very small, weak sidearm: the PCS complimentary gear
+    loot_box(tag + '_Box', ex - 36.0, ly(192.0), lyaw(90) + 6.0, ['Pocket pistol', 'Wrench 01', 'Fleet Sword 01'] if tag == 'Cabin_S1' else ['Pocket pistol'])   # S1 also gets a wrench and a blade to try the melee on   # a few degrees off square: hand placed   # a very small, weak sidearm: the PCS complimentary gear
     place(tag + '_Stool', P + 'SM_Prop_Stool_01', ex - 55.0, ly(375.0), 0, yaw=lyaw(90), tags=['inspectable', 'name:Stool', 'desc:A metal stool, bolted where it stands.', 'action:Sit', 'seat:66,0,4,38'])   # seat:<top height>,<facing yaw>,<whole-body lean deg>,<spine hunch deg>: sit facing the desk, upright
     place(tag + '_Terminal', P + 'SM_Prop_Screen_Small_01', x0 + CELL - 17.0, ly(375.0), 118.0, yaw=90, tags=['inspectable', 'name:Terminal', 'desc:', 'action:Use'])   # on the niche's desk top (z 89), screen to the room; Use is the whole menu
     # On the desk top (z 89): a keyboard in front of the screen, a data pad, a keycard and a drink can; a small lamp in the alcove's top.
@@ -1228,7 +1338,11 @@ def soldier(label, mesh_path, head_path, x, y, face_deg, start, rate, disp, desc
     face_deg is a compass angle measured from +X. These meshes face +Y at yaw zero, so the yaw
     that points them along that angle is face_deg - 90."""
     anim = unreal.load_asset(SOLDIER_IDLE)
-    mat = unreal.load_asset(SOLDIER_MAT)
+    # The Space palette swap is for the Space pack's own bodies only. A body from another pack
+    # (the Mech pilots) keeps the materials its asset came with: Synty atlases share a rough
+    # layout, so the Space atlas on a Mech mesh looks nearly right with rainbow swatches where
+    # the two disagree -- the "tex probs" on the pilots. None here clears an old override.
+    mat = unreal.load_asset(SOLDIER_MAT) if '/PolygonSciFiSpace/' in mesh_path else None
     mesh = unreal.load_asset(mesh_path)
     if not mesh:
         print('SOLDIER MESH MISSING', mesh_path); return
@@ -1242,8 +1356,7 @@ def soldier(label, mesh_path, head_path, x, y, face_deg, start, rate, disp, desc
         c = a.skeletal_mesh_component
         try: c.set_skeletal_mesh_asset(mesh)
         except Exception: c.set_editor_property('skeletal_mesh_asset', mesh)
-        if mat:
-            for i in range(c.get_num_materials()): c.set_material(i, mat)
+        for i in range(c.get_num_materials()): c.set_material(i, mat)   # None = back to the asset's own
         if anim:
             c.set_editor_property('animation_mode', unreal.AnimationMode.ANIMATION_SINGLE_NODE)
             d = c.get_editor_property('animation_data')
@@ -1471,6 +1584,7 @@ def _clear_spot(taken):
     return None
 
 _taken = []
+REVISE |= {'Caf_Lineup_Mech_MechPilot_Male', 'Caf_Lineup_Mech_MechPilot_Female'}   # material override cleared (see soldier())
 for _i, (_pack, _path) in enumerate(LINEUP):
     _spot = _clear_spot(_taken)
     if _spot is None:

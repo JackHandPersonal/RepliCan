@@ -5,19 +5,36 @@
  "_now": "ONE EFFECT FOR EVERYTHING, for now: a puff of smoke, a spit of sparks, a short sharp crack. No gas clouds -- the smoke emits for four hundredths of a second, so it is a wisp, not a column. The horror pack's NS_Spark_Shower_01 is an ambient loop; a tenth of a second of it, small, is the spark burst. People get the dull thud and no sparks.",
  "default": {
   "fx": [
-   { "niagara": "/Game/PolygonSciFiWorlds/FX/Niagara/NS_Smoke_Small_01", "scale": 0.08, "seconds": 0.04 },
-   { "niagara": "/Game/Synty/PolygonSciFiHorror/FX/NS_Spark_Shower_01", "scale": 0.35, "seconds": 0.1 }
+   {
+    "niagara": "/Game/PolygonSciFiWorlds/FX/Niagara/NS_Smoke_Small_01",
+    "scale": 0.08,
+    "seconds": 0.04
+   },
+   {
+    "niagara": "/Game/Synty/PolygonSciFiHorror/FX/NS_Spark_Shower_01",
+    "scale": 0.35,
+    "seconds": 0.1
+   }
   ],
-  "decal": "/Game/RepliCan/Materials/M_ImpactScorch",
-  "decal_size": 8.0,
-  "decal_life": 30.0,
-  "light_color": [ 1.0, 0.8, 0.45 ],
+  "decal": "/Game/RepliCan/Materials/M_BulletHole_01",
+  "decal_size": 6.0,
+  "decal_life": 60.0,
+  "light_color": [
+   1.0,
+   0.8,
+   0.45
+  ],
   "light_intensity": 1600.0,
   "light_radius": 220.0,
   "light_seconds": 0.045,
   "sound": "impact_crack",
   "volume": 0.6,
-  "variants": 4
+  "variants": 4,
+  "decals": [
+   "/Game/RepliCan/Materials/M_BulletHole_01",
+   "/Game/RepliCan/Materials/M_BulletHole_02",
+   "/Game/RepliCan/Materials/M_BulletHole_03"
+  ]
  },
  "rules": [
   {
@@ -30,5 +47,6 @@
    "volume": 0.6,
    "variants": 3
   }
- ]
+ ],
+ "_decals": "'decals' is a list of decal materials picked from at random (bullet holes, three variants); 'decal' alone is one; 'decal': '' is no mark. The size is jittered 0.8..1.25 in code."
 }

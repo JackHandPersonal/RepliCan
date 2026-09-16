@@ -106,20 +106,21 @@ struct REPLICAN_API FAttributes
 	GENERATED_BODY()
 
 	// Raw muscle power, heavy lifting, and melee force.
-	UPROPERTY() int32 Brawn = 5;
+	UPROPERTY() int32 Brawn = 50;
 	// Coordination, speed, dodging, and fine motor skills.
-	UPROPERTY() int32 Agility = 5;
+	UPROPERTY() int32 Agility = 50;
 	// Immune system strength, stamina, and resistance to toxins or radiation.
-	UPROPERTY() int32 Endurance = 5;
+	UPROPERTY() int32 Endurance = 50;
 	// Memory, logical deduction, and academic knowledge.
-	UPROPERTY() int32 Cognition = 5;
+	UPROPERTY() int32 Cognition = 50;
 	// Repairing, hacking, and operating futuristic machinery or starship systems.
-	UPROPERTY() int32 Tech = 5;
+	UPROPERTY() int32 Tech = 50;
 	// Leadership, intimidation, and social engineering.
-	UPROPERTY() int32 Presence = 5;
+	UPROPERTY() int32 Presence = 50;
 
+	// A hundred-point scale for humans: 50 is an ordinary person, 100 the best a body does.
 	static constexpr int32 Min = 1;
-	static constexpr int32 Max = 10;
+	static constexpr int32 Max = 100;
 	// The six in the order they are shown, so the UI and any roll code agree on it.
 	static const TArray<FName>& Names();
 	int32 Get(FName Which) const;

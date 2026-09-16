@@ -37,6 +37,8 @@ import unreal, io, math, traceback
 PKG = '/Game/RepliCan/Optics'
 MAT_DIR = '/Game/RepliCan/Materials'
 GLASS = MAT_DIR + '/M_RedDot'
+MATERIAL_ONLY = True      # rebuild M_RedDot and stop: the RedDot_01 mesh and body stay as they are
+class Done(BaseException): pass
 BODY = MAT_DIR + '/M_OpticBody'
 
 # The optic, in HAC1 terms: +X downrange, +Z up, origin where it clamps to the rail.
@@ -79,6 +81,7 @@ try:
     if not mat:
         raise RuntimeError('could not create ' + GLASS)
 
+    MEL.delete_all_material_expressions(mat)   # a rebuild, not a pile of old nodes under the new ones
     mat.set_editor_property('blend_mode', unreal.BlendMode.BLEND_TRANSLUCENT)
     mat.set_editor_property('shading_model', unreal.MaterialShadingModel.MSM_UNLIT)
     # Two-sided so the reticle is there from behind the weapon too, in third person.
@@ -153,8 +156,13 @@ try:
     link(wp, '', local, '')
 
     # The middle of the glass, in the optic's own space -- the same numbers the mesh was built to.
-    lens_centre = node(unreal.MaterialExpressionConstant3Vector, -1700, 420)
-    lens_centre.set_editor_property('constant', unreal.LinearColor(LENS_AT, 0.0, GLASS_Z_M, 0.0))
+    # Per optic: where the pane sits in the optic's own frame and how big it is. Parameters, so a
+    # part baked from a pack (Tools/bake_optic_part.py) sets its own on an instance; the defaults
+    # are this script's RedDot_01. With constants here, RedDot_02's dot was drawn a pane-height
+    # below its glass and never seen.
+    lens_centre = node(unreal.MaterialExpressionVectorParameter, -1700, 420)
+    lens_centre.set_editor_property('parameter_name', 'LensCentre')
+    lens_centre.set_editor_property('default_value', unreal.LinearColor(LENS_AT, 0.0, GLASS_Z_M, 0.0))
     on_glass = node(unreal.MaterialExpressionSubtract, -1360, 340)
     link(local, '', on_glass, 'A')
     link(lens_centre, '', on_glass, 'B')
@@ -165,8 +173,13 @@ try:
     link(on_glass, '', across, '')
 
     # Normalised to the pane, so -0.5..0.5 across and up it whatever size the glass is.
-    lens_size = node(unreal.MaterialExpressionConstant2Vector, -1200, 460)
-    lens_size.set_editor_property('r', GLASS_WIDE_M); lens_size.set_editor_property('g', GLASS_HEIGHT_M)
+    lens_size_p = node(unreal.MaterialExpressionVectorParameter, -1420, 460)
+    lens_size_p.set_editor_property('parameter_name', 'LensSize')
+    lens_size_p.set_editor_property('default_value', unreal.LinearColor(GLASS_WIDE_M, GLASS_HEIGHT_M, 1.0, 0.0))
+    lens_size = node(unreal.MaterialExpressionComponentMask, -1200, 460)   # the pane's width and height
+    lens_size.set_editor_property('r', True); lens_size.set_editor_property('g', True)
+    lens_size.set_editor_property('b', False); lens_size.set_editor_property('a', False)
+    link(lens_size_p, '', lens_size, '')
     from_centre = node(unreal.MaterialExpressionDivide, -1020, 360)
     link(across, '', from_centre, 'A')
     link(lens_size, '', from_centre, 'B')
@@ -176,8 +189,13 @@ try:
     link(from_centre, '', offset, 'A')
     link(shifted, '', offset, 'B')
 
-    dist = node(unreal.MaterialExpressionLength, -250, 140)
-    link(offset, '', dist, '')
+    # Back to centimetres before the size tests: the dot and ring are physical sizes on the
+    # glass, the same on every optic, not fractions of a pane that may be twice as wide.
+    offset_cm = node(unreal.MaterialExpressionMultiply, -330, 140)
+    link(offset, '', offset_cm, 'A')
+    link(lens_size, '', offset_cm, 'B')
+    dist = node(unreal.MaterialExpressionLength, -200, 140)
+    link(offset_cm, '', dist, '')
 
     def falloff(edge_node, x, y, power):
         """saturate(1 - d/edge) ^ power -- a soft round blob with no texture involved."""
@@ -193,12 +211,12 @@ try:
         p.set_editor_property('const_exponent', power)
         return p
 
-    dot_size = scalar('DotSize', 0.045, -250, 400)
+    dot_size = scalar('DotSize', 0.025, -250, 400)    # cm: the dot's radius on the glass (a quarter of the first cut, per the user)
     dot = falloff(dot_size, -80, 300, 1.6)
 
     # The ring: the same falloff about a radius rather than about zero.
-    ring_r = scalar('RingRadius', 0.30, -250, 620)
-    ring_w = scalar('RingWidth', 0.035, -250, 720)
+    ring_r = scalar('RingRadius', 0.15, -250, 620)     # cm
+    ring_w = scalar('RingWidth', 0.02, -250, 720)      # cm
     ring_d = node(unreal.MaterialExpressionSubtract, -80, 620)
     link(dist, '', ring_d, 'A')
     link(ring_r, '', ring_d, 'B')
@@ -248,6 +266,7 @@ try:
     MEL.recompile_material(mat)
     unreal.EditorAssetLibrary.save_loaded_asset(mat, False)
     print('GLASS', GLASS)
+    if MATERIAL_ONLY: raise Done()
 
     # ---- The tube --------------------------------------------------------------------------
     body = unreal.load_asset(BODY)
@@ -336,6 +355,8 @@ try:
     print('OPTIC %s  %d tris  %.1f x %.1f x %.1f cm'
           % (full, dyn.get_triangle_count(), b.box_extent.x * 2, b.box_extent.y * 2, b.box_extent.z * 2))
     print('lens centre (the new rear sight) at local (%.2f, 0.00, %.2f)' % (LENS_AT, MOUNT_DROP + GLASS_HEIGHT * 0.5))
+except Done:
+    print('material only: done')
 except Exception:
     io.open(r'C:/Dev/Games/RepliCan/RawArt/render_error.txt', 'w').write(traceback.format_exc())
     print('ERROR', traceback.format_exc().strip().splitlines()[-1])

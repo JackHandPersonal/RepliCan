@@ -4,6 +4,9 @@
 #include "EditToolWidget.h"
 #include "CharacterSheetWidget.h"
 #include "RemoteViewWidget.h"
+#include "TerminalWidget.h"
+#include "Components/WidgetComponent.h"
+#include "Components/WidgetInteractionComponent.h"
 #include "AppearanceWidget.h"
 #include "Engine/StaticMeshActor.h"
 #include "NiagaraFunctionLibrary.h"
@@ -38,6 +41,9 @@
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
+#include "PhysicsEngine/BodySetup.h"
+#include "ContextMenuWidget.h"
+#include "UObject/UObjectIterator.h"
 #include "Blueprint/UserWidget.h"
 #include "CollisionShape.h"
 #include "Components/StaticMeshComponent.h"
@@ -69,6 +75,8 @@
 #include "SequenceData.h"
 #include "SequenceDirector.h"
 #include "WeaponCatalog.h"
+#include "WeaponSkins.h"
+#include "ShotReactions.h"
 #include "ElevatorActor.h"
 #include "ImpactEffects.h"
 #include "InputBindings.h"
@@ -147,23 +155,54 @@ namespace
 		// here would break that.
 		virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& KeyEvent) override
 		{
+			if (TerminalKey(KeyEvent, false)) { return true; }
 			ABasePlayerController* PC = Controller.Get();
 			if (!PC || !PC->GetWorld() || !PC->GetWorld()->IsGameWorld()) { return false; }
 			if (InputBindings::KeyFor(TEXT("Freelook")) == KeyEvent.GetKey())
 			{
 				if (ABaseCharacter* Ch = Cast<ABaseCharacter>(PC->GetPawn())) { Ch->SetFreelook(false); }
 			}
+			if (InputBindings::KeyFor(TEXT("Scan")) == KeyEvent.GetKey()) { PC->SetScanHeld(false); }
 			return false;
 		}
 
+		// THE TERMINAL owns the keyboard and the mouse while it is up: every key and click is carried
+		// to the screen in the world through the interaction pointer; Esc alone is the way out.
+		// The pointer INJECTS what it is given back into Slate, which comes through this processor
+		// again: while forwarding, the injected copy is let through untouched, or the two chase
+		// each other off the end of the stack.
+		bool bTerminalForwarding = false;
+		struct FForwardScope { bool& Flag; FForwardScope(bool& F) : Flag(F) { Flag = true; } ~FForwardScope() { Flag = false; } };
+		bool TerminalKey(const FKeyEvent& KeyEvent, bool bDown)
+		{
+			ABasePlayerController* PC = Controller.Get();
+			if (!PC || !PC->IsTerminalOpen() || bTerminalForwarding) { return false; }
+			FForwardScope Scope(bTerminalForwarding);
+			if (bDown && KeyEvent.GetKey() == EKeys::Escape) { PC->CloseTerminal(); return true; }
+			if (UWidgetInteractionComponent* Pointer = PC->GetTerminalPointer())
+			{
+				if (bDown)
+				{
+					Pointer->PressKey(KeyEvent.GetKey(), KeyEvent.IsRepeat());
+					// The processor sees keys, not characters: the typed character comes from the key event.
+					uint32 Ch = KeyEvent.GetCharacter();
+					if (Ch >= 'A' && Ch <= 'Z' && !KeyEvent.IsShiftDown()) { Ch += 'a' - 'A'; }   // key codes are upper case; the shift state says
+					if (Ch >= 32 && Ch < 127) { Pointer->SendKeyChar(FString::Chr((TCHAR)Ch), KeyEvent.IsRepeat()); }
+				}
+				else { Pointer->ReleaseKey(KeyEvent.GetKey()); }
+			}
+			return true;
+		}
 		virtual bool HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& KeyEvent) override
 		{
+			if (TerminalKey(KeyEvent, true)) { return true; }
 			ABasePlayerController* PC = Controller.Get();
 			if (!PC || KeyEvent.IsRepeat() || !PC->GetWorld() || !PC->GetWorld()->IsGameWorld()) { return false; }
 			const FKey Key = KeyEvent.GetKey();
 			if (InputBindings::KeyFor(TEXT("Freelook")) == Key && !PC->IsAnyScreenOpen() && !PC->IsEditMode())
 			{
-				if (ABaseCharacter* Ch = Cast<ABaseCharacter>(PC->GetPawn())) { Ch->SetFreelook(true); }
+				// Not down the sights: the two want opposite things from the camera, and the sights won.
+				if (ABaseCharacter* Ch = Cast<ABaseCharacter>(PC->GetPawn())) { if (!Ch->IsAiming()) { Ch->SetFreelook(true); } }
 				return false;   // Alt is still a modifier for other commands
 			}
 			if (Key == EKeys::F11) { PC->ToggleMetrics(); return true; }
@@ -183,14 +222,29 @@ namespace
 			}
 			const bool bShift = KeyEvent.IsShiftDown(), bCtrl = KeyEvent.IsControlDown(), bAlt = KeyEvent.IsAltDown();
 			auto Bound = [&](const TCHAR* Id) { return InputBindings::Matches(FName(Id), Key, bShift, bCtrl, bAlt); };
-			const bool bPlaying = !PC->IsAnyScreenOpen();
+			// A covering page blocks the play keys; the reticle menu beside the aim does not, now that
+			// most of the station answers the reticle and the menu is up whenever something is looked at.
+			const bool bPlaying = !PC->IsPageOpen();
 
 			if (Bound(TEXT("CyclePalette")) && bPlaying) { PC->CycleMaterialUnderReticle(); return true; }
 			if (Bound(TEXT("InspectSurface")) && bPlaying) { PC->NoteTextureUnderReticle(); return true; }
+			if (Key == EKeys::One || Key == EKeys::Two || Key == EKeys::G) { UE_LOG(LogTemp, Log, TEXT("Keys: %s playing=%d page=%d menu=%d rows=%d flavour=%d"), *Key.ToString(), bPlaying ? 1 : 0, PC->IsPageOpen() ? 1 : 0, PC->IsInspectMenuOpen() ? 1 : 0, PC->InspectActionCount(), PC->IsInspectMenuFlavour() ? 1 : 0); }
 			if (Bound(TEXT("NextWeapon")) && bPlaying) { PC->SwapWeaponSlot(); return true; }
+			// With the reticle menu up, a digit does the row with that number; the weapon keys wait
+			// for the menu to close (or a digit past the menu's rows falls through to them).
+			if (PC->IsInspectMenuOpen() && !PC->IsInspectMenuFlavour() && !bShift && !bCtrl && !bAlt)
+			{
+				static const FKey MenuDigits[] = { EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine };
+				for (int32 d = 0; d < 9; ++d) { if (Key == MenuDigits[d] && d < PC->InspectActionCount()) { PC->InspectSelectIndex(d); PC->InspectUseSelected(); return true; } }   // the digit picks AND uses the row: one press, like a conversation reply
+			}
+			if (Bound(TEXT("Weapon1")) && bPlaying) { PC->EquipWeaponSlot(1); return true; }
+			if (Bound(TEXT("Weapon2")) && bPlaying) { PC->EquipWeaponSlot(2); return true; }
+			if (Bound(TEXT("InspectPrev")) && PC->IsInspectMenuOpen()) { PC->InspectSelectNext(-1); return true; }
+			if (Bound(TEXT("InspectNext")) && PC->IsInspectMenuOpen()) { PC->InspectSelectNext(1); return true; }
 			if (Bound(TEXT("Holster")) && bPlaying) { PC->ToggleHolster(); return true; }
 			if (Bound(TEXT("Reload")) && bPlaying) { PC->ReloadHeldWeapon(); return true; }
 			if (Bound(TEXT("MeleeBash")) && bPlaying) { PC->MeleeHeldWeapon(); return true; }
+			if (Bound(TEXT("Scan")) && bPlaying) { PC->SetScanHeld(true); return true; }
 			if (Bound(TEXT("Headlamp")) && !PC->IsPauseMenuOpen() && !PC->IsInCinematic())
 			{
 				if (ABaseCharacter* Ch = Cast<ABaseCharacter>(PC->GetPawn())) { Ch->ToggleHeadlamp(); PC->SetDiagNote(Ch->IsHeadlampOn() ? TEXT("Headlamp on") : TEXT("Headlamp off")); }
@@ -241,11 +295,13 @@ namespace
 		// from the Zoom input action, so the two do not both fire off one scroll; zoom stays on C.
 		virtual bool HandleMouseWheelOrGestureEvent(FSlateApplication& SlateApp, const FPointerEvent& WheelEvent, const FPointerEvent* GestureEvent) override
 		{
+			if (ABasePlayerController* TPC = Controller.Get()) { if (TPC->IsTerminalOpen() && !bTerminalForwarding) { FForwardScope Scope(bTerminalForwarding); if (UWidgetInteractionComponent* Pointer = TPC->GetTerminalPointer()) { Pointer->ScrollWheel(WheelEvent.GetWheelDelta()); } return true; } }
 			ABasePlayerController* PC = Controller.Get();
 			if (!PC || !PC->GetWorld() || !PC->GetWorld()->IsGameWorld()) { return false; }
-			if (PC->IsEditMode() || PC->IsAnyScreenOpen()) { return false; }
+			if (PC->IsEditMode() || PC->IsPageOpen() || (PC->IsInspectMenuOpen() && PC->InspectActionCount() > 1)) { return false; }   // a reticle menu with a choice to make takes the wheel (the axis binding below); otherwise it changes weapon
 			const float Delta = WheelEvent.GetWheelDelta();
 			if (FMath::IsNearlyZero(Delta)) { return false; }
+			UE_LOG(LogTemp, Log, TEXT("Wheel: %.1f -> swap"), Delta);
 			PC->SwapWeaponSlot(Delta > 0.0f ? 1 : -1);
 			return true;
 		}
@@ -257,6 +313,7 @@ namespace
 		{
 			ABasePlayerController* PC = Controller.Get();
 			if (!PC) { return false; }
+			if (PC->IsTerminalOpen() && !bTerminalForwarding) { FForwardScope Scope(bTerminalForwarding); if (UWidgetInteractionComponent* Pointer = PC->GetTerminalPointer()) { Pointer->ReleasePointerKey(MouseEvent.GetEffectingButton()); } return true; }
 			if (InputBindings::KeyFor(TEXT("Fire")) == MouseEvent.GetEffectingButton()) { PC->SetTriggerHeld(false); }
 			if (InputBindings::KeyFor(TEXT("Aim")) == MouseEvent.GetEffectingButton())
 			{
@@ -269,14 +326,16 @@ namespace
 		{
 			ABasePlayerController* PC = Controller.Get();
 			if (!PC) { return false; }
+			if (PC->IsTerminalOpen() && !bTerminalForwarding) { FForwardScope Scope(bTerminalForwarding); if (UWidgetInteractionComponent* Pointer = PC->GetTerminalPointer()) { Pointer->PressPointerKey(MouseEvent.GetEffectingButton()); } return true; }
 			const FKey Button = MouseEvent.GetEffectingButton();
-			const bool bCanAct = !PC->IsEditMode() && !PC->IsAnyScreenOpen();
+			// Only a real page blocks these (the reticle menu is not one): aiming is a combat intent, and it closes that menu.
+			const bool bCanAct = !PC->IsEditMode() && !PC->IsPageOpen();
 
 			if (bCanAct && InputBindings::KeyFor(TEXT("Aim")) == Button)
 			{
 				if (ABaseCharacter* Ch = Cast<ABaseCharacter>(PC->GetPawn()))
 				{
-					if (PC->HeldSlot >= 0) { Ch->SetAiming(true); return true; }
+					if (PC->HeldSlot >= 0) { PC->DismissInspectMenu(); Ch->SetAiming(true); return true; }
 				}
 				return false;
 			}
@@ -439,8 +498,9 @@ void ABasePlayerController::SetupInputComponent()
 	// Inspect context menu: wheel moves the selection, E uses it. Neither
 	// consumes, so the wheel still zooms when no menu is up (the character's
 	// zoom handler checks IsInspectMenuOpen).
-	InputComponent->BindAxisKey(EKeys::MouseWheelAxis, this, &ABasePlayerController::OnInspectWheel).bConsumeInput = false;
+	InputComponent->BindAxisKey(EKeys::MouseWheelAxis, this, &ABasePlayerController::OnInspectWheel).bConsumeInput = false;   // Up / Down do the same (see the input processor)
 	InputComponent->BindKey(EKeys::E, IE_Pressed, this, &ABasePlayerController::OnInspectUse).bConsumeInput = false;
+	InputComponent->BindKey(EKeys::E, IE_Released, this, &ABasePlayerController::OnInspectUseReleased).bConsumeInput = false;
 
 	// Conversation replies 1-9 (Tab/Esc are caught in FEditClickProcessor).
 	for (const FKey& Digit : { EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine })
@@ -493,13 +553,124 @@ void ABasePlayerController::OnInspectWheel(float Value)
 
 void ABasePlayerController::OnInspectUse()
 {
-	if (IsInspectMenuOpen()) { InspectUseSelected(); }
+	if (Carried.IsValid()) { StoreCarried(); return; }   // a tap while carrying puts it away
+	if (!IsInspectMenuOpen()) { return; }
+	AActor* Target = InspectTarget.Get();
+	if (CanCarry(Target))
+	{
+		// Perhaps a hold: the action waits for the release (a tap), or a carry begins (a hold).
+		bInspectUseHeld = true; bCarryBegunThisHold = false; HoldCandidate = Target;
+		InspectUseHeldSince = GetWorld()->GetTimeSeconds();
+		return;
+	}
+	InspectUseSelected();
+}
+
+void ABasePlayerController::OnInspectUseReleased()
+{
+	if (!bInspectUseHeld) { return; }
+	bInspectUseHeld = false;
+	if (bCarryBegunThisHold) { DropCarried(); return; }
+	if (HoldCandidate.IsValid() && InspectTarget.Get() == HoldCandidate.Get()) { InspectUseSelected(); }   // a tap: the action it would have been
+	HoldCandidate = nullptr;
+}
+
+bool ABasePlayerController::CanCarry(AActor* Target) const
+{
+	// A loose prop: tagged for the reticle, offered Take (or already knocked loose), with simple
+	// collision to simulate, and no heavier than a person lifts one-handed.
+	const AStaticMeshActor* Prop = Cast<AStaticMeshActor>(Target);
+	if (!Prop || !Prop->ActorHasTag(TEXT("inspectable"))) { return false; }
+	bool bTake = false;
+	for (const FName& T : Prop->Tags) { if (T == TEXT("action:Take") || T == TEXT("loose")) { bTake = true; break; } }
+	if (!bTake) { return false; }
+	const UStaticMeshComponent* C = Prop->GetStaticMeshComponent();
+	const UStaticMesh* Mesh = C ? C->GetStaticMesh() : nullptr;
+	const UBodySetup* Body = Mesh ? Mesh->GetBodySetup() : nullptr;
+	return Body && Body->CollisionTraceFlag != CTF_UseComplexAsSimple && Body->AggGeom.GetElementCount() > 0;
+}
+
+void ABasePlayerController::BeginCarry(AActor* Target)
+{
+	AStaticMeshActor* Prop = Cast<AStaticMeshActor>(Target);
+	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	if (!Prop || !Me || !CanCarry(Prop)) { return; }
+	UStaticMeshComponent* C = Prop->GetStaticMeshComponent();
+	// Mass as a shot would find it: the catalogue's, else a guess from the size; too heavy stays put.
+	FString Name; for (const FName& T : Prop->Tags) { const FString S = T.ToString(); if (S.StartsWith(TEXT("name:"))) { Name = S.Mid(5); break; } }
+	const ItemCatalog::FRecord* R = Name.IsEmpty() ? nullptr : ItemCatalog::FindRecord(Name);
+	float Mass = R ? (float)R->Number(TEXT("mass_kg"), 0.0) : 0.0f;
+	const FBoxSphereBounds B = C->GetStaticMesh()->GetBounds();
+	if (Mass <= 0.0f) { const FVector E = B.BoxExtent * 2.0f * Prop->GetActorScale3D(); Mass = FMath::Clamp(E.X * E.Y * E.Z * 1e-6f * 220.0f, 0.2f, 200.0f); }
+	if (Mass > 25.0f) { ShowCallout(Prop, TEXT("Too heavy to lift."), 2.0f, false); return; }
+	C->SetMobility(EComponentMobility::Movable);
+	C->SetCollisionProfileName(TEXT("PhysicsActor"));
+	C->SetSimulatePhysics(true);
+	C->SetMassOverrideInKg(NAME_None, Mass, true);
+	C->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);   // it must not shove its bearer
+	C->SetEnableGravity(false);
+	C->SetLinearDamping(4.0f); C->SetAngularDamping(6.0f);
+	Prop->Tags.AddUnique(TEXT("loose"));
+	Carried = Prop; CarriedComp = C;
+	CarriedRadius = B.SphereRadius * Prop->GetActorScale3D().GetAbsMax();
+	CarryDistance = FMath::Clamp(CarriedRadius * 1.3f + 35.0f, 45.0f, 90.0f);
+	HideInspectMenu();
+	SetInspectHighlight(Prop, false);
+	if (InspectTarget.Get() == Prop) { InspectTarget = nullptr; }
+	Me->SetCarried(C, CarriedRadius);
+	bCarryBegunThisHold = true;
+	SetDiagNoteTimed(FString::Printf(TEXT("carrying %s: let go of E to set it down, tap E to bag it"), *(Name.IsEmpty() ? Prop->GetActorNameOrLabel() : Name)), 3.0f);
+}
+
+void ABasePlayerController::TickCarry(float DeltaSeconds)
+{
+	if (bInspectUseHeld && !bCarryBegunThisHold && HoldCandidate.IsValid() && GetWorld()->GetTimeSeconds() - InspectUseHeldSince >= CarryHoldSeconds) { BeginCarry(HoldCandidate.Get()); }
+	if (!Carried.IsValid() || !CarriedComp.IsValid()) { if (Carried.IsValid() || CarriedComp.IsValid()) { DropCarried(); } return; }
+	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	if (!Me) { DropCarried(); return; }
+	// Held out in front, a little below the eye line, and pulled in before anything in the way.
+	const FVector Eye = Me->GetAimOrigin();
+	const FVector Dir = Me->GetAimRotation().Vector();
+	FVector Target = Eye + Dir * CarryDistance - FVector(0.0f, 0.0f, 12.0f);
+	FHitResult Hit; FCollisionQueryParams Q(SCENE_QUERY_STAT(Carry), false, Me); Q.AddIgnoredActor(Carried.Get());
+	if (GetWorld()->LineTraceSingleByChannel(Hit, Eye, Target, ECC_Visibility, Q)) { Target = Hit.ImpactPoint - Dir * CarriedRadius; }
+	const FVector Pos = CarriedComp->GetComponentLocation();
+	CarriedComp->SetPhysicsLinearVelocity(((Target - Pos) * 10.0f).GetClampedToMaxSize(900.0f));
+	CarriedComp->SetPhysicsAngularVelocityInDegrees(CarriedComp->GetPhysicsAngularVelocityInDegrees() * 0.85f);
+	if (FVector::Dist(Pos, Target) > 250.0f) { DropCarried(); }   // torn out of the hand
+}
+
+void ABasePlayerController::DropCarried()
+{
+	if (UPrimitiveComponent* C = CarriedComp.Get())
+	{
+		C->SetEnableGravity(true);
+		C->SetLinearDamping(0.01f); C->SetAngularDamping(0.0f);
+		C->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	}
+	Carried = nullptr; CarriedComp = nullptr; HoldCandidate = nullptr;
+	bCarryBegunThisHold = false;
+	if (ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn())) { Me->SetCarried(nullptr, 0.0f); }
+}
+
+void ABasePlayerController::StoreCarried()
+{
+	AActor* A = Carried.Get();
+	DropCarried();
+	if (A) { ExecuteInspectAction(A, TEXT("Take")); }
 }
 
 void ABasePlayerController::InspectSelectNext(int32 Delta)
 {
 	if (InspectActions.Num() == 0) { return; }
 	InspectSelection = ((InspectSelection + Delta) % InspectActions.Num() + InspectActions.Num()) % InspectActions.Num();
+	if (InspectMenuWidget) { InspectMenuWidget->SetSelectedIndex(InspectSelection); }
+}
+
+void ABasePlayerController::InspectSelectIndex(int32 Index)
+{
+	if (!InspectActions.IsValidIndex(Index)) { return; }
+	InspectSelection = Index;
 	if (InspectMenuWidget) { InspectMenuWidget->SetSelectedIndex(InspectSelection); }
 }
 
@@ -584,6 +755,7 @@ void ABasePlayerController::DescribeInspectable(AActor* Target, FString& OutName
 		Label.ReplaceInline(TEXT("_"), TEXT(" "));
 		OutName = Label;
 	}
+	if (Target->ActorHasTag(TEXT("dead"))) { OutActions.Remove(TEXT("Talk")); OutActions.Remove(TEXT("Call")); }   // the dead do not talk
 	if (OutActions.Num() == 0) { OutActions.Add(TEXT("Inspect")); }
 }
 
@@ -594,7 +766,9 @@ void ABasePlayerController::RefreshInspectMenu(AActor* Target)
 	DescribeInspectable(Target, Name, Description, InspectActions);
 	InspectSelection = 0;
 	if (!InspectMenuWidget) { InspectMenuWidget = CreateWidget<UInspectMenuWidget>(this, UInspectMenuWidget::StaticClass()); }
-	InspectMenuWidget->SetContent(Name, FString(), InspectActions, InspectSelection);   // the description shows through Inspect, not in the menu
+	const bool bFlavour = InspectActions.Num() == 1 && InspectActions[0] == TEXT("Inspect");
+	bInspectMenuFlavour = bFlavour;
+	InspectMenuWidget->SetContent(Name, FString(), bFlavour ? TArray<FString>() : InspectActions, InspectSelection);   // the description shows through Inspect, not in the menu; flavour is a name tag with no rows
 	if (!InspectMenuWidget->IsInViewport()) { InspectMenuWidget->AddToViewport(50); }
 	UpdateInspectMenuPosition();
 }
@@ -741,7 +915,25 @@ void ABasePlayerController::ExecuteInspectAction(AActor* Target, const FString& 
 	{
 		if (ASlidingDoorActor* Door = Cast<ASlidingDoorActor>(Target)) { Door->SetHoldOpen(Action == TEXT("Open")); }
 		else if (ALootBoxActor* Box = Cast<ALootBoxActor>(Target)) { OpenTransfer(Box); }   // the lid stays on for now (SetOpen swings it off)
+		else { ShowCallout(Target, TEXT("It does not open."), 2.0f, false); }   // a crate or locker with nothing behind it yet
 		if (InspectTarget.IsValid()) { RefreshInspectMenu(InspectTarget.Get()); }
+	}
+	else if (Action == TEXT("Use") && IsTerminal(Target))
+	{
+		OpenTerminal(Target);
+	}
+	else if (Action == TEXT("Loot"))
+	{
+		// A body's pockets: the hidden loot box riding it (ShotReactions::CorpseLoot).
+		TArray<AActor*> Attached; Target->GetAttachedActors(Attached, true, true);
+		ALootBoxActor* Box = nullptr;
+		for (AActor* A : Attached) { if (A && A->ActorHasTag(TEXT("corpse_loot"))) { Box = Cast<ALootBoxActor>(A); if (Box) { break; } } }
+		if (Box) { OpenTransfer(Box); } else { ShowCallout(Target, TEXT("Nothing on them."), 2.0f, false); }
+	}
+	else if (Action == TEXT("Read"))
+	{
+		// A note, a sign, a pad: its line is what it says.
+		ShowCallout(Target, Description.IsEmpty() ? TEXT("Nothing legible.") : Description, 4.0f, false);
 	}
 	else if (Action == TEXT("Locked"))
 	{
@@ -754,19 +946,7 @@ void ABasePlayerController::ExecuteInspectAction(AActor* Target, const FString& 
 			if (Action == TEXT("Stand")) { Me->StandUp(); }
 			else
 			{
-				// seat:<top height>,<facing yaw> on the prop; a stool top at 66 facing +x by default.
-				float Height = 66.0f, Yaw = Me->GetActorRotation().Yaw, Lean = 0.0f, Hunch = 0.0f;
-				for (const FName& Tag : Target->Tags)
-				{
-					const FString T = Tag.ToString();
-					if (!T.StartsWith(TEXT("seat:"))) { continue; }
-					TArray<FString> Parts; T.Mid(5).ParseIntoArray(Parts, TEXT(","));
-					if (Parts.Num() > 0) { Height = FCString::Atof(*Parts[0]); }
-					if (Parts.Num() > 1) { Yaw = FCString::Atof(*Parts[1]); }
-					if (Parts.Num() > 2) { Lean = FCString::Atof(*Parts[2]); }
-					if (Parts.Num() > 3) { Hunch = FCString::Atof(*Parts[3]); }
-				}
-				Me->BeginSit(Target, Height, Yaw, Lean, Hunch);
+				SitOnTagged(Me, Target);
 			}
 			if (InspectTarget.IsValid()) { RefreshInspectMenu(InspectTarget.Get()); }
 		}
@@ -777,8 +957,7 @@ void ABasePlayerController::ExecuteInspectAction(AActor* Target, const FString& 
 	}
 	else if (Action == TEXT("Take"))
 	{
-		if (Inventory.Num() >= InventoryCapacity) { ShowCallout(GetPawn(), TEXT("No room."), 2.0f, false); return; }
-		Inventory.Add(Name);
+		if (!AddToInventory(Name)) { ShowCallout(GetPawn(), TEXT("No room."), 2.0f, false); return; }
 		ShowCallout(GetPawn(), FString::Printf(TEXT("Took %s"), *Name), 2.5f, false);
 		// Off the world, kept around for gameplay to reclaim.
 		Target->SetActorHiddenInGame(true);
@@ -845,7 +1024,246 @@ void ABasePlayerController::UpdateCallout()
 
 void ABasePlayerController::OnMenuKey()
 {
+	if (bTerminalOpen) { CloseTerminal(); return; }   // Esc leaves the terminal before it means the menu
 	if (bPauseMenuOpen) { HidePauseMenu(); } else { ShowPauseMenu(); }
+}
+
+void ABasePlayerController::SitOnTagged(ABaseCharacter* Me, AActor* Seat)
+{
+	if (!Me || !Seat) { return; }
+	// seat:<top height>,<facing yaw>,<lean>,<hunch> on the prop; a stool top at 66 facing +x by default.
+	float Height = 66.0f, Yaw = Me->GetActorRotation().Yaw, Lean = 0.0f, Hunch = 0.0f;
+	for (const FName& Tag : Seat->Tags)
+	{
+		const FString T = Tag.ToString();
+		if (!T.StartsWith(TEXT("seat:"))) { continue; }
+		TArray<FString> Parts; T.Mid(5).ParseIntoArray(Parts, TEXT(","));
+		if (Parts.Num() > 0) { Height = FCString::Atof(*Parts[0]); }
+		if (Parts.Num() > 1) { Yaw = FCString::Atof(*Parts[1]); }
+		if (Parts.Num() > 2) { Lean = FCString::Atof(*Parts[2]); }
+		if (Parts.Num() > 3) { Hunch = FCString::Atof(*Parts[3]); }
+	}
+	Me->BeginSit(Seat, Height, Yaw, Lean, Hunch);
+}
+
+// ---------------------------------------------------------------- terminals
+static TAutoConsoleVariable<int32> CVarTerminalFlip(TEXT("RepliCan.TerminalFlip"), 0, TEXT("1 turns the in-world console screen to face the other way (if the text reads mirrored)"));
+namespace
+{
+	// UI/Screens.json: a monitor mesh's screen as fractions of its local bounds.
+	struct FScreenSpec { FString Front = TEXT("+y"); float Inset = 0.08f; float InsetRight = -1.0f; float Bottom = 0.16f; float Top = 0.06f; float Recess = 0.0f; };   // InsetRight < 0: same as Inset; Recess: cm the glass sits behind the front face
+	bool ScreenSpecFor(const FString& MeshName, FScreenSpec& Out)
+	{
+		static TMap<FString, FScreenSpec> Table; static bool bLoaded = false;
+		if (!bLoaded)
+		{
+			bLoaded = true;
+			FString Json; TSharedPtr<FJsonObject> Root;
+			if (FFileHelper::LoadFileToString(Json, *FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("Screens.json"))))
+			{
+				TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
+				if (FJsonSerializer::Deserialize(Reader, Root) && Root.IsValid())
+				{
+					for (const auto& Pair : Root->Values)
+					{
+						const FString Key(Pair.Key.ToView());
+						if (Key.StartsWith(TEXT("_"))) { continue; }
+						const TSharedPtr<FJsonObject>* O = nullptr; if (!Pair.Value->TryGetObject(O) || !O) { continue; }
+						FScreenSpec S; (*O)->TryGetStringField(TEXT("front"), S.Front);
+						double N = 0.0;
+						if ((*O)->TryGetNumberField(TEXT("inset"), N)) { S.Inset = (float)N; }
+						if ((*O)->TryGetNumberField(TEXT("bottom"), N)) { S.Bottom = (float)N; }
+						if ((*O)->TryGetNumberField(TEXT("top"), N)) { S.Top = (float)N; }
+						if ((*O)->TryGetNumberField(TEXT("inset_right"), N)) { S.InsetRight = (float)N; }
+						if ((*O)->TryGetNumberField(TEXT("recess"), N)) { S.Recess = (float)N; }
+						Table.Add(Key, S);
+					}
+				}
+			}
+		}
+		if (const FScreenSpec* S = Table.Find(MeshName)) { Out = *S; return true; }
+		return false;
+	}
+}
+
+bool ABasePlayerController::IsTerminal(const AActor* Target) const
+{
+	FVector C, N, R, U; float W, H;
+	return ScreenQuadFor(Target, C, N, R, U, W, H);
+}
+
+bool ABasePlayerController::ScreenQuadFor(const AActor* Target, FVector& OutCentre, FVector& OutNormal, FVector& OutRight, FVector& OutUp, float& OutW, float& OutH) const
+{
+	const UStaticMeshComponent* C = Target ? Target->FindComponentByClass<UStaticMeshComponent>() : nullptr;
+	const UStaticMesh* Mesh = C ? C->GetStaticMesh() : nullptr;
+	if (!Mesh) { return false; }
+	FScreenSpec S;
+	if (!ScreenSpecFor(Mesh->GetName(), S)) { return false; }
+	// The screen: the front face of the mesh's local box, less the stand at the bottom and the
+	// bezel round it, taken into the world through the component's transform.
+	const FBoxSphereBounds B = Mesh->GetBounds();
+	const FVector Min = B.Origin - B.BoxExtent, Max = B.Origin + B.BoxExtent;
+	FVector LocalNormal(0, 1, 0);
+	const FString F = S.Front.ToLower();
+	if (F == TEXT("-y")) { LocalNormal = FVector(0, -1, 0); }
+	else if (F == TEXT("+x")) { LocalNormal = FVector(1, 0, 0); }
+	else if (F == TEXT("-x")) { LocalNormal = FVector(-1, 0, 0); }
+	// The VIEWER's right, standing in front of the face looking at it: up crossed with the normal.
+	const FVector LocalRight = FVector::CrossProduct(FVector::UpVector, LocalNormal).GetSafeNormal();
+	const float Width = FMath::Abs(FVector::DotProduct(Max - Min, LocalRight.GetAbs()));
+	const float Height = Max.Z - Min.Z;
+	FVector LocalCentre = B.Origin;
+	if (F == TEXT("-y")) { LocalCentre.Y = Min.Y; } else if (F == TEXT("+x")) { LocalCentre.X = Max.X; } else if (F == TEXT("-x")) { LocalCentre.X = Min.X; } else { LocalCentre.Y = Max.Y; }
+	LocalCentre.Z = Min.Z + Height * (S.Bottom + (1.0f - S.Bottom - S.Top) * 0.5f);
+	// Insets can differ per side (a control strip down one edge): the centre shifts toward the wider bezel.
+	const float InsetL = S.Inset, InsetR = S.InsetRight >= 0.0f ? S.InsetRight : S.Inset;
+	LocalCentre += LocalRight * (Width * (InsetL - InsetR) * 0.5f);
+	const FTransform& T = C->GetComponentTransform();
+	OutCentre = T.TransformPosition(LocalCentre + LocalNormal * (0.5f - S.Recess));
+	OutNormal = T.TransformVectorNoScale(LocalNormal).GetSafeNormal();
+	OutRight = T.TransformVectorNoScale(LocalRight).GetSafeNormal();
+	OutUp = FVector::CrossProduct(OutNormal, OutRight).GetSafeNormal();
+	if (OutUp.Z < 0.0f) { OutUp *= -1.0f; }
+	OutW = Width * (1.0f - InsetL - InsetR) * T.GetScale3D().GetAbsMax();
+	OutH = Height * (1.0f - S.Bottom - S.Top) * T.GetScale3D().GetAbsMax();
+	return OutW > 1.0f && OutH > 1.0f;
+}
+
+void ABasePlayerController::OpenTerminal(AActor* Target)
+{
+	if (bTerminalOpen || !Target) { return; }
+	FVector Centre, Normal, Right, Up; float W, H;
+	if (!ScreenQuadFor(Target, Centre, Normal, Right, Up, W, H)) { return; }
+	HideInspectMenu();
+	SetInspectHighlight(Target, false);
+	if (InspectTarget.Get() == Target) { InspectTarget = nullptr; }
+	TerminalTarget = Target;
+	bTerminalSeated = false;
+	if (ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn()))
+	{
+		Me->SetAiming(false);
+		// The seat beside it, if there is one and the character is not already sitting; else square up.
+		if (!Me->IsSitting())
+		{
+			AActor* Seat = nullptr; float Best = 200.0f;
+			for (TActorIterator<AActor> It(GetWorld()); It; ++It)
+			{
+				bool bSeat = false; for (const FName& Tag : It->Tags) { if (Tag.ToString().StartsWith(TEXT("seat:"))) { bSeat = true; break; } }
+				if (!bSeat) { continue; }
+				const float D = FVector::Dist2D(It->GetActorLocation(), Centre);
+				if (D < Best) { Best = D; Seat = *It; }
+			}
+			if (Seat) { SitOnTagged(Me, Seat); bTerminalSeated = true; }
+			else { Me->SetActorRotation(FRotator(0.0f, (Centre - Me->GetActorLocation()).Rotation().Yaw, 0.0f)); }
+		}
+	}
+	// THE SCREEN IN THE WORLD: the console widget drawn on a world-space widget component the size
+	// of the screen quad, a hair off its face. It is the monitor's picture, from any camera.
+	if (!TerminalWidget)
+	{
+		TerminalWidget = CreateWidget<UTerminalWidget>(this, UTerminalWidget::StaticClass());
+		TerminalWidget->OnExit.BindUObject(this, &ABasePlayerController::CloseTerminal);
+	}
+	FString Id = Target->GetActorNameOrLabel();
+	for (const FName& Tag : Target->Tags) { const FString T = Tag.ToString(); if (T.StartsWith(TEXT("terminal:"))) { Id = T.Mid(9); } }
+	TerminalWidget->Open(this, Id);
+	if (TerminalWidget->IsInViewport()) { TerminalWidget->RemoveFromParent(); }
+	const float DrawW = 1024.0f, DrawH = FMath::RoundToFloat(1024.0f * H / FMath::Max(1.0f, W));
+	TerminalScreen = NewObject<UWidgetComponent>(Target, TEXT("TerminalScreen"));
+	TerminalScreen->SetWidgetSpace(EWidgetSpace::World);
+	TerminalScreen->SetDrawSize(FVector2D(DrawW, DrawH));
+	TerminalScreen->SetBlendMode(EWidgetBlendMode::Transparent);   // the console has clear corners, so the glass shows through them
+	TerminalScreen->SetTwoSided(false);
+	TerminalScreen->SetCollisionProfileName(TEXT("UI"));
+	TerminalScreen->SetWidget(TerminalWidget);
+	static const auto* FlipVar = IConsoleManager::Get().FindConsoleVariable(TEXT("RepliCan.TerminalFlip"));
+	const bool bFlip = FlipVar && FlipVar->GetInt() != 0;
+	const FVector Face = bFlip ? -Normal : Normal;
+	TerminalScreen->SetWorldTransform(FTransform(FRotationMatrix::MakeFromXZ(Face, Up).ToQuat(), Centre + Normal * 0.8f, FVector(1.0f, W / DrawW, W / DrawW)));
+	TerminalScreen->AttachToComponent(Target->GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
+	TerminalScreen->RegisterComponent();
+	// THE POINTER: the mouse traced from the camera onto the screen, and the keys sent through it,
+	// as a virtual Slate user of its own.
+	if (APawn* MyPawn = GetPawn())
+	{
+		TerminalPointer = NewObject<UWidgetInteractionComponent>(MyPawn, TEXT("TerminalPointer"));
+		TerminalPointer->InteractionSource = EWidgetInteractionSource::Mouse;
+		TerminalPointer->VirtualUserIndex = 1;
+		TerminalPointer->PointerIndex = 0;
+		TerminalPointer->InteractionDistance = 800.0f;
+		TerminalPointer->AttachToComponent(MyPawn->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+		TerminalPointer->RegisterComponent();
+	}
+	bTerminalOpen = true;
+	ApplyInputMode();
+	// The camera goes to the seated eye once the sit has settled; the prompt takes the pointer's focus then.
+	GetWorld()->GetTimerManager().SetTimer(TerminalPlaceTimer, this, &ABasePlayerController::PlaceTerminalCamera, 0.45f, false);
+}
+
+void ABasePlayerController::PlaceTerminalCamera()
+{
+	if (!bTerminalOpen || !TerminalTarget.IsValid()) { return; }
+	FVector Centre, Normal, Right, Up; float W, H;
+	if (!ScreenQuadFor(TerminalTarget.Get(), Centre, Normal, Right, Up, W, H)) { return; }
+	// From the character's own eye, a hand's width in front of the face so the head is behind the
+	// lens and the shoulders below the frame; the field of view fitted so the screen fills most of
+	// the height. No character: from the screen's normal instead.
+	FVector Eye = Centre + Normal * 60.0f;
+	if (const ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn()))
+	{
+		const USkeletalMeshComponent* M = Me->GetMesh();
+		const FVector Head = (M && M->DoesSocketExist(TEXT("head"))) ? M->GetSocketLocation(TEXT("head")) : Me->GetActorLocation() + FVector(0, 0, 60.0f);
+		// Along the line from the eye to the screen, a screen-and-a-half out from the glass: close.
+		const FVector Toward = (Head - Centre).GetSafeNormal();
+		Eye = Centre + Toward * FMath::Clamp(H * 1.5f, 22.0f, 60.0f);
+	}
+	const float Dist = FMath::Max(20.0f, (float)FVector::Dist(Eye, Centre));
+	const FVector2D ViewSize = UWidgetLayoutLibrary::GetViewportSize(this);
+	const float Aspect = ViewSize.Y > 1.0f ? ViewSize.X / ViewSize.Y : 1.777f;
+	const float VNeeded = 2.0f * FMath::Atan((H * 0.5f) / Dist) / 0.72f;
+	const float Fov = FMath::Clamp(FMath::RadiansToDegrees(2.0f * FMath::Atan(FMath::Tan(VNeeded * 0.5f) * Aspect)), 35.0f, 85.0f);
+	FActorSpawnParameters Params; Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	ACameraActor* Previous = TerminalCamera;
+	TerminalCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), Eye, (Centre - Eye).Rotation(), Params);
+	if (TerminalCamera && TerminalCamera->GetCameraComponent()) { TerminalCamera->GetCameraComponent()->SetFieldOfView(Fov); }
+	if (TerminalCamera) { SetViewTargetWithBlend(TerminalCamera, 0.35f, VTBlend_EaseInOut, 2.0f); }
+	if (Previous) { Previous->SetLifeSpan(1.5f); }
+	// Focus the prompt the way a click would: a custom hit on the prompt row through the screen
+	// component, pressed and released on the next ticks, then the pointer goes back to the mouse.
+	// Slate's own focus call cannot reach a widget on a world screen (its window is virtual).
+	if (TerminalPointer && TerminalScreen && TerminalTarget.IsValid())
+	{
+		FHitResult Click;
+		Click.bBlockingHit = true;
+		Click.Component = TerminalScreen;
+		Click.HitObjectHandle = FActorInstanceHandle(TerminalTarget.Get());
+		Click.Location = Click.ImpactPoint = Centre - Up * (H * 0.42f) + Normal * 0.5f;
+		Click.ImpactNormal = Click.Normal = Normal;
+		Click.TraceStart = Eye; Click.TraceEnd = Click.Location - Normal * 5.0f;
+		TerminalPointer->InteractionSource = EWidgetInteractionSource::Custom;
+		TerminalPointer->SetCustomHitResult(Click);
+		TWeakObjectPtr<UWidgetInteractionComponent> WeakPointer(TerminalPointer);
+		FTimerHandle Press, Release, Back;
+		GetWorld()->GetTimerManager().SetTimer(Press, FTimerDelegate::CreateLambda([WeakPointer]() { if (WeakPointer.IsValid()) { WeakPointer->PressPointerKey(EKeys::LeftMouseButton); } }), 0.1f, false);
+		GetWorld()->GetTimerManager().SetTimer(Release, FTimerDelegate::CreateLambda([WeakPointer]() { if (WeakPointer.IsValid()) { WeakPointer->ReleasePointerKey(EKeys::LeftMouseButton); } }), 0.2f, false);
+		GetWorld()->GetTimerManager().SetTimer(Back, FTimerDelegate::CreateLambda([WeakPointer]() { if (WeakPointer.IsValid()) { WeakPointer->InteractionSource = EWidgetInteractionSource::Mouse; } }), 0.3f, false);
+	}
+}
+
+void ABasePlayerController::CloseTerminal()
+{
+	if (!bTerminalOpen) { return; }
+	bTerminalOpen = false;
+	GetWorld()->GetTimerManager().ClearTimer(TerminalPlaceTimer);
+	if (TerminalWidget && TerminalWidget->IsInViewport()) { TerminalWidget->RemoveFromParent(); }
+	if (TerminalScreen) { TerminalScreen->SetWidget(nullptr); TerminalScreen->DestroyComponent(); TerminalScreen = nullptr; }
+	if (TerminalPointer) { TerminalPointer->DestroyComponent(); TerminalPointer = nullptr; }
+	if (ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn())) { if (bTerminalSeated && Me->IsSitting()) { Me->StandUp(); } }
+	bTerminalSeated = false;
+	if (APawn* P = GetPawn()) { SetViewTargetWithBlend(P, 0.35f, VTBlend_EaseInOut, 2.0f); }
+	if (TerminalCamera) { TerminalCamera->SetLifeSpan(1.5f); TerminalCamera = nullptr; }
+	TerminalTarget = nullptr;
+	ApplyInputMode();
 }
 
 void ABasePlayerController::ShowPauseMenu()
@@ -866,6 +1284,12 @@ void ABasePlayerController::ShowPauseMenu()
 	bPauseMenuOpen = true;
 	SetPause(true);
 	ApplyInputMode();
+}
+
+void ABasePlayerController::ShowReferenceFor(const FString& ItemName)
+{
+	ShowConsolePage(1);
+	if (ReferenceWidget && !ReferenceWidget->OpenEntryByName(ItemName)) { SetDiagNoteTimed(FString::Printf(TEXT("No card for %s"), *ItemName), 3.0f); }
 }
 
 void ABasePlayerController::ShowReference()
@@ -1031,7 +1455,7 @@ static void LockCaptureExposure(USceneCaptureComponent2D* Cap)
 static const FVector WeaponBoothOrigin(60000.0f, -60000.0f, 0.0f);   // well away from the level and the character booth
 static const float WeaponKickTime = 0.26f;
 
-void ABasePlayerController::ShowWeaponPreview(const FString& MeshPath)
+void ABasePlayerController::ShowWeaponPreview(const FString& MeshPath, const FString& WeaponName)
 {
 	HideWeaponPreview();
 	UStaticMesh* Mesh = LoadObject<UStaticMesh>(nullptr, *MeshPath);
@@ -1041,6 +1465,7 @@ void ABasePlayerController::ShowWeaponPreview(const FString& MeshPath)
 	if (!WeaponBoothActor) { return; }
 	WeaponBoothActor->SetMobility(EComponentMobility::Movable);
 	WeaponBoothActor->GetStaticMeshComponent()->SetStaticMesh(Mesh);
+	if (const WeaponCatalog::FWeapon* Skinned = WeaponName.IsEmpty() ? nullptr : WeaponCatalog::Find(WeaponName)) { WeaponSkins::Apply(WeaponBoothActor->GetStaticMeshComponent(), *Skinned); }
 	WeaponBoothActor->GetStaticMeshComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	WeaponBoothActor->SetTickableWhenPaused(true);
 	// The same rim-glow shell the inspect highlight draws over a character (M_CharacterHighlight:
@@ -1258,6 +1683,7 @@ void ABasePlayerController::HideCharacterSheet()
 	if (!bCharacterSheetOpen) { return; }
 	bCharacterSheetOpen = false;
 	HideSheetMirror();
+	for (TObjectIterator<UContextMenuWidget> It; It; ++It) { if (It->IsInViewport()) { It->Close(); } }   // a DROP menu left open closes with the sheet
 	if (CharacterSheetWidget && CharacterSheetWidget->IsInViewport() && !bRetainPageWidget) { CharacterSheetWidget->RemoveFromParent(); }
 	if (!bPauseMenuOpen) { SetPause(false); }
 	ApplyInputMode();
@@ -1794,7 +2220,7 @@ void ABasePlayerController::ApplyInputMode()
 {
 	UGameViewportClient* Viewport = GetLocalPlayer() ? GetLocalPlayer()->ViewportClient : nullptr;
 
-	if (bPauseMenuOpen || bCharacterSheetOpen || bAppearanceInputMode || bTransferOpen || bReferenceOpen)
+	if (bPauseMenuOpen || bCharacterSheetOpen || bAppearanceInputMode || bTransferOpen || bReferenceOpen || bTerminalOpen)
 	{
 		// Menu only: free cursor, nothing reaches the game until Back.
 		FInputModeGameAndUI Mode;
@@ -2179,7 +2605,11 @@ void ABasePlayerController::Tick(float DeltaSeconds)
 	KeepConsolePagesFitted();
 	TickFreelookSafety();
 	TickPendingFire(DeltaSeconds);
+	TickPendingSwap(DeltaSeconds);
 	TickAutoFire(DeltaSeconds);
+	TickLaser(DeltaSeconds);
+	TickMelee(DeltaSeconds);
+	TickCarry(DeltaSeconds);
 	Super::Tick(DeltaSeconds);
 	if (bGroggy && !bGroggyArrived && GetPawn() && FVector::Dist2D(GetPawn()->GetActorLocation(), GroggyGoal) <= GroggyRadius)
 	{
@@ -2335,13 +2765,72 @@ void ABasePlayerController::UpdateInspectTarget()
 	else if (!NewTarget && InspectTarget.IsValid() && Now - InspectLastSeen < InspectGraceSeconds) { NewTarget = InspectTarget.Get(); }
 	else if (NewTarget) { InspectLastSeen = Now; }
 	if (!NewTarget) { bAnchorValid = false; }
-	if (NewTarget != InspectTarget.Get())
+	// Tiers and dwell. A thing with a real action (Open, Use, Sit, Take, Read, Talk ...) gets the
+	// outline and the menu after a short dwell, so a sweep across a shelf does not strobe. A
+	// thing with only Inspect to offer -- flavour -- never gets the outline; after a longer
+	// dwell a quiet name tag appears, and E still reads its line. Hold Scan for the whole picture.
+	if (NewTarget != InspectCandidate.Get())
 	{
-		SetInspectHighlight(InspectTarget.Get(), false);
-		InspectTarget = NewTarget;
-		SetInspectHighlight(NewTarget, true);
-		RefreshInspectMenu(NewTarget);
+		InspectCandidate = NewTarget; InspectCandidateSince = Now;
+		bCandidateFlavour = NewTarget && IsFlavourInteractable(NewTarget);
 	}
+	const float Dwell = bCandidateFlavour ? InspectDwellFlavourSeconds : InspectDwellSeconds;
+	const ABaseCharacter* Aimer = Cast<ABaseCharacter>(GetPawn());
+	AActor* Want = (NewTarget && NewTarget != Carried.Get() && !bTerminalOpen && Now - InspectCandidateSince >= Dwell && !(Aimer && Aimer->IsAiming())) ? NewTarget : nullptr;   // no menu down the sights, none on what is in the hand, none at a terminal
+	if (Want != InspectTarget.Get())
+	{
+		if (!ScanLit.Contains(InspectTarget)) { SetInspectHighlight(InspectTarget.Get(), false); }
+		InspectTarget = Want;
+		if (Want && !bCandidateFlavour) { SetInspectHighlight(Want, true); }
+		RefreshInspectMenu(Want);
+	}
+	TickScan(Now);
+}
+
+bool ABasePlayerController::IsFlavourInteractable(AActor* Target)
+{
+	if (!Target) { return false; }
+	FString Name, Description; TArray<FString> Actions;
+	DescribeInspectable(Target, Name, Description, Actions);
+	return Actions.Num() == 1 && Actions[0] == TEXT("Inspect");
+}
+
+void ABasePlayerController::SetScanHeld(bool bHeld)
+{
+	if (bScanHeld == bHeld) { return; }
+	bScanHeld = bHeld;
+	ScanNextRefresh = 0.0f;
+	if (!bHeld)
+	{
+		for (const TWeakObjectPtr<AActor>& A : ScanLit) { if (A.IsValid() && A != InspectTarget) { SetInspectHighlight(A.Get(), false); } }
+		ScanLit.Reset();
+	}
+}
+
+void ABasePlayerController::TickScan(float Now)
+{
+	if (!bScanHeld || Now < ScanNextRefresh || !GetWorld() || !PlayerCameraManager) { return; }
+	ScanNextRefresh = Now + 0.25f;
+	const APawn* P = GetPawn();
+	const FVector Eye = PlayerCameraManager->GetCameraLocation();
+	const FVector Fwd = PlayerCameraManager->GetCameraRotation().Vector();
+	const FVector From = P ? P->GetActorLocation() : Eye;
+	static const FName NoInspectTag(TEXT("noinspect"));
+	TArray<TWeakObjectPtr<AActor>> Lit;
+	for (TActorIterator<AActor> It(GetWorld()); It; ++It)
+	{
+		AActor* A = *It;
+		if (A == P || A->IsHidden()) { continue; }
+		const bool bTagged = A->ActorHasTag(InspectableTag) || (A->IsA<ABaseCharacter>() && !A->ActorHasTag(NoInspectTag));
+		if (!bTagged) { continue; }
+		if (FVector::Dist(A->GetActorLocation(), From) > ScanRange) { continue; }
+		if (FVector::DotProduct((A->GetActorLocation() - Eye).GetSafeNormal(), Fwd) < 0.15f) { continue; }   // in front of the camera
+		if (IsFlavourInteractable(A)) { continue; }
+		Lit.Add(A);
+	}
+	for (const TWeakObjectPtr<AActor>& A : ScanLit) { if (A.IsValid() && !Lit.Contains(A) && A != InspectTarget) { SetInspectHighlight(A.Get(), false); } }
+	for (const TWeakObjectPtr<AActor>& A : Lit) { if (A.IsValid() && !ScanLit.Contains(A)) { SetInspectHighlight(A.Get(), true); } }
+	ScanLit = MoveTemp(Lit);
 }
 
 void ABasePlayerController::SetInspectHighlight(AActor* Target, bool bOn)
@@ -3413,8 +3902,7 @@ bool ABasePlayerController::EquipFromInventory(int32 InventoryIndex)
 	const int32 Slot = Spec.SlotForKind(ItemCatalog::Kind(Item));
 	if (Slot < 0) { ShowCallout(GetPawn(), FString::Printf(TEXT("%s does not equip."), *Item), 2.0f, false); return false; }
 	if (!Spec.Slots[Slot].bEnabled) { ShowCallout(GetPawn(), TEXT("That slot is not available yet."), 2.0f, false); return false; }
-	Inventory.RemoveAt(InventoryIndex);
-	if (!Equipped[Slot].IsEmpty()) { Inventory.Add(Equipped[Slot]); }   // swap the old one back into the bag
+	Inventory[InventoryIndex] = Equipped[Slot];   // the old one takes the square the new one left (empty when there was none)
 	Equipped[Slot] = Item;
 	RefreshHeldWeapon();
 	return true;
@@ -3442,6 +3930,19 @@ void ABasePlayerController::GiveStartingWeapons()
 	};
 	Fit(StartingPrimary);
 	Fit(StartingSidearm);
+	RefreshHeldWeapon();
+}
+
+void ABasePlayerController::CycleWeaponSkin(const FString& ItemName)
+{
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(ItemName);
+	if (!W) { return; }
+	const TArray<FString> V = WeaponSkins::Variants(*W);
+	if (V.Num() < 2) { return; }
+	const int32 At = V.IndexOfByKey(WeaponSkins::Current(*W));
+	const FString Next = V[(At + 1) % V.Num()];
+	const FString Key = W->Key;   // the write re-reads the catalogue, so W is stale after it
+	if (!WeaponCatalog::WriteStringField(Key, TEXT("skin"), Next)) { UE_LOG(LogTemp, Warning, TEXT("CycleWeaponSkin: could not write %s"), *Key); return; }
 	RefreshHeldWeapon();
 }
 
@@ -3503,14 +4004,17 @@ void ABasePlayerController::RefreshHeldWeapon()
 	Me->SetWeaponRelativeLocation(FVector::ZeroVector);
 	Me->SetWeaponRelativeRotation(FRotator::ZeroRotator);
 	Me->SetWeaponMesh(Mesh);
-	if (OpticMesh && !Optic->Eye.IsNearlyZero()) { Me->SetWeaponSight(W->OpticMount + Optic->Eye, true, 0.0f); }
+	WeaponSkins::Apply(Me->WeaponMeshComponent, *W);   // its chosen paint
+	if (OpticMesh && !Optic->Eye.IsNearlyZero()) { Me->SetWeaponSight(W->OpticMount + Optic->Eye - Optic->Mount, true, 0.0f); }   // the eye, with the optic's own mount point on the rail
 	else { Me->SetWeaponSight(W->Sight, W->bHasSight, W->SightPitch); }
-	Me->SetWeaponGrip(W->Grip);
+	Me->SetWeaponGrip(W->Grip + WeaponCatalog::StanceGripNudge(W->Stance));   // the stance may move the hand along the grip
 	Me->SetWeaponRecoil(W->Recoil);
+	Me->SetWeaponMass(W->MassKg);
 	Me->SetWeaponMuzzle(W->Muzzle);
 	Me->SetWeaponForeGrip(W->ForeGrip, W->bHasForeGrip, W->ForeGripPitch);
 	Me->SetWeaponHipFire(W->bHipFire);
-	Me->SetWeaponOptic(OpticMesh, OpticMesh ? W->OpticMount : FVector::ZeroVector);
+	Me->SetWeaponMelee(!W->bRanged);
+	Me->SetWeaponOptic(OpticMesh, (OpticMesh && Optic) ? W->OpticMount - Optic->Mount : FVector::ZeroVector);
 	// How the body holds it is the weapon's own business: it carries a stance name and the
 	// character composes clip paths from it. Nothing here decides what a rifle looks like.
 	Me->SetWeaponStance(W->Stance);
@@ -3518,6 +4022,25 @@ void ABasePlayerController::RefreshHeldWeapon()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("RefreshHeldWeapon: %s has not been normalised (Tools/normalise_weapons.py); it will hang wrong"), *W->Name);
 	}
+}
+
+void ABasePlayerController::EquipWeaponSlot(int32 Ordinal)
+{
+	const FSheetSpec& Spec = FSheetSpec::Get();
+	// By NAME: the spec lists Slot 1, Slot 3, Slot 2, Slot 4 (the grid's layout), so counting them in order sent key 2 to Slot 3.
+	const FString WantName = FString::Printf(TEXT("Slot %d"), Ordinal);
+	UE_LOG(LogTemp, Log, TEXT("EquipWeaponSlot %d: held %d"), Ordinal, HeldSlot);
+	for (int32 i = 0; i < Spec.Slots.Num() && i < Equipped.Num(); ++i)
+	{
+		if (Spec.Slots[i].Name != WantName) { continue; }
+		if (Equipped[i].IsEmpty()) { SetDiagNoteTimed(FString::Printf(TEXT("Slot %d is empty"), Ordinal), 2.0f); return; }
+		bHolstered = false;
+		if (HeldSlot == i) { StowedSlot = i; RefreshHeldWeapon(); return; }   // already in hand (or holstered): just make sure it is drawn
+		BeginWeaponSwap(i);
+		SetDiagNoteTimed(FString::Printf(TEXT("Drew %s"), *WeaponCatalog::DisplayName(Equipped[HeldSlot])), 3.0f);
+		return;
+	}
+	SetDiagNoteTimed(FString::Printf(TEXT("No weapon slot %d"), Ordinal), 2.0f);
 }
 
 void ABasePlayerController::SwapWeaponSlot(int32 Direction)
@@ -3531,11 +4054,14 @@ void ABasePlayerController::SwapWeaponSlot(int32 Direction)
 	{
 		if (Spec.Slots[i].Name.StartsWith(TEXT("Slot ")) && !Equipped[i].IsEmpty()) { Filled.Add(i); }
 	}
+	UE_LOG(LogTemp, Log, TEXT("SwapWeaponSlot: %d filled, held %d"), Filled.Num(), HeldSlot);
 	if (Filled.Num() < 2) { SetDiagNoteTimed(TEXT("Nothing else to draw"), 3.0f); return; }
 	const int32 At = FMath::Max(0, Filled.IndexOfByKey(HeldSlot));
 	const int32 Step = (Direction >= 0) ? 1 : Filled.Num() - 1;   // wrap both ways
-	HeldSlot = Filled[(At + Step) % Filled.Num()];
-	RefreshHeldWeapon();
+	// The re-equip trusts StowedSlot over HeldSlot (a pickup must not snatch the weapon out of the
+	// hand), so the swap has to move BOTH or the next refresh puts the old one back -- which is
+	// exactly what the wheel was doing: swapping, then refreshing back to slot 1.
+	BeginWeaponSwap(Filled[(At + Step) % Filled.Num()]);
 	SetDiagNoteTimed(FString::Printf(TEXT("Drew %s"), *Equipped[HeldSlot]), 3.0f), void();
 }
 
@@ -3546,7 +4072,7 @@ void ABasePlayerController::FireHeldWeapon()
 	if (!Equipped.IsValidIndex(HeldSlot)) { return; }
 	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(Equipped[HeldSlot]);
 	if (!W) { return; }
-	if (!W->bRanged) { SetDiagNoteTimed(FString::Printf(TEXT("%s is not a firearm"), *W->Name), 3.0f); return; }
+	if (!W->bRanged) { MeleeSwing(); return; }   // a blade or a hammer: a swing, not a shot
 
 	// Told to shoot with the muzzle at the floor: bring it up first and fire when it arrives.
 	// Firing straight from low ready would either put a round into the deck or snap the weapon
@@ -3560,17 +4086,35 @@ void ABasePlayerController::FireHeldWeapon()
 		PendingFireLeft = Wait;
 		return;
 	}
+	// A laser is a beam, not a shot: TickLaser runs it for as long as the trigger stays held.
+	if (CurrentFireMode() == WeaponCatalog::EFireMode::Laser) { return; }
 
 	// Hitscan down the CAMERA's line, not the muzzle's. The reticle is what the player aimed
 	// with, and a shot that leaves along the barrel instead lands somewhere else whenever the
 	// weapon is not perfectly aligned with the view -- which, held in a hand, it never is.
 	// Down the AIM, which is normally the camera but is not while free looking -- there the
 	// camera has swung away and the rifle is still pointing where it was.
-	const FVector Start = Me->GetAimOrigin();
+	FVector Start = Me->GetAimOrigin();
+	FVector Along = Me->GetAimRotation().Vector();
+	// HEIGHT OVER BORE. Down the sights the camera looks along the sight line and the barrel runs
+	// parallel to it a few centimetres lower -- the catalogue's muzzle point against its optic
+	// eye -- so the round leaves the MUZZLE along the BORE, and a near wall takes it that much
+	// under the point of aim. ZeroRangeCm converges the two at a range instead. Off the sights
+	// the shot follows the reticle's cone as before: the barrel is nowhere near the aim line then.
+	if (Me->bHeightOverBore && Me->GetCarry() == EWeaponCarry::ADS && Me->WeaponMeshComponent)
+	{
+		const FTransform& WT = Me->WeaponMeshComponent->GetComponentTransform();
+		const FVector Muzzle = WT.TransformPosition(W->Muzzle);
+		Along = Me->ZeroRangeCm > 1.0f ? (Start + Along * Me->ZeroRangeCm - Muzzle).GetSafeNormal() : WT.GetUnitAxis(EAxis::X);
+		Start = Muzzle;
+	}
 	// Inside the cone the reticle is drawing. Using the same number for both means the ring on
 	// screen is a promise: a shot can land anywhere inside it and nowhere outside.
 	const float SpreadDeg = Me->GetWeaponSpreadDegrees();
-	const FVector Aim = FMath::VRandCone(Me->GetAimRotation().Vector(), FMath::DegreesToRadians(SpreadDeg));
+	// The stance's cone, then the weapon's own: a rifle that groups 5 MOA puts rounds in a circle 5
+	// minutes of angle across (half that from the centre) however still the shooter is.
+	const FVector Held = FMath::VRandCone(Along, FMath::DegreesToRadians(SpreadDeg));
+	const FVector Aim = FMath::VRandCone(Held, FMath::DegreesToRadians(W->MechanicalMoa / 60.0f * 0.5f));
 	const FVector End = Start + Aim * 20000.0f;
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(WeaponFire), true, Me);
 	TArray<AActor*> Attached;
@@ -3583,6 +4127,7 @@ void ABasePlayerController::FireHeldWeapon()
 	// The shot has to arrive somewhere. Without this the muzzle flashes and the world does not
 	// react at all, which reads as the gun not working rather than as a miss.
 	ImpactEffects::Play(GetWorld(), Hit, Me, Me->IsFirstPerson() ? ImpactScaleFirstPerson : 1.0f);
+	if (bHit) { ShotReactions::React(GetWorld(), Hit, Aim, Me, W->Damage); }   // a person flinches and bleeds; a loose thing is knocked about or bursts
 	const FString Wav = W->Sound.IsEmpty() ? TEXT("wep_pistol.wav")
 		: (W->Sound.EndsWith(TEXT(".wav")) ? W->Sound : W->Sound + TEXT(".wav"));
 	// The report, then the overpressure: everything else ducks and comes back over a second.
@@ -3591,17 +4136,97 @@ void ABasePlayerController::FireHeldWeapon()
 	UAmbientPlayer::PlayOneShot(this, GetWorld(), Wav, Me->IsFirstPerson() ? ReportVolumeFirstPerson : ReportVolumeThirdPerson, FMath::FRandRange(0.94f, 1.06f), /*bIgnoreDuck=*/true);   // the report is the loudest thing the player does
 
 	SetDiagNoteTimed(bHit
-		? FString::Printf(TEXT("%s -> %s at %.0f m"), *W->Name, *Hit.GetActor()->GetActorNameOrLabel(), Hit.Distance / 100.0f)
+		? FString::Printf(TEXT("%s -> %s at %.0f m%s"), *W->Name, *Hit.GetActor()->GetActorNameOrLabel(), Hit.Distance / 100.0f, *(ShotReactions::LastRegion().IsEmpty() ? FString() : FString::Printf(TEXT(" (%s)"), *ShotReactions::LastRegion())))
 		: FString::Printf(TEXT("%s -> miss"), *W->Name), 4.0f);
 }
 
-FString ABasePlayerController::CurrentFireMode() const
+WeaponCatalog::EFireMode ABasePlayerController::CurrentFireMode() const
 {
-	if (!Equipped.IsValidIndex(HeldSlot)) { return TEXT("semi"); }
+	using WeaponCatalog::EFireMode;
+	if (!Equipped.IsValidIndex(HeldSlot)) { return EFireMode::Semi; }
 	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(Equipped[HeldSlot]);
-	if (!W) { return TEXT("semi"); }
-	if (W->FireModes.Num() == 0) { return TEXT("semi"); }
+	if (!W || W->FireModes.Num() == 0) { return EFireMode::Semi; }
 	return W->FireModes.Contains(FireMode) ? FireMode : W->FireModes[0];
+}
+
+void ABasePlayerController::RecoilTune(float RecoverSeconds, float RecoverFraction)
+{
+	if (ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn()))
+	{
+		Me->RecoilRecoverSeconds = FMath::Max(0.0f, RecoverSeconds); Me->RecoilRecoverFraction = FMath::Clamp(RecoverFraction, 0.0f, 1.0f);
+		SetDiagNoteTimed(FString::Printf(TEXT("recoil returns %.0f%% over %.2f s"), Me->RecoilRecoverFraction * 100.0f, Me->RecoilRecoverSeconds), 3.0f);
+	}
+}
+
+void ABasePlayerController::ZeroRange(float Cm)
+{
+	// -1 switches height over bore off, 0 on with the bore parallel, a range on and converging there.
+	if (ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn())) { Me->bHeightOverBore = Cm >= 0.0f; Me->ZeroRangeCm = FMath::Max(0.0f, Cm); SetDiagNoteTimed(!Me->bHeightOverBore ? TEXT("height over bore off: shots on the sight line") : (Cm > 1.0f ? FString::Printf(TEXT("zeroed at %.0f m"), Cm / 100.0f) : TEXT("bore parallel to the sight line")), 3.0f); }
+}
+
+void ABasePlayerController::AimSens(float Scale)
+{
+	if (ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn())) { Me->AimSensitivityScale = FMath::Clamp(Scale, 0.05f, 1.0f); SetDiagNoteTimed(FString::Printf(TEXT("ADS mouse scale %.2f"), Me->AimSensitivityScale), 3.0f); }
+}
+
+void ABasePlayerController::AimSway(float Scale)
+{
+	if (ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn())) { Me->AimSwayScale = FMath::Clamp(Scale, 0.0f, 5.0f); SetDiagNoteTimed(FString::Printf(TEXT("aim sway x%.2f (now %.2f deg)"), Me->AimSwayScale, Me->AimSwayTargetDeg()), 3.0f); }
+}
+
+float ABasePlayerController::ArmourValueFor(const FString& BodySlot) const
+{
+	const FSheetSpec& Spec = FSheetSpec::Get();
+	for (int32 i = 0; i < Spec.Slots.Num() && i < Equipped.Num(); ++i)
+	{
+		if (Spec.Slots[i].Name != BodySlot || Equipped[i].IsEmpty()) { continue; }
+		if (const ItemCatalog::FRecord* R = ItemCatalog::FindRecord(Equipped[i])) { return (float)R->Number(TEXT("armor_value"), 0.0); }
+	}
+	return 0.0f;
+}
+
+AActor* ABasePlayerController::PersonUnderReticle(FVector& OutDir) const
+{
+	const ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	if (!Me) { return nullptr; }
+	FCollisionQueryParams P(SCENE_QUERY_STAT(PersonUnderReticle), true, Me);
+	const FVector Start = Me->GetAimOrigin();
+	OutDir = Me->GetAimRotation().Vector();
+	FHitResult Hit;
+	if (!GetWorld()->LineTraceSingleByChannel(Hit, Start, Start + OutDir * 6000.0f, ECC_Visibility, P)) { return nullptr; }
+	return (Cast<USkeletalMeshComponent>(Hit.GetComponent()) || Cast<ABaseCharacter>(Hit.GetActor())) ? Hit.GetActor() : nullptr;
+}
+
+void ABasePlayerController::Sever(const FString& Region)
+{
+	static const TCHAR* Names[] = { TEXT("Head"), TEXT("ArmL"), TEXT("ArmR"), TEXT("LegL"), TEXT("LegR") };
+	FString Want;
+	for (const TCHAR* N : Names) { if (Region.Equals(N, ESearchCase::IgnoreCase)) { Want = N; } }
+	if (Want.IsEmpty()) { SetDiagNoteTimed(TEXT("Sever: Head, ArmL, ArmR, LegL or LegR"), 4.0f); return; }
+	FVector Dir;
+	AActor* Who = PersonUnderReticle(Dir);
+	if (!Who) { SetDiagNoteTimed(TEXT("Sever: no one under the reticle"), 3.0f); return; }
+	const bool bOk = ShotReactions::Sever(GetWorld(), Who, Want, Dir);
+	SetDiagNoteTimed(FString::Printf(TEXT("Sever %s: %s"), *Want, bOk ? TEXT("off") : TEXT("nothing there to take off")), 4.0f);
+}
+
+void ABasePlayerController::Kill()
+{
+	FVector Dir;
+	AActor* Who = PersonUnderReticle(Dir);
+	if (!Who) { SetDiagNoteTimed(TEXT("Kill: no one under the reticle"), 3.0f); return; }
+	ShotReactions::Kill(GetWorld(), Who, Dir);
+	SetDiagNoteTimed(FString::Printf(TEXT("%s is down"), *Who->GetActorNameOrLabel()), 4.0f);
+}
+
+void ABasePlayerController::Revive()
+{
+	if (ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn())) { Me->Revive(); SetDiagNoteTimed(TEXT("revived: vitality full, limbs back"), 4.0f); }
+}
+
+void ABasePlayerController::SwayRate(float StridesPerSecond)
+{
+	if (ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn())) { Me->SwayStepsPerSecond = FMath::Clamp(StridesPerSecond, 0.2f, 5.0f); SetDiagNoteTimed(FString::Printf(TEXT("sway %.2f strides/s"), Me->SwayStepsPerSecond), 3.0f); }
 }
 
 void ABasePlayerController::CycleFireMode()
@@ -3609,25 +4234,32 @@ void ABasePlayerController::CycleFireMode()
 	if (!Equipped.IsValidIndex(HeldSlot)) { return; }
 	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(Equipped[HeldSlot]);
 	if (!W || !W->bRanged) { return; }
-	if (W->FireModes.Num() < 2) { SetDiagNoteTimed(FString::Printf(TEXT("%s: %s only"), *W->Name, *CurrentFireMode().ToUpper()), 3.0f); return; }
+	if (W->FireModes.Num() < 2) { SetDiagNoteTimed(FString::Printf(TEXT("%s: %s only"), *W->Name, *FString(WeaponCatalog::FireModeName(CurrentFireMode())).ToUpper()), 3.0f); return; }
 	const int32 At = W->FireModes.IndexOfByKey(CurrentFireMode());
 	FireMode = W->FireModes[(At + 1) % W->FireModes.Num()];
 	AutoFireClock = 0.0f;
 	UAmbientPlayer::PlayOneShot(this, GetWorld(), TEXT("switch_click.wav"), 0.5f, 1.15f);
-	SetDiagNoteTimed(FString::Printf(TEXT("FIRE MODE: %s"), *FireMode.ToUpper()), 3.0f);
+	SetDiagNoteTimed(FString::Printf(TEXT("FIRE MODE: %s"), *FString(WeaponCatalog::FireModeName(FireMode)).ToUpper()), 3.0f);
 }
 
 void ABasePlayerController::SetTriggerHeld(bool bHeld)
 {
 	bTriggerHeld = bHeld;
+	// A burst is the press and two more, and a released trigger does not cut it short. The beam
+	// goes out with the trigger.
+	if (bHeld && CurrentFireMode() == WeaponCatalog::EFireMode::Burst) { BurstLeft = 2; }
+	if (!bHeld) { StopLaser(); }
 	// The first shot of a held trigger was the press itself; the clock starts after it.
 	AutoFireClock = 0.0f;
 }
 
 void ABasePlayerController::TickAutoFire(float DeltaSeconds)
 {
-	if (!bTriggerHeld || IsEditMode() || IsAnyScreenOpen() || !Equipped.IsValidIndex(HeldSlot)) { return; }
-	if (CurrentFireMode() != TEXT("auto")) { return; }
+	using WeaponCatalog::EFireMode;
+	if (IsEditMode() || IsAnyScreenOpen() || !Equipped.IsValidIndex(HeldSlot)) { return; }
+	const EFireMode Mode = CurrentFireMode();
+	// Auto runs while the trigger is held; a burst finishes its rounds whether or not it still is.
+	if (!((Mode == EFireMode::Auto && bTriggerHeld) || (Mode == EFireMode::Burst && BurstLeft > 0))) { return; }
 	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(Equipped[HeldSlot]);
 	if (!W || !W->bRanged) { return; }
 	const float Rate = W->FireRate > 0.1f ? W->FireRate : 8.0f;
@@ -3638,6 +4270,204 @@ void ABasePlayerController::TickAutoFire(float DeltaSeconds)
 	// A shot already queued behind a posture change is not doubled up.
 	if (PendingFireLeft > 0.0f) { return; }
 	FireHeldWeapon();
+	if (Mode == EFireMode::Burst) { --BurstLeft; }
+}
+
+void ABasePlayerController::TickLaser(float DeltaSeconds)
+{
+	using WeaponCatalog::EFireMode;
+	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	const WeaponCatalog::FWeapon* W = (Me && Equipped.IsValidIndex(HeldSlot)) ? WeaponCatalog::Find(Equipped[HeldSlot]) : nullptr;
+	const bool bWant = W && W->bRanged && bTriggerHeld && !bHolstered && !IsEditMode() && !IsAnyScreenOpen()
+		&& CurrentFireMode() == EFireMode::Laser && Me->WeaponMeshComponent && Me->SecondsUntilReadyToFire() <= 0.0f;
+	if (!bWant) { StopLaser(); return; }
+	// From the muzzle, down the aim -- the swaying aim, so the beam wanders as the arms do -- to
+	// whatever it meets. No cone: a beam is exactly as straight as its bearer is steady.
+	const FTransform& WT = Me->WeaponMeshComponent->GetComponentTransform();
+	const FVector Muzzle = WT.TransformPosition(W->Muzzle);
+	const FVector Start = Me->GetAimOrigin();
+	const FVector Dir = Me->GetAimRotation().Vector();
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(LaserBeam), true, Me);
+	TArray<AActor*> Attached; Me->GetAttachedActors(Attached, true, true); Params.AddIgnoredActors(Attached);
+	FHitResult Hit;
+	const bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, Start + Dir * 20000.0f, ECC_Visibility, Params);
+	const FVector End = bHit ? Hit.ImpactPoint : Start + Dir * 20000.0f;
+	if (!LaserBeam)
+	{
+		LaserBeam = NewObject<UStaticMeshComponent>(this, TEXT("LaserBeam"));
+		LaserBeam->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cylinder.Cylinder")));
+		if (UMaterialInterface* M = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/RepliCan/Materials/M_LaserBeam.M_LaserBeam"))) { LaserBeam->SetMaterial(0, M); }
+		LaserBeam->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		LaserBeam->SetCastShadow(false);
+		LaserBeam->SetAbsolute(true, true, true);
+		LaserBeam->RegisterComponent();
+	}
+	if (!bLaserOn)
+	{
+		bLaserOn = true; LaserFxClock = 1.0f; LaserReactClock = 1.0f;
+		const FString Wav = W->Sound.IsEmpty() ? TEXT("wep_pistol.wav") : (W->Sound.EndsWith(TEXT(".wav")) ? W->Sound : W->Sound + TEXT(".wav"));
+		UAmbientPlayer::PlayOneShot(this, GetWorld(), Wav, Me->IsFirstPerson() ? ReportVolumeFirstPerson : ReportVolumeThirdPerson, 0.9f, /*bIgnoreDuck=*/true);   // the beam lighting; a loop can replace it
+	}
+	// The engine cylinder stands 100 cm tall on Z with a 50 cm radius: laid along the beam, thinned to 1.5 cm.
+	const float Len = FVector::Dist(Muzzle, End);
+	LaserBeam->SetWorldTransform(FTransform(FRotationMatrix::MakeFromZ((End - Muzzle).GetSafeNormal()).ToQuat(), (Muzzle + End) * 0.5f, FVector(0.03f, 0.03f, Len / 100.0f)));
+	LaserBeam->SetVisibility(true);
+	if (!bHit) { return; }
+	// Damage over time reads as sparks and scorching that keep coming while the beam rests on a
+	// thing, and a flinch every so often from a person under it. Nothing has health to drain yet;
+	// when it does, the beam's damage per second lands here.
+	LaserFxClock += DeltaSeconds; LaserReactClock += DeltaSeconds;
+	if (LaserFxClock >= 0.15f) { LaserFxClock = 0.0f; ImpactEffects::Play(GetWorld(), Hit, Me, 0.35f); }
+	if (LaserReactClock >= 0.5f && Hit.GetComponent() && Hit.GetComponent()->IsA<USkeletalMeshComponent>()) { LaserReactClock = 0.0f; ShotReactions::React(GetWorld(), Hit, Dir, Me, W->Damage * 0.5f); }   // twice a second: the catalogue damage per second
+}
+
+void ABasePlayerController::StopLaser()
+{
+	if (!bLaserOn) { return; }
+	bLaserOn = false;
+	if (LaserBeam) { LaserBeam->SetVisibility(false); }
+}
+
+void ABasePlayerController::MeleeSwing()
+{
+	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	const WeaponCatalog::FWeapon* W = (Me && Equipped.IsValidIndex(HeldSlot)) ? WeaponCatalog::Find(Equipped[HeldSlot]) : nullptr;
+	if (!Me || !W || W->bRanged || bHolstered || Me->IsDead() || W->Kind == TEXT("Shield")) { return; }
+	// Mid-swing the press is kept, and becomes the next step when this one lands.
+	if (MeleeSwingClock >= 0.0f) { bMeleeQueued = true; return; }
+	if (Me->IsWeaponBusy()) { return; }   // a reload, a draw
+	// Another press inside the recovery window takes the next step of the combo; otherwise it starts over.
+	MeleeComboStep = (GetWorld()->GetTimeSeconds() < MeleeComboUntil) ? (MeleeComboStep + 1) % 3 : 0;
+	StartMeleeStep(Me, W);
+}
+
+void ABasePlayerController::StartMeleeStep(ABaseCharacter* Me, const WeaponCatalog::FWeapon* W)
+{
+	static const TCHAR* Letters[] = { TEXT("A"), TEXT("B"), TEXT("C") };
+	const FString Family = W->AttackSet == TEXT("heavy") ? TEXT("HeavyCombo01") : TEXT("LightCombo01");
+	const FString Path = FString::Printf(TEXT("/Game/Characters/Animations/SyntySwordCombat/Attack/%s/A_Attack_%s%s_Sword"), *Family, *Family, Letters[MeleeComboStep]);
+	UAnimSequence* Clip = LoadObject<UAnimSequence>(nullptr, *Path, nullptr, LOAD_NoWarn | LOAD_Quiet);
+	if (!Clip || !Me->PlayMeleeClip(Clip)) { SetDiagNoteTimed(FString::Printf(TEXT("no swing clip for %s"), *W->Name), 3.0f); return; }
+	MeleeSwingLength = Clip->GetPlayLength();
+	MeleeSwingClock = 0.0f;
+	MeleeComboUntil = GetWorld()->GetTimeSeconds() + MeleeSwingLength + 0.6f;
+	bMeleeQueued = false;
+	MeleeHitThisSwing.Reset(); MeleeCleaved.Reset(); MeleeLastEdge.Reset();
+	MeleeBudget = W->Damage;
+	Me->SetAiming(false);
+	UAmbientPlayer::PlayOneShot(this, GetWorld(), W->AttackSet == TEXT("heavy") ? TEXT("swing_heavy.wav") : TEXT("swing_light.wav"), 0.7f, FMath::FRandRange(0.92f, 1.08f));
+}
+
+void ABasePlayerController::MeleeStop(ABaseCharacter* Me, bool bHeavy)
+{
+	// The blade stopped in it: a beat of frozen time for the character, then the arm eases back to
+	// the stance and the recovery window runs from here, so the next step can follow the stop.
+	MeleeSwingClock = -1.0f; MeleeLastEdge.Reset();
+	MeleeComboUntil = GetWorld()->GetTimeSeconds() + 0.6f;
+	if (!Me) { return; }
+	Me->CustomTimeDilation = 0.05f;
+	Me->WeaponActionLeft = FMath::Min(Me->WeaponActionLeft, 0.08f);
+	TWeakObjectPtr<ABaseCharacter> Weak(Me);
+	GetWorld()->GetTimerManager().SetTimer(MeleeStopTimer, FTimerDelegate::CreateLambda([Weak]() { if (Weak.IsValid()) { Weak->CustomTimeDilation = 1.0f; } }), bHeavy ? 0.12f : 0.06f, false);
+}
+
+void ABasePlayerController::TickMelee(float DeltaSeconds)
+{
+	if (MeleeSwingClock < 0.0f) { return; }
+	MeleeSwingClock += DeltaSeconds;
+	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	const WeaponCatalog::FWeapon* W = (Me && Equipped.IsValidIndex(HeldSlot)) ? WeaponCatalog::Find(Equipped[HeldSlot]) : nullptr;
+	if (!Me || !W || W->bRanged || !Me->WeaponMeshComponent) { MeleeSwingClock = -1.0f; return; }
+	const float T = MeleeSwingClock / FMath::Max(0.05f, MeleeSwingLength);
+	const bool bHeavy = W->AttackSet == TEXT("heavy");
+	// The window in which the edge is live: the middle of the swing, later and longer for a heavy one.
+	if (T >= (bHeavy ? 0.3f : 0.22f) && T <= (bHeavy ? 0.7f : 0.6f))
+	{
+		const FTransform& WT = Me->WeaponMeshComponent->GetComponentTransform();
+		const FVector Grip = WT.GetLocation();
+		const FVector Tip = WT.TransformPosition(W->Muzzle.IsNearlyZero() ? FVector(60.0f, 0.0f, 0.0f) : W->Muzzle);
+		// Five points along the outer two thirds of the edge, each swept from where it was last frame.
+		TArray<FVector> Edge;
+		for (int32 i = 0; i < 5; ++i) { Edge.Add(FMath::Lerp(Grip, Tip, 0.35f + 0.65f * i / 4.0f)); }
+		if (MeleeLastEdge.Num() == Edge.Num())
+		{
+			FCollisionQueryParams P(SCENE_QUERY_STAT(MeleeSweep), true, Me);
+			TArray<AActor*> Attached; Me->GetAttachedActors(Attached, true, true); P.AddIgnoredActors(Attached);
+			bool bStopped = false;
+			for (int32 i = 0; i < Edge.Num() && !bStopped; ++i)
+			{
+				// Everything the point crossed this frame, nearest first: the edge goes through as far as the budget lasts.
+				TArray<FHitResult> Hits;
+				GetWorld()->LineTraceMultiByChannel(Hits, MeleeLastEdge[i], Edge[i], ECC_Visibility, P, FCollisionResponseParams(ECR_Overlap));
+				for (const FHitResult& Hit : Hits)
+				{
+					AActor* A = Hit.GetActor();
+					if (!A) { continue; }
+					if (MeleeHitThisSwing.Contains(A) && !MeleeCleaved.Contains(A)) { continue; }
+					MeleeHitThisSwing.Add(A); MeleeCleaved.Remove(A);
+					FVector Swing = (Edge[i] - MeleeLastEdge[i]).GetSafeNormal();
+					if (Swing.IsNearlyZero()) { Swing = Me->GetActorForwardVector(); }
+					ImpactEffects::Play(GetWorld(), Hit, Me, 0.6f);
+					const ShotReactions::FStrike St = ShotReactions::Strike(GetWorld(), Hit, Swing, Me, MeleeBudget, W->bBlunt);
+					const FString Region = ShotReactions::LastRegion();
+					MeleeBudget -= St.Spent;
+					if (St.bDestroyed && !St.bDied) { MeleeCleaved.Add(A); }
+					const bool bThrough = MeleeBudget > 0.5f && !W->bBlunt;
+					SetDiagNoteTimed(FString::Printf(TEXT("%s -> %s%s: %s%.0f"), *W->Name, *A->GetActorNameOrLabel(), *(Region.IsEmpty() ? FString() : FString::Printf(TEXT(" (%s)"), *Region)), bThrough ? TEXT("through, ") : TEXT("stopped, "), FMath::Max(0.0f, MeleeBudget)), 4.0f);
+					if (!bThrough) { MeleeStop(Me, bHeavy); bStopped = true; break; }
+				}
+			}
+			if (bStopped) { return; }
+		}
+		MeleeLastEdge = Edge;
+	}
+	else { MeleeLastEdge.Reset(); }
+	if (MeleeSwingClock >= MeleeSwingLength)
+	{
+		MeleeSwingClock = -1.0f;
+		if (bMeleeQueued && GetWorld()->GetTimeSeconds() < MeleeComboUntil) { MeleeComboStep = (MeleeComboStep + 1) % 3; StartMeleeStep(Me, W); }
+		bMeleeQueued = false;
+	}
+}
+
+void ABasePlayerController::BeginWeaponSwap(int32 NewSlot)
+{
+	PendingSwapSlot = NewSlot;
+	PendingSwapLeft = (HeldSlot >= 0 && !bHolstered) ? 0.12f : 0.0f;   // a beat to put the old one away; none when the hands are empty
+	if (PendingSwapLeft <= 0.0f) { TickPendingSwap(0.0f); }
+}
+
+void ABasePlayerController::TickPendingSwap(float DeltaSeconds)
+{
+	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	if (PendingShowLeft > 0.0f)
+	{
+		PendingShowLeft -= DeltaSeconds;
+		if (PendingShowLeft <= 0.0f && Me)
+		{
+			PendingShowLeft = 0.0f;
+			if (Me->WeaponMeshComponent) { Me->WeaponMeshComponent->SetVisibility(true); }
+			if (Me->OpticMeshComponent) { Me->OpticMeshComponent->SetVisibility(Me->HasOpticSight()); }
+		}
+	}
+	if (PendingSwapSlot < 0) { return; }
+	PendingSwapLeft -= DeltaSeconds;
+	if (PendingSwapLeft > 0.0f) { return; }
+	const int32 Slot = PendingSwapSlot;
+	PendingSwapSlot = -1; PendingSwapLeft = 0.0f;
+	if (!Equipped.IsValidIndex(Slot) || Equipped[Slot].IsEmpty()) { return; }
+	bHolstered = false;
+	// The re-equip trusts StowedSlot over HeldSlot (a pickup must not snatch the weapon out of the
+	// hand), so both move, or the next refresh puts the old one back.
+	StowedSlot = HeldSlot = Slot;
+	RefreshHeldWeapon();
+	if (Me && Me->PlayWeaponAction(TEXT("Equip")))
+	{
+		// Out of nowhere for the clip's first third, then in the hand for the rest of the draw.
+		if (Me->WeaponMeshComponent) { Me->WeaponMeshComponent->SetVisibility(false); }
+		if (Me->OpticMeshComponent) { Me->OpticMeshComponent->SetVisibility(false); }
+		PendingShowLeft = FMath::Max(0.05f, Me->WeaponActionLeft * 0.3f);
+	}
 }
 
 void ABasePlayerController::TickPendingFire(float DeltaSeconds)
@@ -3663,9 +4493,15 @@ void ABasePlayerController::TickFreelookSafety()
 	}
 }
 
+bool ABasePlayerController::IsPageOpen() const
+{
+	return bPauseMenuOpen || bScenesOpen || bSettingsOpen || bReferenceOpen || bCharacterSheetOpen || bTransferOpen || bAppearanceOpen || bTerminalOpen
+		|| IsInCinematic() || IsInConversation() || IsBoothActive();
+}
+
 bool ABasePlayerController::IsAnyScreenOpen() const
 {
-	return bPauseMenuOpen || bScenesOpen || bSettingsOpen || bReferenceOpen || bCharacterSheetOpen || bTransferOpen || bAppearanceOpen
+	return bPauseMenuOpen || bScenesOpen || bSettingsOpen || bReferenceOpen || bCharacterSheetOpen || bTransferOpen || bAppearanceOpen || bTerminalOpen
 		|| IsInCinematic() || IsInConversation() || IsInspectMenuOpen() || IsRemoteViewOpen() || IsBoothActive();
 }
 
@@ -3695,6 +4531,9 @@ void ABasePlayerController::ReloadHeldWeapon()
 	}
 	// Reloading lowers the weapon, so it cancels the sights rather than fighting them.
 	Me->SetAiming(false);
+	// The sound of it: a mag out, a mag in, the action worked (RawAudio/reload_<stance>.wav, Tools/make_reload_sounds.py).
+	const FString Family = W->Stance.StartsWith(TEXT("Pistol")) ? TEXT("pistol") : W->Stance == TEXT("Shotgun") ? TEXT("shotgun") : TEXT("rifle");
+	UAmbientPlayer::PlayOneShot(this, GetWorld(), FString::Printf(TEXT("reload_%s.wav"), *Family), Me->IsFirstPerson() ? 0.9f : 0.7f, FMath::FRandRange(0.97f, 1.03f));
 	SetDiagNoteTimed(FString::Printf(TEXT("Reloading %s"), *W->Name), 2.0f);
 }
 
@@ -3705,11 +4544,162 @@ void ABasePlayerController::MeleeHeldWeapon()
 	Me->PlayWeaponAction(TEXT("Melee"));
 }
 
+int32 ABasePlayerController::InventoryFree() const
+{
+	int32 Used = 0;
+	for (const FString& It : Inventory) { if (!It.IsEmpty()) { ++Used; } }
+	return InventoryCapacity - Used;
+}
+
+AActor* ABasePlayerController::DropToWorld(const FString& Name)
+{
+	APawn* Me = GetPawn(); UWorld* World = GetWorld();
+	if (!Me || !World || Name.IsEmpty()) { return nullptr; }
+	// Where it goes: a forearm's length out in front at waist height, then a gentle toss on from there.
+	const FRotator Facing(0.0f, Me->GetActorRotation().Yaw, 0.0f);
+	const FVector Fwd = Facing.Vector();
+	const FVector Spot = Me->GetActorLocation() + Fwd * 55.0f + FVector(0.0f, 0.0f, 10.0f);
+	const FName NameTag(*(TEXT("name:") + Name));
+	AActor* Prop = nullptr;
+	// The actor Take put away, if this is one of those: everything about it comes back as it was.
+	for (TActorIterator<AActor> It(World); It; ++It)
+	{
+		if (It->IsHidden() && It->ActorHasTag(TEXT("inspectable")) && It->ActorHasTag(NameTag)) { Prop = *It; break; }
+	}
+	UStaticMeshComponent* C = nullptr;
+	if (Prop)
+	{
+		Prop->SetActorHiddenInGame(false);
+		Prop->SetActorEnableCollision(true);
+		C = Prop->FindComponentByClass<UStaticMeshComponent>();
+	}
+	else
+	{
+		FString MeshPath;
+		if (const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(Name)) { MeshPath = W->MeshPath; }
+		else if (const ItemCatalog::FRecord* R = ItemCatalog::FindRecord(Name)) { MeshPath = R->Mesh; }
+		if (!MeshPath.IsEmpty() && !MeshPath.Contains(TEXT("."))) { MeshPath += TEXT(".") + FPackageName::GetShortName(MeshPath); }
+		UStaticMesh* Mesh = MeshPath.IsEmpty() ? nullptr : LoadObject<UStaticMesh>(nullptr, *MeshPath, nullptr, LOAD_NoWarn | LOAD_Quiet);
+		if (!Mesh) { return nullptr; }
+		FActorSpawnParameters P; P.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		AStaticMeshActor* SM = World->SpawnActor<AStaticMeshActor>(AStaticMeshActor::StaticClass(), Spot, Facing, P);
+		if (!SM) { return nullptr; }
+		SM->SetMobility(EComponentMobility::Movable);
+		C = SM->GetStaticMeshComponent();
+		C->SetStaticMesh(Mesh);
+		SM->Tags.Add(TEXT("inspectable")); SM->Tags.Add(NameTag); SM->Tags.Add(TEXT("action:Take"));
+		Prop = SM;
+	}
+	Prop->SetActorLocationAndRotation(Spot, FRotator(0.0f, Facing.Yaw + 90.0f, 0.0f), false, nullptr, ETeleportType::TeleportPhysics);
+	if (C && C->GetStaticMesh())
+	{
+		UBodySetup* Body = C->GetStaticMesh()->GetBodySetup();
+		const bool bCanSimulate = Body && Body->CollisionTraceFlag != CTF_UseComplexAsSimple && Body->AggGeom.GetElementCount() > 0;
+		if (bCanSimulate)
+		{
+			C->SetMobility(EComponentMobility::Movable);
+			C->SetCollisionProfileName(TEXT("PhysicsActor"));
+			C->SetSimulatePhysics(true);
+			C->WakeAllRigidBodies();
+			C->AddImpulse(Fwd * 160.0f + FVector(0.0f, 0.0f, 60.0f), NAME_None, true);
+			C->AddAngularImpulseInDegrees(FVector(FMath::FRandRange(-200.f, 200.f), FMath::FRandRange(-200.f, 200.f), FMath::FRandRange(-200.f, 200.f)), NAME_None, true);
+			Prop->Tags.AddUnique(TEXT("loose"));
+		}
+		else
+		{
+			// No simple collision to fall with: set down on whatever is under the spot, resting on its bounds.
+			FHitResult Floor; FCollisionQueryParams Q(SCENE_QUERY_STAT(Drop), false, Me); Q.AddIgnoredActor(Prop);
+			if (World->LineTraceSingleByChannel(Floor, Spot + FVector(0.0f, 0.0f, 50.0f), Spot - FVector(0.0f, 0.0f, 300.0f), ECC_Visibility, Q))
+			{
+				const FBox B = C->Bounds.GetBox();
+				Prop->SetActorLocation(FVector(Spot.X, Spot.Y, Floor.ImpactPoint.Z + (Prop->GetActorLocation().Z - B.Min.Z) + 0.5f));
+			}
+		}
+	}
+	ShowCallout(Me, FString::Printf(TEXT("Dropped %s"), *WeaponCatalog::DisplayName(Name)), 2.5f, false);
+	return Prop;
+}
+
+bool ABasePlayerController::DropInventory(int32 InventoryIndex)
+{
+	if (!Inventory.IsValidIndex(InventoryIndex) || Inventory[InventoryIndex].IsEmpty()) { return false; }
+	if (!DropToWorld(Inventory[InventoryIndex])) { SetDiagNoteTimed(FString::Printf(TEXT("%s has no mesh to drop"), *Inventory[InventoryIndex]), 3.0f); return false; }
+	Inventory[InventoryIndex].Empty();
+	return true;
+}
+
+bool ABasePlayerController::DropGear(int32 Slot)
+{
+	if (!Equipped.IsValidIndex(Slot) || Equipped[Slot].IsEmpty()) { return false; }
+	if (!DropToWorld(Equipped[Slot])) { SetDiagNoteTimed(FString::Printf(TEXT("%s has no mesh to drop"), *Equipped[Slot]), 3.0f); return false; }
+	Equipped[Slot].Empty();
+	RefreshHeldWeapon();
+	return true;
+}
+
+bool ABasePlayerController::AddToInventory(const FString& Name)
+{
+	for (FString& It : Inventory) { if (It.IsEmpty()) { It = Name; return true; } }
+	if (Inventory.Num() >= InventoryCapacity) { return false; }
+	Inventory.Add(Name);
+	return true;
+}
+
+bool ABasePlayerController::KindFitsSlot(const FString& Item, int32 Slot) const
+{
+	const FSheetSpec& Spec = FSheetSpec::Get();
+	if (Item.IsEmpty() || !Spec.Slots.IsValidIndex(Slot) || !Spec.Slots[Slot].bEnabled) { return false; }
+	const FString Kind = ItemCatalog::Kind(Item);
+	for (const FString& K : Spec.Slots[Slot].Kinds) { if (K.Equals(Kind, ESearchCase::IgnoreCase)) { return true; } }
+	return false;
+}
+
+bool ABasePlayerController::MoveInventory(int32 From, int32 To)
+{
+	if (!Inventory.IsValidIndex(From) || Inventory[From].IsEmpty() || To < 0 || To >= InventoryCapacity || From == To) { return false; }
+	if (Inventory.Num() <= To) { Inventory.SetNum(To + 1); }
+	Swap(Inventory[From], Inventory[To]);
+	return true;
+}
+
+bool ABasePlayerController::EquipFromInventoryToSlot(int32 InventoryIndex, int32 Slot)
+{
+	if (!Inventory.IsValidIndex(InventoryIndex) || Inventory[InventoryIndex].IsEmpty()) { return false; }
+	const FSheetSpec& Spec = FSheetSpec::Get();
+	if (Equipped.Num() != Spec.Slots.Num()) { Equipped.SetNum(Spec.Slots.Num()); }
+	if (!KindFitsSlot(Inventory[InventoryIndex], Slot)) { return false; }
+	const FString Old = Equipped[Slot];
+	Equipped[Slot] = Inventory[InventoryIndex];
+	Inventory[InventoryIndex] = Old;
+	RefreshHeldWeapon();
+	return true;
+}
+
+bool ABasePlayerController::UnequipToInventory(int32 Slot, int32 InventoryIndex)
+{
+	if (!Equipped.IsValidIndex(Slot) || Equipped[Slot].IsEmpty() || InventoryIndex < 0 || InventoryIndex >= InventoryCapacity) { return false; }
+	if (Inventory.Num() <= InventoryIndex) { Inventory.SetNum(InventoryIndex + 1); }
+	const FString There = Inventory[InventoryIndex];
+	if (!There.IsEmpty() && !KindFitsSlot(There, Slot)) { return false; }
+	Inventory[InventoryIndex] = Equipped[Slot];
+	Equipped[Slot] = There;
+	RefreshHeldWeapon();
+	return true;
+}
+
+bool ABasePlayerController::SwapGear(int32 A, int32 B)
+{
+	if (!Equipped.IsValidIndex(A) || !Equipped.IsValidIndex(B) || A == B || Equipped[A].IsEmpty()) { return false; }
+	if (!KindFitsSlot(Equipped[A], B) || (!Equipped[B].IsEmpty() && !KindFitsSlot(Equipped[B], A))) { return false; }
+	Swap(Equipped[A], Equipped[B]);
+	RefreshHeldWeapon();
+	return true;
+}
+
 bool ABasePlayerController::UnequipSlot(int32 Slot)
 {
 	if (!Equipped.IsValidIndex(Slot) || Equipped[Slot].IsEmpty()) { return false; }
-	if (Inventory.Num() >= InventoryCapacity) { ShowCallout(GetPawn(), TEXT("No room."), 2.0f, false); return false; }
-	Inventory.Add(Equipped[Slot]);
+	if (!AddToInventory(Equipped[Slot])) { ShowCallout(GetPawn(), TEXT("No room."), 2.0f, false); return false; }
 	Equipped[Slot].Reset();
 	RefreshHeldWeapon();
 	return true;

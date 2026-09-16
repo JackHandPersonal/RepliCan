@@ -74,19 +74,27 @@
     "enabled": true,
     "label": "above",
     "kinds": [
-     "Rifle",
-     "Assault Rifle",
-     "Marksman Rifle",
-     "Shotgun",
-     "SMG",
-     "Heavy Gun",
-     "Launcher",
-     "Grenade Launcher",
-     "Laser",
      "Alien Weapon",
+     "Assault Rifle",
+     "Dagger",
      "Great Axe",
+     "Grenade Launcher",
      "Hammer",
-     "Primary"
+     "Hand Axe",
+     "Heavy Gun",
+     "Laser",
+     "Launcher",
+     "Marksman Rifle",
+     "Paint",
+     "Pistol",
+     "Rifle",
+     "SMG",
+     "Shield",
+     "Shock",
+     "Shotgun",
+     "Shuriken",
+     "Sword",
+     "Tool"
     ]
    },
    {
@@ -104,16 +112,27 @@
     "enabled": true,
     "label": "above",
     "kinds": [
-     "Sidearm",
-     "Pistol",
-     "Shock",
-     "Paint",
+     "Alien Weapon",
+     "Assault Rifle",
      "Dagger",
+     "Great Axe",
+     "Grenade Launcher",
+     "Hammer",
      "Hand Axe",
-     "Sword",
+     "Heavy Gun",
+     "Laser",
+     "Launcher",
+     "Marksman Rifle",
+     "Paint",
+     "Pistol",
+     "Rifle",
+     "SMG",
+     "Shield",
+     "Shock",
+     "Shotgun",
      "Shuriken",
-     "Tool",
-     "Shield"
+     "Sword",
+     "Tool"
     ]
    },
    {
@@ -286,14 +305,21 @@
     ]
    },
    {
-    "caption": "==[ DEFENCES ]=",
+    "caption": "==[ VITALS ]=",
     "rows": [
      "VITALITY     {Vitality}",
+     "STAMINA      {Stamina}"
+    ]
+   },
+   {
+    "caption": "==[ DEFENCES ]=",
+    "rows": [
      "KINETIC      {Kinetic}",
-     "THERMAL      {Thermal}",
-     "TOXIN        {Toxin}",
-     "EVASION      {Evasion}",
-     "FIREWALL     {Firewall}"
+     "HEAT         {Heat}",
+     "COLD         {Cold}",
+     "ELECTRICAL   {Electrical}",
+     "CORROSION    {Corrosion}",
+     "RADIATION    {Radiation}"
     ]
    },
    {

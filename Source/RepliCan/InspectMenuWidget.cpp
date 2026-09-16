@@ -84,7 +84,7 @@ void UInspectMenuWidget::RefreshSelection()
 	for (int32 i = 0; i < ActionTexts.Num(); ++i)
 	{
 		const bool bSel = (i == Selected);
-		ActionTexts[i]->SetText(FText::FromString((bSel ? TEXT("> ") : TEXT("  ")) + ActionLabels[i]));
+		ActionTexts[i]->SetText(FText::FromString(FString::Printf(TEXT("%s%d %s"), bSel ? TEXT("> ") : TEXT("  "), i + 1, *ActionLabels[i])));   // numbered: the digit keys pick a row
 		ActionTexts[i]->SetColorAndOpacity(FSlateColor(bSel ? SelectedColor : OptionColor));
 		ActionTexts[i]->SetFont(Crt::Mono(12));
 	}

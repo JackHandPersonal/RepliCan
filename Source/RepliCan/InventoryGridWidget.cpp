@@ -16,6 +16,7 @@
 #include "Components/Spacer.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
+#include "Framework/Application/SlateApplication.h"
 
 void UInventorySlotBinding::OnClicked()
 {
@@ -125,9 +126,12 @@ void UInventoryGridWidget::SetSlotEnabled(int32 Index, bool bEnabled)
 
 void UInventoryGridWidget::SetItems(const TArray<FString>& Items)
 {
+	Filled.Init(false, Cells.Num());
+	HighlightIndex = -1;
 	for (int32 i = 0; i < Cells.Num(); ++i)
 	{
 		const bool bFilled = Items.IsValidIndex(i) && !Items[i].IsEmpty();
+		Filled[i] = bFilled;
 		UTexture2D* Tex = bFilled ? FindIcon(Items[i]) : nullptr;
 		if (Icons.IsValidIndex(i) && Icons[i])
 		{
@@ -143,6 +147,107 @@ void UInventoryGridWidget::SetItems(const TArray<FString>& Items)
 		if (Cells[i]) { Cells[i]->SetBackgroundColor(i == SelectedIndex && bFilled ? FLinearColor(0.55f, 1.0f, 0.7f, 1) : (bFilled ? FLinearColor(1, 1, 1, 1) : FLinearColor(0.45f, 0.45f, 0.45f, 1))); }
 	}
 }
+
+FLinearColor UInventoryGridWidget::RestColour(int32 Index) const
+{
+	const bool bFilled = Filled.IsValidIndex(Index) && Filled[Index];
+	return Index == SelectedIndex && bFilled ? FLinearColor(0.55f, 1.0f, 0.7f, 1) : (bFilled ? FLinearColor(1, 1, 1, 1) : FLinearColor(0.45f, 0.45f, 0.45f, 1));
+}
+
+int32 UInventoryGridWidget::CellAt(const FVector2D& ScreenPos) const
+{
+	for (int32 i = 0; i < Cells.Num(); ++i)
+	{
+		if (!Cells[i] || (SlotEnabled.IsValidIndex(i) && !SlotEnabled[i])) { continue; }
+		if (Cells[i]->GetCachedGeometry().IsUnderLocation(ScreenPos)) { return i; }
+	}
+	return -1;
+}
+
+void UInventoryGridWidget::SetHighlight(int32 Index)
+{
+	if (HighlightIndex == Index) { return; }
+	if (Cells.IsValidIndex(HighlightIndex) && Cells[HighlightIndex]) { Cells[HighlightIndex]->SetBackgroundColor(RestColour(HighlightIndex)); }
+	HighlightIndex = Index;
+	if (Cells.IsValidIndex(Index) && Cells[Index]) { Cells[Index]->SetBackgroundColor(FLinearColor(1.0f, 0.95f, 0.45f, 1)); }   // the target: a warm glow the rest of the grid never uses
+}
+
+FReply UInventoryGridWidget::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	// A press on a filled square may become a drag: ask Slate to watch for one. The button
+	// underneath still gets the press (this is a preview, not a claim), so a plain click still clicks.
+	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton && OnCanDrop.IsBound())
+	{
+		const int32 I = CellAt(InMouseEvent.GetScreenSpacePosition());
+		if (Filled.IsValidIndex(I) && Filled[I]) { PressedIndex = I; return FReply::Unhandled().DetectDrag(TakeWidget(), EKeys::LeftMouseButton); }
+	}
+	// A right click on a filled square is the owner's to answer (a menu); on an empty one, nothing.
+	if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton && OnSlotRightClicked.IsBound())
+	{
+		const int32 I = CellAt(InMouseEvent.GetScreenSpacePosition());
+		PressedIndex = -1;
+		if (Filled.IsValidIndex(I) && Filled[I]) { OnSlotRightClicked.Execute(I, InMouseEvent.GetScreenSpacePosition()); return FReply::Handled(); }
+	}
+	PressedIndex = -1;
+	return Super::NativeOnPreviewMouseButtonDown(InGeometry, InMouseEvent);
+}
+
+void UInventoryGridWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
+{
+	if (PressedIndex < 0) { return; }
+	UInventoryDragOperation* Op = NewObject<UInventoryDragOperation>(this);
+	Op->SourceGrid = GridId; Op->SourceIndex = PressedIndex;
+	// The square's icon rides under the pointer, drawn by the owner (no engine decorator window).
+	FSlateBrush Brush;
+	if (Icons.IsValidIndex(PressedIndex) && Icons[PressedIndex] && Icons[PressedIndex]->GetVisibility() != ESlateVisibility::Collapsed) { Brush = Icons[PressedIndex]->GetBrush(); }
+	else { Brush.TintColor = FSlateColor(FLinearColor(0.55f, 1.0f, 0.7f, 0.6f)); Brush.ImageSize = FVector2D(CellSize, CellSize); }
+	OnDragBegan.ExecuteIfBound(Brush);
+	Op->OnDrop.AddDynamic(this, &UInventoryGridWidget::HandleDragOpEnded);
+	Op->OnDragCancelled.AddDynamic(this, &UInventoryGridWidget::HandleDragOpEnded);
+	OutOperation = Op;
+	UE_LOG(LogTemp, Log, TEXT("Drag: grid %d square %d"), GridId, PressedIndex);
+}
+
+bool UInventoryGridWidget::NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+	if (UInventoryDragOperation* Op = Cast<UInventoryDragOperation>(InOperation))
+	{
+		const int32 I = CellAt(InDragDropEvent.GetScreenSpacePosition());
+		const bool bOk = I >= 0 && OnCanDrop.IsBound() && OnCanDrop.Execute(Op->SourceGrid, Op->SourceIndex, GridId, I);
+		SetHighlight(bOk ? I : -1);
+		return true;
+	}
+	return Super::NativeOnDragOver(InGeometry, InDragDropEvent, InOperation);
+}
+
+void UInventoryGridWidget::NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+	SetHighlight(-1);
+	Super::NativeOnDragLeave(InDragDropEvent, InOperation);
+}
+
+bool UInventoryGridWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+	if (UInventoryDragOperation* Op = Cast<UInventoryDragOperation>(InOperation))
+	{
+		const int32 I = CellAt(InDragDropEvent.GetScreenSpacePosition());
+		const bool bOk = I >= 0 && OnCanDrop.IsBound() && OnCanDrop.Execute(Op->SourceGrid, Op->SourceIndex, GridId, I);
+		SetHighlight(-1);
+		UE_LOG(LogTemp, Log, TEXT("Drop: grid %d square %d -> grid %d square %d: %s"), Op->SourceGrid, Op->SourceIndex, GridId, I, bOk ? TEXT("ok") : TEXT("refused"));
+		if (bOk) { OnDropped.ExecuteIfBound(Op->SourceGrid, Op->SourceIndex, GridId, I); }
+		else { OnDropRefused.ExecuteIfBound(Op->SourceGrid, Op->SourceIndex, GridId, I); }
+		return true;
+	}
+	return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+}
+
+void UInventoryGridWidget::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+	SetHighlight(-1);
+	Super::NativeOnDragCancelled(InDragDropEvent, InOperation);
+}
+
+void UInventoryGridWidget::HandleDragOpEnded(UDragDropOperation* Operation) { OnDragEnded.ExecuteIfBound(); }
 
 UTexture2D* UInventoryGridWidget::FindIcon(const FString& ItemName)
 {

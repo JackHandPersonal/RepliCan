@@ -32,6 +32,7 @@
 #include "Framework/Application/SlateApplication.h"
 
 static FString GroupHeader(const TCHAR* Name, bool bOpen);   // defined with the field form, below
+static bool ParseVector(const FString& Text, FVector& Out);   // defined with the markers, below
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
@@ -56,10 +57,13 @@ void UReferenceCardBinding::OnClicked()
 	Widget->LastCardIndex = Index; Widget->LastCardClickSeconds = Now;
 	Widget->SelectEntry(Index);
 }
-void UReferenceFieldBinding::OnToggle() { if (!Widget.IsValid()) { return; } if (Key.StartsWith(TEXT("group:"))) { Widget->ToggleGroup(Key.Mid(6)); } else if (Key.StartsWith(TEXT("arm:"))) { Widget->ArmMarker(Key.Mid(4)); } else { Widget->ToggleBoolField(Key); } }
+void UReferenceFieldBinding::OnCycle() { if (Widget.IsValid()) { Widget->CycleEnumField(Key); } }
+
+void UReferenceFieldBinding::OnToggle() { if (!Widget.IsValid()) { return; } if (Key.StartsWith(TEXT("group:"))) { Widget->ToggleGroup(Key.Mid(6)); } else if (Key.StartsWith(TEXT("arm:"))) { Widget->ArmMarker(Key.Mid(4)); } else if (Key == TEXT("attach:add")) { Widget->AddAttachment(); } else if (Key == TEXT("attach:del")) { Widget->RemoveArmedAttachment(); } else { Widget->ToggleBoolField(Key); } }
 
 void UReferenceWidget::NativeOnInitialized()
 {
+	SetIsFocusable(true);   // keys (X, Y, Z during a point drag) come to this widget when it holds focus
 	Super::NativeOnInitialized();
 	UBorder* Root = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("Root"));
 	Root->SetBrushColor(Crt::Panel);
@@ -78,7 +82,7 @@ void UReferenceWidget::NativeDestruct()
 
 static FString CatalogueFile() { return FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("Weapons.json")); }
 static FString RefItemsFile() { return FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("Items.json")); }
-static const TCHAR* Categories[] = { TEXT("weapons"), TEXT("armor"), TEXT("equipment"), TEXT("consumables"), TEXT("other") };
+static const TCHAR* Categories[] = { TEXT("weapons"), TEXT("optics"), TEXT("armor"), TEXT("equipment"), TEXT("consumables"), TEXT("other") };
 
 // UI/Weapons.json: { "weapons": { "<Pack>/<asset>": { name, kind, pack, description, icon, mesh } } }
 void UReferenceWidget::LoadCatalogue()
@@ -106,8 +110,27 @@ void UReferenceWidget::LoadCatalogue()
 		(*O)->TryGetStringField(TEXT("stance"), E.Stance);
 		ItemCatalog::ReadFields(*O, E.Fields);
 		if (E.Name.IsEmpty()) { E.Name = Pair.Key; }
-		E.Category = TEXT("weapons");
+		E.bWeaponsFile = true;
+		E.Category = E.Kind == TEXT("Shield") ? TEXT("armor") : TEXT("weapons");   // a shield is carried like a weapon but read like armour: the ARMOR tab, armour's fields
 		Entries.Add(E);
+	}
+	// The optics: parts with points of their own (MOUNT, EYE), on a tab of their own. Same
+	// card, the part alone in the booth. Saved back into the same file's optics block.
+	const TSharedPtr<FJsonObject>* OpticsObj = nullptr;
+	if (Root->TryGetObjectField(TEXT("optics"), OpticsObj) && OpticsObj)
+	{
+		for (const TPair<FString, TSharedPtr<FJsonValue>>& Pair : (*OpticsObj)->Values)
+		{
+			const TSharedPtr<FJsonObject>* O = nullptr;
+			if (!Pair.Value->TryGetObject(O) || !O) { continue; }
+			FReferenceEntry E; E.Key = Pair.Key;
+			(*O)->TryGetStringField(TEXT("name"), E.Name); (*O)->TryGetStringField(TEXT("mesh"), E.Mesh); (*O)->TryGetStringField(TEXT("icon"), E.Icon);
+			(*O)->TryGetStringField(TEXT("description"), E.Description);
+			ItemCatalog::ReadFields(*O, E.Fields);
+			if (E.Name.IsEmpty()) { E.Name = Pair.Key; }
+			E.Category = TEXT("optics"); E.Kind = TEXT("Optic");
+			Entries.Add(E);
+		}
 	}
 	// The other catalogue: everything a character can carry that is not a weapon, from the
 	// packs (Tools/survey_items.py -> Tools/build_item_catalog.py). Same card, same booth; no
@@ -163,9 +186,32 @@ bool UReferenceWidget::SaveItemEntry(const FReferenceEntry& E)
 	return bSaved;
 }
 
+bool UReferenceWidget::SaveOpticEntry(const FReferenceEntry& E)
+{
+	FString Json;
+	if (!FFileHelper::LoadFileToString(Json, *CatalogueFile())) { return false; }
+	TSharedPtr<FJsonObject> Root;
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
+	if (!FJsonSerializer::Deserialize(Reader, Root) || !Root.IsValid()) { return false; }
+	const TSharedPtr<FJsonObject>* Optics = nullptr;
+	if (!Root->TryGetObjectField(TEXT("optics"), Optics) || !Optics) { return false; }
+	const TSharedPtr<FJsonObject>* Entry = nullptr;
+	if (!(*Optics)->TryGetObjectField(E.Key, Entry) || !Entry) { return false; }
+	(*Entry)->SetStringField(TEXT("name"), E.Name);
+	(*Entry)->SetStringField(TEXT("description"), E.Description);
+	for (const ItemFields::FField& F : ItemFields::Table) { if (ItemFields::Applies(F, E.Category)) { if (const FString* V = E.Fields.Find(F.Key)) { ItemCatalog::StringToField(*Entry, F, *V); } } }
+	FString Out;
+	TSharedRef<TJsonWriter<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>> Writer = TJsonWriterFactory<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>::Create(&Out);
+	if (!FJsonSerializer::Serialize(Root.ToSharedRef(), Writer)) { return false; }
+	const bool bSaved = FFileHelper::SaveStringToFile(Out, *CatalogueFile(), FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
+	if (bSaved) { WeaponCatalog::Reload(); ItemCatalog::Reload(true); }
+	return bSaved;
+}
+
 bool UReferenceWidget::SaveEntry(const FReferenceEntry& E)
 {
-	if (E.Category != TEXT("weapons")) { return SaveItemEntry(E); }
+	if (E.Category == TEXT("optics")) { return SaveOpticEntry(E); }
+	if (!E.bWeaponsFile) { return SaveItemEntry(E); }
 	FString Json;
 	if (!FFileHelper::LoadFileToString(Json, *CatalogueFile())) { return false; }
 	TSharedPtr<FJsonObject> Root;
@@ -181,7 +227,7 @@ bool UReferenceWidget::SaveEntry(const FReferenceEntry& E)
 	(*Entry)->SetBoolField(TEXT("hip_fire"), E.bHipFire);
 	if (!E.Stance.IsEmpty()) { (*Entry)->SetStringField(TEXT("stance"), E.Stance); }
 	(*Entry)->SetBoolField(TEXT("keep"), true);
-	for (const ItemFields::FField& F : ItemFields::Table) { if (ItemFields::Applies(F, E.Category)) { if (const FString* V = E.Fields.Find(F.Key)) { ItemCatalog::StringToField(*Entry, F, *V); } } }
+	for (const ItemFields::FField& F : ItemFields::Table) { if (ItemFields::Applies(F, E.Category) || F.Scope == ItemFields::EScope::Gear) { if (const FString* V = E.Fields.Find(F.Key)) { ItemCatalog::StringToField(*Entry, F, *V); } } }
 	FString Out;
 	TSharedRef<TJsonWriter<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>> Writer = TJsonWriterFactory<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>::Create(&Out);
 	if (!FJsonSerializer::Serialize(Root.ToSharedRef(), Writer)) { return false; }
@@ -210,7 +256,7 @@ static UEditableTextBox* StyledBox(UWidgetTree* Tree, int32 Size)
 	Box->WidgetStyle.SetBackgroundImageNormal(FSlateColorBrush(Crt::PanelSolid));
 	Box->WidgetStyle.SetBackgroundImageHovered(FSlateColorBrush(Crt::PanelSolid));
 	Box->WidgetStyle.SetBackgroundImageFocused(FSlateColorBrush(Crt::Faint));
-	Box->WidgetStyle.SetPadding(FMargin(10.0f, 4.0f));
+	Box->WidgetStyle.SetPadding(FMargin(8.0f, 2.0f));
 	Box->WidgetStyle.TextStyle.SetSelectedBackgroundColor(FSlateColor(Crt::DimGreen));
 	Box->WidgetStyle.TextStyle.SetHighlightColor(Crt::Green);
 	return Box;
@@ -247,7 +293,7 @@ void UReferenceWidget::Rebuild()
 	TabLabels.Reset();
 	{
 		using FTabFn = void (UReferenceWidget::*)();
-		const FTabFn Fns[] = { &UReferenceWidget::OnTabWeapons, &UReferenceWidget::OnTabArmor, &UReferenceWidget::OnTabEquipment, &UReferenceWidget::OnTabConsumables, &UReferenceWidget::OnTabOther };
+		const FTabFn Fns[] = { &UReferenceWidget::OnTabWeapons, &UReferenceWidget::OnTabOptics, &UReferenceWidget::OnTabArmor, &UReferenceWidget::OnTabEquipment, &UReferenceWidget::OnTabConsumables, &UReferenceWidget::OnTabOther };
 		for (int32 i = 0; i < UE_ARRAY_COUNT(Categories); ++i)
 		{
 			UButton* B = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
@@ -258,9 +304,10 @@ void UReferenceWidget::Rebuild()
 			switch (i)
 			{
 			case 0: B->OnClicked.AddDynamic(this, &UReferenceWidget::OnTabWeapons); break;
-			case 1: B->OnClicked.AddDynamic(this, &UReferenceWidget::OnTabArmor); break;
-			case 2: B->OnClicked.AddDynamic(this, &UReferenceWidget::OnTabEquipment); break;
-			case 3: B->OnClicked.AddDynamic(this, &UReferenceWidget::OnTabConsumables); break;
+			case 1: B->OnClicked.AddDynamic(this, &UReferenceWidget::OnTabOptics); break;
+			case 2: B->OnClicked.AddDynamic(this, &UReferenceWidget::OnTabArmor); break;
+			case 3: B->OnClicked.AddDynamic(this, &UReferenceWidget::OnTabEquipment); break;
+			case 4: B->OnClicked.AddDynamic(this, &UReferenceWidget::OnTabConsumables); break;
 			default: B->OnClicked.AddDynamic(this, &UReferenceWidget::OnTabOther); break;
 			}
 			(void)Fns;
@@ -407,6 +454,7 @@ void UReferenceWidget::BuildDetail(UVerticalBox* Into)
 	Reset->OnClicked.AddDynamic(this, &UReferenceWidget::OnResetView);
 	Controls->AddChildToHorizontalBox(Reset)->SetPadding(FMargin(0, 0, 10, 0));
 	UButton* ResetPts = Crt::Button(WidgetTree, TEXT("[ RESET POINTS ]"), S.CaptionSize, Crt::DimGreen);
+	ResetPointsWidget = ResetPts;
 	ResetPts->OnClicked.AddDynamic(this, &UReferenceWidget::OnResetPoints);
 	Controls->AddChildToHorizontalBox(ResetPts)->SetPadding(FMargin(0, 0, 10, 0));
 	// (the FIRE button that stood here was taken out at the user's request; OnFire stays wired for the console)
@@ -426,14 +474,55 @@ void UReferenceWidget::BuildDetail(UVerticalBox* Into)
 		LegendSlot->SetPadding(FMargin(12.0f, 10.0f, 0.0f, 0.0f));
 	}
 	FeedBox->AddChild(FeedStack);
-	UVerticalBoxSlot* FeedSlot = Into->AddChildToVerticalBox(FeedBox);
+	// The render with a column of buttons to its right. GIVE puts one of the weapon in the bag.
+	UHorizontalBox* FeedRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+	FeedRow->AddChildToHorizontalBox(FeedBox);
+	{
+		UVerticalBox* Side = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
+		GiveWidget = Side;
+		UButton* GiveBtn = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
+		GiveBtn->SetStyle(Crt::ButtonStyle());
+		UTextBlock* GiveText = Crt::FixedText(WidgetTree, TEXT("[ GIVE ]"), S.CaptionSize, Crt::Green);
+		GiveBtn->AddChild(GiveText);
+		if (UButtonSlot* GS = Cast<UButtonSlot>(GiveText->Slot)) { GS->SetPadding(FMargin(10.0f, 4.0f)); }
+		GiveBtn->OnClicked.AddDynamic(this, &UReferenceWidget::OnGive);
+		Side->AddChildToVerticalBox(GiveBtn);
+		UHorizontalBoxSlot* SideSlot = FeedRow->AddChildToHorizontalBox(Side); SideSlot->SetPadding(FMargin(10, 0, 0, 0)); SideSlot->SetVerticalAlignment(VAlign_Top);
+	}
+	UVerticalBoxSlot* FeedSlot = Into->AddChildToVerticalBox(FeedRow);
 	FeedSlot->SetHorizontalAlignment(HAlign_Left);
-	FeedSlot->SetPadding(FMargin(0, 0, 0, 10));
-	Into->AddChildToVerticalBox(UCrtRuleWidget::Make(GetOwningPlayer(), TEXT("--[ DETAILS ]-"), S.CaptionSize, Crt::DimGreen))->SetPadding(FMargin(0, 0, 0, 8));
-	Into->AddChildToVerticalBox(Crt::FixedText(WidgetTree, TEXT("NAME"), S.RowSize, Crt::DimGreen));
+	FeedSlot->SetPadding(FMargin(0, 0, 0, 6));
+	Into->AddChildToVerticalBox(UCrtRuleWidget::Make(GetOwningPlayer(), TEXT("--[ DETAILS ]-"), S.CaptionSize, Crt::DimGreen))->SetPadding(FMargin(0, 0, 0, 4));
+	// Label and value on one line, the label in the same 170 px column the field rows use.
+	auto Labelled = [&](const TCHAR* Caption, UWidget* Value, EVerticalAlignment ValueAlign) -> UTextBlock*
+	{
+		UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+		USizeBox* LabelBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
+		LabelBox->SetWidthOverride(170.0f);
+		UTextBlock* L = Crt::FixedText(WidgetTree, Caption, S.RowSize, Crt::DimGreen);
+		LabelBox->AddChild(L);
+		UHorizontalBoxSlot* LS = Row->AddChildToHorizontalBox(LabelBox); LS->SetVerticalAlignment(ValueAlign == VAlign_Top ? VAlign_Top : VAlign_Center); LS->SetPadding(FMargin(0, ValueAlign == VAlign_Top ? 5 : 0, 0, 0));
+		UHorizontalBoxSlot* VS = Row->AddChildToHorizontalBox(Value); VS->SetSize(ESlateSizeRule::Fill); VS->SetVerticalAlignment(ValueAlign);
+		Into->AddChildToVerticalBox(Row)->SetPadding(FMargin(0, 1));
+		return L;
+	};
 	NameBox = StyledBox(WidgetTree, S.CaptionSize);
-	Into->AddChildToVerticalBox(NameBox)->SetPadding(FMargin(0, 2, 0, 8));
-	Into->AddChildToVerticalBox(Crt::FixedText(WidgetTree, TEXT("DESCRIPTION"), S.RowSize, Crt::DimGreen));
+	NameLabel = Labelled(TEXT("NAME"), NameBox, VAlign_Center);
+	// A weapon or an optic is a MAKE and a MODEL on one line (its name stays underneath as the
+	// record's identity); the row stands in for NAME on those cards and folds away on the others.
+	{
+		UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+		USizeBox* MakeCell = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass()); MakeCell->SetWidthOverride(170.0f);
+		MakeLabel = Crt::FixedText(WidgetTree, TEXT("MAKE"), S.RowSize, Crt::DimGreen); MakeCell->AddChild(MakeLabel);
+		Row->AddChildToHorizontalBox(MakeCell)->SetVerticalAlignment(VAlign_Center);
+		MakeBox = StyledBox(WidgetTree, S.CaptionSize);
+		{ UHorizontalBoxSlot* MS = Row->AddChildToHorizontalBox(MakeBox); MS->SetSize(ESlateSizeRule::Fill); MS->SetVerticalAlignment(VAlign_Center); }
+		ModelLabel = Crt::FixedText(WidgetTree, TEXT("MODEL"), S.RowSize, Crt::DimGreen);
+		{ UHorizontalBoxSlot* ML = Row->AddChildToHorizontalBox(ModelLabel); ML->SetVerticalAlignment(VAlign_Center); ML->SetPadding(FMargin(16, 0, 10, 0)); }
+		ModelBox = StyledBox(WidgetTree, S.CaptionSize);
+		{ UHorizontalBoxSlot* MS = Row->AddChildToHorizontalBox(ModelBox); MS->SetSize(ESlateSizeRule::Fill); MS->SetVerticalAlignment(VAlign_Center); }
+		Into->AddChildToVerticalBox(Row)->SetPadding(FMargin(0, 1));
+	}
 	DescBox = WidgetTree->ConstructWidget<UMultiLineEditableTextBox>(UMultiLineEditableTextBox::StaticClass());
 	DescBox->WidgetStyle.SetFont(Crt::Fixed(S.InfoTextSize));
 	DescBox->WidgetStyle.SetForegroundColor(Crt::Green);
@@ -441,63 +530,59 @@ void UReferenceWidget::BuildDetail(UVerticalBox* Into)
 	DescBox->WidgetStyle.SetBackgroundImageNormal(FSlateColorBrush(Crt::PanelSolid));
 	DescBox->WidgetStyle.SetBackgroundImageHovered(FSlateColorBrush(Crt::PanelSolid));
 	DescBox->WidgetStyle.SetBackgroundImageFocused(FSlateColorBrush(Crt::Faint));
-	DescBox->WidgetStyle.SetPadding(FMargin(10.0f, 6.0f));
+	DescBox->WidgetStyle.SetPadding(FMargin(8.0f, 4.0f));
 	DescBox->WidgetStyle.TextStyle.SetSelectedBackgroundColor(FSlateColor(Crt::DimGreen));
 	DescBox->WidgetStyle.TextStyle.SetHighlightColor(Crt::Green);
 	USizeBox* DescSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-	DescSize->SetMinDesiredHeight(150.0f);
+	DescSize->SetMinDesiredHeight(96.0f);
 	DescSize->AddChild(DescBox);
-	Into->AddChildToVerticalBox(DescSize)->SetPadding(FMargin(0, 2, 0, 8));
-	// The sound it makes, and whether it is a HIP FIRE weapon. That flag is the one the carry
-	// logic reads: fired without the sights, a hip-fire weapon comes up to the hip instead of
-	// the shoulder. Special weapons only; everything else leaves it off.
+	Labelled(TEXT("DESCRIPTION"), DescSize, VAlign_Top);
+	// SOUND, then the cycled controls, all on one line: HIP FIRE is the flag the carry logic
+	// reads (fired without the sights, a hip-fire weapon comes up to the hip instead of the
+	// shoulder); STANCE is the folder of clips the body holds it with, cycled rather than typed
+	// because a misspelt one is a weapon nobody can hold; OPTIC is the sight fitted, or none.
 	UHorizontalBox* Pair = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
-	UVerticalBox* SoundCol = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	SoundCol->AddChildToVerticalBox(Crt::FixedText(WidgetTree, TEXT("SOUND"), S.RowSize, Crt::DimGreen));
-	SoundBox = StyledBox(WidgetTree, S.CaptionSize);
-	SoundCol->AddChildToVerticalBox(SoundBox)->SetPadding(FMargin(0, 2, 0, 0));
-	UHorizontalBoxSlot* SoundSlot = Pair->AddChildToHorizontalBox(SoundCol); SoundSlot->SetSize(ESlateSizeRule::Fill); SoundSlot->SetPadding(FMargin(0, 0, 24, 0));
-	UVerticalBox* HipCol = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	HipWidget = HipCol;
-	HipCol->AddChildToVerticalBox(Crt::FixedText(WidgetTree, TEXT("HIP FIRE"), S.RowSize, Crt::DimGreen));
+	{
+		USizeBox* SoundCell = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass()); SoundCell->SetWidthOverride(170.0f);
+		SoundCell->AddChild(Crt::FixedText(WidgetTree, TEXT("SOUND"), S.RowSize, Crt::DimGreen));
+		Pair->AddChildToHorizontalBox(SoundCell)->SetVerticalAlignment(VAlign_Center);
+		SoundBox = StyledBox(WidgetTree, S.CaptionSize);
+		UHorizontalBoxSlot* SoundSlot = Pair->AddChildToHorizontalBox(SoundBox); SoundSlot->SetSize(ESlateSizeRule::Fill); SoundSlot->SetVerticalAlignment(VAlign_Center); SoundSlot->SetPadding(FMargin(0, 0, 16, 0));
+	}
+	auto Control = [&](const TCHAR* Caption, UButton* Button) -> UWidget*
+	{
+		UHorizontalBox* Cell = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+		Cell->AddChildToHorizontalBox(Crt::FixedText(WidgetTree, Caption, S.RowSize, Crt::DimGreen))->SetPadding(FMargin(0, 0, 8, 0));
+		Cell->AddChildToHorizontalBox(Button);
+		for (int32 k = 0; k < Cell->GetChildrenCount(); ++k) { if (UHorizontalBoxSlot* CS = Cast<UHorizontalBoxSlot>(Cell->GetChildAt(k)->Slot)) { CS->SetVerticalAlignment(VAlign_Center); } }
+		UHorizontalBoxSlot* PS = Pair->AddChildToHorizontalBox(Cell); PS->SetSize(ESlateSizeRule::Automatic); PS->SetVerticalAlignment(VAlign_Center); PS->SetPadding(FMargin(0, 0, 16, 0));
+		return Cell;
+	};
 	HipFireButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
 	HipFireButton->SetStyle(Crt::ButtonStyle());
 	HipFireLabel = Crt::FixedText(WidgetTree, FixedLabel(TEXT("   NO"), 7), S.CaptionSize, Crt::DimGreen);
 	HipFireButton->AddChild(HipFireLabel);
-	if (UButtonSlot* HS = Cast<UButtonSlot>(HipFireLabel->Slot)) { HS->SetPadding(FMargin(10.0f, 4.0f)); }
+	if (UButtonSlot* HS = Cast<UButtonSlot>(HipFireLabel->Slot)) { HS->SetPadding(FMargin(8.0f, 2.0f)); }
 	HipFireButton->OnClicked.AddDynamic(this, &UReferenceWidget::OnHipFire);
-	HipCol->AddChildToVerticalBox(HipFireButton)->SetPadding(FMargin(0, 2, 0, 0));
-	UHorizontalBoxSlot* HipSlot = Pair->AddChildToHorizontalBox(HipCol); HipSlot->SetSize(ESlateSizeRule::Automatic); HipSlot->SetVerticalAlignment(VAlign_Bottom); HipSlot->SetPadding(FMargin(0, 0, 24, 0));
-	// The stance: which folder of clips the body holds it with. Cycled, not typed -- the names
-	// are the catalogue's own table, and a misspelt one would be a weapon nobody can hold.
-	UVerticalBox* StanceCol = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	StanceWidget = StanceCol;
-	StanceCol->AddChildToVerticalBox(Crt::FixedText(WidgetTree, TEXT("STANCE"), S.RowSize, Crt::DimGreen));
+	HipWidget = Control(TEXT("HIP FIRE"), HipFireButton);
 	UButton* StanceButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
 	StanceButton->SetStyle(Crt::ButtonStyle());
 	StanceLabel = Crt::FixedText(WidgetTree, FixedLabel(TEXT("-"), 7), S.CaptionSize, Crt::Green);
 	StanceButton->AddChild(StanceLabel);
-	if (UButtonSlot* SS = Cast<UButtonSlot>(StanceLabel->Slot)) { SS->SetPadding(FMargin(10.0f, 4.0f)); }
+	if (UButtonSlot* SS = Cast<UButtonSlot>(StanceLabel->Slot)) { SS->SetPadding(FMargin(8.0f, 2.0f)); }
 	StanceButton->OnClicked.AddDynamic(this, &UReferenceWidget::OnCycleStance);
-	StanceCol->AddChildToVerticalBox(StanceButton)->SetPadding(FMargin(0, 2, 0, 0));
-	UHorizontalBoxSlot* StanceSlot = Pair->AddChildToHorizontalBox(StanceCol); StanceSlot->SetSize(ESlateSizeRule::Automatic); StanceSlot->SetVerticalAlignment(VAlign_Bottom); StanceSlot->SetPadding(FMargin(0, 0, 24, 0));
-	// The optic: which of the catalogue's sights is fitted, or none. Cycled; SAVE writes it and
-	// the weapon in hand is re-equipped with it on the spot.
-	UVerticalBox* OpticCol = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	OpticWidget = OpticCol;
-	OpticCol->AddChildToVerticalBox(Crt::FixedText(WidgetTree, TEXT("OPTIC"), S.RowSize, Crt::DimGreen));
+	StanceWidget = Control(TEXT("STANCE"), StanceButton);
 	UButton* OpticButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
 	OpticButton->SetStyle(Crt::ButtonStyle());
 	OpticLabel = Crt::FixedText(WidgetTree, FixedLabel(TEXT("NONE"), 10), S.CaptionSize, Crt::Green);
 	OpticButton->AddChild(OpticLabel);
-	if (UButtonSlot* OS = Cast<UButtonSlot>(OpticLabel->Slot)) { OS->SetPadding(FMargin(10.0f, 4.0f)); }
+	if (UButtonSlot* OS = Cast<UButtonSlot>(OpticLabel->Slot)) { OS->SetPadding(FMargin(8.0f, 2.0f)); }
 	OpticButton->OnClicked.AddDynamic(this, &UReferenceWidget::OnCycleOptic);
-	OpticCol->AddChildToVerticalBox(OpticButton)->SetPadding(FMargin(0, 2, 0, 0));
-	UHorizontalBoxSlot* OpticSlot = Pair->AddChildToHorizontalBox(OpticCol); OpticSlot->SetSize(ESlateSizeRule::Automatic); OpticSlot->SetVerticalAlignment(VAlign_Bottom);
-	Into->AddChildToVerticalBox(Pair)->SetPadding(FMargin(0, 0, 0, 10));
+	OpticWidget = Control(TEXT("OPTIC"), OpticButton);
+	Into->AddChildToVerticalBox(Pair)->SetPadding(FMargin(0, 3, 0, 4));
 	// The form: filled per item (FillFields), every field that applies to it.
 	FieldsBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	Into->AddChildToVerticalBox(FieldsBox)->SetPadding(FMargin(0, 0, 0, 10));
+	Into->AddChildToVerticalBox(FieldsBox)->SetPadding(FMargin(0, 0, 0, 6));
 }
 
 // One card per entry: the render square on the left, then the name, a kind / pack line and
@@ -513,7 +598,7 @@ void UReferenceWidget::FillList()
 		const FReferenceEntry& E = Entries[i];
 		if (E.Category != CurrentCategory) { continue; }
 		if (!bShowHidden && E.Fields.FindRef(TEXT("hidden")) == TEXT("true")) { continue; }
-		if (!Filter.IsEmpty() && !E.Name.Contains(Filter) && !E.Kind.Contains(Filter) && !E.Pack.Contains(Filter) && !E.Description.Contains(Filter)) { continue; }
+		if (!Filter.IsEmpty() && !E.Name.Contains(Filter) && !E.Kind.Contains(Filter) && !E.Pack.Contains(Filter) && !E.Description.Contains(Filter) && !E.Fields.FindRef(TEXT("make")).Contains(Filter) && !E.Fields.FindRef(TEXT("model")).Contains(Filter)) { continue; }
 		UButton* CardButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
 		CardButton->SetStyle(Crt::ButtonStyle());
 		UReferenceCardBinding* Binding = NewObject<UReferenceCardBinding>(this);
@@ -529,7 +614,11 @@ void UReferenceWidget::FillList()
 		UHorizontalBoxSlot* SquareSlot = Card->AddChildToHorizontalBox(Square);
 		SquareSlot->SetVerticalAlignment(VAlign_Top); SquareSlot->SetPadding(FMargin(0, 0, 16, 0));
 		UVerticalBox* Text = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-		Text->AddChildToVerticalBox(Crt::FixedText(WidgetTree, E.Name.ToUpper(), S.InfoNameSize, i == SelectedIndex ? FLinearColor(0.75f, 1.0f, 0.8f) : Crt::Green))->SetPadding(FMargin(0, 0, 0, 6));
+		{
+			const FString Make = E.Fields.FindRef(TEXT("make")), Model = E.Fields.FindRef(TEXT("model"));
+			if (!Make.IsEmpty()) { Text->AddChildToVerticalBox(Crt::FixedText(WidgetTree, Make.ToUpper(), S.CaptionSize, Crt::DimGreen))->SetPadding(FMargin(0, 0, 0, 2)); }
+			Text->AddChildToVerticalBox(Crt::FixedText(WidgetTree, (Model.IsEmpty() ? E.Name : Model).ToUpper(), S.InfoNameSize, i == SelectedIndex ? FLinearColor(0.75f, 1.0f, 0.8f) : Crt::Green))->SetPadding(FMargin(0, 0, 0, 6));
+		}
 		UTextBlock* Desc = Crt::FixedText(WidgetTree, E.Description, S.InfoTextSize, Crt::DimGreen);
 		Desc->SetAutoWrapText(true);
 		Text->AddChildToVerticalBox(Desc);
@@ -551,10 +640,17 @@ void UReferenceWidget::SelectEntry(int32 Index)
 	if (!Entries.IsValidIndex(Index) || !DetailBox) { return; }
 	SelectedIndex = Index;
 	const FReferenceEntry& E = Entries[Index];
-	if (DetailTitle) { DetailTitle->SetText(FText::FromString(E.Name)); }
+	if (DetailTitle) { DetailTitle->SetText(FText::FromString(TitleOf(E))); }
 	if (DetailMesh) { FString Shown = E.Mesh; Shown.RemoveFromStart(TEXT("/Game/RepliCan/")); Shown.RemoveFromStart(TEXT("/Game/")); DetailMesh->SetText(FText::FromString(Shown)); }
 	if (HiddenLabel) { const bool bHid = E.Fields.FindRef(TEXT("hidden")) == TEXT("true"); HiddenLabel->SetText(FText::FromString(FixedLabel(bHid ? TEXT("SHOW") : TEXT("HIDE"), 4))); HiddenLabel->SetColorAndOpacity(FSlateColor(bHid ? Crt::Green : Crt::DimGreen)); }
 	if (NameBox) { NameBox->SetText(FText::FromString(E.Name)); }
+	{
+		const bool bGear = E.bWeaponsFile || E.Category == TEXT("optics");
+		if (MakeBox) { MakeBox->SetText(FText::FromString(E.Fields.FindRef(TEXT("make")))); }
+		if (ModelBox) { ModelBox->SetText(FText::FromString(E.Fields.FindRef(TEXT("model")))); }
+		if (UWidget* Row = MakeBox ? MakeBox->GetParent() : nullptr) { Row->SetVisibility(bGear ? ESlateVisibility::Visible : ESlateVisibility::Collapsed); }
+		if (UWidget* Row = NameBox ? NameBox->GetParent() : nullptr) { Row->SetVisibility(bGear ? ESlateVisibility::Collapsed : ESlateVisibility::Visible); }
+	}
 	bHipFireValue = E.bHipFire;
 	ShowHipFire();
 	StanceValue = E.Stance;
@@ -562,13 +658,17 @@ void UReferenceWidget::SelectEntry(int32 Index)
 	ShowStance();
 	FillFields(E);
 	const bool bWeapon = E.Category == TEXT("weapons");
-	for (UWidget* W : { FireWidget.Get(), HipWidget.Get(), StanceWidget.Get(), OpticWidget.Get(), MetaWidget.Get() }) { if (W) { W->SetVisibility(bWeapon ? ESlateVisibility::Visible : ESlateVisibility::Collapsed); } }
+	const bool bOpticEntry = E.Category == TEXT("optics");
+	if (ResetPointsWidget) { ResetPointsWidget->SetVisibility((bWeapon || bOpticEntry) ? ESlateVisibility::Visible : ESlateVisibility::Collapsed); }   // nothing to reset on an item without points
+	for (UWidget* W : { FireWidget.Get(), HipWidget.Get(), StanceWidget.Get(), OpticWidget.Get() }) { if (W) { W->SetVisibility(bWeapon ? ESlateVisibility::Visible : ESlateVisibility::Collapsed); } }
+	if (GiveWidget) { GiveWidget->SetVisibility(E.bWeaponsFile ? ESlateVisibility::Visible : ESlateVisibility::Collapsed); }   // a shield can be given too
+	if (MetaWidget) { MetaWidget->SetVisibility((bWeapon || bOpticEntry) ? ESlateVisibility::Visible : ESlateVisibility::Collapsed); }
 	FillMetaTable(bWeapon ? WeaponCatalog::Find(E.Name) : nullptr);
 	if (SoundBox) { SoundBox->SetText(FText::FromString(E.Sound)); }
 	if (DescBox) { DescBox->SetText(FText::FromString(E.Description)); }
 	if (DetailNote) { DetailNote->SetText(FText::GetEmpty()); }
 	DetailBox->SetVisibility(ESlateVisibility::Visible);
-	if (OwnerController) { OwnerController->ShowWeaponPreview(E.Mesh); }
+	if (OwnerController) { OwnerController->ShowWeaponPreview(E.Mesh, E.bWeaponsFile ? E.Name : FString()); }
 	RefreshFeed();
 	FillList();   // the picked card lights up
 }
@@ -593,6 +693,14 @@ void UReferenceWidget::OnFire()
 	if (OwnerController) { OwnerController->FireWeaponPreview(Entries.IsValidIndex(SelectedIndex) ? Entries[SelectedIndex].Sound : FString()); }
 }
 
+void UReferenceWidget::OnGive()
+{
+	if (!OwnerController || !Entries.IsValidIndex(SelectedIndex) || !Entries[SelectedIndex].bWeaponsFile) { return; }
+	const FString& Name = Entries[SelectedIndex].Name;
+	const bool bOk = OwnerController->AddToInventory(Name);
+	if (DetailNote) { DetailNote->SetText(FText::FromString(bOk ? FString::Printf(TEXT("GIVEN: %s IS IN THE BAG"), *WeaponCatalog::DisplayName(Name).ToUpper()) : TEXT("NO ROOM IN THE BAG"))); }
+}
+
 void UReferenceWidget::OnResetView() { if (OwnerController) { OwnerController->ResetWeaponPreviewView(); } }
 
 void UReferenceWidget::OnSaveDetail()
@@ -611,13 +719,13 @@ void UReferenceWidget::OnSaveDetail()
 	FString NewCat = E.Fields.FindRef(TEXT("category")).ToLower().TrimStartAndEnd();
 	static const TCHAR* Tabs[] = { TEXT("armor"), TEXT("equipment"), TEXT("consumables"), TEXT("other") };
 	bool bKnown = false; for (const TCHAR* T : Tabs) { bKnown |= NewCat == T; }
-	const bool bMoved = E.Category != TEXT("weapons") && bKnown && NewCat != E.Category;
-	if (E.Category != TEXT("weapons") && !bKnown && !NewCat.IsEmpty()) { E.Fields.Add(TEXT("category"), E.Category); if (DetailNote) { DetailNote->SetText(FText::FromString(TEXT("CATEGORY must be armor, equipment, consumables or other"))); } }
+	const bool bMoved = !E.bWeaponsFile && bKnown && NewCat != E.Category;
+	if (!E.bWeaponsFile && !bKnown && !NewCat.IsEmpty()) { E.Fields.Add(TEXT("category"), E.Category); if (DetailNote) { DetailNote->SetText(FText::FromString(TEXT("CATEGORY must be armor, equipment, consumables or other"))); } }
 	if (bMoved) { E.Category = NewCat; }
 	const bool bOk = SaveEntry(E);
-	if (bOk && E.Category == TEXT("weapons") && OwnerController) { OwnerController->RefreshHeldWeapon(); }   // the weapon in hand picks up its new optic and points now
-	if (DetailNote && !(E.Category != TEXT("weapons") && !bKnown && !NewCat.IsEmpty())) { DetailNote->SetText(FText::FromString(bOk ? (E.Category == TEXT("weapons") ? TEXT("SAVED TO UI/WEAPONS.JSON") : TEXT("SAVED TO UI/ITEMS.JSON")) : TEXT("SAVE FAILED"))); }
-	if (DetailTitle) { DetailTitle->SetText(FText::FromString(E.Name)); }
+	if (bOk && (E.bWeaponsFile || E.Category == TEXT("optics")) && OwnerController) { OwnerController->RefreshHeldWeapon(); }   // the weapon in hand picks up its new optic and points now
+	if (DetailNote && !(!E.bWeaponsFile && !bKnown && !NewCat.IsEmpty())) { DetailNote->SetText(FText::FromString(bOk ? ((E.bWeaponsFile || E.Category == TEXT("optics")) ? TEXT("SAVED TO UI/WEAPONS.JSON") : TEXT("SAVED TO UI/ITEMS.JSON")) : TEXT("SAVE FAILED"))); }
+	if (DetailTitle) { DetailTitle->SetText(FText::FromString(TitleOf(E))); }
 	if (bMoved)
 	{
 		const FString Key = E.Key;
@@ -681,6 +789,7 @@ void UReferenceWidget::ShowStance()
 }
 
 void UReferenceWidget::OnTabWeapons() { SetCategory(TEXT("weapons")); }
+void UReferenceWidget::OnTabOptics() { SetCategory(TEXT("optics")); }
 void UReferenceWidget::OnTabArmor() { SetCategory(TEXT("armor")); }
 void UReferenceWidget::OnTabEquipment() { SetCategory(TEXT("equipment")); }
 void UReferenceWidget::OnTabConsumables() { SetCategory(TEXT("consumables")); }
@@ -722,6 +831,16 @@ void UReferenceWidget::OnReviewedToday()
 	OnSaveDetail();   // the stamp is part of the entry: saved with everything else on the form
 }
 
+void UReferenceWidget::CycleEnumField(const FString& Key)
+{
+	const TArray<FString>* Options = FieldEnumOptions.Find(Key);
+	if (!Options || Options->Num() == 0) { return; }
+	FString& V = FieldEnumValues.FindOrAdd(Key);
+	const int32 At = Options->IndexOfByKey(V);
+	V = (*Options)[(At + 1) % Options->Num()];
+	if (TObjectPtr<UTextBlock>* L = FieldEnumLabels.Find(Key)) { if (*L) { (*L)->SetText(FText::FromString(FixedLabel(TEXT("< ") + V.ToUpper() + TEXT(" >"), 10))); } }
+}
+
 void UReferenceWidget::ToggleBoolField(const FString& Key)
 {
 	bool& V = FieldBoolValues.FindOrAdd(Key);
@@ -733,7 +852,7 @@ void UReferenceWidget::FillFields(const FReferenceEntry& E)
 {
 	if (!FieldsBox) { return; }
 	FieldsBox->ClearChildren();
-	FieldBoxes.Reset(); FieldBoolLabels.Reset(); FieldBoolValues.Reset(); FieldBindings.Reset();
+	FieldBoxes.Reset(); if (MakeBox) { FieldBoxes.Add(TEXT("make"), MakeBox); } if (ModelBox) { FieldBoxes.Add(TEXT("model"), ModelBox); } FieldBoolLabels.Reset(); FieldBoolValues.Reset(); FieldEnumLabels.Reset(); FieldEnumValues.Reset(); FieldEnumOptions.Reset(); FieldBindings.Reset();
 	const FSheetSpec& S = FSheetSpec::Get();
 	if (ReviewLabel) { const FString D = E.Fields.FindRef(TEXT("reviewdate")); ReviewLabel->SetText(FText::FromString(TEXT("REVIEWED: ") + (D.IsEmpty() ? TEXT("never") : D))); }
 	GroupBoxes.Reset(); GroupLabels.Reset();
@@ -746,6 +865,8 @@ void UReferenceWidget::FillFields(const FReferenceEntry& E)
 		if (FCString::Strcmp(F.Group, GroupName) != 0) { continue; }
 		if (!ItemFields::Applies(F, E.Category)) { continue; }
 		if (FCString::Strcmp(F.Key, TEXT("reviewdate")) == 0) { continue; }   // in the header
+		if (FCString::Strcmp(F.Key, TEXT("make")) == 0 || FCString::Strcmp(F.Key, TEXT("model")) == 0) { continue; }
+		if (FCString::Strcmp(F.Key, TEXT("shoulder")) == 0 && E.Stance.StartsWith(TEXT("Pistol"))) { continue; }   // no stock, no shoulder: a pistol indexes off the hand   // in the header too
 		if (!Rows)
 		{
 			// The header folds its rows: a button whose caption says which way it is.
@@ -759,7 +880,7 @@ void UReferenceWidget::FillFields(const FReferenceEntry& E)
 			GB->Widget = this; GB->Key = FString(TEXT("group:")) + GroupName;
 			HB->OnClicked.AddDynamic(GB, &UReferenceFieldBinding::OnToggle);
 			FieldBindings.Add(GB); GroupLabels.Add(GroupName, HL);
-			{ UVerticalBoxSlot* HS = FieldsBox->AddChildToVerticalBox(HB); HS->SetPadding(FMargin(0, 8, 0, 4)); HS->SetHorizontalAlignment(HAlign_Left); }   // left, like every other header in the column
+			{ UVerticalBoxSlot* HS = FieldsBox->AddChildToVerticalBox(HB); HS->SetPadding(FMargin(0, 5, 0, 2)); HS->SetHorizontalAlignment(HAlign_Left); }   // left, like every other header in the column
 			Rows = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
 			Rows->SetVisibility(bOpen ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 			FieldsBox->AddChildToVerticalBox(Rows);
@@ -773,6 +894,23 @@ void UReferenceWidget::FillFields(const FReferenceEntry& E)
 		UHorizontalBoxSlot* LS = Row->AddChildToHorizontalBox(LabelBox); LS->SetVerticalAlignment(VAlign_Center);
 		switch (F.Type)
 		{
+		case ItemFields::EType::Enum:
+		{
+			// One of a fixed set of names: a button that steps through them, in the hint's order.
+			UButton* B = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
+			B->SetStyle(Crt::ButtonStyle());
+			TArray<FString> Options; FString(F.Hint).ParseIntoArray(Options, TEXT(" "), true);
+			const FString Shown = (Value.IsEmpty() && Options.Num() > 0) ? Options[0] : Value;
+			UTextBlock* L = Crt::FixedText(WidgetTree, FixedLabel(TEXT("< ") + Shown.ToUpper() + TEXT(" >"), 10), S.CaptionSize, Crt::Green);
+			B->AddChild(L);
+			if (UButtonSlot* BS = Cast<UButtonSlot>(L->Slot)) { BS->SetPadding(FMargin(8.0f, 2.0f)); }
+			UReferenceFieldBinding* Binding = NewObject<UReferenceFieldBinding>(this);
+			Binding->Widget = this; Binding->Key = F.Key;
+			B->OnClicked.AddDynamic(Binding, &UReferenceFieldBinding::OnCycle);
+			FieldBindings.Add(Binding); FieldEnumLabels.Add(F.Key, L); FieldEnumValues.Add(F.Key, Shown); FieldEnumOptions.Add(F.Key, Options);
+			Row->AddChildToHorizontalBox(B)->SetVerticalAlignment(VAlign_Center);
+			break;
+		}
 		case ItemFields::EType::Bool:
 		{
 			UButton* B = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
@@ -780,7 +918,7 @@ void UReferenceWidget::FillFields(const FReferenceEntry& E)
 			const bool bOn = Value == TEXT("true");
 			UTextBlock* L = Crt::FixedText(WidgetTree, FixedLabel(bOn ? TEXT("X  YES") : TEXT("   NO"), 7), S.CaptionSize, bOn ? Crt::Green : Crt::DimGreen);
 			B->AddChild(L);
-			if (UButtonSlot* BS = Cast<UButtonSlot>(L->Slot)) { BS->SetPadding(FMargin(10.0f, 3.0f)); }
+			if (UButtonSlot* BS = Cast<UButtonSlot>(L->Slot)) { BS->SetPadding(FMargin(8.0f, 2.0f)); }
 			UReferenceFieldBinding* Binding = NewObject<UReferenceFieldBinding>(this);
 			Binding->Widget = this; Binding->Key = F.Key;
 			B->OnClicked.AddDynamic(Binding, &UReferenceFieldBinding::OnToggle);
@@ -801,7 +939,7 @@ void UReferenceWidget::FillFields(const FReferenceEntry& E)
 		}
 		}
 		if (F.Hint && *F.Hint) { Row->SetToolTipText(FText::FromString(F.Hint)); }
-		Rows->AddChildToVerticalBox(Row)->SetPadding(FMargin(0, 2));
+		Rows->AddChildToVerticalBox(Row)->SetPadding(FMargin(0, 1));
 		}
 	}
 }
@@ -830,6 +968,71 @@ void UReferenceWidget::HideEntry(int32 Index)
 	if (DetailNote) { DetailNote->SetText(FText::FromString(FString::Printf(TEXT("HIDDEN: %s"), *Entries[Index].Name))); }
 }
 
+int32 UReferenceWidget::AxisHeld() const
+{
+	if (HeldAxis >= 0) { return HeldAxis; }
+	if (const APlayerController* PC = GetOwningPlayer())
+	{
+		if (PC->IsInputKeyDown(EKeys::X)) { return 0; }
+		if (PC->IsInputKeyDown(EKeys::Y)) { return 1; }
+		if (PC->IsInputKeyDown(EKeys::Z)) { return 2; }
+	}
+	return -1;
+}
+
+static int32 AxisOfKey(const FKey& K) { return K == EKeys::X ? 0 : K == EKeys::Y ? 1 : K == EKeys::Z ? 2 : -1; }
+
+FReply UReferenceWidget::NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+{
+	const int32 A = AxisOfKey(InKeyEvent.GetKey());
+	if (A >= 0 && bShowMeta)
+	{
+		HeldAxis = A;
+		// Eaten only mid-drag, so an x typed into a field still lands in the field.
+		if (bDragging && DragMarker >= 0) { return FReply::Handled(); }
+	}
+	return Super::NativeOnPreviewKeyDown(InGeometry, InKeyEvent);
+}
+
+FReply UReferenceWidget::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+{
+	const int32 A = AxisOfKey(InKeyEvent.GetKey());
+	if (A >= 0 && HeldAxis == A) { HeldAxis = -1; }
+	return Super::NativeOnKeyUp(InGeometry, InKeyEvent);
+}
+
+void UReferenceWidget::NativeOnFocusLost(const FFocusEvent& InFocusEvent)
+{
+	HeldAxis = -1;   // the key-up will go elsewhere now
+	Super::NativeOnFocusLost(InFocusEvent);
+}
+
+bool UReferenceWidget::UnprojectToAxis(const FVector2D& FeedPx, const FVector& LineStartLocal, int32 Axis, FVector& OutLocal) const
+{
+	FTransform Camera, Piece; float Fov = 34.0f;
+	if (!WeaponFeed || !OwnerController || !OwnerController->GetWeaponPreviewFrame(Camera, Fov, Piece)) { return false; }
+	const FVector2D Sz = WeaponFeed->GetCachedGeometry().GetLocalSize();
+	if (Sz.X <= 1.0 || Sz.Y <= 1.0) { return false; }
+	const double TanH = FMath::Tan(FMath::DegreesToRadians(FMath::Max(1.0f, Fov) * 0.5f));
+	const FVector DirCam(1.0, (FeedPx.X / Sz.X - 0.5) * 2.0 * TanH, -(FeedPx.Y / Sz.Y - 0.5) * 2.0 * TanH / (Sz.X / Sz.Y));
+	const FVector D = Camera.TransformVectorNoScale(DirCam).GetSafeNormal();
+	const FVector O = Camera.GetLocation();
+	// The axis line in the world, through where the point was picked up.
+	FVector Unit = FVector::ZeroVector; Unit[FMath::Clamp(Axis, 0, 2)] = 1.0;
+	const FVector A = Piece.TransformVectorNoScale(Unit).GetSafeNormal();
+	const FVector P = Piece.TransformPosition(LineStartLocal);
+	// The point of the line nearest the pointer's ray: the two-lines closest-points solve with
+	// both directions unit length.
+	const FVector W0 = O - P;
+	const double B = FVector::DotProduct(D, A), Dd = FVector::DotProduct(D, W0), E = FVector::DotProduct(A, W0);
+	const double Denom = 1.0 - B * B;
+	if (Denom < 1e-4) { return false; }   // looking straight down the axis: nowhere to drag it to
+	const double T = (E - B * Dd) / Denom;
+	const double Scale = FMath::Max(Piece.GetScale3D()[FMath::Clamp(Axis, 0, 2)], 1e-3);
+	OutLocal = LineStartLocal + Unit * (T / Scale);
+	return true;
+}
+
 void UReferenceWidget::ArmMarker(const FString& Key)
 {
 	ArmedKey = (ArmedKey == Key) ? FString() : Key;
@@ -843,9 +1046,21 @@ void UReferenceWidget::OnResetPoints()
 	// file when it changes, so this is the state at the last SAVE).
 	if (!Entries.IsValidIndex(SelectedIndex)) { return; }
 	FReferenceEntry& E = Entries[SelectedIndex];
+	if (E.Category == TEXT("optics"))
+	{
+		// Optics are not ItemCatalog records; the weapon catalogue's read of the file has their points.
+		const WeaponCatalog::FOptic* O = WeaponCatalog::FindOptic(E.Key);
+		const FString MountText = O ? FString::Printf(TEXT("%.2f, %.2f, %.2f"), O->Mount.X, O->Mount.Y, O->Mount.Z) : FString();
+		const FString EyeText = O ? FString::Printf(TEXT("%.2f, %.2f, %.2f"), O->Eye.X, O->Eye.Y, O->Eye.Z) : FString();
+		E.Fields.Add(TEXT("mount"), MountText); E.Fields.Add(TEXT("eye"), EyeText);
+		if (TObjectPtr<UEditableTextBox>* Box = FieldBoxes.Find(TEXT("mount"))) { if (*Box) { (*Box)->SetText(FText::FromString(MountText)); } }
+		if (TObjectPtr<UEditableTextBox>* Box = FieldBoxes.Find(TEXT("eye"))) { if (*Box) { (*Box)->SetText(FText::FromString(EyeText)); } }
+		if (DetailNote) { DetailNote->SetText(FText::FromString(TEXT("POINTS RESET TO THE FILE"))); }
+		return;
+	}
 	const ItemCatalog::FRecord* R = ItemCatalog::FindRecordByKey(E.Key);
 	if (!R) { return; }
-	static const TCHAR* Keys[] = { TEXT("grip"), TEXT("sight"), TEXT("fore_grip"), TEXT("muzzle"), TEXT("optic_mount") };
+	static const TCHAR* Keys[] = { TEXT("grip"), TEXT("sight"), TEXT("fore_grip"), TEXT("muzzle"), TEXT("optic_mount"), TEXT("shoulder"), TEXT("attachments") };
 	for (const TCHAR* K : Keys)
 	{
 		const FString V = R->Fields.FindRef(K);
@@ -878,12 +1093,41 @@ void UReferenceWidget::ReadFieldsFromForm(FReferenceEntry& E) const
 {
 	for (const TPair<FString, TObjectPtr<UEditableTextBox>>& Pair : FieldBoxes) { if (Pair.Value) { E.Fields.Add(Pair.Key, Pair.Value->GetText().ToString().TrimStartAndEnd()); } }
 	for (const TPair<FString, bool>& Pair : FieldBoolValues) { E.Fields.Add(Pair.Key, Pair.Value ? TEXT("true") : TEXT("false")); }
+	for (const TPair<FString, FString>& Pair : FieldEnumValues) { E.Fields.Add(Pair.Key, Pair.Value); }
+}
+
+// The render is on screen only while the detail pane is: the feed image keeps its own Visible
+// flag inside a collapsed pane, and its cached rectangle stays where it last was, so painting
+// on the image's flag alone left a ghost of the frame over the list.
+bool UReferenceWidget::FeedShown() const
+{
+	return WeaponFeed && WeaponFeed->GetVisibility() == ESlateVisibility::Visible && DetailBox && DetailBox->GetVisibility() != ESlateVisibility::Collapsed;
+}
+
+FString UReferenceWidget::TitleOf(const FReferenceEntry& E)
+{
+	const FString Make = E.Fields.FindRef(TEXT("make")), Model = E.Fields.FindRef(TEXT("model"));
+	if (!Make.IsEmpty() && !Model.IsEmpty()) { return Make + TEXT("  ") + Model; }
+	return Model.IsEmpty() ? E.Name : Model;
+}
+
+bool UReferenceWidget::OpenEntryByName(const FString& Name)
+{
+	for (int32 i = 0; i < Entries.Num(); ++i)
+	{
+		if (Entries[i].Name != Name) { continue; }
+		SetCategory(Entries[i].Category);
+		SelectEntry(i);
+		return true;
+	}
+	return false;
 }
 
 void UReferenceWidget::OnCloseDetail()
 {
 	SelectedIndex = -1;
 	if (DetailBox) { DetailBox->SetVisibility(ESlateVisibility::Collapsed); }
+	if (WeaponFeed) { WeaponFeed->SetVisibility(ESlateVisibility::Hidden); }
 	if (OwnerController) { OwnerController->HideWeaponPreview(); }
 	FillList();
 }
@@ -899,7 +1143,7 @@ void UReferenceWidget::OnTab(int32 Tab) { if (OwnerController) { OwnerController
 
 FReply UReferenceWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
-	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton && WeaponFeed && WeaponFeed->GetVisibility() == ESlateVisibility::Visible && WeaponFeed->GetCachedGeometry().IsUnderLocation(InMouseEvent.GetScreenSpacePosition()))
+	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton && FeedShown() && WeaponFeed->GetCachedGeometry().IsUnderLocation(InMouseEvent.GetScreenSpacePosition()))
 	{
 		// On a dot: pick it up. The point moves in the plane through it that faces the camera,
 		// so a drag in the side view is a move in the weapon's X and Z, and the POINTS field
@@ -922,7 +1166,10 @@ FReply UReferenceWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, co
 			}
 		}
 		bDragging = true; DragLast = InMouseEvent.GetScreenSpacePosition(); DragTravel = 0.0f;
-		return FReply::Handled().CaptureMouse(TakeWidget());
+		DragAxis = -1;
+		if (DragMarker >= 0) { DragStartLocal = CurrentMarkers()[DragMarker].Local; DragAxis = AxisHeld(); }
+		// Focus comes with the drag, so a held X, Y or Z reaches this widget rather than a field.
+		return FReply::Handled().CaptureMouse(TakeWidget()).SetUserFocus(TakeWidget(), EFocusCause::Mouse);
 	}
 	return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 }
@@ -937,6 +1184,7 @@ FReply UReferenceWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry, cons
 		// A click rather than a drag: step between the fitted view and a closer one.
 		if (!bWasDot && DragTravel < 6.0f && OwnerController) { OwnerController->ToggleWeaponPreviewZoom(); }
 		if (bWasDot && DetailNote) { DetailNote->SetText(FText::FromString(TEXT("POINT MOVED -- SAVE to keep it"))); }
+		DragAxis = -1;
 		return FReply::Handled().ReleaseMouseCapture();
 	}
 	return Super::NativeOnMouseButtonUp(InGeometry, InMouseEvent);
@@ -958,7 +1206,13 @@ FReply UReferenceWidget::NativeOnMouseMove(const FGeometry& InGeometry, const FP
 				{
 					const FVector2D Local = WeaponFeed->GetCachedGeometry().AbsoluteToLocal(Now);
 					FVector NewLocal;
-					if (UnprojectToPlane(Local, Piece.TransformPosition(Marks[DragMarker].Local), NewLocal)) { SetPointField(Marks[DragMarker].Key, NewLocal); }
+					// The pin applies from where the drag BEGAN: press Z mid-drag and the point jumps back
+					// to the start plus only the vertical part of the movement so far; release it and the
+					// free drag resumes from the same start. Nothing re-anchors mid-drag.
+					DragAxis = AxisHeld();
+					const bool bOk = DragAxis >= 0 ? UnprojectToAxis(Local, DragStartLocal, DragAxis, NewLocal)
+					                               : UnprojectToPlane(Local, Piece.TransformPosition(DragStartLocal), NewLocal);
+					if (bOk) { SetPointField(Marks[DragMarker].Key, NewLocal); }
 				}
 			}
 			return FReply::Handled();
@@ -985,7 +1239,7 @@ int32 UReferenceWidget::NativePaint(const FPaintArgs& Args, const FGeometry& All
 	// The render's own rectangle, in this panel's space, so the raster is dialled down over it.
 	FBox2f Soft(ForceInit);
 	bool bHaveSoft = false;
-	if (WeaponFeed && WeaponFeed->GetVisibility() == ESlateVisibility::Visible)
+	if (FeedShown())
 	{
 		const FGeometry& G = WeaponFeed->GetCachedGeometry();
 		if (G.GetLocalSize().X > 1.0f)
@@ -999,7 +1253,7 @@ int32 UReferenceWidget::NativePaint(const FPaintArgs& Args, const FGeometry& All
 	Crt::PaintFrame(OutDrawElements, AllottedGeometry, FVector2f::ZeroVector, FVector2f(AllottedGeometry.GetLocalSize()), LayerId + 1, Clock, 1.0f, bHaveSoft ? &Soft : nullptr);
 	// The render keeps the panel's scanlines here: repainting it above the frame, the way the
 	// character sheet does its portrait, would bury the controls sitting on top of it.
-	if (WeaponFeed && WeaponFeed->GetVisibility() == ESlateVisibility::Visible)
+	if (FeedShown())
 	{
 		const FGeometry& FeedGeo = WeaponFeed->GetCachedGeometry();
 		const FVector2f Sz(FeedGeo.GetLocalSize());
@@ -1050,10 +1304,17 @@ void UReferenceWidget::FillMetaTable(const WeaponCatalog::FWeapon* W)
 {
 	if (!MetaLegend) { return; }
 	MetaLegend->ClearChildren();
-	if (!W) { MetaLegend->SetVisibility(ESlateVisibility::Collapsed); return; }
+	const bool bOpticEntry = Entries.IsValidIndex(SelectedIndex) && Entries[SelectedIndex].Category == TEXT("optics");
+	if (!W && !bOpticEntry) { MetaLegend->SetVisibility(ESlateVisibility::Collapsed); return; }
 	MetaLegend->SetVisibility(bShowMeta ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 	const FSheetSpec& S = FSheetSpec::Get();
 	LegendBindings.Reset();
+	// With a point armed: how to move it precisely. A plain drag rides the camera-facing plane;
+	// a held X, Y or Z pins it to that weapon axis.
+	if (!ArmedKey.IsEmpty())
+	{
+		MetaLegend->AddChildToVerticalBox(Crt::FixedText(WidgetTree, TEXT("DRAG THE POINT -- HOLD X, Y OR Z TO MOVE ALONG ONE AXIS"), S.RowSize, Crt::DimGreen))->SetPadding(FMargin(0, 6, 0, 2));
+	}
 	for (const FMarkerHit& M : CurrentMarkers())
 	{
 		// A row is a button: click it and a drag in the viewer moves THAT point. A point with
@@ -1085,6 +1346,28 @@ void UReferenceWidget::FillMetaTable(const WeaponCatalog::FWeapon* W)
 		}
 		else { MetaLegend->AddChildToVerticalBox(R)->SetPadding(FMargin(2, 1)); }
 	}
+	if (W)
+	{
+		// Accessory mounts come and go: one button adds a point under the fore-end, the other
+		// removes the armed one.
+		UHorizontalBox* AR = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+		auto AddBtn = [&](const TCHAR* Caption, const TCHAR* Key)
+		{
+			UButton* B = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
+			B->SetStyle(Crt::ButtonStyle());
+			UTextBlock* T = Crt::FixedText(WidgetTree, Caption, S.RowSize, Crt::Green);
+			B->AddChild(T);
+			if (UButtonSlot* BS = Cast<UButtonSlot>(T->Slot)) { BS->SetPadding(FMargin(4.0f, 1.0f)); }
+			UReferenceFieldBinding* NB = NewObject<UReferenceFieldBinding>(this);
+			NB->Widget = this; NB->Key = Key;
+			B->OnClicked.AddDynamic(NB, &UReferenceFieldBinding::OnToggle);
+			LegendBindings.Add(NB);
+			AR->AddChildToHorizontalBox(B)->SetPadding(FMargin(0, 0, 6, 0));
+		};
+		AddBtn(TEXT("[ + ATTACH ]"), TEXT("attach:add"));
+		if (ArmedKey.StartsWith(TEXT("attach:"))) { AddBtn(TEXT("[ - ATTACH ]"), TEXT("attach:del")); }
+		MetaLegend->AddChildToVerticalBox(AR)->SetPadding(FMargin(0, 6, 0, 2));
+	}
 }
 
 void UReferenceWidget::OnToggleMeta()
@@ -1111,6 +1394,20 @@ static bool ParseVector(const FString& Text, FVector& Out)
 	return true;
 }
 
+// "x, y, z; x, y, z" <-> points: the ATTACHMENTS field's form.
+static void ParseVectors(const FString& Text, TArray<FVector>& Out)
+{
+	Out.Reset();
+	TArray<FString> Parts; Text.ParseIntoArray(Parts, TEXT(";"), true);
+	for (const FString& P : Parts) { FVector V; if (ParseVector(P, V)) { Out.Add(V); } }
+}
+static FString VectorsText(const TArray<FVector>& In)
+{
+	TArray<FString> Parts;
+	for (const FVector& V : In) { Parts.Add(FString::Printf(TEXT("%.2f, %.2f, %.2f"), V.X, V.Y, V.Z)); }
+	return FString::Join(Parts, TEXT("; "));
+}
+
 // The dots as the page currently has them: the entry's POINTS fields (which a drag edits)
 // over the catalogue's numbers, so what is drawn is what SAVE will write.
 TArray<UReferenceWidget::FMarkerHit> UReferenceWidget::CurrentMarkers() const
@@ -1118,6 +1415,15 @@ TArray<UReferenceWidget::FMarkerHit> UReferenceWidget::CurrentMarkers() const
 	TArray<FMarkerHit> Out;
 	if (!Entries.IsValidIndex(SelectedIndex)) { return Out; }
 	const FReferenceEntry& E = Entries[SelectedIndex];
+	if (E.Category == TEXT("optics"))
+	{
+		// An optic alone: where it sits on a rail, and where the eye looks through it.
+		const WeaponCatalog::FOptic* O = WeaponCatalog::FindOptic(E.Key);
+		FVector V;
+		Out.Add({ TEXT("mount"), ParseVector(E.Fields.FindRef(TEXT("mount")), V) ? V : (O ? O->Mount : FVector::ZeroVector), FLinearColor(0.3f, 1.0f, 1.0f), TEXT("MOUNT (on the rail)") });
+		Out.Add({ TEXT("eye"), ParseVector(E.Fields.FindRef(TEXT("eye")), V) ? V : (O ? O->Eye : FVector::ZeroVector), FLinearColor(1.0f, 0.9f, 0.2f), TEXT("EYE (window centre)") });
+		return Out;
+	}
 	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(E.Name);
 	if (!W) { return Out; }
 	auto Point = [&](const TCHAR* Key, const FVector& Fallback) { FVector V; return ParseVector(E.Fields.FindRef(Key), V) ? V : Fallback; };
@@ -1128,7 +1434,7 @@ TArray<UReferenceWidget::FMarkerHit> UReferenceWidget::CurrentMarkers() const
 	{
 		const FVector Mount = Point(TEXT("optic_mount"), W->OpticMount);
 		Out.Add({ TEXT("optic_mount"), Mount, FLinearColor(0.3f, 1.0f, 1.0f), TEXT("OPTIC MOUNT") });
-		Out.Add({ TEXT(""), Mount + Optic->Eye, FLinearColor(1.0f, 0.9f, 0.2f), TEXT("AIM POINT (optic window)") });
+		Out.Add({ TEXT(""), Mount + Optic->Eye - Optic->Mount, FLinearColor(1.0f, 0.9f, 0.2f), TEXT("AIM POINT (optic window)") });
 	}
 	else
 	{
@@ -1137,6 +1443,12 @@ TArray<UReferenceWidget::FMarkerHit> UReferenceWidget::CurrentMarkers() const
 	}
 	const FVector Muzzle = Point(TEXT("muzzle"), W->Muzzle);
 	if (!Muzzle.IsNearlyZero()) { Out.Add({ TEXT("muzzle"), Muzzle, FLinearColor::White, TEXT("MUZZLE") }); }
+	const FVector Shoulder = Point(TEXT("shoulder"), W->Shoulder);
+	if (!Shoulder.IsNearlyZero()) { Out.Add({ TEXT("shoulder"), Shoulder, FLinearColor(1.0f, 0.4f, 1.0f), TEXT("SHOULDER") }); }
+	// Accessory mounts, as many as the weapon has: the field's text once edited, the file's list until then.
+	TArray<FVector> Att;
+	if (E.Fields.Contains(TEXT("attachments"))) { ParseVectors(E.Fields.FindRef(TEXT("attachments")), Att); } else { Att = W->Attachments; }
+	for (int32 i = 0; i < Att.Num(); ++i) { Out.Add({ FString::Printf(TEXT("attach:%d"), i), Att[i], FLinearColor(1.0f, 0.55f, 0.15f), FString::Printf(TEXT("ATTACH %d"), i + 1) }); }
 	return Out;
 }
 
@@ -1177,17 +1489,73 @@ bool UReferenceWidget::UnprojectToPlane(const FVector2D& FeedPx, const FVector& 
 void UReferenceWidget::SetPointField(const FString& Key, const FVector& Local)
 {
 	if (!Entries.IsValidIndex(SelectedIndex) || Key.IsEmpty()) { return; }
+	if (Key.StartsWith(TEXT("attach:")))
+	{
+		FReferenceEntry& E = Entries[SelectedIndex];
+		TArray<FVector> Att;
+		if (E.Fields.Contains(TEXT("attachments"))) { ParseVectors(E.Fields.FindRef(TEXT("attachments")), Att); }
+		else if (const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(E.Name)) { Att = W->Attachments; }
+		const int32 N = FCString::Atoi(*Key.Mid(7));
+		if (!Att.IsValidIndex(N)) { return; }
+		Att[N] = Local;
+		const FString Text = VectorsText(Att);
+		E.Fields.Add(TEXT("attachments"), Text);
+		if (TObjectPtr<UEditableTextBox>* Box = FieldBoxes.Find(TEXT("attachments"))) { if (*Box) { (*Box)->SetText(FText::FromString(Text)); } }
+		return;
+	}
 	const FString Text = FString::Printf(TEXT("%.2f, %.2f, %.2f"), Local.X, Local.Y, Local.Z);
 	Entries[SelectedIndex].Fields.Add(Key, Text);
 	if (TObjectPtr<UEditableTextBox>* Box = FieldBoxes.Find(Key)) { if (*Box) { (*Box)->SetText(FText::FromString(Text)); } }
 }
 
+void UReferenceWidget::AddAttachment()
+{
+	if (!Entries.IsValidIndex(SelectedIndex)) { return; }
+	FReferenceEntry& E = Entries[SelectedIndex];
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(E.Name);
+	if (!W) { return; }
+	TArray<FVector> Att;
+	if (E.Fields.Contains(TEXT("attachments"))) { ParseVectors(E.Fields.FindRef(TEXT("attachments")), Att); } else { Att = W->Attachments; }
+	// A first guess that is ON the weapon: under the fore-end, a light's usual place; short of
+	// the muzzle on a weapon without one. Each further point a little further along.
+	FVector V;
+	const FVector Fore = ParseVector(E.Fields.FindRef(TEXT("fore_grip")), V) ? V : W->ForeGrip;
+	const FVector Muzzle = ParseVector(E.Fields.FindRef(TEXT("muzzle")), V) ? V : W->Muzzle;
+	FVector P = W->bHasForeGrip ? FVector(Fore.X + 4.0, 0.0, Fore.Z - 3.0) : FVector(Muzzle.X - 12.0, 0.0, Muzzle.Z - 3.0);
+	P.X += 2.0 * Att.Num();
+	Att.Add(P);
+	const FString Text = VectorsText(Att);
+	E.Fields.Add(TEXT("attachments"), Text);
+	if (TObjectPtr<UEditableTextBox>* Box = FieldBoxes.Find(TEXT("attachments"))) { if (*Box) { (*Box)->SetText(FText::FromString(Text)); } }
+	ArmedKey = FString::Printf(TEXT("attach:%d"), Att.Num() - 1);
+	FillMetaTable(W);
+	if (DetailNote) { DetailNote->SetText(FText::FromString(TEXT("ATTACH POINT ADDED -- drag it into place, SAVE to keep it"))); }
+}
+
+void UReferenceWidget::RemoveArmedAttachment()
+{
+	if (!Entries.IsValidIndex(SelectedIndex) || !ArmedKey.StartsWith(TEXT("attach:"))) { return; }
+	FReferenceEntry& E = Entries[SelectedIndex];
+	TArray<FVector> Att;
+	if (E.Fields.Contains(TEXT("attachments"))) { ParseVectors(E.Fields.FindRef(TEXT("attachments")), Att); }
+	else if (const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(E.Name)) { Att = W->Attachments; }
+	const int32 N = FCString::Atoi(*ArmedKey.Mid(7));
+	if (!Att.IsValidIndex(N)) { return; }
+	Att.RemoveAt(N);
+	const FString Text = VectorsText(Att);
+	E.Fields.Add(TEXT("attachments"), Text);
+	if (TObjectPtr<UEditableTextBox>* Box = FieldBoxes.Find(TEXT("attachments"))) { if (*Box) { (*Box)->SetText(FText::FromString(Text)); } }
+	ArmedKey.Reset();
+	FillMetaTable(WeaponCatalog::Find(E.Name));
+	if (DetailNote) { DetailNote->SetText(FText::FromString(TEXT("ATTACH POINT REMOVED -- SAVE to keep it"))); }
+}
+
 void UReferenceWidget::PaintMarkers(FSlateWindowElementList& OutDrawElements, int32 Layer) const
 {
-	if (!bShowMeta || !WeaponFeed || WeaponFeed->GetVisibility() != ESlateVisibility::Visible || !OwnerController || !Entries.IsValidIndex(SelectedIndex)) { return; }
+	if (!bShowMeta || !FeedShown() || !OwnerController || !Entries.IsValidIndex(SelectedIndex)) { return; }
 	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(Entries[SelectedIndex].Name);
 	FTransform Camera, Piece; float Fov = 34.0f;
-	if (!W || !OwnerController->GetWeaponPreviewFrame(Camera, Fov, Piece)) { return; }
+	if ((!W && Entries[SelectedIndex].Category != TEXT("optics")) || !OwnerController->GetWeaponPreviewFrame(Camera, Fov, Piece)) { return; }
 	const FGeometry& FeedGeo = WeaponFeed->GetCachedGeometry();
 	const FVector2f Sz(FeedGeo.GetLocalSize());
 	if (Sz.X <= 1.0f || Sz.Y <= 1.0f) { return; }

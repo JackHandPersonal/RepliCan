@@ -21,6 +21,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "ConversationData.h"
+#include "WeaponCatalog.h"
 #include "BasePlayerController.generated.h"
 
 class ABaseCharacter;
@@ -104,6 +105,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Inspect") int32 GetInspectSelection() const { return InspectSelection; }
 	UFUNCTION(BlueprintPure, Category = "Inspect") TArray<FString> GetInspectActions() const { return InspectActions; }
 	UFUNCTION(BlueprintCallable, Category = "Inspect") void InspectSelectNext(int32 Delta);
+	UFUNCTION(BlueprintCallable, Category = "Inspect") void InspectSelectIndex(int32 Index);   // the digit keys: row N
+	int32 InspectActionCount() const { return InspectActions.Num(); }
+	bool IsInspectMenuFlavour() const { return bInspectMenuFlavour; }   // a name tag with no rows: the keys are not its
 	UFUNCTION(BlueprintCallable, Category = "Inspect") void InspectUseSelected();
 	// Floating text over an actor for Seconds (a character's line, or an
 	// action's note). Speech is shown in quotes/italics.
@@ -114,6 +118,22 @@ public:
 	// Equipped gear, one string per ItemCatalog::GearSlots entry (empty = nothing there).
 	UPROPERTY(BlueprintReadOnly, Category = "Inspect") TArray<FString> Equipped;
 	UFUNCTION(BlueprintCallable, Category = "Inspect") bool EquipFromInventory(int32 InventoryIndex);
+	// The bag keeps its squares: an item taken out leaves an empty square behind, a new one takes
+	// the first empty square. These are what the sheet's drag and drop calls.
+	UFUNCTION(BlueprintCallable, Category = "Inspect") bool AddToInventory(const FString& Name);
+	// DROPPING. A square's item goes out into the world in front of the character, as if let go:
+	// the actor Take hid if there is one (its tags and paint intact), else a fresh prop from the
+	// catalogue's mesh, tagged so it can be taken again. Tossed if its mesh can simulate, set on
+	// the floor if it cannot.
+	UFUNCTION(BlueprintCallable, Category = "Inspect") bool DropInventory(int32 InventoryIndex);
+	UFUNCTION(BlueprintCallable, Category = "Inspect") bool DropGear(int32 Slot);
+	AActor* DropToWorld(const FString& Name);
+	UFUNCTION(BlueprintPure, Category = "Inspect") int32 InventoryFree() const;
+	UFUNCTION(BlueprintCallable, Category = "Inspect") bool MoveInventory(int32 From, int32 To);                       // swap two bag squares
+	UFUNCTION(BlueprintCallable, Category = "Inspect") bool EquipFromInventoryToSlot(int32 InventoryIndex, int32 Slot);  // into a named slot; what was there takes the bag square
+	UFUNCTION(BlueprintCallable, Category = "Inspect") bool UnequipToInventory(int32 Slot, int32 InventoryIndex);       // into a bag square; a filled square swaps if its item fits the slot
+	UFUNCTION(BlueprintCallable, Category = "Inspect") bool SwapGear(int32 A, int32 B);                                 // two gear slots, each item fitting the other's slot
+	UFUNCTION(BlueprintPure, Category = "Inspect") bool KindFitsSlot(const FString& Item, int32 Slot) const;
 	// Drops the cached UI widgets so the next open rebuilds them (after a Live Coding patch or a spec edit).
 	UFUNCTION(Exec, BlueprintCallable, Category = "Debug") void ReloadUI();
 	// Every widget on the open console page that wants more room than it was given, or that
@@ -143,6 +163,12 @@ public:
 	// The hover highlight and inspect menu are off until the story hands them over (Hannah's call in the cabin).
 	UFUNCTION(BlueprintCallable, Category = "Inspect") void SetInspectEnabled(bool bEnabled) { bInspectEnabled = bEnabled; }
 	UFUNCTION(BlueprintPure, Category = "Inspect") bool IsInspectEnabled() const { return bInspectEnabled; }
+	// SCAN: held, every interactable in view with a real action shows its outline, for finding
+	// things without the world lighting up on its own.
+	UFUNCTION(BlueprintCallable, Category = "Inspect") void SetScanHeld(bool bHeld);
+	UFUNCTION(BlueprintPure, Category = "Inspect") bool IsScanHeld() const { return bScanHeld; }
+	// Flavour: an interactable with nothing but Inspect to offer. No outline; a quiet name tag after a dwell.
+	bool IsFlavourInteractable(AActor* Target);
 	UFUNCTION(BlueprintCallable, Category = "Inspect") void ExecuteInspectActionOn(AActor* Target, const FString& Action) { ExecuteInspectAction(Target, Action); }
 
 	// ---- Conversations ------------------------------------------------------
@@ -159,6 +185,18 @@ public:
 	// from the angle their config gives, in a square left of the panel.
 	UFUNCTION(BlueprintCallable, Category = "Conversation") void ShowRemoteView(ABaseCharacter* Who, bool bWithSquare = true);
 	UFUNCTION(BlueprintCallable, Category = "Conversation") void HideRemoteView();
+	// TERMINALS. Use on a monitor prop whose mesh UI/Screens.json knows: the character sits at the
+	// seat beside it (or squares up to it), the camera goes to a spot looking straight at the
+	// screen, and the console page is laid over the screen's projection so the text reads as the
+	// monitor's own. Esc, or "exit", puts it all back.
+	UFUNCTION(BlueprintCallable, Category = "Terminal") void OpenTerminal(AActor* Target);
+	UFUNCTION(BlueprintCallable, Category = "Terminal") void CloseTerminal();
+	UFUNCTION(BlueprintPure, Category = "Terminal") bool IsTerminalOpen() const { return bTerminalOpen; }
+	bool IsTerminal(const AActor* Target) const;
+	bool ScreenQuadFor(const AActor* Target, FVector& OutCentre, FVector& OutNormal, FVector& OutRight, FVector& OutUp, float& OutW, float& OutH) const;
+	void PlaceTerminalCamera();   // from the seated eye, once the sit has settled
+	class UWidgetInteractionComponent* GetTerminalPointer() const { return TerminalPointer; }
+	void SitOnTagged(class ABaseCharacter* Me, AActor* Seat);
 	UFUNCTION(BlueprintPure, Category = "Conversation") bool IsRemoteViewOpen() const { return RemoteSubject.IsValid(); }
 	void UpdateRemoteView();
 	// Side of the square feed's render target; set before the first remote
@@ -259,8 +297,20 @@ public:
 	// Slot 1 is the primary and Slot 2 the sidearm; whichever is filled goes into the hand,
 	// primary first. Called whenever the equipment changes.
 	UFUNCTION(BlueprintCallable, Category = "Weapon") void RefreshHeldWeapon();
+	// Steps the named weapon to its next texture variant (WeaponSkins), writes it to the catalogue and re-dresses the one in hand.
+	UFUNCTION(BlueprintCallable, Category = "Weapon") void CycleWeaponSkin(const FString& ItemName);
 	// Swaps which of the two filled slots is being carried.
 	UFUNCTION(Exec, BlueprintCallable, Category = "Weapon") void SwapWeaponSlot(int32 Direction = 1);
+	// Draws the weapon in the Nth weapon slot (1-based, the sheet's "Slot 1", "Slot 2" ...); the keys 1 and 2 for now.
+	UFUNCTION(Exec, BlueprintCallable, Category = "Weapon") void EquipWeaponSlot(int32 Ordinal);
+	// A change of weapon takes a moment: a short beat, then the new one appears in the hand as its
+	// stance's draw clip (MM_<Stance>_Equip) plays, hidden for the clip's first third so it comes
+	// up out of nowhere rather than snapping into a hand that is still reaching.
+	void BeginWeaponSwap(int32 NewSlot);
+	void TickPendingSwap(float DeltaSeconds);
+	int32 PendingSwapSlot = -1;
+	float PendingSwapLeft = 0.0f;
+	float PendingShowLeft = 0.0f;
 	// Fires whatever is in the hand: hitscan down the camera's own line, since that is what the
 	// reticle promises. Ignored for a melee weapon or an empty hand.
 	UFUNCTION(Exec, BlueprintCallable, Category = "Weapon") void FireHeldWeapon();
@@ -355,6 +405,9 @@ public:
 	// bug that only shows up as "I shot my own foot in the inventory", so the trigger asks this
 	// one question rather than each caller remembering the current list of panels.
 	UFUNCTION(BlueprintPure, Category = "Menu") bool IsAnyScreenOpen() const;
+	// A page covering the world (a menu, the Reference, the sheet, a transfer, a cinematic, a conversation): the aim mark has nothing to mark. The inspect menu beside the reticle is not one.
+	UFUNCTION(BlueprintPure, Category = "Menu") bool IsPageOpen() const;
+	void DismissInspectMenu() { HideInspectMenu(); }   // for the input processor: aiming closes the reticle menu
 
 	// Clears free look if the key-up was lost (alt-tab) or a screen opened while it was held.
 	void TickFreelookSafety();
@@ -365,10 +418,53 @@ public:
 	// THE SELECTOR. Middle mouse cycles the weapon's fire_modes; the trigger is HELD from the
 	// press to the release, and in auto the held trigger fires again every 1/fire_rate seconds.
 	UFUNCTION(Exec, BlueprintCallable, Category = "Weapon") void CycleFireMode();
+	UFUNCTION(Exec, Category = "Weapon") void AimSens(float Scale);   // the ADS mouse scale, 0.05..1
+	UFUNCTION(Exec, Category = "Weapon") void AimSway(float Scale);   // the aim sway scale: 0 none, 1 as tuned
+	// VITALITY. The worn armour at a body slot ("Head", "Chest", "Arms", "Hands", "Legs", "Feet"):
+	// the catalogue armor_value of what sits in that gear slot. And the test commands: Sever takes
+	// a region off whoever is under the reticle (Head ArmL ArmR LegL LegR), Kill drops them,
+	// Revive puts the player's own body back together.
+	float ArmourValueFor(const FString& BodySlot) const;
+	UFUNCTION(Exec, Category = "Vitality") void Sever(const FString& Region);
+	UFUNCTION(Exec, Category = "Vitality") void Kill();
+	UFUNCTION(Exec, Category = "Vitality") void Revive();
+	AActor* PersonUnderReticle(FVector& OutDir) const;
+	UFUNCTION(Exec, Category = "Weapon") void ZeroRange(float Cm);     // 0: bore parallel to the sight line; else converge at that range
+	UFUNCTION(Exec, Category = "Weapon") void RecoilTune(float RecoverSeconds, float RecoverFraction);   // how long the kick takes to come back, and how much of it does
+	UFUNCTION(Exec, Category = "Weapon") void SwayRate(float StridesPerSecond);   // the run sway's stride rate
 	void SetTriggerHeld(bool bHeld);
 	void TickAutoFire(float DeltaSeconds);
-	FString CurrentFireMode() const;
-	FString FireMode;              // what the selector is on; "" = the weapon's first mode
+	WeaponCatalog::EFireMode CurrentFireMode() const;
+	WeaponCatalog::EFireMode FireMode = WeaponCatalog::EFireMode::Semi;   // what the selector is on; a weapon without that position falls to its first
+	int32 BurstLeft = 0;           // rounds still owed by the last pull in burst
+	// LASER: a beam from the muzzle down the aim for as long as the trigger is held. Its damage
+	// is done over time -- sparks and scorching where it rests, a flinch from a person under it --
+	// rather than per shot.
+	void TickLaser(float DeltaSeconds);
+	// MELEE. Fire on a blade or a hammer is a swing: a clip from the weapon's attack set on the
+	// arm override, a hit window part-way through it during which the edge (grip to tip) is swept
+	// through the world each tick, and every actor it crosses takes the weapon's damage once. A
+	// press inside the recovery window chains the next combo step (A, B, C); mid-swing it is kept.
+	void MeleeSwing();
+	void StartMeleeStep(class ABaseCharacter* Me, const WeaponCatalog::FWeapon* W);
+	void TickMelee(float DeltaSeconds);
+	int32 MeleeComboStep = 0;
+	float MeleeComboUntil = 0.0f;
+	float MeleeSwingClock = -1.0f, MeleeSwingLength = 0.0f;
+	bool bMeleeQueued = false;
+	TSet<TWeakObjectPtr<AActor>> MeleeHitThisSwing;
+	TSet<TWeakObjectPtr<AActor>> MeleeCleaved;   // took a limb off: the edge may meet them once more (arm, then body)
+	// THE BUDGET. A swing carries the weapon's damage; a kill or a limb destroyed costs what it
+	// took and the rest carries on to the next thing in the arc; anything less, a wall, or a blunt
+	// weapon spends it all and the swing STOPS: a beat of frozen time and the arm eases back.
+	float MeleeBudget = 0.0f;
+	void MeleeStop(class ABaseCharacter* Me, bool bHeavy);
+	FTimerHandle MeleeStopTimer;
+	TArray<FVector> MeleeLastEdge;
+	void StopLaser();
+	UPROPERTY() TObjectPtr<class UStaticMeshComponent> LaserBeam;
+	bool bLaserOn = false;
+	float LaserFxClock = 0.0f, LaserReactClock = 0.0f;
 	bool bTriggerHeld = false;
 	float AutoFireClock = 0.0f;
 	// The player's own shot in first person, and the impacts it makes: the report should be the
@@ -381,6 +477,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Weapon|Sound") float ShotDuckSeconds = 1.1f;
 	// The Reference screen (the item catalogue), reached from the menu; closing returns to the menu.
 	UFUNCTION(BlueprintCallable, Category = "Menu") void ShowReference();
+	UFUNCTION(BlueprintCallable, Category = "Menu") void ShowReferenceFor(const FString& ItemName);   // the Reference open at that item's card
 	UFUNCTION(BlueprintCallable, Category = "Menu") void HideReference();
 	UFUNCTION(BlueprintPure, Category = "Menu") bool IsReferenceOpen() const { return bReferenceOpen; }
 	// The console pages share a tab strip: 0 the unit's sheet, 1 Reference, 2 Appearance. Closes whatever is open, opens the target.
@@ -399,6 +496,16 @@ public:
 	UPROPERTY() TObjectPtr<class UScenesWidget> ScenesWidget;
 	bool bScenesOpen = false;
 	bool bSettingsOpen = false;
+	bool bTerminalOpen = false;
+	bool bTerminalSeated = false;
+	UPROPERTY() TObjectPtr<class UTerminalWidget> TerminalWidget;
+	UPROPERTY() TObjectPtr<class ACameraActor> TerminalCamera;
+	// The console drawn ON the monitor: a world-space widget component sized to the screen quad,
+	// and the pointer that carries the mouse and keyboard to it.
+	UPROPERTY() TObjectPtr<class UWidgetComponent> TerminalScreen;
+	UPROPERTY() TObjectPtr<class UWidgetInteractionComponent> TerminalPointer;
+	TWeakObjectPtr<AActor> TerminalTarget;
+	FTimerHandle TerminalPlaceTimer;
 
 	UFUNCTION(BlueprintCallable, Category = "Menu") void ShowConsolePage(int32 Tab);
 	// Where a console page sits: the screen less the spec's margins, never smaller than the
@@ -426,7 +533,7 @@ public:
 	void PlaceAtEditorCamera();
 	// The weapon booth behind the Reference's detail column: one static mesh far from the level,
 	// lit like the icon shots, captured every frame (ticks while paused). Drag turns it, FIRE kicks it.
-	UFUNCTION(BlueprintCallable, Category = "Reference") void ShowWeaponPreview(const FString& MeshPath);
+	UFUNCTION(BlueprintCallable, Category = "Reference") void ShowWeaponPreview(const FString& MeshPath, const FString& WeaponName = FString());   // the weapon's name, when it is one, puts its skin on the piece
 	UFUNCTION(BlueprintCallable, Category = "Reference") void HideWeaponPreview();
 	UFUNCTION(BlueprintCallable, Category = "Reference") void OrbitWeaponPreview(float DeltaYaw, float DeltaPitch);
 	UFUNCTION(BlueprintCallable, Category = "Reference") void FireWeaponPreview(const FString& SoundFile);
@@ -535,6 +642,18 @@ private:
 	void SetInspectHighlight(AActor* Target, bool bOn);
 	void EnsureInspectOutlineVolume();
 	TWeakObjectPtr<AActor> InspectTarget;
+	// The thing under the reticle waits out a dwell before it becomes the target: a short one
+	// for something with a real action, a longer one for flavour, so a sweep lights nothing.
+	TWeakObjectPtr<AActor> InspectCandidate;
+	float InspectCandidateSince = 0.0f;
+	bool bCandidateFlavour = false;
+	UPROPERTY(EditAnywhere, Category = "Inspect") float InspectDwellSeconds = 0.12f;
+	UPROPERTY(EditAnywhere, Category = "Inspect") float InspectDwellFlavourSeconds = 0.4f;
+	UPROPERTY(EditAnywhere, Category = "Inspect") float ScanRange = 900.0f;
+	bool bScanHeld = false;
+	float ScanNextRefresh = 0.0f;
+	TArray<TWeakObjectPtr<AActor>> ScanLit;
+	void TickScan(float Now);
 	UPROPERTY() TObjectPtr<class APostProcessVolume> InspectOutlineVolume;
 	bool FindDropPointUnderCursor(FVector& OutFloorPoint, bool& bOutHit) const;
 	ABaseCharacter* SpawnManagedCharacter(const FVector& FloorPoint);
@@ -615,6 +734,7 @@ private:
 	UPROPERTY() TObjectPtr<class UInspectMenuWidget> InspectMenuWidget;
 	UPROPERTY() TObjectPtr<class UCalloutWidget> CalloutWidget;
 	TArray<FString> InspectActions;
+	bool bInspectMenuFlavour = false;
 	int32 InspectSelection = 0;
 	// How long the current inspect target survives the reticle slipping off it (see UpdateInspectTarget).
 	UPROPERTY(EditAnywhere, Category = "Inspect") float InspectGraceSeconds = 0.35f;
@@ -633,6 +753,23 @@ private:
 	void UpdateCallout();
 	void OnInspectWheel(float Value);
 	void OnInspectUse();
+	void OnInspectUseReleased();
+	// CARRYING. E held on a takeable prop lifts it into the off hand and moves it with the view:
+	// let go to set it down where it is, tap E while carrying to put it in the bag instead. A tap
+	// on E stays the reticle action; only a hold on something that can be carried starts this.
+	bool CanCarry(AActor* Target) const;
+	void BeginCarry(AActor* Target);
+	void DropCarried();
+	void StoreCarried();
+	void TickCarry(float DeltaSeconds);
+	UFUNCTION(BlueprintPure, Category = "Inspect") bool IsCarrying() const { return Carried.IsValid(); }
+	TWeakObjectPtr<AActor> Carried;
+	TWeakObjectPtr<class UPrimitiveComponent> CarriedComp;
+	TWeakObjectPtr<AActor> HoldCandidate;
+	bool bInspectUseHeld = false, bCarryBegunThisHold = false;
+	float InspectUseHeldSince = 0.0f;
+	float CarryDistance = 60.0f, CarriedRadius = 15.0f;
+	UPROPERTY(EditAnywhere, Category = "Inspect") float CarryHoldSeconds = 0.3f;   // E held this long on a takeable thing picks it up rather than acting
 	void ExecuteInspectAction(AActor* Target, const FString& Action);
 	bool ToggleTaggedLights(AActor* Target, const FString& Action);
 	// What the menu shows for an actor: friendly name, description, actions.

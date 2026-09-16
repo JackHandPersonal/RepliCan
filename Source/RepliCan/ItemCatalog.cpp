@@ -87,6 +87,22 @@ FString ItemCatalog::FieldToString(const TSharedPtr<FJsonValue>& Value, const It
 	{
 	case ItemFields::EType::Bool: { bool B = false; return Value->TryGetBool(B) ? (B ? TEXT("true") : TEXT("false")) : Value->AsString(); }
 	case ItemFields::EType::Number: { double D = 0.0; return Value->TryGetNumber(D) ? NumberText(D) : Value->AsString(); }
+	case ItemFields::EType::Points:
+	{
+		// [[x, y, z], ...] -> "x, y, z; x, y, z"
+		const TArray<TSharedPtr<FJsonValue>>* Arr = nullptr;
+		if (!Value->TryGetArray(Arr) || !Arr) { return Value->AsString(); }
+		TArray<FString> Points;
+		for (const TSharedPtr<FJsonValue>& P : *Arr)
+		{
+			const TArray<TSharedPtr<FJsonValue>>* XYZ = nullptr;
+			if (!P->TryGetArray(XYZ) || !XYZ) { continue; }
+			TArray<FString> Parts;
+			for (const TSharedPtr<FJsonValue>& V : *XYZ) { double D; Parts.Add(V->TryGetNumber(D) ? NumberText(D) : V->AsString()); }
+			Points.Add(FString::Join(Parts, TEXT(", ")));
+		}
+		return FString::Join(Points, TEXT("; "));
+	}
 	case ItemFields::EType::List:
 	case ItemFields::EType::Measured:
 	{
@@ -112,6 +128,21 @@ void ItemCatalog::StringToField(const TSharedPtr<FJsonObject>& Entry, const Item
 	case ItemFields::EType::Measured: return;   // regenerated from the mesh, never typed
 	case ItemFields::EType::Bool: Entry->SetBoolField(Field.Key, T.Equals(TEXT("true"), ESearchCase::IgnoreCase) || T == TEXT("1") || T.Equals(TEXT("yes"), ESearchCase::IgnoreCase)); return;
 	case ItemFields::EType::Number: Entry->SetNumberField(Field.Key, T.IsEmpty() ? 0.0 : FCString::Atod(*T)); return;
+	case ItemFields::EType::Points:
+	{
+		// "x, y, z; x, y, z" -> [[x, y, z], ...]; a triple short of three numbers is dropped
+		TArray<FString> Points; T.ParseIntoArray(Points, TEXT(";"), true);
+		TArray<TSharedPtr<FJsonValue>> Arr;
+		for (const FString& P : Points)
+		{
+			TArray<FString> Parts; P.ParseIntoArray(Parts, TEXT(","), true);
+			if (Parts.Num() < 3) { continue; }
+			TArray<TSharedPtr<FJsonValue>> XYZ;
+			for (int32 i = 0; i < 3; ++i) { XYZ.Add(MakeShared<FJsonValueNumber>(FCString::Atod(*Parts[i].TrimStartAndEnd()))); }
+			Arr.Add(MakeShared<FJsonValueArray>(XYZ));
+		}
+		Entry->SetArrayField(Field.Key, Arr); return;
+	}
 	case ItemFields::EType::List:
 	{
 		TArray<FString> Parts; T.ParseIntoArray(Parts, TEXT(","), true);

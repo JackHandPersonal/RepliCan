@@ -4,13 +4,22 @@
 #include "CrtRuleWidget.h"
 #include "CrtTabsWidget.h"
 #include "ItemCatalog.h"
+#include "WeaponCatalog.h"
+#include "WeaponSkins.h"
+#include "Components/ButtonSlot.h"
 #include "SheetSpec.h"
 #include "BaseCharacter.h"
 #include "BasePlayerController.h"
 #include "CrtStyle.h"
+#include "ContextMenuWidget.h"
 #include "Blueprint/WidgetTree.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/Border.h"
+#include "Components/CanvasPanel.h"
+#include "Components/CanvasPanelSlot.h"
+#include "Components/Overlay.h"
+#include "Components/OverlaySlot.h"
+#include "Blueprint/SlateBlueprintLibrary.h"
 #include "Components/Button.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
@@ -30,7 +39,17 @@ void UCharacterSheetWidget::NativeOnInitialized()
 	Root->SetPadding(FMargin(34.0f, 26.0f));
 	WidgetTree->RootWidget = Root;
 	Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("Column"));
-	Root->SetContent(Column);
+	// The column under a canvas that carries the drag picture; the canvas never takes the mouse.
+	UOverlay* Over = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("SheetOverlay"));
+	Root->SetContent(Over);
+	if (UOverlaySlot* CS = Over->AddChildToOverlay(Column)) { CS->SetHorizontalAlignment(HAlign_Fill); CS->SetVerticalAlignment(VAlign_Fill); }
+	DragLayer = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("DragLayer"));
+	DragLayer->SetVisibility(ESlateVisibility::HitTestInvisible);
+	if (UOverlaySlot* DS = Over->AddChildToOverlay(DragLayer)) { DS->SetHorizontalAlignment(HAlign_Fill); DS->SetVerticalAlignment(VAlign_Fill); }
+	DragImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("DragImage"));
+	DragImage->SetVisibility(ESlateVisibility::Collapsed);
+	DragImage->SetRenderOpacity(0.85f);
+	DragLayer->AddChild(DragImage);
 	Rebuild();
 }
 
@@ -41,6 +60,67 @@ UVerticalBoxSlot* UCharacterSheetWidget::AddRow(UVerticalBox* Box, const FString
 	return Box->AddChildToVerticalBox(Crt::FixedText(WidgetTree, Text, Size, Color));
 }
 
+// Which sections are folded, by the name between the caption's brackets; kept for the session.
+static TSet<FString> GSheetFolded;
+static FString SectionKeyOf(const FString& Caption)
+{
+	const int32 A = Caption.Find(TEXT("[")), B = Caption.Find(TEXT("]"));
+	return (A != INDEX_NONE && B != INDEX_NONE && B > A) ? Caption.Mid(A + 1, B - A - 1).TrimStartAndEnd() : Caption;
+}
+static FString FoldCaption(const FString& Caption, bool bOpen)
+{
+	const int32 A = Caption.Find(TEXT("[")), B = Caption.Find(TEXT("]"));
+	if (A == INDEX_NONE || B == INDEX_NONE || B < A) { return Caption; }
+	const FString Inner = Caption.Mid(A, B - A + 1);
+	return bOpen ? TEXT("--") + Inner + TEXT("-") : TEXT("==") + Inner + TEXT("=");
+}
+
+void UCharacterSheetSectionBinding::OnClicked() { if (Sheet) { Sheet->ToggleSection(Key); } }
+
+UVerticalBox* UCharacterSheetWidget::BeginSection(UVerticalBox* Into, const FString& Caption, const FMargin& Pad, UWidget* HeaderRight)
+{
+	const FSheetSpec& S = FSheetSpec::Get();
+	const FString Key = SectionKeyOf(Caption);
+	const bool bOpen = !GSheetFolded.Contains(Key);
+	UButton* B = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
+	B->SetStyle(Crt::ButtonStyle());
+	B->SetContent(UCrtRuleWidget::Make(GetOwningPlayer(), FoldCaption(Caption, bOpen), S.CaptionSize, Crt::DimGreen));
+	if (UButtonSlot* BS = Cast<UButtonSlot>(B->GetContent()->Slot)) { BS->SetPadding(FMargin(0.0f)); BS->SetHorizontalAlignment(HAlign_Fill); }
+	UCharacterSheetSectionBinding* Binding = NewObject<UCharacterSheetSectionBinding>(this);
+	Binding->Sheet = this; Binding->Key = Key;
+	B->OnClicked.AddDynamic(Binding, &UCharacterSheetSectionBinding::OnClicked);
+	SectionBindings.Add(Binding);
+	UWidget* Header = B;
+	if (HeaderRight)
+	{
+		UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+		UHorizontalBoxSlot* HS = Row->AddChildToHorizontalBox(B); HS->SetSize(ESlateSizeRule::Fill); HS->SetVerticalAlignment(VAlign_Center);
+		Row->AddChildToHorizontalBox(HeaderRight)->SetPadding(FMargin(10, 0, 0, 0));
+		Header = Row;
+	}
+	Into->AddChildToVerticalBox(Header)->SetPadding(Pad);
+	UVerticalBox* BodyBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
+	BodyBox->SetVisibility(bOpen ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+	Into->AddChildToVerticalBox(BodyBox);
+	SectionBodies.Add(Key, BodyBox); SectionButtons.Add(Key, B); SectionCaptions.Add(Key, Caption);
+	return BodyBox;
+}
+
+void UCharacterSheetWidget::ToggleSection(const FString& Key)
+{
+	if (GSheetFolded.Contains(Key)) { GSheetFolded.Remove(Key); } else { GSheetFolded.Add(Key); }
+	const bool bOpen = !GSheetFolded.Contains(Key);
+	if (TObjectPtr<UWidget>* Found = SectionBodies.Find(Key)) { if (*Found) { (*Found)->SetVisibility(bOpen ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed); } }
+	if (TObjectPtr<UButton>* B = SectionButtons.Find(Key))
+	{
+		if (*B)
+		{
+			(*B)->SetContent(UCrtRuleWidget::Make(GetOwningPlayer(), FoldCaption(SectionCaptions.FindRef(Key), bOpen), FSheetSpec::Get().CaptionSize, Crt::DimGreen));
+			if (UButtonSlot* BS = Cast<UButtonSlot>((*B)->GetContent()->Slot)) { BS->SetPadding(FMargin(0.0f)); BS->SetHorizontalAlignment(HAlign_Fill); }
+		}
+	}
+}
+
 void UCharacterSheetWidget::Rebuild()
 {
 	if (!Column) { return; }
@@ -48,6 +128,7 @@ void UCharacterSheetWidget::Rebuild()
 	FaceClickFraction = S.FaceClickFraction;
 	RuleChars = S.RuleChars.IsEmpty() ? TEXT("-=") : S.RuleChars;
 	Column->ClearChildren();
+	SectionBodies.Reset(); SectionButtons.Reset(); SectionCaptions.Reset(); SectionBindings.Reset();
 	// Hidden while it settles. Two ticks was not enough: the fixed-width font is built at
 	// runtime and its glyphs measure in over the first few frames, which read as the text
 	// typing itself in and the columns sliding right to make room. The widths below no longer
@@ -82,12 +163,11 @@ void UCharacterSheetWidget::Rebuild()
 	for (int32 SectionIndex = 0; SectionIndex < S.StatSections.Num(); ++SectionIndex)
 	{
 		const FSheetStatSection& Section = S.StatSections[SectionIndex];
-		UVerticalBoxSlot* CaptionSlot = AddRow(Stats, Section.Caption, S.CaptionSize, Crt::DimGreen);
 		// Space above each caption but the first, so the blocks read as separate without a rule.
-		CaptionSlot->SetPadding(FMargin(0, SectionIndex == 0 ? 0.0f : 14.0f, 0, 8));
+		UVerticalBox* SectionBody = BeginSection(Stats, Section.Caption, FMargin(0, SectionIndex == 0 ? 0.0f : 14.0f, 0, 8));
 		for (const FString& Row : Section.Rows)
 		{
-			UVerticalBoxSlot* RowSlot = AddRow(Stats, Row, S.RowSize, Crt::DimGreen);
+			UVerticalBoxSlot* RowSlot = AddRow(SectionBody, Row, S.RowSize, Crt::DimGreen);
 			RowSlot->SetPadding(FMargin(0, 1));
 			// A row with a token keeps its template so Refresh can fill the number in.
 			if (Row.Contains(TEXT("{"))) { if (UTextBlock* T = Cast<UTextBlock>(RowSlot->Content)) { StatRowTexts.Add(T); StatRowTemplates.Add(Row); } }
@@ -111,7 +191,7 @@ void UCharacterSheetWidget::Rebuild()
 	Divide();
 
 	UVerticalBox* Middle = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-	if (!S.MirrorCaption.IsEmpty()) { AddRow(Middle, S.MirrorCaption, S.CaptionSize, Crt::DimGreen)->SetPadding(FMargin(0, 0, 0, 8)); }
+	UVerticalBox* MirrorBody = S.MirrorCaption.IsEmpty() ? Middle : BeginSection(Middle, S.MirrorCaption, FMargin(0, 0, 0, 8));
 	// A box held to the portrait's 5:8 aspect: it lays out in one pass, where a scale box needs a
 	// frame to find its size and the columns visibly shift while it does.
 	USizeBox* Fit = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
@@ -120,12 +200,12 @@ void UCharacterSheetWidget::Rebuild()
 	Feed = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass());
 	Feed->SetColorAndOpacity(FLinearColor::White);
 	Fit->AddChild(Feed);
-	UVerticalBoxSlot* FitSlot = Middle->AddChildToVerticalBox(Fit);
+	UVerticalBoxSlot* FitSlot = MirrorBody->AddChildToVerticalBox(Fit);
 	// At the TOP of the column, its own height (5:8 of the mirror's width, set with the width in
 	// NativeTick): a fill slot stretched the box to the column and centred the picture in it.
 	FitSlot->SetSize(ESlateSizeRule::Automatic); FitSlot->SetHorizontalAlignment(HAlign_Fill); FitSlot->SetVerticalAlignment(VAlign_Top);
 	Fit->SetHeightOverride(FMath::Floor(MirrorWidth / 0.625f));
-	if (!S.MirrorFooter.IsEmpty()) { AddRow(Middle, S.MirrorFooter, S.CaptionSize, Crt::DimGreen)->SetPadding(FMargin(0, 8, 0, 0)); }
+	if (!S.MirrorFooter.IsEmpty()) { AddRow(MirrorBody, S.MirrorFooter, S.CaptionSize, Crt::DimGreen)->SetPadding(FMargin(0, 8, 0, 0)); }
 	// A fixed width, so nothing about this column depends on the rest of the page settling. The
 	// first guess is from the viewport; NativeTick replaces it with the body's real width.
 	MirrorBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
@@ -140,7 +220,25 @@ void UCharacterSheetWidget::Rebuild()
 
 	UVerticalBox* Right = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
 	// Equipped gear from the spec's slot table: equipment squares unlabelled, body slots captioned beside/above/below.
-	AddRow(Right, S.GearCaption, S.CaptionSize, Crt::DimGreen)->SetPadding(FMargin(0, 0, 0, 8));
+	// The quickbar first, at the top of the column; the gear below it.
+	// The QUICKBAR: ten squares captioned 1 to 0, the keys. Squares 1 and 2 show the weapons
+	// the keys 1 and 2 draw; the others are empty until the binding UI arrives.
+	UVerticalBox* QuickBody = BeginSection(Right, S.QuickbarCaption, FMargin(0, 0, 0, 8));
+	QuickGrid = CreateWidget<UInventoryGridWidget>(GetOwningPlayer(), UInventoryGridWidget::StaticClass());
+	QuickGrid->SetGap(S.InventoryGap);
+	{
+		TArray<FIntPoint> Cells;
+		for (int32 k = 0; k < 10; ++k) { Cells.Add(FIntPoint(1, k)); }
+		QuickGrid->ConfigureCells(TEXT(""), Cells, S.GearCell);
+		for (int32 k = 0; k < 10; ++k) { QuickGrid->AddCaption(0, k, FString::Printf(TEXT("%d"), (k + 1) % 10), 2); }
+	}
+	QuickGrid->OnDragBegan.BindUObject(this, &UCharacterSheetWidget::OnDragBegan); QuickGrid->OnDragEnded.BindUObject(this, &UCharacterSheetWidget::OnDragEnded); QuickGrid->OnDropRefused.BindUObject(this, &UCharacterSheetWidget::OnDropRefused);
+	QuickGrid->SetGridId(2); QuickGrid->OnCanDrop.BindUObject(this, &UCharacterSheetWidget::CanDrop); QuickGrid->OnDropped.BindUObject(this, &UCharacterSheetWidget::OnDropped);
+	QuickGrid->OnSlotClicked.BindUObject(this, &UCharacterSheetWidget::OnQuickSlot);
+	QuickGrid->OnSlotHovered.BindUObject(this, &UCharacterSheetWidget::OnQuickHover);
+	QuickBody->AddChildToVerticalBox(QuickGrid)->SetHorizontalAlignment(HAlign_Left);
+
+	UVerticalBox* GearBody = S.GearCaption.IsEmpty() ? Right : BeginSection(Right, S.GearCaption, FMargin(0, 18, 0, 8));
 	GearGrid = CreateWidget<UInventoryGridWidget>(GetOwningPlayer(), UInventoryGridWidget::StaticClass());
 	GearGrid->SetGap(S.InventoryGap);
 	{
@@ -158,32 +256,59 @@ void UCharacterSheetWidget::Rebuild()
 			else if (G.Label == TEXT("below")) { GearGrid->AddCaption(G.Row + 1, G.Col, G.Name, 2); }
 		}
 	}
+	GearGrid->OnDragBegan.BindUObject(this, &UCharacterSheetWidget::OnDragBegan); GearGrid->OnDragEnded.BindUObject(this, &UCharacterSheetWidget::OnDragEnded); GearGrid->OnDropRefused.BindUObject(this, &UCharacterSheetWidget::OnDropRefused);
+	GearGrid->SetGridId(1); GearGrid->OnCanDrop.BindUObject(this, &UCharacterSheetWidget::CanDrop); GearGrid->OnDropped.BindUObject(this, &UCharacterSheetWidget::OnDropped);
 	GearGrid->OnSlotClicked.BindUObject(this, &UCharacterSheetWidget::OnGearSlot);
 	GearGrid->OnSlotHovered.BindUObject(this, &UCharacterSheetWidget::OnGearHover);
-	Right->AddChildToVerticalBox(GearGrid)->SetHorizontalAlignment(HAlign_Left);
+	GearGrid->OnSlotRightClicked.BindUObject(this, &UCharacterSheetWidget::OnGearRightClick);
+	GearBody->AddChildToVerticalBox(GearGrid)->SetHorizontalAlignment(HAlign_Left);
+	UVerticalBox* InvBody = Right;
 	if (!S.InventoryCaption.IsEmpty())
 	{
-		// The caption rule fills the width with how full the bag is at the right end of it.
-		UHorizontalBox* InvHead = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
-		UHorizontalBoxSlot* CapSlot = InvHead->AddChildToHorizontalBox(UCrtRuleWidget::Make(GetOwningPlayer(), S.InventoryCaption, S.CaptionSize, Crt::DimGreen));
-		CapSlot->SetSize(ESlateSizeRule::Fill); CapSlot->SetVerticalAlignment(VAlign_Center);
+		// The caption rule is the fold button, with how full the bag is at the right end of it.
 		InventoryCount = Crt::FixedText(WidgetTree, TEXT(""), S.CaptionSize, Crt::DimGreen, ETextJustify::Right);
-		InvHead->AddChildToHorizontalBox(InventoryCount)->SetPadding(FMargin(10, 0, 0, 0));
-		Right->AddChildToVerticalBox(InvHead)->SetPadding(FMargin(0, 18, 0, 8));
+		InvBody = BeginSection(Right, S.InventoryCaption, FMargin(0, 18, 0, 8), InventoryCount);
 	}
 	InventoryGrid = UInventoryGridWidget::MakeBag(GetOwningPlayer(), ABasePlayerController::InventoryCapacity);
+	InventoryGrid->OnDragBegan.BindUObject(this, &UCharacterSheetWidget::OnDragBegan); InventoryGrid->OnDragEnded.BindUObject(this, &UCharacterSheetWidget::OnDragEnded); InventoryGrid->OnDropRefused.BindUObject(this, &UCharacterSheetWidget::OnDropRefused);
+	InventoryGrid->SetGridId(0); InventoryGrid->OnCanDrop.BindUObject(this, &UCharacterSheetWidget::CanDrop); InventoryGrid->OnDropped.BindUObject(this, &UCharacterSheetWidget::OnDropped);
 	InventoryGrid->OnSlotClicked.BindUObject(this, &UCharacterSheetWidget::OnInventorySlot);
 	InventoryGrid->OnSlotHovered.BindUObject(this, &UCharacterSheetWidget::OnInventoryHover);
-	Right->AddChildToVerticalBox(InventoryGrid)->SetHorizontalAlignment(HAlign_Left);
+	InventoryGrid->OnSlotRightClicked.BindUObject(this, &UCharacterSheetWidget::OnInventoryRightClick);
+	InvBody->AddChildToVerticalBox(InventoryGrid)->SetHorizontalAlignment(HAlign_Left);
 
 
 	// Info for whatever is hovered.
-	if (!S.InfoCaption.IsEmpty()) { AddRow(Right, S.InfoCaption, S.CaptionSize, Crt::DimGreen)->SetPadding(FMargin(0, 18, 0, 8)); }
+	// At the right end of the INFO header: a link to the shown item's card in the Reference.
+	InfoLink = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
+	InfoLink->SetStyle(Crt::ButtonStyle());
+	{
+		UTextBlock* LinkText = Crt::FixedText(WidgetTree, TEXT("[ REFERENCE > ]"), S.CaptionSize, Crt::Green);
+		InfoLink->AddChild(LinkText);
+		if (UButtonSlot* LS = Cast<UButtonSlot>(LinkText->Slot)) { LS->SetPadding(FMargin(6.0f, 1.0f)); }
+	}
+	InfoLink->OnClicked.AddDynamic(this, &UCharacterSheetWidget::OnInfoLink);
+	InfoLink->SetVisibility(ESlateVisibility::Collapsed);
+	UVerticalBox* InfoBody = S.InfoCaption.IsEmpty() ? Right : BeginSection(Right, S.InfoCaption, FMargin(0, 18, 0, 8), InfoLink);
 	InfoName = Crt::FixedText(WidgetTree, TEXT(""), S.InfoNameSize, Crt::Green);
-	Right->AddChildToVerticalBox(InfoName);
+	{
+		// The title row: the name on the left and, for a weapon its pack paints more than one
+		// way, a SKIN button at the right end that steps through the variants. Hidden otherwise.
+		UHorizontalBox* TitleRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+		UHorizontalBoxSlot* NS = TitleRow->AddChildToHorizontalBox(InfoName); NS->SetSize(FSlateChildSize(ESlateSizeRule::Fill)); NS->SetVerticalAlignment(VAlign_Center);
+		SkinButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
+		SkinButton->SetStyle(Crt::ButtonStyle());
+		SkinLabel = Crt::FixedText(WidgetTree, TEXT("[ SKIN ]"), S.CaptionSize, Crt::Green);
+		SkinButton->AddChild(SkinLabel);
+		if (UButtonSlot* BS = Cast<UButtonSlot>(SkinLabel->Slot)) { BS->SetPadding(FMargin(6.0f, 2.0f)); }
+		SkinButton->OnClicked.AddDynamic(this, &UCharacterSheetWidget::OnSkin);
+		SkinButton->SetVisibility(ESlateVisibility::Collapsed);
+		UHorizontalBoxSlot* SS = TitleRow->AddChildToHorizontalBox(SkinButton); SS->SetHorizontalAlignment(HAlign_Right); SS->SetVerticalAlignment(VAlign_Center); SS->SetPadding(FMargin(8, 0, 0, 0));
+		InfoBody->AddChildToVerticalBox(TitleRow);
+	}
 	InfoText = Crt::FixedText(WidgetTree, TEXT(""), S.InfoTextSize, Crt::DimGreen);
 	InfoText->SetAutoWrapText(true);
-	Right->AddChildToVerticalBox(InfoText)->SetPadding(FMargin(0, 3, 0, 0));
+	InfoBody->AddChildToVerticalBox(InfoText)->SetPadding(FMargin(0, 3, 0, 0));
 	// Weight 0 in the spec means the right column HUGS its grids: automatic, never squeezed and
 	// never stretched. The grids are size boxes, so that width is known before any text has
 	// measured, and the left columns take everything else.
@@ -235,14 +360,14 @@ void UCharacterSheetWidget::Refresh()
 			FString Line = StatRowTemplates[i];
 			for (const FName& Which : FAttributes::Names())
 			{
-				Line = Line.Replace(*FString::Printf(TEXT("{%s}"), *Which.ToString()), *FString::Printf(TEXT("%2d"), Attr.Get(Which)));
+				Line = Line.Replace(*FString::Printf(TEXT("{%s}"), *Which.ToString()), *FString::Printf(TEXT("%3d"), Attr.Get(Which)));
 			}
 			// Derived numbers. They live in FAttributes::Derived rather than in the sheet so the
 			// same figures can be used by anything that cares -- damage, saves, a status effect
 			// -- instead of only ever being text on a screen.
 			for (const TPair<FName, int32>& Pair : FAttributes::Derived(Attr))
 			{
-				Line = Line.Replace(*FString::Printf(TEXT("{%s}"), *Pair.Key.ToString()), *FString::Printf(TEXT("%2d"), Pair.Value));
+				Line = Line.Replace(*FString::Printf(TEXT("{%s}"), *Pair.Key.ToString()), *FString::Printf(TEXT("%3d"), Pair.Value));
 			}
 			StatRowTexts[i]->SetText(FText::FromString(Line));
 		}
@@ -257,6 +382,68 @@ void UCharacterSheetWidget::Refresh()
 	TArray<FString> Gear = OwnerController ? OwnerController->Equipped : TArray<FString>();
 	Gear.SetNum(FSheetSpec::Get().Slots.Num());
 	GearGrid->SetItems(Gear);
+	if (QuickGrid) { QuickGrid->SetItems(QuickbarItems()); }
+}
+
+TArray<FString> UCharacterSheetWidget::QuickbarItems() const
+{
+	TArray<FString> Out; Out.SetNum(10);
+	if (!OwnerController) { return Out; }
+	// The Nth weapon slot of the spec ("Slot 1", "Slot 2" ...) sits in square N, the way EquipWeaponSlot counts them.
+	const FSheetSpec& S = FSheetSpec::Get();
+	for (int32 i = 0; i < S.Slots.Num() && i < OwnerController->Equipped.Num(); ++i)
+	{
+		for (int32 N = 1; N <= 2; ++N) { if (S.Slots[i].Name == FString::Printf(TEXT("Slot %d"), N)) { Out[N - 1] = OwnerController->Equipped[i]; } }   // by name: square N is Slot N
+	}
+	return Out;
+}
+
+void UCharacterSheetWidget::OnQuickSlot(int32 Index)
+{
+	if (!OwnerController || !QuickGrid) { return; }
+	QuickGrid->SetSelected(Index);
+	if (Index < 2 && !QuickbarItems()[Index].IsEmpty()) { OwnerController->EquipWeaponSlot(Index + 1); }
+	ShowInfo(QuickbarItems()[Index]);
+}
+
+void UCharacterSheetWidget::OnQuickHover(int32 Index) { if (Index < 0) { ShowSelectedInfo(); return; } const TArray<FString> Q = QuickbarItems(); ShowInfo(Q.IsValidIndex(Index) ? Q[Index] : FString()); }
+
+// A drop is valid when the item fits where it lands and whatever it displaces fits where it came
+// from: bag to bag always, bag to a gear slot of the right kind, gear back to the bag, gear to
+// gear when both fit. The quickbar takes nothing until its binding UI exists.
+bool UCharacterSheetWidget::CanDrop(int32 SrcGrid, int32 Src, int32 DstGrid, int32 Dst)
+{
+	if (!OwnerController || (SrcGrid == DstGrid && Src == Dst)) { return false; }
+	const TArray<FString>& Bag = OwnerController->Inventory;
+	const TArray<FString>& Gear = OwnerController->Equipped;
+	const FString SrcItem = SrcGrid == 0 ? (Bag.IsValidIndex(Src) ? Bag[Src] : FString()) : SrcGrid == 1 ? (Gear.IsValidIndex(Src) ? Gear[Src] : FString()) : FString();
+	if (SrcItem.IsEmpty()) { return false; }
+	if (DstGrid == 0)
+	{
+		if (Dst < 0 || Dst >= ABasePlayerController::InventoryCapacity) { return false; }
+		const FString There = Bag.IsValidIndex(Dst) ? Bag[Dst] : FString();
+		return SrcGrid == 0 || There.IsEmpty() || OwnerController->KindFitsSlot(There, Src);
+	}
+	if (DstGrid == 1)
+	{
+		if (!OwnerController->KindFitsSlot(SrcItem, Dst)) { return false; }
+		const FString There = Gear.IsValidIndex(Dst) ? Gear[Dst] : FString();
+		return SrcGrid == 0 || There.IsEmpty() || OwnerController->KindFitsSlot(There, Src);
+	}
+	return false;
+}
+
+void UCharacterSheetWidget::OnDropped(int32 SrcGrid, int32 Src, int32 DstGrid, int32 Dst)
+{
+	if (!OwnerController || !CanDrop(SrcGrid, Src, DstGrid, Dst)) { return; }
+	bool bDone = false;
+	if (SrcGrid == 0 && DstGrid == 0) { bDone = OwnerController->MoveInventory(Src, Dst); }
+	else if (SrcGrid == 0 && DstGrid == 1) { bDone = OwnerController->EquipFromInventoryToSlot(Src, Dst); }
+	else if (SrcGrid == 1 && DstGrid == 0) { bDone = OwnerController->UnequipToInventory(Src, Dst); }
+	else if (SrcGrid == 1 && DstGrid == 1) { bDone = OwnerController->SwapGear(Src, Dst); }
+	if (!bDone) { return; }
+	SelectedBag = -1; SelectedGear = -1;
+	Refresh();
 }
 
 void UCharacterSheetWidget::OnClose() { if (OwnerController) { OwnerController->HideCharacterSheet(); } }
@@ -266,6 +453,30 @@ void UCharacterSheetWidget::OnTab(int32 Tab) { if (OwnerController) { OwnerContr
 // bag, unequip from the gear), which is what a plain click used to do and kept moving things
 // people only meant to look at.
 static bool CtrlHeld() { return FSlateApplication::IsInitialized() && FSlateApplication::Get().GetModifierKeys().IsControlDown(); }
+void UCharacterSheetWidget::OnInventoryRightClick(int32 Index, FVector2D ScreenPos)
+{
+	if (!OwnerController || !OwnerController->Inventory.IsValidIndex(Index) || OwnerController->Inventory[Index].IsEmpty()) { return; }
+	OnInventorySlot(Index);   // shown in INFO, as a click would
+	TWeakObjectPtr<UCharacterSheetWidget> Self(this);
+	UContextMenuWidget::Show(OwnerController, ScreenPos, WeaponCatalog::DisplayName(OwnerController->Inventory[Index]), { TEXT("Drop") }, [Self, Index](const FString& Pick)
+	{
+		if (!Self.IsValid() || !Self->OwnerController || Pick != TEXT("Drop")) { return; }
+		if (Self->OwnerController->DropInventory(Index)) { Self->SelectedBag = -1; Self->Refresh(); Self->ShowSelectedInfo(); }
+	});
+}
+
+void UCharacterSheetWidget::OnGearRightClick(int32 Index, FVector2D ScreenPos)
+{
+	if (!OwnerController || !OwnerController->Equipped.IsValidIndex(Index) || OwnerController->Equipped[Index].IsEmpty()) { return; }
+	OnGearSlot(Index);
+	TWeakObjectPtr<UCharacterSheetWidget> Self(this);
+	UContextMenuWidget::Show(OwnerController, ScreenPos, WeaponCatalog::DisplayName(OwnerController->Equipped[Index]), { TEXT("Drop") }, [Self, Index](const FString& Pick)
+	{
+		if (!Self.IsValid() || !Self->OwnerController || Pick != TEXT("Drop")) { return; }
+		if (Self->OwnerController->DropGear(Index)) { Self->SelectedGear = -1; Self->Refresh(); Self->ShowSelectedInfo(); }
+	});
+}
+
 void UCharacterSheetWidget::OnInventorySlot(int32 Index)
 {
 	if (CtrlHeld()) { if (OwnerController && OwnerController->EquipFromInventory(Index)) { SelectedBag = -1; SelectedGear = -1; Refresh(); } return; }
@@ -295,8 +506,26 @@ void UCharacterSheetWidget::ShowSelectedInfo()
 
 void UCharacterSheetWidget::ShowInfo(const FString& Item)
 {
+	InfoItem = Item;
+	if (InfoLink) { InfoLink->SetVisibility(Item.IsEmpty() ? ESlateVisibility::Collapsed : ESlateVisibility::Visible); }
 	if (InfoName) { InfoName->SetText(FText::FromString(ItemCatalog::InfoTitle(Item))); }
 	if (InfoText) { InfoText->SetText(FText::FromString(Item.IsEmpty() ? FString() : ItemCatalog::Describe(Item))); }
+	if (SkinButton)
+	{
+		const WeaponCatalog::FWeapon* W = Item.IsEmpty() ? nullptr : WeaponCatalog::Find(Item);
+		const TArray<FString> V = W ? WeaponSkins::Variants(*W) : TArray<FString>();
+		SkinButton->SetVisibility(V.Num() >= 2 ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+		if (SkinLabel && W && V.Num() >= 2) { SkinLabel->SetText(FText::FromString(FString::Printf(TEXT("[ SKIN %d/%d ]"), V.IndexOfByKey(WeaponSkins::Current(*W)) + 1, V.Num()))); }
+	}
+}
+
+void UCharacterSheetWidget::OnInfoLink() { if (OwnerController && !InfoItem.IsEmpty()) { OwnerController->ShowReferenceFor(InfoItem); } }
+
+void UCharacterSheetWidget::OnSkin()
+{
+	if (!OwnerController || InfoItem.IsEmpty()) { return; }
+	OwnerController->CycleWeaponSkin(InfoItem);
+	ShowInfo(InfoItem);
 }
 
 FReply UCharacterSheetWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -344,8 +573,44 @@ FReply UCharacterSheetWidget::NativeOnMouseMove(const FGeometry& InGeometry, con
 	return Super::NativeOnMouseMove(InGeometry, InMouseEvent);
 }
 
+void UCharacterSheetWidget::OnDragBegan(const FSlateBrush& Brush)
+{
+	if (!DragImage) { return; }
+	DragImage->SetBrush(Brush);
+	DragImage->SetVisibility(ESlateVisibility::HitTestInvisible);
+	bDragPicture = true;
+}
+
+void UCharacterSheetWidget::OnDragEnded()
+{
+	bDragPicture = false;
+	if (DragImage) { DragImage->SetVisibility(ESlateVisibility::Collapsed); }
+}
+
+void UCharacterSheetWidget::OnDropRefused(int32 SrcGrid, int32 Src, int32 DstGrid, int32 Dst)
+{
+	// Say why, in the INFO text: the kinds the slot takes, or that the square is out of reach.
+	if (!OwnerController || !InfoText) { return; }
+	const FSheetSpec& Spec = FSheetSpec::Get();
+	FString Why = TEXT("It does not go there.");
+	if (DstGrid == 1 && Spec.Slots.IsValidIndex(Dst))
+	{
+		const FSheetGearSlot& S = Spec.Slots[Dst];
+		Why = S.bEnabled ? FString::Printf(TEXT("%s takes: %s"), *S.Name, *FString::Join(S.Kinds, TEXT(", "))) : FString::Printf(TEXT("%s is not available yet."), *S.Name);
+	}
+	else if (DstGrid == 2) { Why = TEXT("The quickbar mirrors the weapon slots; bind it from a slot."); }
+	InfoText->SetText(FText::FromString(Why));
+}
+
 void UCharacterSheetWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
+	if (bDragPicture && DragImage && DragLayer)
+	{
+		// The picture follows the pointer, centred on it, in the canvas's own space.
+		const FVector2D Local = USlateBlueprintLibrary::AbsoluteToLocal(DragLayer->GetCachedGeometry(), FSlateApplication::Get().GetCursorPos());
+		const FVector2D Size = DragImage->GetBrush().ImageSize.IsNearlyZero() ? FVector2D(64.0f, 64.0f) : DragImage->GetBrush().ImageSize;
+		if (UCanvasPanelSlot* PS = Cast<UCanvasPanelSlot>(DragImage->Slot)) { PS->SetAutoSize(false); PS->SetSize(Size); PS->SetPosition(Local - Size * 0.5f); }
+	}
 	Super::NativeTick(MyGeometry, InDeltaTime);
 	Clock += InDeltaTime;
 	// Once the panel has laid out, pin the two text columns to widths taken from ITS width, in

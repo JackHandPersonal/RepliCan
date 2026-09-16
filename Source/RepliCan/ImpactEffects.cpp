@@ -29,6 +29,7 @@ namespace
 		FString Match;              // substring tested against the hit's description; empty = default
 		TArray<ImpactEffects::FBurst> Fx;   // what is spawned, in order: a puff, then sparks
 		FString Decal;
+		TArray<FString> Decals;      // "decals": several to pick from at random, so a burst into one wall is not one stamp
 		float DecalSize = 8.0f;
 		float DecalLifeSeconds = 25.0f;
 		FLinearColor LightColor = FLinearColor(1.0f, 0.75f, 0.35f);
@@ -77,7 +78,9 @@ namespace
 				if (!B.System.IsEmpty()) { R.Fx.Add(B); }
 			}
 		}
-		Obj->TryGetStringField(TEXT("decal"), R.Decal);
+		if (Obj->TryGetStringField(TEXT("decal"), R.Decal) && R.Decal.IsEmpty()) { R.Decals.Reset(); }   // "decal": "" is no mark at all
+		const TArray<TSharedPtr<FJsonValue>>* DecalList = nullptr;
+		if (Obj->TryGetArrayField(TEXT("decals"), DecalList) && DecalList) { R.Decals.Reset(); for (const TSharedPtr<FJsonValue>& V : *DecalList) { const FString S = V->AsString(); if (!S.IsEmpty()) { R.Decals.Add(S); } } }
 		Obj->TryGetStringField(TEXT("sound"), R.Sound);
 		double N = 0.0;
 		if (Obj->TryGetNumberField(TEXT("decal_size"), N)) { R.DecalSize = N; }
@@ -210,20 +213,23 @@ void ImpactEffects::Play(UWorld* World, const FHitResult& Hit, AActor* Instigato
 
 	for (const ImpactEffects::FBurst& B : R.Fx) { ImpactEffects::SpawnBurst(World, B, Hit.ImpactPoint, Facing); }
 
-	if (!R.Decal.IsEmpty() && R.DecalSize > 0.0f)
+	const FString DecalPath = R.Decals.Num() > 0 ? R.Decals[FMath::RandRange(0, R.Decals.Num() - 1)] : R.Decal;
+	if (!DecalPath.IsEmpty() && R.DecalSize > 0.0f)
 	{
-		if (UMaterialInterface* Mat = LoadObject<UMaterialInterface>(nullptr, *R.Decal, nullptr, LOAD_NoWarn | LOAD_Quiet))
+		if (UMaterialInterface* Mat = LoadObject<UMaterialInterface>(nullptr, *DecalPath, nullptr, LOAD_NoWarn | LOAD_Quiet))
 		{
 			// Decals project down their own -X, so the decal faces INTO the surface: the
 			// rotation is the inverse normal, not the normal. Sized as a box, and given a
 			// random roll so a burst into one wall is not the same stamp nine times.
-			const FVector Size(FMath::Max(2.0f, R.DecalSize * 0.5f), R.DecalSize, R.DecalSize);
+			const float S = R.DecalSize * FMath::FRandRange(0.8f, 1.25f);   // no two holes the same size
+			const FVector Size(FMath::Max(2.0f, S * 0.5f), S, S);
 			FRotator DecalRot = (-Hit.ImpactNormal).Rotation();
 			DecalRot.Roll = FMath::FRandRange(0.0f, 360.0f);
 			if (UDecalComponent* D = UGameplayStatics::SpawnDecalAtLocation(World, Mat, Size, Hit.ImpactPoint, DecalRot, R.DecalLifeSeconds))
 			{
 				// Fade out over the last fifth of its life rather than blinking away.
 				D->SetFadeOut(R.DecalLifeSeconds * 0.8f, R.DecalLifeSeconds * 0.2f, false);
+				D->SetFadeScreenSize(0.0004f);   // a decal stops drawing below a screen-size fraction (1% by default): a 6 cm hole crossed that a few metres out
 			}
 		}
 	}

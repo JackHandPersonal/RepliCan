@@ -13,6 +13,10 @@ namespace
 			{ TEXT("FireMode"),      TEXT("Fire mode"),            TEXT("Combat"),  EKeys::MiddleMouseButton, EKeys::Invalid, TEXT("Cycle semi / auto on the weapon in hand") },
 			{ TEXT("Reload"),        TEXT("Reload"),               TEXT("Combat"),  EKeys::R,                EKeys::Invalid, TEXT("Change the magazine") },
 			{ TEXT("NextWeapon"),    TEXT("Next weapon"),          TEXT("Combat"),  EKeys::G,                EKeys::Invalid, TEXT("Also the mouse wheel") },
+			{ TEXT("Weapon1"),       TEXT("Weapon slot 1"),        TEXT("Combat"),  EKeys::One,              EKeys::Invalid, TEXT("Draws the weapon in slot 1") },
+			{ TEXT("Weapon2"),       TEXT("Weapon slot 2"),        TEXT("Combat"),  EKeys::Two,              EKeys::Invalid, TEXT("Draws the weapon in slot 2") },
+			{ TEXT("InspectPrev"),   TEXT("Menu up"),              TEXT("World"),   EKeys::Up,               EKeys::Invalid, TEXT("The reticle menu's previous action (the wheel changes weapon)") },
+			{ TEXT("InspectNext"),   TEXT("Menu down"),            TEXT("World"),   EKeys::Down,             EKeys::Invalid, TEXT("The reticle menu's next action") },
 			{ TEXT("Holster"),       TEXT("Holster weapon"),       TEXT("Combat"),  EKeys::H,                EKeys::Invalid, TEXT("Put it away, or draw it again") },
 			{ TEXT("MeleeBash"),     TEXT("Melee"),                TEXT("Combat"),  EKeys::V,                EKeys::Invalid, TEXT("Hit something with the weapon rather than shoot it") },
 
@@ -24,6 +28,7 @@ namespace
 			{ TEXT("PauseMenu"),     TEXT("Menu"),                 TEXT("Screens"), EKeys::Escape,           EKeys::Invalid, TEXT("Also backs out of whatever is open") },
 
 			{ TEXT("Headlamp"),      TEXT("Headlamp"),             TEXT("World"),   EKeys::L,                EKeys::Invalid, TEXT("") },
+			{ TEXT("Scan"),          TEXT("Scan"),                 TEXT("World"),   EKeys::F,                EKeys::Invalid, TEXT("Held. Everything in view with a use lights up") },
 
 			{ TEXT("InspectSurface"),TEXT("Identify surface"),     TEXT("Tools"),   EKeys::T,                EKeys::Invalid, TEXT("Reports the mesh and material under the reticle") },
 			{ TEXT("CyclePalette"),  TEXT("Cycle palette variant"),TEXT("Tools"),   EKeys::T,                EKeys::LeftAlt, TEXT("Steps a Synty material through its lettered variants") },

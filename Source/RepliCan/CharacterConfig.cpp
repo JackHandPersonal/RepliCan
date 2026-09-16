@@ -665,12 +665,18 @@ TArray<TPair<FName, int32>> FAttributes::Derived(const FAttributes& A)
 	// Deliberately simple and readable off the sheet: a player should be able to raise Endurance
 	// and see exactly which three lines moved. Balance can come later; opacity cannot be undone.
 	return {
-		{ TEXT("Vitality"), 20 + A.Endurance * 4 + A.Brawn },     // how much punishment before it matters
-		{ TEXT("Kinetic"),  A.Endurance + A.Brawn },              // bullets and blades, before armour
-		{ TEXT("Thermal"),  A.Endurance + A.Tech },               // fire, plasma, vacuum burn
-		{ TEXT("Toxin"),    A.Endurance * 2 },                    // gas, radiation, bad water
-		{ TEXT("Evasion"),  A.Agility * 2 },                      // not being where the shot went
-		{ TEXT("Firewall"), A.Tech + A.Cognition },               // an implant is an attack surface
+		// Everything on the same hundred-point scale as the attributes: a weighted mean of the
+		// scores that stand in front of that kind of harm, so a score of 50 everywhere reads 50 here.
+		{ TEXT("Vitality"),   (A.Endurance * 3 + A.Brawn) / 4 },     // how much punishment before it matters
+		{ TEXT("Stamina"),    (A.Endurance * 3 + A.Agility) / 4 },   // how long the body keeps going at pace
+		// The six DEFENCES, one per damage type: Endurance, the body's tolerance, with the
+		// attribute that stands in front of that kind of harm.
+		{ TEXT("Kinetic"),    (A.Endurance + A.Brawn) / 2 },         // bullets and blades, before armour
+		{ TEXT("Heat"),       (A.Endurance + A.Tech) / 2 },          // fire, plasma, vacuum burn: suit discipline
+		{ TEXT("Cold"),       A.Endurance },                         // vacuum chill, cryo, a dead heater
+		{ TEXT("Electrical"), (A.Tech + A.Cognition) / 2 },          // arcs, shock sticks, a live panel
+		{ TEXT("Corrosion"),  (A.Endurance + A.Presence) / 2 },      // acid, solvents, bad air: keeping a head about it
+		{ TEXT("Radiation"),  (A.Endurance + A.Cognition) / 2 },     // the reactor deck, a cracked cell
 	};
 }
 

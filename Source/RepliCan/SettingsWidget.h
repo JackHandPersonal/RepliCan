@@ -12,6 +12,7 @@
 #include "SettingsWidget.generated.h"
 
 class UVerticalBox;
+class UHorizontalBox;
 class UTextBlock;
 class UButton;
 
@@ -80,6 +81,11 @@ private:
 	void PokeDirector();
 
 	UPROPERTY() TObjectPtr<UVerticalBox> Column;
+	// The box the rows sit in: the character sheet's panel, header rule and [ X ] (pause context);
+	// on the title screen, which frames the panel itself, these stay bare.
+	UPROPERTY() TObjectPtr<class UBorder> Root;
+	UPROPERTY() TObjectPtr<UHorizontalBox> HeaderBox;
+	UPROPERTY() TObjectPtr<class USizeBox> ColumnFit;
 	UPROPERTY() TObjectPtr<UTextBlock> FullscreenLabel;
 	UPROPERTY() TObjectPtr<UTextBlock> AlwaysIntroLabel;
 	UPROPERTY() TObjectPtr<UTextBlock> FootstepVolumeLabel;

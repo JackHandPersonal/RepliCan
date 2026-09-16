@@ -45,5 +45,5 @@ namespace ItemCatalog
 	// The info panel's body: the description and one line of the numbers that matter.
 	REPLICAN_API FString Describe(const FString& Name);
 	// The info panel's title line: NAME   [ KIND ], empty for no item.
-	inline FString InfoTitle(const FString& Name) { return Name.IsEmpty() ? FString() : Name.ToUpper() + TEXT("   [ ") + Kind(Name).ToUpper() + TEXT(" ]"); }
+	inline FString InfoTitle(const FString& Name) { return Name.IsEmpty() ? FString() : WeaponCatalog::DisplayName(Name).ToUpper() + TEXT("   [ ") + Kind(Name).ToUpper() + TEXT(" ]"); }   // a weapon reads MAKE MODEL
 }

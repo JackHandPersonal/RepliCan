@@ -109,18 +109,17 @@ void UInventoryTransferWidget::Refresh()
 void UInventoryTransferWidget::OnBoxSlot(int32 Index)
 {
 	if (!Box || !OwnerController || !Box->Items.IsValidIndex(Index)) { return; }
-	if (OwnerController->Inventory.Num() >= ABasePlayerController::InventoryCapacity) { if (Note) { Note->SetText(FText::FromString(TEXT("NO ROOM"))); } return; }
-	OwnerController->Inventory.Add(Box->Items[Index]);
+	if (!OwnerController->AddToInventory(Box->Items[Index])) { if (Note) { Note->SetText(FText::FromString(TEXT("NO ROOM"))); } return; }
 	Box->Items.RemoveAt(Index);
 	Refresh();
 }
 
 void UInventoryTransferWidget::OnPlayerSlot(int32 Index)
 {
-	if (!Box || !OwnerController || !OwnerController->Inventory.IsValidIndex(Index)) { return; }
+	if (!Box || !OwnerController || !OwnerController->Inventory.IsValidIndex(Index) || OwnerController->Inventory[Index].IsEmpty()) { return; }
 	if (Box->Items.Num() >= Box->Capacity) { if (Note) { Note->SetText(FText::FromString(TEXT("THE BOX IS FULL"))); } return; }
 	Box->Items.Add(OwnerController->Inventory[Index]);
-	OwnerController->Inventory.RemoveAt(Index);
+	OwnerController->Inventory[Index].Reset();   // the square stays, empty
 	Refresh();
 }
 

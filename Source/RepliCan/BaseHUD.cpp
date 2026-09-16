@@ -4,6 +4,7 @@
 #include "Engine/Font.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "BaseCharacter.h"
+#include "BasePlayerController.h"
 #include "CharacterAnimInstance.h"
 #include "Animation/AnimSequence.h"
 #include "CrtStyle.h"
@@ -30,10 +31,11 @@ void ABaseHUD::DrawHUD()
 	// While free looking the camera has swung away from the aim, so screen centre is no longer
 	// where the weapon points. The reticle follows the AIM: it slides across the screen and
 	// stays on whatever the character is still pointing at, which is the whole point of being
-	// able to look around without turning. Drawn at centre the rest of the time, as before.
+	// able to look around without turning. The same when the aim is swaying: the reticle wanders
+	// with the point of aim, so what it covers is what the shot goes toward. Centre otherwise.
 	if (const ABaseCharacter* Me = Cast<ABaseCharacter>(GetOwningPawn()))
 	{
-		if (Me->IsFreelook())
+		if (Me->IsFreelook() || !Me->GetAimSway().IsNearlyZero())
 		{
 			const FVector Along = Me->GetAimOrigin() + Me->GetAimRotation().Vector() * 6000.0f;
 			FVector2D Screen;
@@ -44,7 +46,11 @@ void ABaseHUD::DrawHUD()
 			}
 		}
 	}
-	if (!DrawWeaponReticle(CenterX, CenterY))
+	// No aim mark under a page: the Reference, the sheet, a transfer or the pause menu covers
+	// the world, and a circle in the middle of it read as a ghost of something.
+	const ABasePlayerController* PC = Cast<ABasePlayerController>(GetOwner());
+	const bool bScreen = PC && PC->IsPageOpen();
+	if (!bScreen && !DrawWeaponReticle(CenterX, CenterY))
 	{
 		DrawRect(FLinearColor::White, CenterX - ReticleSize * 0.5f, CenterY - ReticleSize * 0.5f, ReticleSize, ReticleSize);
 	}
@@ -62,7 +68,8 @@ bool ABaseHUD::DrawWeaponReticle(float CenterX, float CenterY)
 	// Looking through an optic: the glass has its own reticle, and it is collimated, so it is
 	// the honest one. Drawing ours over it would put a second aiming mark on screen a few
 	// pixels away from the first, which is worse than having neither.
-	if (Me->IsAiming() && Me->HasOpticSight())
+	// Third person aims over the shoulder, where the glass cannot be read: the dot and cross stay.
+	if (Me->IsAiming() && Me->HasOpticSight() && Me->IsFirstPerson())
 	{
 		ReticleRadius = -1.0f;
 		return true;   // handled: draw nothing at all, not even the plain dot

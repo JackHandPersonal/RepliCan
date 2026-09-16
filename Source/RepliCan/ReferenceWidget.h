@@ -12,6 +12,7 @@
 #include "ReferenceWidget.generated.h"
 
 class ABasePlayerController;
+class UHorizontalBox;
 class UEditableTextBox;
 class UMultiLineEditableTextBox;
 class UImage;
@@ -36,6 +37,7 @@ struct FReferenceEntry
 	FString Stance;       // Rifle, Pistol, Shotgun, Blade: the animation folder the body holds it with
 	FString Mesh;         // the asset
 	bool bHipFire = false;   // fired from the hip (special weapons): the carry logic reads this through the catalogue
+	bool bWeaponsFile = false;   // lives in UI/Weapons.json (weapons, and shields shown as armour) and is saved back there
 	TMap<FString, FString> Fields;   // every ItemFields key the entry carries, as text (see ItemCatalog::ReadFields)
 };
 
@@ -58,6 +60,7 @@ public:
 	TWeakObjectPtr<class UReferenceWidget> Widget;
 	FString Key;
 	UFUNCTION() void OnToggle();
+	UFUNCTION() void OnCycle();
 };
 
 UCLASS()
@@ -75,6 +78,8 @@ public:
 	void Rebuild();
 	// Opens the detail column on an entry (a card click).
 	void SelectEntry(int32 Index);
+	// Jump to the card for a named entry (the sheet's INFO link): its tab, then the card open.
+	bool OpenEntryByName(const FString& Name);
 
 protected:
 	virtual void NativeOnInitialized() override;
@@ -90,10 +95,12 @@ private:
 	UFUNCTION() void OnSearchChanged(const FText& Text);
 	UFUNCTION() void OnFire();
 	UFUNCTION() void OnResetView();
+	UFUNCTION() void OnGive();   // one of this weapon into the player's bag
 	UFUNCTION() void OnSaveDetail();
 	UFUNCTION() void OnCloseDetail();
 	// The category tabs across the top: one catalogue of weapons, one of everything else.
 	UFUNCTION() void OnTabWeapons();
+	UFUNCTION() void OnTabOptics();
 	UFUNCTION() void OnTabArmor();
 	UFUNCTION() void OnTabEquipment();
 	UFUNCTION() void OnTabConsumables();
@@ -105,6 +112,8 @@ private:
 	UPROPERTY() TArray<TObjectPtr<UTextBlock>> TabLabels;
 	// Parts of the detail column that only mean something for a weapon.
 	UPROPERTY() TObjectPtr<UWidget> FireWidget;
+	UPROPERTY() TObjectPtr<UWidget> GiveWidget;   // the GIVE column beside the render; weapons only
+	UPROPERTY() TObjectPtr<UWidget> ResetPointsWidget;   // only where there are points to reset (weapons, optics)
 	UPROPERTY() TObjectPtr<UWidget> HipWidget;
 	UPROPERTY() TObjectPtr<UWidget> StanceWidget;
 	UPROPERTY() TObjectPtr<UWidget> OpticWidget;
@@ -121,6 +130,7 @@ private:
 	void FillFields(const FReferenceEntry& E);
 	void ReadFieldsFromForm(FReferenceEntry& E) const;
 	void ToggleBoolField(const FString& Key);
+	void CycleEnumField(const FString& Key);
 	bool bShowHidden = false;
 	UPROPERTY() TObjectPtr<UTextBlock> ShowHiddenLabel;
 	UPROPERTY() TObjectPtr<UTextBlock> ReviewLabel;
@@ -128,6 +138,9 @@ private:
 	UPROPERTY() TMap<FString, TObjectPtr<UEditableTextBox>> FieldBoxes;
 	UPROPERTY() TMap<FString, TObjectPtr<UTextBlock>> FieldBoolLabels;
 	TMap<FString, bool> FieldBoolValues;
+	UPROPERTY() TMap<FString, TObjectPtr<UTextBlock>> FieldEnumLabels;
+	TMap<FString, FString> FieldEnumValues;
+	TMap<FString, TArray<FString>> FieldEnumOptions;
 	UPROPERTY() TArray<TObjectPtr<UReferenceFieldBinding>> FieldBindings;
 	void ShowStance();
 	FString StanceValue;
@@ -151,6 +164,7 @@ private:
 	void OnTab(int32 Tab);
 	void LoadCatalogue();
 	bool SaveEntry(const FReferenceEntry& E);
+	bool SaveOpticEntry(const FReferenceEntry& E);   // the optics block of Weapons.json
 	void FillList();
 	void BuildDetail(UVerticalBox* Into);
 	void RefreshFeed();
@@ -181,6 +195,21 @@ private:
 	FString ArmedKey;
 	UPROPERTY() TArray<TObjectPtr<UReferenceFieldBinding>> LegendBindings;
 	void ArmMarker(const FString& Key);
+	bool FeedShown() const;   // the render is on screen: its image visible AND the detail pane open
+	// ATTACHMENTS: none, one or many accessory mounts on a weapon. Added under the fore-end,
+	// dragged like any point, removed while armed.
+	void AddAttachment();
+	void RemoveArmedAttachment();
+	// Hold X, Y or Z while dragging a point and it moves along that weapon axis only: the pointer's
+	// ray is resolved to the nearest point on the axis line through where the point was picked up.
+	virtual FReply NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
+	virtual FReply NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
+	virtual void NativeOnFocusLost(const FFocusEvent& InFocusEvent) override;
+	int32 HeldAxis = -1;        // 0 x, 1 y, 2 z: the key currently down, from the key events that reach this widget
+	int32 DragAxis = -1;        // the axis this drag is pinned to (-1: the camera-facing plane)
+	FVector DragStartLocal = FVector::ZeroVector;   // the point when the drag began: the axis line and the free plane both run through it
+	int32 AxisHeld() const;     // key events first, then the player's key state for keys that went to the game instead
+	bool UnprojectToAxis(const FVector2D& FeedPx, const FVector& LineStartLocal, int32 Axis, FVector& OutLocal) const;
 	// CTRL + a second click on a card within a moment hides the entry and saves it.
 	int32 LastCardIndex = -1;
 	double LastCardClickSeconds = 0.0;
@@ -197,6 +226,12 @@ private:
 	UPROPERTY() TObjectPtr<UTextBlock> DetailMesh;
 	UPROPERTY() TObjectPtr<UEditableTextBox> NameBox;
 	UPROPERTY() TObjectPtr<UEditableTextBox> SoundBox;
+	UPROPERTY() TObjectPtr<UEditableTextBox> MakeBox;    // weapons and optics: MAKE and MODEL where NAME was
+	UPROPERTY() TObjectPtr<UEditableTextBox> ModelBox;
+	UPROPERTY() TObjectPtr<UTextBlock> NameLabel;
+	UPROPERTY() TObjectPtr<UTextBlock> MakeLabel;
+	UPROPERTY() TObjectPtr<UTextBlock> ModelLabel;
+	static FString TitleOf(const FReferenceEntry& E);   // MAKE MODEL for gear, the name otherwise
 	UPROPERTY() TObjectPtr<class UButton> HipFireButton;
 	UPROPERTY() TObjectPtr<UTextBlock> HipFireLabel;
 	bool bHipFireValue = false;

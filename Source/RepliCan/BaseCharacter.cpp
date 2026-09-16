@@ -1,4 +1,7 @@
 #include "BaseCharacter.h"
+#include "Vitality.h"
+#include "ShotReactions.h"
+#include "DeathThrash.h"
 #include "GameFramework/PlayerStart.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -389,14 +392,20 @@ void ABaseCharacter::MoveRight(const FInputActionValue& Value)
 	}
 }
 
+// The look scale of the moment: slower down the sights (AimSensitivityScale), full otherwise.
+float ABaseCharacter::LookScale() const
+{
+	return MouseLookSensitivity * (CurrentCarry == EWeaponCarry::ADS ? AimSensitivityScale : 1.0f);
+}
+
 void ABaseCharacter::LookYaw(const FInputActionValue& Value)
 {
-	AddControllerYawInput(Value.Get<float>() * MouseLookSensitivity);
+	AddControllerYawInput(Value.Get<float>() * LookScale());
 }
 
 void ABaseCharacter::LookPitch(const FInputActionValue& Value)
 {
-	AddControllerPitchInput(Value.Get<float>() * MouseLookSensitivity);
+	AddControllerPitchInput(Value.Get<float>() * LookScale());
 }
 
 void ABaseCharacter::Zoom(const FInputActionValue& Value)
@@ -589,7 +598,8 @@ void ABaseCharacter::UpdateCrouchWalkSpeed()
 void ABaseCharacter::UpdateStandingSpeed()
 {
 	if (bGroggy) { GetCharacterMovement()->MaxWalkSpeed = GroggySpeed; return; }   // Shift and X do nothing while groggy
-	GetCharacterMovement()->MaxWalkSpeed = (bSprintHeld ? RunSpeed : (bWalkToggled ? WalkSpeed : JogSpeed)) * CurrentConfig.SpeedMultiplier;
+	// An injured leg cannot run and gives up a quarter of whatever pace is left.
+	GetCharacterMovement()->MaxWalkSpeed = ((bSprintHeld && !bLegInjured) ? RunSpeed : (bWalkToggled ? WalkSpeed : JogSpeed)) * CurrentConfig.SpeedMultiplier * (bLegInjured ? 0.75f : 1.0f);
 }
 
 FString ABaseCharacter::DescribeMoveGuards() const
@@ -1319,7 +1329,7 @@ void ABaseCharacter::SetWeaponStance(const FString& Stance)
 void ABaseCharacter::SetAiming(bool bNewAiming)
 {
 	// Aiming something you are not holding is just a slower walk.
-	const bool bWanted = bNewAiming && !WeaponStance.IsEmpty();
+	const bool bWanted = bNewAiming && !WeaponStance.IsEmpty() && !bWeaponMelee;   // no sights on a blade
 	if (bAiming == bWanted) { return; }
 	// Raising the sights ends free look. The two ask for opposite things from the camera, and
 	// between them the sights are the one the player pressed a button for.
@@ -1341,6 +1351,36 @@ bool ABaseCharacter::PlayWeaponAction(const FString& Clip)
 	if (!Seq) { return false; }
 	AnimInst->SetArmOverride(Seq, WeaponCatalog::StanceRoots(WeaponStance), 1.0f, false);
 	WeaponActionLeft = Seq->GetPlayLength();
+	if (Clip == TEXT("Reload")) { ReloadTotal = ReloadLeft = WeaponActionLeft; }   // the handling curve runs the clip's length
+	return true;
+}
+
+bool ABaseCharacter::PlayMeleeClip(UAnimSequence* Clip)
+{
+	UCharacterAnimInstance* AnimInst = GetCharacterAnimInstance();
+	if (!AnimInst || !Clip) { return false; }
+	// The whole body, as authored, with the play-time layers out of the way for the swing's length.
+	AnimInst->SetArmOverride(Clip, { FName(TEXT("root")) }, 1.0f, false);
+	AnimInst->bFullBodyAction = true;
+	WeaponActionLeft = Clip->GetPlayLength();
+	return true;
+}
+
+bool ABaseCharacter::PlayDeathClip(UAnimSequence* Clip)
+{
+	UCharacterAnimInstance* AnimInst = GetCharacterAnimInstance();
+	if (!AnimInst || !Clip) { return false; }
+	AnimInst->SetArmOverride(Clip, { FName(TEXT("root")) }, 1.0f, false);
+	WeaponActionLeft = Clip->GetPlayLength();
+	return true;
+}
+
+bool ABaseCharacter::PlayHitReaction(UAnimSequence* Clip)
+{
+	UCharacterAnimInstance* AnimInst = GetCharacterAnimInstance();
+	if (!AnimInst || !Clip) { return false; }
+	AnimInst->SetArmOverride(Clip, { FName(TEXT("spine_01")) }, 1.0f, false);
+	WeaponActionLeft = Clip->GetPlayLength();   // the same clock that hands the arms back to the stance
 	return true;
 }
 
@@ -1348,6 +1388,7 @@ void ABaseCharacter::RefreshWeaponStancePose()
 {
 	UCharacterAnimInstance* AnimInst = GetCharacterAnimInstance();
 	if (!AnimInst) { return; }
+	AnimInst->bFullBodyAction = false;   // whatever action was running is over
 	if (WeaponStance.IsEmpty())
 	{
 		// Unarmed: drop the layer entirely rather than leaving the arms frozen
@@ -1360,6 +1401,7 @@ void ABaseCharacter::RefreshWeaponStancePose()
 	UAnimSequence* Idle = WeaponCatalog::StanceClip(WeaponStance, bADSPose ? TEXT("Idle_ADS") : TEXT("Idle_Hipfire"), bFeminine);
 	if (!Idle) { Idle = WeaponCatalog::StanceClip(WeaponStance, TEXT("Idle_Hipfire"), bFeminine); }
 	if (Idle) { AnimInst->SetArmOverride(Idle, WeaponCatalog::StanceRoots(WeaponStance), 1.0f, true); }
+	else { AnimInst->SetArmOverride(nullptr, TArray<FName>(), 0.0f, true); }   // a stance with no idle of its own hands the arms back to locomotion, rather than leaving a finished swing frozen
 	bPosedForADS = bADSPose;
 }
 
@@ -1370,6 +1412,7 @@ void ABaseCharacter::TickWeaponStance(float DeltaSeconds)
 	SpreadBloomDegrees = FMath::Max(0.0f, SpreadBloomDegrees - SpreadRecoverDegreesPerSecond * DeltaSeconds);
 	ForceShoulderLeft = FMath::Max(0.0f, ForceShoulderLeft - DeltaSeconds);
 	TickCarry(DeltaSeconds);
+	if (ReloadLeft > 0.0f) { ReloadLeft = FMath::Max(0.0f, ReloadLeft - DeltaSeconds); }
 	if (WeaponActionLeft > 0.0f)
 	{
 		WeaponActionLeft -= DeltaSeconds;
@@ -1431,6 +1474,13 @@ void ABaseCharacter::EndFreelookNow()
 }
 
 FRotator ABaseCharacter::GetAimRotation() const
+{
+	// The steady aim plus this frame's sway: the point of aim wanders, and the shot, the reticle
+	// and the weapon in the hands all follow it.
+	return AimRotationSteady() + AimSway;
+}
+
+FRotator ABaseCharacter::AimRotationSteady() const
 {
 	if (bFreelook) { return FrozenAim; }
 	if (bInFirstPerson && bPredictedEyeValid) { return PredictedEyeRot; }   // this frame's, not the cache's
@@ -1516,6 +1566,15 @@ EWeaponCarry ABaseCharacter::GetDesiredCarry() const
 
 FVector ABaseCharacter::CarryOffset(EWeaponCarry Carry) const
 {
+	// A stance with its own hold (a pistol indexes off the trigger hand, arms out, not a stock in
+	// the shoulder) overrides the rifle-tuned defaults below; the sights are the sights either way.
+	// ADS included: a pistol's rear sight sits at arm's length, a rifle's at the cheek, and only the stance knows which.
+	if (!WeaponStance.IsEmpty())
+	{
+		const TCHAR* Which = Carry == EWeaponCarry::ADS ? TEXT("ads") : Carry == EWeaponCarry::HipFire ? TEXT("hip") : Carry == EWeaponCarry::LowReady ? (bInFirstPerson ? TEXT("low_ready_first_person") : TEXT("low_ready")) : TEXT("shouldered");
+		FVector V;
+		if (WeaponCatalog::StanceCarry(WeaponStance, Which, V)) { return V; }
+	}
 	switch (Carry)
 	{
 	case EWeaponCarry::ADS:      return CarryADS;
@@ -1582,6 +1641,12 @@ void ABaseCharacter::SetWeaponHipFire(bool bHipFire)
 	bWeaponHipFire = bHipFire;
 }
 
+void ABaseCharacter::SetWeaponMelee(bool bMelee)
+{
+	bWeaponMelee = bMelee;
+	if (bMelee) { SetAiming(false); }
+}
+
 void ABaseCharacter::TickHandIK(float DeltaSeconds)
 {
 	UCharacterAnimInstance* Anim = GetCharacterAnimInstance();
@@ -1590,7 +1655,7 @@ void ABaseCharacter::TickHandIK(float DeltaSeconds)
 	const bool bArmed = WeaponMesh && WeaponMeshComponent && !WeaponStance.IsEmpty();
 	// The support hand only has somewhere to be on a two-handed weapon. A pistol's off hand is
 	// free, and dragging it onto the barrel would look far worse than leaving it alone.
-	const bool bWantSupport = bArmed && bWeaponHasForeGrip && WeaponCatalog::StanceIsTwoHanded(WeaponStance);
+	const bool bWantSupport = (bArmed && bWeaponHasForeGrip && WeaponCatalog::StanceIsTwoHanded(WeaponStance)) || CarriedByHand.IsValid();   // or the off hand is holding something
 	// The trigger hand only needs solving when the weapon is NOT hanging off it -- which is
 	// exactly when the geometric solve has taken the weapon off the socket. The rest of the
 	// time the socket already puts the hand and the weapon in the same place by construction,
@@ -1615,6 +1680,7 @@ void ABaseCharacter::TickHandIK(float DeltaSeconds)
 	Anim->AimForwardWorld = GetActorForwardVector();
 	Anim->HandIKWeightR = TriggerIKAlpha;
 	Anim->HandIKWeightL = SupportIKAlpha;
+	Anim->ElbowDownBiasR = Anim->ElbowDownBiasL = WeaponCatalog::StanceElbowDown(WeaponStance);   // a pistol's elbows down and out
 	if (SupportIKAlpha <= KINDA_SMALL_NUMBER && TriggerIKAlpha <= KINDA_SMALL_NUMBER) { return; }
 
 	const FTransform WeaponWorld = WeaponMeshComponent->GetComponentTransform();
@@ -1639,7 +1705,19 @@ void ABaseCharacter::TickHandIK(float DeltaSeconds)
 		if (HandFor(WeaponGripSocket, WeaponOnSocket().Inverse() * WeaponWorld, Target)) { Anim->HandIKTargetR = Target; }
 		else { Anim->HandIKWeightR = 0.0f; }
 	}
-	if (SupportIKAlpha > KINDA_SMALL_NUMBER)
+	if (SupportIKAlpha > KINDA_SMALL_NUMBER && CarriedByHand.IsValid())
+	{
+		// The carried thing: the palm on its near side, the hand turned toward it. A first guess
+		// at the wrap; the reach is what matters.
+		const FVector Obj = CarriedByHand->GetComponentLocation();
+		const FVector From = GetMesh() && GetMesh()->DoesSocketExist(TEXT("clavicle_l")) ? GetMesh()->GetSocketLocation(TEXT("clavicle_l")) : GetActorLocation() + FVector(0, 0, 50.0f);
+		const FVector To = (Obj - From).GetSafeNormal();
+		const FVector Palm = Obj - To * (CarriedHandRadius * 0.9f);
+		FTransform Target;
+		if (HandFor(TEXT("WeaponGrip_L"), FTransform(FRotationMatrix::MakeFromXZ(To, FVector::UpVector).ToQuat(), Palm), Target)) { Anim->HandIKTargetL = Target; }
+		else { Anim->HandIKWeightL = 0.0f; }
+	}
+	else if (SupportIKAlpha > KINDA_SMALL_NUMBER)
 	{
 		// The fore grip, in the world: the weapon's own point, turned so the palm wraps it.
 		// The global wrap angle, pitched by this weapon's own handguard slope. Component-wise on
@@ -1700,10 +1778,114 @@ bool ABaseCharacter::TryUnstuck()
 	return false;
 }
 
+void ABaseCharacter::NoteInjury(const FString& Region, bool bDestroyed)
+{
+	if (Region == TEXT("LegL") || Region == TEXT("LegR"))
+	{
+		bLegInjured = true; bLegInjuredLeft = Region == TEXT("LegL");
+		bSprintHeld = false;
+		UpdateStandingSpeed(); UpdateCrouchWalkSpeed();
+	}
+	else if (Region == TEXT("ArmR")) { AimInjuryScale = 1.25f; }   // the trigger arm; the support arm costs nothing yet
+}
+
+void ABaseCharacter::Die(const FVector& ShotDir)
+{
+	if (bDead) { return; }
+	bDead = true;
+	Tags.AddUnique(TEXT("dead"));
+	if (UCharacterMovementComponent* Move = GetCharacterMovement()) { Move->StopMovementImmediately(); Move->DisableMovement(); }
+	if (UCapsuleComponent* Cap = GetCapsuleComponent()) { Cap->SetCollisionEnabled(ECollisionEnabled::NoCollision); }
+	if (WeaponMeshComponent) { WeaponMeshComponent->SetVisibility(false, true); }
+	// The body lets go: every bone simulated, the last shot's push on it; the modular parts and
+	// the hair ride the leader's bones down with it.
+	if (USkeletalMeshComponent* M = GetMesh())
+	{
+		DeadMeshRelative = M->GetRelativeTransform();
+		UDeathPlayComponent::Begin(this, M, UDeathPlayComponent::Pick(this), ShotDir, CurrentConfig.Attributes.Brawn, NAME_None);
+	}
+}
+
+void ABaseCharacter::Revive()
+{
+	if (USkeletalMeshComponent* M = GetMesh())
+	{
+		M->SetSimulatePhysics(false);
+		M->SetAllBodiesSimulatePhysics(false);
+		M->SetCollisionProfileName(TEXT("CharacterMesh"));
+		M->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+		if (bDead) { M->SetRelativeTransform(DeadMeshRelative); }
+	}
+	// Every folded bone back on every mesh, every piece shown again.
+	TInlineComponentArray<USkeletalMeshComponent*> Skels(this);
+	for (USkeletalMeshComponent* S : Skels)
+	{
+		if (!S) { continue; }
+		for (int32 i = 0; i < S->GetNumBones(); ++i) { S->UnHideBoneByName(S->GetBoneName(i)); }
+		S->SetVisibility(true, true);
+		S->RecreatePhysicsState();   // the bodies a severing terminated come back
+	}
+	if (UCapsuleComponent* Cap = GetCapsuleComponent()) { Cap->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics); }
+	if (UCharacterMovementComponent* Move = GetCharacterMovement()) { Move->SetMovementMode(MOVE_Walking); }
+	if (WeaponMeshComponent) { WeaponMeshComponent->SetVisibility(true, true); }
+	for (int32 i = Tags.Num() - 1; i >= 0; --i) { const FString T = Tags[i].ToString(); if (T == TEXT("dead") || T == TEXT("headless") || T.StartsWith(TEXT("severed_"))) { Tags.RemoveAt(i); } }
+	bDead = false; bLegInjured = false; AimInjuryScale = 1.0f; LimpApplied = 0.0f;
+	UpdateStandingSpeed(); UpdateCrouchWalkSpeed();
+	if (UVitalityComponent* V = UVitalityComponent::FindOrAdd(this)) { V->Reset(UVitalityComponent::PoolFor(CurrentConfig.Attributes.Endurance, CurrentConfig.Attributes.Brawn)); }
+}
+
+void ABaseCharacter::TickLimp(float DeltaSeconds)
+{
+	// The hitch: the body drops on the bad leg's step and comes back up on the other. The stride
+	// clock is the weapon sway's, which already runs at the pace of the feet. Additive to the mesh
+	// offset, and forgotten when a crouch rewrites that offset from scratch.
+	if (!GetMesh()) { return; }
+	if (bIsCrouched != bLimpWasCrouched) { bLimpWasCrouched = bIsCrouched; LimpApplied = 0.0f; }
+	const bool bMoving = !bDead && GetVelocity().Size2D() > 30.0f;
+	const float Want = (bLegInjured && bMoving) ? LimpDipCm * FMath::Max(0.0f, FMath::Sin(SwayPhase + (bLegInjuredLeft ? 0.0f : PI))) : 0.0f;
+	if (FMath::IsNearlyEqual(Want, LimpApplied)) { return; }
+	GetMesh()->GetRelativeLocation_DirectMutable().Z += (LimpApplied - Want);
+	LimpApplied = Want;
+}
+
+float ABaseCharacter::AimSwayTargetDeg() const
+{
+	if (!WeaponMesh || WeaponStance.IsEmpty()) { return 0.0f; }
+	float Base = 0.0f;
+	switch (CurrentCarry)
+	{
+	case EWeaponCarry::ADS:        Base = AimSwayAdsDeg; break;
+	case EWeaponCarry::HipFire:    Base = AimSwayHipDeg; break;
+	case EWeaponCarry::Shouldered: Base = AimSwayShoulderedDeg; break;
+	default:                       return 0.0f;   // low ready: nothing is being aimed
+	}
+	const FAttributes& A = CurrentConfig.Attributes;
+	// Brawn carries part of the weight: at 100 the weapon feels a third lighter, at 0 a third heavier.
+	const float FeltKg = WeaponMassKg * (1.0f - FMath::Clamp((A.Brawn - 50) / 50.0f, -1.0f, 1.0f) * 0.35f);
+	const float Weight = FMath::Clamp(0.6f + FeltKg * 0.13f, 0.6f, 2.5f);               // 3 kg reads 1.0, an 8 kg gun 1.6, a pistol 0.75
+	const float Agile = FMath::Clamp(1.3f - A.Agility / 100.0f * 0.6f, 0.5f, 1.5f);    // 50 reads 1.0; 100 reads 0.7, 0 reads 1.3
+	return Base * Weight * Agile * AimSwayScale * AimInjuryScale;
+}
+
+void ABaseCharacter::TickAimSway(float DeltaSeconds)
+{
+	AimSwayAmplitude = FMath::FInterpTo(AimSwayAmplitude, AimSwayTargetDeg(), DeltaSeconds, 4.0f);
+	AimSwayClock += DeltaSeconds;
+	if (AimSwayAmplitude <= KINDA_SMALL_NUMBER) { AimSway = FRotator::ZeroRotator; return; }
+	// Two slow sines per axis at rates that never line up, so the path does not visibly repeat,
+	// and a breath on the pitch. Pitch smaller than yaw: arms drift sideways more readily than they rise.
+	const float T = AimSwayClock * 2.0f * PI;
+	const float Yaw = 0.62f * FMath::Sin(T * 0.42f) + 0.38f * FMath::Sin(T * 0.9f + 1.3f);
+	const float Pitch = 0.7f * (0.62f * FMath::Sin(T * 0.37f + 0.7f) + 0.38f * FMath::Sin(T * 1.1f + 2.1f)) + 0.3f * FMath::Sin(T * 0.25f);
+	AimSway = FRotator(Pitch * AimSwayAmplitude, Yaw * AimSwayAmplitude, 0.0f);
+}
+
 void ABaseCharacter::TickWeaponSway(float DeltaSeconds)
 {
 	const UCharacterMovementComponent* Move = GetCharacterMovement();
-	const float MaxSpeed = Move ? FMath::Max(1.0f, Move->MaxWalkSpeed) : 1.0f;
+	// Against the RUN speed, not the gait's own cap: measured against MaxWalkSpeed a steady jog
+	// counted as a full run and swung at the full-run stride rate, which read as far too fast.
+	const float MaxSpeed = FMath::Max(1.0f, RunSpeed * CurrentConfig.SpeedMultiplier);
 	const float Speed = (Move && Move->IsMovingOnGround()) ? Move->Velocity.Size2D() : 0.0f;
 	const float Want = FMath::Clamp(Speed / MaxSpeed, 0.0f, 1.2f);
 	// Settles in and out over a few tenths rather than snapping with the first frame of input.
@@ -1739,7 +1921,9 @@ void ABaseCharacter::TickSightAlignment(float DeltaSeconds)
 	SightBlend.Set(Target, AimSightBlendSeconds);
 	SightBlend.Tick(DeltaSeconds);
 	SightAlignAlpha = SightBlend.Value;
-	if (SightAlignAlpha <= KINDA_SMALL_NUMBER)
+	// MELEE never aligns to the eye: the swing clips move the arm and the weapon must follow the hand,
+	// not sit where a rear sight would be with the hand IK dragging the arm back to it (the jiggle).
+	if (SightAlignAlpha <= KINDA_SMALL_NUMBER || bWeaponMelee)   // a blade or a hammer rides the hand; the sights never own it
 	{
 		// HAND THE WEAPON BACK TO THE HAND. This is where the gun was being left floating behind
 		// the player on a camera change: the solve drives the component by WORLD transform,
@@ -1782,6 +1966,16 @@ FTransform ABaseCharacter::SolveWeaponPose(const FVector& EyeLoc, const FRotator
 	FVector Offset = FMath::Lerp(CarryOffset(CarryFrom), CarryOffset(CurrentCarry), FMath::InterpEaseInOut(0.0f, 1.0f, T, 2.0f));
 	Offset += FVector(0.0f, AimSightNudgeCm.X, AimSightNudgeCm.Y);
 	Offset += FVector(0.0f, SwayOffset.X, SwayOffset.Y);   // the stride's sway, in the same eye frame
+	// Reloading: worked, not aimed. In and back out over the clip, with a rock on top.
+	float HandlingRoll = 0.0f, HandlingPitch = 0.0f;
+	if (ReloadLeft > 0.0f && ReloadTotal > KINDA_SMALL_NUMBER)
+	{
+		const float U = 1.0f - ReloadLeft / ReloadTotal;
+		const float Arc = FMath::Sin(U * PI);
+		Offset += FVector(-ReloadPullCm * Arc, ReloadSideCm * Arc + FMath::Sin(U * PI * 3.0f) * 1.2f * Arc, -ReloadDropCm * Arc);
+		HandlingRoll = -ReloadRollDegrees * Arc;
+		HandlingPitch = ReloadPitchDegrees * Arc + FMath::Sin(U * PI * 4.0f) * 2.0f * Arc;
+	}
 	const FVector SightWorld = EyeLoc + EyeRot.RotateVector(Offset);
 
 	// The point of aim. Everything but low ready keeps the barrel CONVERGING on it, which is
@@ -1799,8 +1993,8 @@ FTransform ABaseCharacter::SolveWeaponPose(const FVector& EyeLoc, const FRotator
 	FRotator DesiredRotator = (AimPoint - SightWorld).Rotation();
 	// A weapon whose sights sit off the bore line is pitched so that looking along the sight
 	// line is looking along the shot. Zero on anything with no usable sights.
-	DesiredRotator.Pitch += WeaponSightPitch;
-	DesiredRotator.Roll += SwayRoll;
+	DesiredRotator.Pitch += WeaponSightPitch + HandlingPitch;
+	DesiredRotator.Roll += SwayRoll + HandlingRoll;
 	const FQuat DesiredRot = DesiredRotator.Quaternion();
 
 	// A weapon with no derived rear sight aims down the bore instead, which is close enough to
@@ -1940,6 +2134,7 @@ void ABaseCharacter::PostCameraTick(float DeltaSeconds)
 		const double RotErr = FMath::RadiansToDegrees(EyeRot.Quaternion().AngularDistance(PredictedEyeRot.Quaternion()));
 		LagCamErrSum += CamErr; LagCamErrMax = FMath::Max(LagCamErrMax, CamErr); LagRotErrMax = FMath::Max(LagRotErrMax, RotErr);
 	}
+	EyeRot += AimSway;   // the point of aim wanders; the weapon is held along it, sights and all
 	PlaceWeapon(EyeLoc, EyeRot);
 	if (LagTestLeft > 0.0f)
 	{
@@ -1994,6 +2189,7 @@ float ABaseCharacter::GetWeaponSpreadDegrees() const
 	// Eased with the carry move, so the reticle tightens AS the gun comes up rather than snapping
 	// to the sights cone the instant the button is pressed.
 	float Spread = FMath::Lerp(SpreadHipDegrees, SpreadAimDegrees, AdsAlpha());
+	Spread *= AimInjuryScale;   // an injured trigger arm: a quarter worse
 
 	if (const UCharacterMovementComponent* Move = GetCharacterMovement())
 	{
@@ -2816,8 +3012,10 @@ void ABaseCharacter::OnWeaponFired(const FVector& MuzzleLocal)
 		const float Kick = (WeaponRecoilOverride >= 0.0f ? WeaponRecoilOverride : RecoilPitchDegrees) * Scale;
 		if (Kick > KINDA_SMALL_NUMBER)
 		{
-			FRotator R = PC->GetControlRotation(); R.Pitch = FRotator::NormalizeAxis(R.Pitch + Kick); PC->SetControlRotation(R);
+			FRotator R = PC->GetControlRotation(); const float Before = R.Pitch; R.Pitch = FRotator::NormalizeAxis(R.Pitch + Kick); PC->SetControlRotation(R);
+			UE_LOG(LogTemp, Log, TEXT("Recoil: kick %.2f (weapon %.2f, scale %.2f) pitch %.2f -> %.2f (read back %.2f)"), Kick, WeaponRecoilOverride, Scale, Before, R.Pitch, PC->GetControlRotation().Pitch);
 		}
+		else { UE_LOG(LogTemp, Log, TEXT("Recoil: no kick (weapon %.2f, scale %.2f)"), WeaponRecoilOverride, Scale); }
 		// Queue the return. A burst stacks kicks; each recovers over the same window from now.
 		RecoilToRecover += Kick * FMath::Clamp(RecoilRecoverFraction, 0.0f, 1.0f);
 		RecoilRecoverLeft = RecoilRecoverSeconds;
@@ -3636,6 +3834,8 @@ void ABaseCharacter::Tick(float DeltaSeconds)
 	// predicted here to the centimetre and the weapon and hands placed against it. Reading the
 	// camera manager here instead gives LAST frame's camera -- the judder.
 	TickWeaponSway(DeltaSeconds);
+	TickAimSway(DeltaSeconds);
+	TickLimp(DeltaSeconds);
 	TickGoodSpots(DeltaSeconds);
 	PredictEye();
 	TickSightAlignment(DeltaSeconds);

@@ -1211,6 +1211,8 @@ void FCharacterAnimInstanceProxy::PreUpdate(UAnimInstance* InAnimInstance, float
 	CachedIKWeightR = FMath::Clamp(Owner->HandIKWeightR, 0.0f, 1.0f);
 	CachedIKWeightL = FMath::Clamp(Owner->HandIKWeightL, 0.0f, 1.0f);
 	CachedIKMaxReach = Owner->HandIKMaxReach;
+	CachedElbowBiasR = Owner->ElbowDownBiasR; CachedElbowBiasL = Owner->ElbowDownBiasL;
+	bCachedFullBody = Owner->bFullBodyAction;
 	CachedIKBones[0] = Owner->IKUpperArmR; CachedIKBones[1] = Owner->IKLowerArmR; CachedIKBones[2] = Owner->IKHandR;
 	CachedIKBones[3] = Owner->IKUpperArmL; CachedIKBones[4] = Owner->IKLowerArmL; CachedIKBones[5] = Owner->IKHandL;
 	CachedAimPitch = Owner->AimPitchDegrees;
@@ -1324,14 +1326,17 @@ bool FCharacterAnimInstanceProxy::Evaluate(FPoseContext& Output)
 	// space: head look-at, facial edits (the eyes-scale blink in particular,
 	// which the retarget's rotation/translation-only conversion drops), and
 	// the weapon-hand grip curl, which targets the mesh's own finger bones.
-	ApplyGaitAdjustments(Output);   // before look-at so the head compensates a hunch/lean
-	ApplySpineLean(Output);         // likewise: the head is aimed AFTER the torso has leaned
-	ApplyLookAt(Output);
+	if (!bCachedFullBody)   // a full-body action is seen as authored: no gait, lean or look-at over it
+	{
+		ApplyGaitAdjustments(Output);   // before look-at so the head compensates a hunch/lean
+		ApplySpineLean(Output);         // likewise: the head is aimed AFTER the torso has leaned
+		ApplyLookAt(Output);
+	}
 	ApplyFacialBoneEdits(Output);
-	ApplyWeaponGripCorrection(Output);
+	if (!bCachedFullBody) { ApplyWeaponGripCorrection(Output); }
 	// IK goes LAST of the arm work. Anything that ran after it would move the hand off the grip
 	// it was just placed on, which defeats the entire point of solving for it.
-	ApplyHandIK(Output);
+	if (!bCachedFullBody) { ApplyHandIK(Output); }
 	if (ToAsset) { GroundFeet(Output); }
 	return true;
 }
@@ -2095,7 +2100,7 @@ void FCharacterAnimInstanceProxy::ApplyArmOverride(FPoseContext& Output)
 }
 
 void FCharacterAnimInstanceProxy::SolveTwoBone(FCSPose<FCompactPose>& CS, FName UpperName, FName LowerName,
-                                              FName EndName, const FTransform& TargetCS, float Weight)
+                                              FName EndName, const FTransform& TargetCS, float Weight, float ElbowDownBias)
 {
 	if (Weight <= KINDA_SMALL_NUMBER) { return; }
 	const FBoneContainer& BC = CS.GetPose().GetBoneContainer();
@@ -2146,6 +2151,17 @@ void FCharacterAnimInstanceProxy::SolveTwoBone(FCSPose<FCompactPose>& CS, FName 
 		if (Pole.SizeSquared() < 1.0f) { Pole = FVector::CrossProduct(Dir, FVector::ForwardVector); }
 	}
 	Pole = Pole.GetSafeNormal();
+	// A STANCE'S ELBOWS. Arms held out in front (a pistol) want the elbows down and a little out,
+	// which the clip's bent-arm pose does not give once the hands are pulled out to the grip:
+	// its elbows ride up. The wanted direction is blended in over the pose's own by the stance's
+	// bias, in the bend plane, so the arm keeps some of its character and cannot flip.
+	if (ElbowDownBias > KINDA_SMALL_NUMBER)
+	{
+		const FVector Out = FVector(Root.X, Root.Y, 0.0f).GetSafeNormal();   // away from the body's centre line
+		FVector Want = (FVector(0.0f, 0.0f, -1.0f) + Out * 0.45f).GetSafeNormal();
+		Want = (Want - Dir * FVector::DotProduct(Want, Dir)).GetSafeNormal();
+		if (!Want.IsNearlyZero()) { Pole = FMath::Lerp(Pole, Want, FMath::Clamp(ElbowDownBias, 0.0f, 1.0f)).GetSafeNormal(); }
+	}
 
 	// Law of cosines: the angle at the shoulder between the reach line and the upper arm.
 	const float CosShoulder = FMath::Clamp((L1 * L1 + Reach * Reach - L2 * L2) / (2.0f * L1 * Reach), -1.0f, 1.0f);
@@ -2228,12 +2244,12 @@ void FCharacterAnimInstanceProxy::ApplyHandIK(FPoseContext& Output)
 	if (CachedIKWeightR > KINDA_SMALL_NUMBER)
 	{
 		SolveTwoBone(CS, CachedIKBones[0], CachedIKBones[1], CachedIKBones[2],
-		             CachedIKTargetR * WorldToComp, CachedIKWeightR);
+		             CachedIKTargetR * WorldToComp, CachedIKWeightR, CachedElbowBiasR);
 	}
 	if (CachedIKWeightL > KINDA_SMALL_NUMBER)
 	{
 		SolveTwoBone(CS, CachedIKBones[3], CachedIKBones[4], CachedIKBones[5],
-		             CachedIKTargetL * WorldToComp, CachedIKWeightL);
+		             CachedIKTargetL * WorldToComp, CachedIKWeightL, CachedElbowBiasL);
 	}
 
 	FCSPose<FCompactPose>::ConvertComponentPosesToLocalPoses(MoveTemp(CS), Output.Pose);

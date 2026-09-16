@@ -559,7 +559,7 @@ private:
 	// so the pose keeps its character and the IK only corrects the hand -- inventing a pole
 	// vector is where two-bone IK usually starts flipping elbows.
 	void SolveTwoBone(FCSPose<FCompactPose>& CS, FName UpperName, FName LowerName, FName EndName,
-	                  const FTransform& TargetCS, float Weight);
+	                  const FTransform& TargetCS, float Weight, float ElbowDownBias = 0.0f);
 
 	// ---- Orientation retarget --------------------------------------------
 	//
@@ -699,6 +699,8 @@ private:
 	FTransform CachedIKTargetR = FTransform::Identity;
 	FTransform CachedIKTargetL = FTransform::Identity;
 	float CachedIKWeightR = 0.0f;
+	float CachedElbowBiasR = 0.0f, CachedElbowBiasL = 0.0f;
+	bool bCachedFullBody = false;
 	float CachedIKWeightL = 0.0f;
 	float CachedIKMaxReach = 0.985f;
 	FName CachedIKBones[6];
@@ -1124,6 +1126,13 @@ public:
 	UPROPERTY(Transient) FTransform HandIKTargetR = FTransform::Identity;
 	UPROPERTY(Transient) FTransform HandIKTargetL = FTransform::Identity;
 	UPROPERTY(Transient) float HandIKWeightR = 0.0f;
+	// How far the elbow is pulled toward "down and a little out" from the pose's own bend plane (0 = the pose's elbow): a pistol's arms out in front want it.
+	// A FULL-BODY ACTION (a sword swing from the root): the layers that shape the pose for play --
+	// gait, spine lean, look-at, the grip correction, the hand IK -- stand aside so the clip is
+	// seen as authored. The character sets it with the clip and clears it when the clip ends.
+	UPROPERTY(Transient) bool bFullBodyAction = false;
+	UPROPERTY(Transient) float ElbowDownBiasR = 0.0f;
+	UPROPERTY(Transient) float ElbowDownBiasL = 0.0f;
 	UPROPERTY(Transient) float HandIKWeightL = 0.0f;
 
 	// How far past straight the arm is allowed to reach. Never 1: an arm locked dead straight

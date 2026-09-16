@@ -15,6 +15,13 @@ SRC = '/Game/PolygonSciFiWorlds/Models/Weapons/Parts/SM_Wep_Assault_02_RedDot_01
 NAME = 'SM_Optic_RedDot_02'; KEY = 'RedDot_02'; PRETTY = 'RDS-2 reflex sight'
 ASSIGN_TO = 'Worlds/Wep_Assault_01'
 PKG = '/Game/RepliCan/Optics'; GLASS = '/Game/RepliCan/Materials/M_RedDot'
+# Where the ray search gets the window wrong, say where the glass is by hand: centre (y, z) and
+# size (w, h) in the part's HAC1 frame. This part is a solid block with a painted screen, not a
+# hoop: the search counted the narrow upper block's clear edges as window and put its centre near
+# the top of the housing, so the dot sat high. The screen block spans z 2.4..6.0 (rays down its
+# length, Tools scratch window_probe), centre 4.2.
+WINDOW_OVERRIDE = {'y': 0.0, 'z': 4.2, 'w': 4.9, 'h': 3.6}
+PANE_INSET = 0.94   # the pane is this much of the window: inside the hoop, never past it (1.08 poked out of RedDot_02's frame)
 CAT = r'C:\Dev\Games\RepliCan\UI\Weapons.json'
 MQ = unreal.GeometryScript_MeshQueries; AU = unreal.GeometryScript_AssetUtils; SP = unreal.GeometryScript_MeshSpatial
 XF = unreal.GeometryScript_MeshTransforms; P = unreal.GeometryScript_Primitives
@@ -59,6 +66,9 @@ try:
     ys = [y for y, z in win]; zs = [z for y, z in win]
     win_w = (max(ys) - min(ys)) + W / n; win_h = (max(zs) - min(zs)) + H / n
     print('window: %d of %d rays clear; centre y %.2f z %.2f; %.1f wide x %.1f tall' % (len(win), n * n, yc, zc, win_w, win_h))
+    if WINDOW_OVERRIDE:
+        yc, zc, win_w, win_h = WINDOW_OVERRIDE['y'], WINDOW_OVERRIDE['z'], WINDOW_OVERRIDE['w'], WINDOW_OVERRIDE['h']
+        print('window by hand: centre y %.2f z %.2f; %.1f wide x %.1f tall' % (yc, zc, win_w, win_h))
     # the frame's x extent at the window height: where along the sight the ring is, for the pane
     xs = []
     for t in range(dyn.get_triangle_count()):
@@ -70,10 +80,23 @@ try:
     # the pane, on its own slot
     lens = unreal.DynamicMesh(); opts = unreal.GeometryScriptPrimitiveOptions()
     xf = unreal.Transform(unreal.Vector(lens_x, yc, zc), unreal.Rotator(roll=0.0, pitch=90.0, yaw=0.0), unreal.Vector(1, 1, 1))   # pitch 90: the pane's normal from +Z to -X, facing the eye
-    P.append_rectangle_xy(lens, opts, xf, win_h * 1.08, win_w * 1.08, 1, 1)
+    P.append_rectangle_xy(lens, opts, xf, win_h * PANE_INSET, win_w * PANE_INSET, 1, 1)
     unreal.GeometryScript_Normals.set_per_face_normals(lens)
     ml = AU.get_material_list_from_static_mesh(src); body_mats = list(ml[0]) if ml else []
-    glass_mat = unreal.load_asset(GLASS)
+    # The reticle glass: an instance of M_RedDot carrying THIS part's pane centre and size. The
+    # material draws the dot relative to LensCentre / LensSize (Tools/make_optics.py); the master's
+    # defaults are RedDot_01's pane, which is why this part showed no dot at all before.
+    MEL = unreal.MaterialEditingLibrary
+    mi_name = 'MI_' + KEY + '_Glass'; mi_path = PKG + '/' + mi_name
+    glass_mat = unreal.load_asset(mi_path) if unreal.EditorAssetLibrary.does_asset_exist(mi_path) else None
+    if not glass_mat:
+        glass_mat = unreal.AssetToolsHelpers.get_asset_tools().create_asset(mi_name, PKG, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
+    MEL.set_material_instance_parent(glass_mat, unreal.load_asset(GLASS))
+    MEL.set_material_instance_vector_parameter_value(glass_mat, 'LensCentre', unreal.LinearColor(lens_x, yc, zc, 0.0))
+    MEL.set_material_instance_vector_parameter_value(glass_mat, 'LensSize', unreal.LinearColor(win_w * PANE_INSET, win_h * PANE_INSET, 1.0, 0.0))   # the pane's own size
+    MEL.update_material_instance(glass_mat)
+    unreal.EditorLoadingAndSavingUtils.save_packages([glass_mat.get_outermost()], False)
+    print('glass instance', mi_path, 'centre (%.2f, %.2f, %.2f) size %.2f x %.2f' % (lens_x, yc, zc, win_w * PANE_INSET, win_h * PANE_INSET))
     dyn, combined = unreal.GeometryScript_MeshEdits.append_mesh_with_materials(dyn, body_mats, lens, [glass_mat], unreal.Transform())
     unreal.GeometryScript_Normals.set_per_face_normals(dyn)
     unreal.GeometryScript_Normals.recompute_normals(dyn, unreal.GeometryScriptCalculateNormalsOptions())

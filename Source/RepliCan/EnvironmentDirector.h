@@ -97,12 +97,12 @@ private:
 	UPROPERTY() TArray<TObjectPtr<class UStaticMesh>> PestMeshes;
 	// Never more than this on screen at once: two is a nest, five is an infestation and reads
 	// as a gameplay event rather than as atmosphere.
-	UPROPERTY(EditAnywhere, Category = "Environment|Pests") int32 MaxPests = 2;
-	UPROPERTY(EditAnywhere, Category = "Environment|Pests") FVector2D PestGapSeconds = FVector2D(14.0f, 48.0f);
+	UPROPERTY(EditAnywhere, Category = "Environment|Pests") int32 MaxPests = 6;      // was 2: they come in numbers now
+	UPROPERTY(EditAnywhere, Category = "Environment|Pests") FVector2D PestGapSeconds = FVector2D(4.0f, 14.0f);   // was 14..48: about three times as often
 	// Close enough to notice, far enough not to be examined.
 	UPROPERTY(EditAnywhere, Category = "Environment|Pests") float PestNearCm = 320.0f;
 	UPROPERTY(EditAnywhere, Category = "Environment|Pests") float PestFarCm = 950.0f;
-	UPROPERTY(EditAnywhere, Category = "Environment|Pests") float PestScale = 1.0f;
+	UPROPERTY(EditAnywhere, Category = "Environment|Pests") float PestScale = 1.3f;   // a little bigger than the pack ships them
 
 	// The two world actors the director owns. Both are spawned transient: nothing it makes is
 	// ever saved into the map.
