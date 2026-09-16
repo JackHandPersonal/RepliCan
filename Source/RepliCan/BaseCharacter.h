@@ -1454,6 +1454,15 @@ public:
 	// the catalogue when a weapon is drawn; zero means the weapon has no derived sight and the
 	// alignment falls back to the bore line.
 	void SetWeaponSight(const FVector& SightLocal, bool bHasSight, float SightPitch);
+	bool IsFirstPerson() const { return bInFirstPerson; }
+	// UNSTUCK. Every couple of seconds on solid ground the spot is remembered; asked to get
+	// unstuck, the character goes back to the newest remembered spot that is a stride away and
+	// has room for the capsule, and failing every one of those, to the player start. Returns
+	// false only when nothing at all could be found.
+	bool TryUnstuck();
+	TArray<FVector> GoodSpots;
+	float GoodSpotClock = 0.0f;
+	void TickGoodSpots(float DeltaSeconds);
 	// The trigger hand's weapon-space correction (see TriggerHandRotation); the console's HandRot goes through here.
 	void SetTriggerHandRotation(const FRotator& R);
 	FRotator GetTriggerHandRotation() const { return TriggerHandRotation; }
@@ -1493,7 +1502,11 @@ public:
 	// in the socket itself.
 	UPROPERTY(EditAnywhere, Category = "Weapon|Hands") FRotator TriggerHandRotation = FRotator(0.0f, -20.0f, 58.0f);
 	// The weapon's transform under the grip socket that realises TriggerHandRotation.
-	FTransform WeaponOnSocket() const { return FTransform(TriggerHandRotation.Quaternion().Inverse()); }
+	// The mesh under the grip socket: turned by the trigger-hand correction, and shifted so the
+	// weapon's own GRIP point (mesh space, usually the origin) sits at the socket.
+	FTransform WeaponOnSocket() const { const FQuat R = TriggerHandRotation.Quaternion().Inverse(); return FTransform(R, -R.RotateVector(WeaponGripLocal)); }
+	FVector WeaponGripLocal = FVector::ZeroVector;
+	void SetWeaponGrip(const FVector& GripLocal);
 
 	// Whether the body should face the way the camera is looking rather than the way it is
 	// walking. True in first person, and true ANY TIME A WEAPON IS OUT: a man carrying a rifle

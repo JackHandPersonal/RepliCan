@@ -120,6 +120,8 @@ public:
 	// reaches past the page's edge -- the layout's overflow, as numbers. UIAudit in the console;
 	// ui_audit() from Python, which gets the text back.
 	UFUNCTION(Exec, BlueprintCallable, Category = "Debug") FString UIAudit();
+	// Gets the pawn out of geometry: the pause menu's UNSTUCK, also a console command.
+	UFUNCTION(Exec, BlueprintCallable, Category = "Player") void Unstuck();
 	// The trigger hand's correction on the weapon, live: HandRot pitch yaw roll (weapon space). HandRot alone prints it.
 	UFUNCTION(Exec) void HandRot(float Pitch = 1000.0f, float Yaw = 0.0f, float Roll = 0.0f);
 	// Turns and walks for N seconds measuring the weapon's per-frame jump in camera space (the
@@ -360,6 +362,20 @@ public:
 	// A shot commanded from low ready waits for the weapon to come up. Seconds remaining.
 	void TickPendingFire(float DeltaSeconds);
 	float PendingFireLeft = 0.0f;
+	// THE SELECTOR. Middle mouse cycles the weapon's fire_modes; the trigger is HELD from the
+	// press to the release, and in auto the held trigger fires again every 1/fire_rate seconds.
+	UFUNCTION(Exec, BlueprintCallable, Category = "Weapon") void CycleFireMode();
+	void SetTriggerHeld(bool bHeld);
+	void TickAutoFire(float DeltaSeconds);
+	FString CurrentFireMode() const;
+	FString FireMode;              // what the selector is on; "" = the weapon's first mode
+	bool bTriggerHeld = false;
+	float AutoFireClock = 0.0f;
+	// The player's own shot in first person, and the impacts it makes: the report should be the
+	// loudest thing on the deck, so it goes up and the impact sound comes down.
+	UPROPERTY(EditAnywhere, Category = "Weapon|Sound") float ReportVolumeFirstPerson = 1.6f;
+	UPROPERTY(EditAnywhere, Category = "Weapon|Sound") float ReportVolumeThirdPerson = 1.0f;
+	UPROPERTY(EditAnywhere, Category = "Weapon|Sound") float ImpactScaleFirstPerson = 0.45f;
 	// The Reference screen (the item catalogue), reached from the menu; closing returns to the menu.
 	UFUNCTION(BlueprintCallable, Category = "Menu") void ShowReference();
 	UFUNCTION(BlueprintCallable, Category = "Menu") void HideReference();

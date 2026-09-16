@@ -1,4 +1,7 @@
 #include "BaseCharacter.h"
+#include "GameFramework/PlayerStart.h"
+#include "Components/CapsuleComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "ImpactEffects.h"
 #include "Components/PointLightComponent.h"
 #include "AmbientPlayer.h"
@@ -1457,6 +1460,16 @@ bool ABaseCharacter::ShouldFaceAim() const
 	return bInFirstPerson || !WeaponStance.IsEmpty();
 }
 
+void ABaseCharacter::SetWeaponGrip(const FVector& GripLocal)
+{
+	WeaponGripLocal = GripLocal;
+	if (WeaponMeshComponent && WeaponMeshComponent->GetAttachParent() && GetMesh() && GetMesh()->DoesSocketExist(WeaponGripSocket))
+	{
+		FTransform OnSocket = WeaponOnSocket(); OnSocket.SetScale3D(WeaponRelativeScale);
+		WeaponMeshComponent->SetRelativeTransform(OnSocket);
+	}
+}
+
 void ABaseCharacter::SetTriggerHandRotation(const FRotator& R)
 {
 	TriggerHandRotation = R;
@@ -1638,6 +1651,53 @@ void ABaseCharacter::TickHandIK(float DeltaSeconds)
 		if (HandFor(TEXT("WeaponGrip_L"), ForeGripWorld, Target)) { Anim->HandIKTargetL = Target; }
 		else { Anim->HandIKWeightL = 0.0f; }
 	}
+}
+
+void ABaseCharacter::TickGoodSpots(float DeltaSeconds)
+{
+	GoodSpotClock += DeltaSeconds;
+	if (GoodSpotClock < 2.0f) { return; }
+	GoodSpotClock = 0.0f;
+	const UCharacterMovementComponent* Move = GetCharacterMovement();
+	if (!Move || !Move->IsMovingOnGround()) { return; }
+	const FVector Here = GetActorLocation();
+	if (GoodSpots.Num() > 0 && FVector::Dist(GoodSpots.Last(), Here) < 60.0f) { return; }   // standing still: one entry is enough
+	GoodSpots.Add(Here);
+	if (GoodSpots.Num() > 24) { GoodSpots.RemoveAt(0); }
+}
+
+bool ABaseCharacter::TryUnstuck()
+{
+	UWorld* World = GetWorld();
+	const UCapsuleComponent* Cap = GetCapsuleComponent();
+	if (!World || !Cap) { return false; }
+	const FVector Here = GetActorLocation();
+	const FCollisionShape Shape = FCollisionShape::MakeCapsule(Cap->GetScaledCapsuleRadius() * 0.95f, Cap->GetScaledCapsuleHalfHeight() * 0.95f);
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(Unstuck), false, this);
+	auto Free = [&](const FVector& At) { return !World->OverlapBlockingTestByChannel(At, FQuat::Identity, ECC_Pawn, Shape, Params); };
+	auto GoTo = [&](const FVector& At)
+	{
+		if (UCharacterMovementComponent* Move = GetCharacterMovement()) { Move->StopMovementImmediately(); Move->Velocity = FVector::ZeroVector; }
+		SetActorLocation(At + FVector(0, 0, 2.0f), false, nullptr, ETeleportType::TeleportPhysics);
+	};
+	// Newest first: the most recent spot a stride or more away that has room.
+	for (int32 i = GoodSpots.Num() - 1; i >= 0; --i)
+	{
+		if (FVector::Dist(GoodSpots[i], Here) < 150.0f) { continue; }
+		if (Free(GoodSpots[i])) { GoTo(GoodSpots[i]); return true; }
+	}
+	// Then the player start.
+	if (AActor* Start = UGameplayStatics::GetActorOfClass(World, APlayerStart::StaticClass()))
+	{
+		const FVector At = Start->GetActorLocation();
+		if (Free(At)) { GoTo(At); return true; }
+	}
+	// Last: straight up in steps, for a body that has sunk into the floor.
+	for (float Up = 50.0f; Up <= 300.0f; Up += 50.0f)
+	{
+		if (Free(Here + FVector(0, 0, Up))) { GoTo(Here + FVector(0, 0, Up)); return true; }
+	}
+	return false;
 }
 
 void ABaseCharacter::TickWeaponSway(float DeltaSeconds)
@@ -3569,6 +3629,7 @@ void ABaseCharacter::Tick(float DeltaSeconds)
 	// predicted here to the centimetre and the weapon and hands placed against it. Reading the
 	// camera manager here instead gives LAST frame's camera -- the judder.
 	TickWeaponSway(DeltaSeconds);
+	TickGoodSpots(DeltaSeconds);
 	PredictEye();
 	TickSightAlignment(DeltaSeconds);
 	TickHandIK(DeltaSeconds);

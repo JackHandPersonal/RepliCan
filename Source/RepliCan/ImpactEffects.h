@@ -28,7 +28,8 @@ namespace ImpactEffects
 
 	// Everything a landed shot does, in one call. Safe to call with a miss (bBlockingHit false):
 	// it simply does nothing, so the caller does not need to branch.
-	REPLICAN_API void Play(UWorld* World, const FHitResult& Hit, AActor* Instigator);
+	// VolumeScale multiplies the rule's sound: first person turns the impacts down so the report is heard.
+	REPLICAN_API void Play(UWorld* World, const FHitResult& Hit, AActor* Instigator, float VolumeScale = 1.0f);
 
 	// Drops the cache so an edited Impacts.json is picked up without restarting.
 	REPLICAN_API void Reload();

@@ -28,6 +28,7 @@ protected:
 
 private:
 	UFUNCTION() void OnBack();
+	UFUNCTION() void OnUnstuck();
 	UFUNCTION() void OnQuit();
 	UFUNCTION() void OnSave();
 	UFUNCTION() void OnLoad();

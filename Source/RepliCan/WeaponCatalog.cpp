@@ -104,8 +104,17 @@ namespace
 			Entry->TryGetStringField(TEXT("stance"), W.Stance);
 			Entry->TryGetStringField(TEXT("space"), W.Space);
 			Entry->TryGetBoolField(TEXT("ranged"), W.bRanged);
+			{
+				const TArray<TSharedPtr<FJsonValue>>* Modes = nullptr;
+				if (Entry->TryGetArrayField(TEXT("fire_modes"), Modes) && Modes)
+				{
+					for (const TSharedPtr<FJsonValue>& V : *Modes) { const FString M = V->AsString().ToLower().TrimStartAndEnd(); if (!M.IsEmpty()) { W.FireModes.Add(M); } }
+				}
+				double Rate = 0.0; if (Entry->TryGetNumberField(TEXT("fire_rate"), Rate)) { W.FireRate = (float)Rate; }
+			}
 			Entry->TryGetStringField(TEXT("icon"), W.Icon);
 			W.Muzzle = ReadVector(Entry, TEXT("muzzle"));
+			W.Grip = ReadVector(Entry, TEXT("grip"));
 			const TArray<TSharedPtr<FJsonValue>>* SightArr = nullptr;
 			W.bHasSight = Entry->TryGetArrayField(TEXT("sight"), SightArr) && SightArr && SightArr->Num() >= 3;
 			if (W.bHasSight) { W.Sight = ReadVector(Entry, TEXT("sight")); }

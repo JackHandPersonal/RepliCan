@@ -59,6 +59,9 @@ MESHES = [
     '/Game/PolygonSciFiSpace/Meshes/CharactersUE4/SK_Chr_Junker_Male_01',
     '/Game/PolygonSciFiSpace/Meshes/CharactersUE4/SK_Chr_Junker_Female_01',
     '/Game/PolygonSciFiSpace/Meshes/CharactersUE4/SK_Chr_Hunter_Female_01',
+    # The mech pilots in the cafeteria line-up (POLYGON Mech, mannequin rig, own heads).
+    '/Game/PolygonMech/Models/CharactersUE4/SK_Chr_MechPilot_Male_01',
+    '/Game/PolygonMech/Models/CharactersUE4/SK_Chr_MechPilot_Female_01',
 ]
 
 
@@ -157,6 +160,18 @@ try:
         print('%-44s face up%7.2f fwd%7.2f  ->  nose (%.2f, %.2f)%s'
               % (name, m['face_up'], m['face_forward'], m['nose_offset'][0], m['nose_offset'][1],
                  '   <- reference' if name == REFERENCE_HEAD else ''))
+    # A HELD entry ("hold": true in the file) keeps its nose_offset: the measured number is kept
+    # beside it as nose_offset_measured. The BR soldier is held at the standard head because the
+    # density rule reads his face plates as the face.
+    try:
+        prev = json.load(io.open(OUT, encoding='utf-8'))
+    except Exception:
+        prev = {}
+    for name, m in out.items():
+        old = prev.get(name, {})
+        if old.get('hold'):
+            m['nose_offset_measured'] = m['nose_offset']; m['nose_offset'] = old['nose_offset']; m['hold'] = True; m['note'] = old.get('note', 'held')
+            print('%-44s HELD at (%.2f, %.2f)' % (name, m['nose_offset'][0], m['nose_offset'][1]))
     io.open(OUT, 'w', encoding='utf-8', newline=chr(10)).write(json.dumps(out, indent=1))
     print('FACES', len(out), '->', OUT)
 except Exception:

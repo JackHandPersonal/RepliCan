@@ -406,10 +406,10 @@ void UReferenceWidget::BuildDetail(UVerticalBox* Into)
 	UButton* Reset = Crt::Button(WidgetTree, TEXT("[ RESET VIEW ]"), S.CaptionSize, Crt::DimGreen);
 	Reset->OnClicked.AddDynamic(this, &UReferenceWidget::OnResetView);
 	Controls->AddChildToHorizontalBox(Reset)->SetPadding(FMargin(0, 0, 10, 0));
-	UButton* Fire = Crt::Button(WidgetTree, TEXT("[ FIRE ]"), S.CaptionSize, Crt::Green);
-	FireWidget = Fire;
-	Fire->OnClicked.AddDynamic(this, &UReferenceWidget::OnFire);
-	Controls->AddChildToHorizontalBox(Fire);
+	UButton* ResetPts = Crt::Button(WidgetTree, TEXT("[ RESET POINTS ]"), S.CaptionSize, Crt::DimGreen);
+	ResetPts->OnClicked.AddDynamic(this, &UReferenceWidget::OnResetPoints);
+	Controls->AddChildToHorizontalBox(ResetPts)->SetPadding(FMargin(0, 0, 10, 0));
+	// (the FIRE button that stood here was taken out at the user's request; OnFire stays wired for the console)
 	if (UOverlaySlot* ControlSlot = FeedStack->AddChildToOverlay(Controls))
 	{
 		ControlSlot->SetHorizontalAlignment(HAlign_Fill);
@@ -799,6 +799,24 @@ void UReferenceWidget::ArmMarker(const FString& Key)
 	if (DetailNote) { DetailNote->SetText(FText::FromString(ArmedKey.IsEmpty() ? TEXT("") : FString::Printf(TEXT("DRAG MOVES: %s"), *ArmedKey.ToUpper().Replace(TEXT("_"), TEXT(" "))))); }
 }
 
+void UReferenceWidget::OnResetPoints()
+{
+	// Every dragged or typed point goes back to the file's value (the catalogue re-reads the
+	// file when it changes, so this is the state at the last SAVE).
+	if (!Entries.IsValidIndex(SelectedIndex)) { return; }
+	FReferenceEntry& E = Entries[SelectedIndex];
+	const ItemCatalog::FRecord* R = ItemCatalog::FindRecordByKey(E.Key);
+	if (!R) { return; }
+	static const TCHAR* Keys[] = { TEXT("grip"), TEXT("sight"), TEXT("fore_grip"), TEXT("muzzle"), TEXT("optic_mount") };
+	for (const TCHAR* K : Keys)
+	{
+		const FString V = R->Fields.FindRef(K);
+		E.Fields.Add(K, V);
+		if (TObjectPtr<UEditableTextBox>* Box = FieldBoxes.Find(K)) { if (*Box) { (*Box)->SetText(FText::FromString(V)); } }
+	}
+	if (DetailNote) { DetailNote->SetText(FText::FromString(TEXT("POINTS RESET TO THE FILE"))); }
+}
+
 void UReferenceWidget::OnRevert()
 {
 	if (!Entries.IsValidIndex(SelectedIndex)) { return; }
@@ -1065,7 +1083,7 @@ TArray<UReferenceWidget::FMarkerHit> UReferenceWidget::CurrentMarkers() const
 	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(E.Name);
 	if (!W) { return Out; }
 	auto Point = [&](const TCHAR* Key, const FVector& Fallback) { FVector V; return ParseVector(E.Fields.FindRef(Key), V) ? V : Fallback; };
-	Out.Add({ TEXT(""), FVector::ZeroVector, FLinearColor(1.0f, 0.3f, 0.3f), TEXT("GRIP (origin)") });
+	Out.Add({ TEXT("grip"), Point(TEXT("grip"), W->Grip), FLinearColor(1.0f, 0.3f, 0.3f), TEXT("GRIP") });
 	if (W->bHasForeGrip) { Out.Add({ TEXT("fore_grip"), Point(TEXT("fore_grip"), W->ForeGrip), FLinearColor(0.35f, 1.0f, 0.4f), TEXT("FORE GRIP") }); }
 	const WeaponCatalog::FOptic* Optic = W->Optic.IsEmpty() ? nullptr : WeaponCatalog::FindOptic(W->Optic);
 	if (Optic && !Optic->Eye.IsNearlyZero())

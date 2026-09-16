@@ -27,6 +27,7 @@ namespace ItemFields
 	inline const FField Table[] = {
 		// the weapon's points, in HAC1 space (cm from the grip): the ones the Reference viewer draws
 		// and lets you drag. Listed first: they are what gets tuned most.
+		{ TEXT("grip"),          TEXT("GRIP"),          TEXT("POINTS"),   EType::List,     EScope::Weapons, TEXT("x, y, z: where the trigger hand closes (red); drag it to move the hold") },
 		{ TEXT("sight"),         TEXT("SIGHT"),         TEXT("POINTS"),   EType::List,     EScope::Weapons, TEXT("x, y, z: the rear sight the eye lines up (yellow)") },
 		{ TEXT("fore_grip"),     TEXT("FORE GRIP"),     TEXT("POINTS"),   EType::List,     EScope::Weapons, TEXT("x, y, z: where the support hand closes (green)") },
 		{ TEXT("muzzle"),        TEXT("MUZZLE"),        TEXT("POINTS"),   EType::List,     EScope::Weapons, TEXT("x, y, z: where the shot leaves (white)") },
@@ -67,6 +68,7 @@ namespace ItemFields
 		// weapon
 		{ TEXT("damage"),        TEXT("DAMAGE"),        TEXT("WEAPON"),   EType::Number,   EScope::Weapons, TEXT("per shot or swing") },
 		{ TEXT("fire_rate"),     TEXT("FIRE RATE"),     TEXT("WEAPON"),   EType::Number,   EScope::Weapons, TEXT("per second") },
+		{ TEXT("fire_modes"),    TEXT("FIRE MODES"),    TEXT("WEAPON"),   EType::List,     EScope::Weapons, TEXT("semi, auto -- the selector's positions; empty is semi only") },
 		{ TEXT("ammo_kind"),     TEXT("AMMO"),          TEXT("WEAPON"),   EType::Text,     EScope::Weapons, TEXT("light medium heavy shell cell rocket none") },
 		{ TEXT("magazine"),      TEXT("MAGAZINE"),      TEXT("WEAPON"),   EType::Number,   EScope::Weapons, TEXT("rounds") },
 		{ TEXT("reload_s"),      TEXT("RELOAD S"),      TEXT("WEAPON"),   EType::Number,   EScope::Weapons, TEXT("") },

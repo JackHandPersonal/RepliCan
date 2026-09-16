@@ -874,7 +874,7 @@ def loot_box(label, x, y, yaw, items):
     ensure(label, spawn, apply)
 
 DOOR_SIGN_Z = 298.0   # where the user set the wide door signs by hand (2026-09-16); only a NEW sign is placed from this
-def door_sign(label, x, y, yaw, text, width=441.0, height=42.0, z=None, depth=16.0, standoff=18.6):
+def door_sign(label, x, y, yaw, text, width=340.0, height=42.0, z=None, depth=16.0, standoff=18.6):
     if z is None: z = DOOR_SIGN_Z
     """A dot-matrix LED strip in the lintel plate of the door's far-side (B) trim: the trim's
     inset plate spans local x 60..440, z 352..384 on its outer face (local y -8)."""
@@ -1406,6 +1406,10 @@ HORROR_UNUSED = [
 # people standing in a mess hall read as people. The rest of SPACE_UNUSED is left listed above
 # so the next one is a line, not a search.
 LINEUP = [('Space', SM + n) for n in ('SK_Chr_Junker_Male_01', 'SK_Chr_Junker_Female_01', 'SK_Chr_Hunter_Female_01')]
+# The two mech pilots (POLYGON Mech, on the pack's mannequin copy), with a few of the pack's
+# gear pieces hung on them below and noses from face_planes.json like everyone else.
+MECH = '/Game/PolygonMech/Models/CharactersUE4/'
+LINEUP += [('Mech', MECH + 'SK_Chr_MechPilot_Male_01'), ('Mech', MECH + 'SK_Chr_MechPilot_Female_01')]
 # Placeholders until they are written: a name to inspect and a line that says what they are.
 LINEUP_TEXT = {
     'Junker_Male':    ('JUNKER [PLACEHOLDER]',
@@ -1414,6 +1418,10 @@ LINEUP_TEXT = {
                        'The other half of the salvage pair. Does the talking, apparently. Not written yet.'),
     'Hunter_Female':  ('HUNTER [PLACEHOLDER]',
                        'Came in off a contract and has not said which one. Not written yet.'),
+    'MechPilot_Male':   ('PILOT [PLACEHOLDER]',
+                         'Flies a loader frame in the yard. Still wears the harness indoors. Not written yet.'),
+    'MechPilot_Female': ('PILOT [PLACEHOLDER]',
+                         'The other pilot. Keeps the tubing on; says the yard air is worse. Not written yet.'),
 }
 
 # The clear-ish north-east quarter of the cafeteria, searched on a 150 cm lattice.
@@ -1478,6 +1486,52 @@ for _i, (_pack, _path) in enumerate(LINEUP):
             # nose=True: all three are bare-faced humans. The flag exists for the robots and
             # sealed helmets in SPACE_UNUSED, not for people.
             140.0 + _i * 95.0, (_i * 0.37) % 1.0, 1.0, _disp, _desc, nose=True)
+
+# ---- Gear on the pilots --------------------------------------------------------------------
+# The pack's character attachments are flat plates centred on their own pivot and the pilots
+# carry no SOC_ sockets, so each piece hangs from a bone at a point read off the body surface
+# by Tools/measure_gear_points.py (gear_points.json: the surface point and the outward-facing
+# rotation, both in the bone's frame). The plate goes half its thickness outside the surface.
+# Head gear is the stock mount: the head bone, pitch -90 (measured on the Space crew).
+def _load_gear_points():
+    try:
+        return json.load(io.open(os.path.join(unreal.Paths.project_dir(), 'Tools', 'gear_points.json'), encoding='utf-8'))
+    except Exception as e:
+        print('GEAR POINTS not loaded (%s)' % e); return {}
+GEAR_POINTS = _load_gear_points()
+MECH_GEAR = '/Game/PolygonMech/Models/Characters/Character_Attachments/'
+
+def gear(label, body_label, body_mesh, mesh_name, mount, half_thickness=3.0):
+    body = existing.get(body_label)
+    mesh = unreal.load_asset(MECH_GEAR + mesh_name)
+    if not body or not mesh:
+        print('GEAR skipped', label, 'body' if not body else 'mesh'); return
+    pt = GEAR_POINTS.get(body_mesh, {}).get(mount)
+    if mount != 'head' and not pt:
+        print('GEAR no point for', body_mesh, mount); return
+    def apply(g):
+        g.static_mesh_component.set_mobility(unreal.ComponentMobility.MOVABLE)   # movable FIRST, or the attach silently fails
+        bone = 'head' if mount == 'head' else pt['bone']
+        g.attach_to_actor(body, bone, unreal.AttachmentRule.SNAP_TO_TARGET, unreal.AttachmentRule.SNAP_TO_TARGET, unreal.AttachmentRule.SNAP_TO_TARGET, False)
+        if mount == 'head':
+            g.set_actor_relative_location(unreal.Vector(0, 0, 0), False, False)
+            g.set_actor_relative_rotation(unreal.Rotator(roll=0.0, pitch=-90.0, yaw=0.0), False, False)
+        else:
+            g.set_actor_relative_location(unreal.Vector(*pt['local_loc']), False, False)
+            g.set_actor_relative_rotation(unreal.Rotator(pitch=pt['local_rot'][0], yaw=pt['local_rot'][1], roll=pt['local_rot'][2]), False, False)
+            g.add_actor_local_offset(unreal.Vector(0.0, half_thickness, 0.0), False, False)   # the plate's own +Y faces out
+        g.set_actor_relative_scale3d(unreal.Vector(1.0, 1.0, 1.0))
+    def spawn():
+        g = eas.spawn_actor_from_object(mesh, body.get_actor_location() + unreal.Vector(0, 0, 100))
+        if g: apply(g)
+        return g
+    ensure(label, spawn, apply)
+
+for _who, _mesh, _pieces in (('Male', 'SK_Chr_MechPilot_Male_01', (('Helmet', 'SM_Chr_Attach_Helmet_01', 'head'), ('Holster', 'SM_Chr_Attach_Holster_01', 'thigh_r'), ('Pouch', 'SM_Chr_Attach_Pouch_01', 'hip_back'))),
+                             ('Female', 'SK_Chr_MechPilot_Female_01', (('Hair', 'SM_Chr_Attach_Hair_Female_01', 'head'), ('Tubing', 'SM_Chr_Attach_Tubing_01', 'back'), ('Pouch', 'SM_Chr_Attach_Pouch_02', 'thigh_l')))):
+    _body = 'Caf_Lineup_Mech_MechPilot_%s' % _who
+    for _tag, _piece, _mount in _pieces:
+        gear('%s_%s' % (_body, _tag), _body, _mesh, _piece, _mount, half_thickness=(6.8 if _tag == 'Tubing' else 3.0))
 
 # ---- The service lift ------------------------------------------------------------------------
 # IN THE FOYER, on the wall across from the bay. Measured, and the room turned out to have been

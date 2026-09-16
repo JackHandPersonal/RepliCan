@@ -2560,7 +2560,7 @@
     0,
     -4.17
    ],
-   "optic": "RedDot_01",
+   "optic": "RedDot_02",
    "optic_mount": [
     0.2,
     0.4,
@@ -2649,7 +2649,11 @@
    "hidden": false,
    "reviewdate": "",
    "body_mesh": "/Game/RepliCan/Weapons/Worlds/Body/SM_Wep_Assault_01_Body.SM_Wep_Assault_01_Body",
-   "hip_fire": false
+   "hip_fire": false,
+   "fire_modes": [
+    "semi",
+    "auto"
+   ]
   },
   "Worlds/Wep_Assault_02": {
    "name": "Frontier Assault Rifle 02",
@@ -10679,6 +10683,17 @@
     0,
     8.26
    ]
+  },
+  "RedDot_02": {
+   "mesh": "/Game/RepliCan/Optics/SM_Optic_RedDot_02",
+   "eye": [
+    -0.36,
+    0.0,
+    5.23
+   ],
+   "sit": 5.23,
+   "name": "RDS-2 reflex sight",
+   "source": "/Game/PolygonSciFiWorlds/Models/Weapons/Parts/SM_Wep_Assault_02_RedDot_01"
   }
  }
 }

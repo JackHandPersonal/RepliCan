@@ -257,6 +257,7 @@ namespace
 		{
 			ABasePlayerController* PC = Controller.Get();
 			if (!PC) { return false; }
+			if (InputBindings::KeyFor(TEXT("Fire")) == MouseEvent.GetEffectingButton()) { PC->SetTriggerHeld(false); }
 			if (InputBindings::KeyFor(TEXT("Aim")) == MouseEvent.GetEffectingButton())
 			{
 				if (ABaseCharacter* Ch = Cast<ABaseCharacter>(PC->GetPawn())) { Ch->SetAiming(false); }
@@ -279,6 +280,7 @@ namespace
 				}
 				return false;
 			}
+			if (bCanAct && InputBindings::KeyFor(TEXT("FireMode")) == Button && PC->HeldSlot >= 0) { PC->CycleFireMode(); return true; }
 			if (InputBindings::KeyFor(TEXT("Fire")) != Button) { return false; }
 			// Outside edit mode a click is a trigger pull, provided something is in the hand and
 			// no screen is up. Edit mode keeps the click for placing things.
@@ -288,6 +290,7 @@ namespace
 				if (PC->IsAnyScreenOpen()) { return false; }
 				if (PC->HeldSlot < 0) { return false; }
 				PC->FireHeldWeapon();
+				PC->SetTriggerHeld(true);   // and stays pulled until the release: auto cycles on it
 				return true;
 			}
 
@@ -2176,6 +2179,7 @@ void ABasePlayerController::Tick(float DeltaSeconds)
 	KeepConsolePagesFitted();
 	TickFreelookSafety();
 	TickPendingFire(DeltaSeconds);
+	TickAutoFire(DeltaSeconds);
 	Super::Tick(DeltaSeconds);
 	if (bGroggy && !bGroggyArrived && GetPawn() && FVector::Dist2D(GetPawn()->GetActorLocation(), GroggyGoal) <= GroggyRadius)
 	{
@@ -3501,6 +3505,7 @@ void ABasePlayerController::RefreshHeldWeapon()
 	Me->SetWeaponMesh(Mesh);
 	if (OpticMesh && !Optic->Eye.IsNearlyZero()) { Me->SetWeaponSight(W->OpticMount + Optic->Eye, true, 0.0f); }
 	else { Me->SetWeaponSight(W->Sight, W->bHasSight, W->SightPitch); }
+	Me->SetWeaponGrip(W->Grip);
 	Me->SetWeaponMuzzle(W->Muzzle);
 	Me->SetWeaponForeGrip(W->ForeGrip, W->bHasForeGrip, W->ForeGripPitch);
 	Me->SetWeaponHipFire(W->bHipFire);
@@ -3576,14 +3581,59 @@ void ABasePlayerController::FireHeldWeapon()
 	Me->OnWeaponFired(W->Muzzle);
 	// The shot has to arrive somewhere. Without this the muzzle flashes and the world does not
 	// react at all, which reads as the gun not working rather than as a miss.
-	ImpactEffects::Play(GetWorld(), Hit, Me);
+	ImpactEffects::Play(GetWorld(), Hit, Me, Me->IsFirstPerson() ? ImpactScaleFirstPerson : 1.0f);
 	const FString Wav = W->Sound.IsEmpty() ? TEXT("wep_pistol.wav")
 		: (W->Sound.EndsWith(TEXT(".wav")) ? W->Sound : W->Sound + TEXT(".wav"));
-	UAmbientPlayer::PlayOneShot(this, GetWorld(), Wav, 1.0f, FMath::FRandRange(0.94f, 1.06f));   // full: the report is the loudest thing the player does
+	UAmbientPlayer::PlayOneShot(this, GetWorld(), Wav, Me->IsFirstPerson() ? ReportVolumeFirstPerson : ReportVolumeThirdPerson, FMath::FRandRange(0.94f, 1.06f));   // the report is the loudest thing the player does
 
 	SetDiagNoteTimed(bHit
 		? FString::Printf(TEXT("%s -> %s at %.0f m"), *W->Name, *Hit.GetActor()->GetActorNameOrLabel(), Hit.Distance / 100.0f)
 		: FString::Printf(TEXT("%s -> miss"), *W->Name), 4.0f);
+}
+
+FString ABasePlayerController::CurrentFireMode() const
+{
+	if (!Equipped.IsValidIndex(HeldSlot)) { return TEXT("semi"); }
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(Equipped[HeldSlot]);
+	if (!W) { return TEXT("semi"); }
+	if (W->FireModes.Num() == 0) { return TEXT("semi"); }
+	return W->FireModes.Contains(FireMode) ? FireMode : W->FireModes[0];
+}
+
+void ABasePlayerController::CycleFireMode()
+{
+	if (!Equipped.IsValidIndex(HeldSlot)) { return; }
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(Equipped[HeldSlot]);
+	if (!W || !W->bRanged) { return; }
+	if (W->FireModes.Num() < 2) { SetDiagNoteTimed(FString::Printf(TEXT("%s: %s only"), *W->Name, *CurrentFireMode().ToUpper()), 3.0f); return; }
+	const int32 At = W->FireModes.IndexOfByKey(CurrentFireMode());
+	FireMode = W->FireModes[(At + 1) % W->FireModes.Num()];
+	AutoFireClock = 0.0f;
+	UAmbientPlayer::PlayOneShot(this, GetWorld(), TEXT("switch_click.wav"), 0.5f, 1.15f);
+	SetDiagNoteTimed(FString::Printf(TEXT("FIRE MODE: %s"), *FireMode.ToUpper()), 3.0f);
+}
+
+void ABasePlayerController::SetTriggerHeld(bool bHeld)
+{
+	bTriggerHeld = bHeld;
+	// The first shot of a held trigger was the press itself; the clock starts after it.
+	AutoFireClock = 0.0f;
+}
+
+void ABasePlayerController::TickAutoFire(float DeltaSeconds)
+{
+	if (!bTriggerHeld || IsEditMode() || IsAnyScreenOpen() || !Equipped.IsValidIndex(HeldSlot)) { return; }
+	if (CurrentFireMode() != TEXT("auto")) { return; }
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(Equipped[HeldSlot]);
+	if (!W || !W->bRanged) { return; }
+	const float Rate = W->FireRate > 0.1f ? W->FireRate : 8.0f;
+	AutoFireClock += DeltaSeconds;
+	const float Interval = 1.0f / Rate;
+	if (AutoFireClock < Interval) { return; }
+	AutoFireClock -= Interval;
+	// A shot already queued behind a posture change is not doubled up.
+	if (PendingFireLeft > 0.0f) { return; }
+	FireHeldWeapon();
 }
 
 void ABasePlayerController::TickPendingFire(float DeltaSeconds)
@@ -4008,6 +4058,14 @@ void ABasePlayerController::HandRot(float Pitch, float Yaw, float Roll)
 	if (Pitch < 999.0f) { Me->SetTriggerHandRotation(FRotator(Pitch, Yaw, Roll)); }
 	const FRotator R = Me->GetTriggerHandRotation();
 	SetDiagNoteTimed(FString::Printf(TEXT("HandRot pitch %.1f yaw %.1f roll %.1f (weapon space)"), R.Pitch, R.Yaw, R.Roll), 8.0f);
+}
+
+void ABasePlayerController::Unstuck()
+{
+	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	if (!Me) { return; }
+	const bool bOk = Me->TryUnstuck();
+	SetDiagNoteTimed(bOk ? TEXT("Unstuck: moved to the last solid ground") : TEXT("Unstuck: nowhere to go"), 5.0f);
 }
 
 FString ABasePlayerController::UIAudit()

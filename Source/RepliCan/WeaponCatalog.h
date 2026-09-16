@@ -35,6 +35,10 @@ namespace WeaponCatalog
 		FString BodyMeshPath;  // the mesh with its own scope stripped, used when an optic is fitted (Tools/strip_scopes.py)
 		FString Space;         // "hac1" once Tools/normalise_weapons.py has baked the mesh
 		FVector Muzzle = FVector::ZeroVector;   // where a shot leaves it, in the mesh's own space
+		// "grip": where the trigger hand closes, in the mesh's own space. HAC1 baked the meshes
+		// with the grip at the origin, so this is usually zero; a grip moved on the Reference page
+		// is honoured by holding the mesh offset so THIS point sits in the hand (nothing else moves).
+		FVector Grip = FVector::ZeroVector;
 		// Where the eye goes: the rear sight, in the mesh's own space. Derived from the geometry
 		// by Tools/derive_sights.py rather than authored -- in HAC1 space the sight line is the
 		// top of the receiver on the centreline, which is a measurement, not an opinion.
@@ -64,6 +68,10 @@ namespace WeaponCatalog
 		// special weapons that does not exist yet; "hip_fire": true in the catalogue opts in.
 		bool bHipFire = false;
 		bool bRanged = false;
+		// "fire_modes": the selector's positions, in order: "semi", "auto" (a burst can come later).
+		// Empty means semi only. "fire_rate" is rounds per second, what auto cycles at.
+		TArray<FString> FireModes;
+		float FireRate = 0.0f;
 	};
 
 	// Loads on first use and caches. Returns null when the name is not a weapon, which is the

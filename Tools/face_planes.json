@@ -47,7 +47,8 @@
    7.27,
    18.51
   ],
-  "note": "hand-held to the standard head: the densest sheet on this head is its face plates, 5.5 cm proud of the eye line, and the measured offset hung the nose out in front of them (2026-09-16); measure_face_planes.py will overwrite this on its next run"
+  "hold": true,
+  "note": "HELD at the standard head: the density rule reads his face plates as the face (2026-09-16)"
  },
  "SK_Chr_Junker_Male_01": {
   "head_bone": [
@@ -92,6 +93,36 @@
   "nose_offset": [
    7.76,
    13.01
+  ]
+ },
+ "SK_Chr_MechPilot_Male_01": {
+  "head_bone": [
+   0.0,
+   -3.98,
+   165.52
+  ],
+  "head_verts": 260,
+  "face_verts": 30,
+  "face_up": 2.44,
+  "face_forward": 0.62,
+  "nose_offset": [
+   7.05,
+   13.1
+  ]
+ },
+ "SK_Chr_MechPilot_Female_01": {
+  "head_bone": [
+   0.0,
+   -3.98,
+   165.52
+  ],
+  "head_verts": 266,
+  "face_verts": 30,
+  "face_up": 2.58,
+  "face_forward": 0.7,
+  "nose_offset": [
+   7.19,
+   13.18
   ]
  }
 }

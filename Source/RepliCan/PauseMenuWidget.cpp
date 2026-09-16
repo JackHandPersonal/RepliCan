@@ -48,6 +48,13 @@ void UPauseMenuWidget::NativeOnInitialized()
 	BackSlot->SetHorizontalAlignment(HAlign_Fill);
 	BackSlot->SetPadding(FMargin(0.0f, 4.0f));
 
+	// Out of the geometry and back to the last solid ground; the menu closes so the move is seen.
+	UButton* Unstuck = MakeButton(TEXT("UNSTUCK"));
+	Unstuck->OnClicked.AddDynamic(this, &UPauseMenuWidget::OnUnstuck);
+	UVerticalBoxSlot* UnstuckSlot = Column->AddChildToVerticalBox(Unstuck);
+	UnstuckSlot->SetHorizontalAlignment(HAlign_Fill);
+	UnstuckSlot->SetPadding(FMargin(0.0f, 4.0f));
+
 	UButton* Save = MakeButton(TEXT("SAVE GAME"));
 	Save->OnClicked.AddDynamic(this, &UPauseMenuWidget::OnSave);
 	UVerticalBoxSlot* SaveSlot = Column->AddChildToVerticalBox(Save);
@@ -120,6 +127,11 @@ UButton* UPauseMenuWidget::MakeButton(const FString& Label)
 void UPauseMenuWidget::OnBack()
 {
 	if (OwnerController) { OwnerController->HidePauseMenu(); }
+}
+
+void UPauseMenuWidget::OnUnstuck()
+{
+	if (OwnerController) { OwnerController->Unstuck(); OwnerController->HidePauseMenu(); }
 }
 
 void UPauseMenuWidget::OnQuit()

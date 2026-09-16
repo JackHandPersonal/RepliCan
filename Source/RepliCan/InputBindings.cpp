@@ -10,6 +10,7 @@ namespace
 		static const TArray<InputBindings::FAction> Actions = {
 			{ TEXT("Fire"),          TEXT("Fire"),                 TEXT("Combat"),  EKeys::LeftMouseButton,  EKeys::Invalid, TEXT("Pull the trigger on whatever is in hand") },
 			{ TEXT("Aim"),           TEXT("Aim down sights"),      TEXT("Combat"),  EKeys::RightMouseButton, EKeys::Invalid, TEXT("Held. Pulls the camera in and tightens the spread") },
+			{ TEXT("FireMode"),      TEXT("Fire mode"),            TEXT("Combat"),  EKeys::MiddleMouseButton, EKeys::Invalid, TEXT("Cycle semi / auto on the weapon in hand") },
 			{ TEXT("Reload"),        TEXT("Reload"),               TEXT("Combat"),  EKeys::R,                EKeys::Invalid, TEXT("Change the magazine") },
 			{ TEXT("NextWeapon"),    TEXT("Next weapon"),          TEXT("Combat"),  EKeys::G,                EKeys::Invalid, TEXT("Also the mouse wheel") },
 			{ TEXT("Holster"),       TEXT("Holster weapon"),       TEXT("Combat"),  EKeys::H,                EKeys::Invalid, TEXT("Put it away, or draw it again") },

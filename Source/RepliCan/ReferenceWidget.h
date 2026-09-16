@@ -151,6 +151,7 @@ private:
 	// THE STICKY HEADER over the scrolling detail: name, path, review date, and the buttons.
 	void BuildDetailHeader(UVerticalBox* Into);
 	UFUNCTION() void OnRevert();
+	UFUNCTION() void OnResetPoints();   // the POINTS back to what the file has; nothing else touched
 	UFUNCTION() void OnToggleHidden();
 	UPROPERTY() TObjectPtr<UTextBlock> HiddenLabel;
 	UPROPERTY() TObjectPtr<class UScrollBox> DetailScroll;

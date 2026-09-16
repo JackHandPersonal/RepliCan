@@ -199,7 +199,7 @@ namespace
 	}
 }
 
-void ImpactEffects::Play(UWorld* World, const FHitResult& Hit, AActor* Instigator)
+void ImpactEffects::Play(UWorld* World, const FHitResult& Hit, AActor* Instigator, float VolumeScale)
 {
 	if (!World || !Hit.bBlockingHit) { return; }
 	const FRule& R = PickRule(DescribeHit(Hit));
@@ -238,7 +238,7 @@ void ImpactEffects::Play(UWorld* World, const FHitResult& Hit, AActor* Instigato
 			Wav += FString::Printf(TEXT("_%d"), FMath::RandRange(1, R.SoundVariants));
 		}
 		if (!Wav.EndsWith(TEXT(".wav"))) { Wav += TEXT(".wav"); }
-		UAmbientPlayer::PlayOneShot(Instigator, World, Wav, R.Volume, FMath::FRandRange(0.9f, 1.12f));
+		UAmbientPlayer::PlayOneShot(Instigator, World, Wav, R.Volume * VolumeScale, FMath::FRandRange(0.9f, 1.12f));
 	}
 }
 
