@@ -36,8 +36,9 @@ SX = (W + 2 * WALL_T) / W; SYB = (H + 2 * WALL_T) / H; SYF = (FNY * CELL + 2 * W
 # Floors: the kit has no plain panel tile (01-03/08 carry hazard bands, 04-06/011 cable strips, 07 a hatch);
 # rooms use the clean octagonal plate 09 everywhere, the hall the strip tile 011 laid along its length.
 ROOM_FLOOR = 'SM_Bld_Floor_09'; HALL_FLOOR = 'SM_Bld_Floor_011'
-CEIL_MID = 420.0                       # ceiling underside in a tile's middle column
-CEIL_ARM = 427.0 - 50.0                # ... where the bed arms hang (50 down with the bay's ceiling, see BAY_CEIL_DROP)
+CEIL_DROP = 50.0                       # 2026-09-16: every top-level ceiling sits this much lower than the kit's 400 (a gap showed at the wall tops); what hangs from or near a ceiling follows it
+CEIL_MID = 420.0 - CEIL_DROP           # ceiling underside in a tile's middle column
+CEIL_ARM = 427.0 - CEIL_DROP           # ... where the bed arms hang
 
 # Intentional revisions this run, and removals.
 REVISE = {'Fixture_SW', 'Fixture_SE', 'Fixture_NW', 'Fixture_NE', 'Fixture_SW_Light', 'Fixture_SE_Light', 'Fixture_NW_Light', 'Fixture_NE_Light',
@@ -104,6 +105,9 @@ REVISE |= {l for l in existing if l.startswith('Caf_')}   # the cafeteria loses 
 REVISE |= {l for l in existing if '_Floor' in l}   # the floor tile change
 REVISE |= {'Foyer_Wall_E0', 'Caf_Wall_W0', 'Foyer_Wall_N2'}   # the window wall; N2 is being shortened
 REVISE |= {l for l in existing if l.startswith(('CCTV_', 'Foyer_Board_', 'Door_Fill_'))}
+REPOSITION_EXACT = set()   # exact labels a run may move; a one-run move fills it, then the line is retired
+_CEIL_MOVE = {l for l in existing if not l.startswith(('S10', 'LiftShaft', 'Lift_')) and ('_Ceiling' in l or 'Fixture' in l or l.startswith(('Sign_Door_', 'Sign_Bay_Door', 'Sign_Foyer_Airlock', 'Sign_Foyer_Exit', 'DoorLamp_', 'Back_Vent', 'Wires_Back', 'CeilingArm_', 'Back_Tray_', 'Back_CeilingPipes')))}
+# (2026-09-16: one run revised and repositioned _CEIL_MOVE to take the ceilings CEIL_DROP down; done)
 REMOVE |= {l for l in existing if l.startswith('CCTV_')}   # 2026-09-16: every security camera and its arms and pod came out (user's call); the cctv() helper stays for later
 REMOVE |= {'Caf_Table_Item_4', 'Caf_Table_Item_5', 'Caf_Table_Item_6'}   # CAF_DRESS put a burger, a plate and a snack on the same spots; the audit showed the pairs overlapping
 REMOVE |= {'S10_FogG_%d' % k for k in range(18)} | {'S10_FogH_%d' % k for k in range(6)}   # eighteen emitters at 0.9, then six at 2.0, both cost frames: translucent cost is screen COVERAGE, so four at 1.0 (build_sub_room)
@@ -157,7 +161,7 @@ def ensure(label, spawn, revise=None):
 #
 # When a coordinate in this file genuinely changes and the thing has to follow, put its prefix
 # in here for that run, or simply delete the actor in the editor and let it be re-spawned.
-REPOSITION = ()
+REPOSITION = ()   # prefixes; REPOSITION_EXACT (defined above the REVISE block) holds exact labels
 
 def may_move(label):
     """True while an actor is being PLACED for the first time, False once it exists.
@@ -168,7 +172,7 @@ def may_move(label):
     returns, so a label missing from it is a first placement."""
     if label is None or label not in existing:
         return True
-    return bool(REPOSITION) and label.startswith(REPOSITION)
+    return (bool(REPOSITION) and label.startswith(REPOSITION)) or label in REPOSITION_EXACT
 
 
 def mesh_actor(path, x, y, z=0.0, yaw=0.0, roll=0.0, pitch=0.0, scale=None, mat=True, material=None, tags=None, label=None):
@@ -398,7 +402,8 @@ STRIP_X = 227.5
 def strip_center(i, j, y0, sy):
     return (i * CELL * SX - WALL_T + STRIP_X * SX, y0 + j * CELL * sy - WALL_T + 250.0 * sy)
 
-def shell(x0, y0, nx, ny, tag, south='wall', north='wall', ceiling_z=0.0):
+def shell(x0, y0, nx, ny, tag, south='wall', north='wall', ceiling_z=None):
+    if ceiling_z is None: ceiling_z = -CEIL_DROP
     w_, h_ = nx * CELL, ny * CELL
     sx = (w_ + 2 * WALL_T) / w_; sy = (h_ + 2 * WALL_T) / h_
     for i in range(nx):
@@ -413,7 +418,7 @@ def shell(x0, y0, nx, ny, tag, south='wall', north='wall', ceiling_z=0.0):
                 place('%s_DoorFrame_S' % tag, B + 'SM_Bld_Wall_Doorframe_02', xs, y0 - 44.0, 0, yaw=0)
                 place('%s_DoorLeaves_S' % tag, B + 'SM_Bld_Wall_Doorframe_Door_02', xs + 250.0, y0 - 44.0, 0, yaw=0)
             else:
-                place('%s_Wall_S%d' % (tag, k), B + ('SM_Bld_Wall_01_Alt' if k % 2 else 'SM_Bld_Wall_01'), xs, y0 - WALL_T, 0, yaw=0, scale=sc)
+                place('%s_Wall_S%d' % (tag, k), B + ('SM_Bld_Wall_01_Alt' if k % 2 else 'SM_Bld_Wall_01_Alt'), xs, y0 - WALL_T, 0, yaw=0, scale=sc)
     if north != 'none':
         for k, (xs, sc) in enumerate([(x0 + 250.0, ovx), (x0 + 750.0, ov), (x0 + 1250.0 + EXT, ovx)]):
             if k == 1 and north == 'open': continue
@@ -421,11 +426,11 @@ def shell(x0, y0, nx, ny, tag, south='wall', north='wall', ceiling_z=0.0):
                 place('%s_DoorFrame_N' % tag, B + 'SM_Bld_Wall_Doorframe_02', xs, y0 + h_ + 44.0, 0, yaw=180)
                 place('%s_DoorLeaves_N' % tag, B + 'SM_Bld_Wall_Doorframe_Door_02', xs - 250.0, y0 + h_ + 44.0, 0, yaw=180)
             else:
-                place('%s_Wall_N%d' % (tag, k), B + 'SM_Bld_Wall_01', xs, y0 + h_ + WALL_T, 0, yaw=180, scale=sc)
+                place('%s_Wall_N%d' % (tag, k), B + 'SM_Bld_Wall_01_Alt', xs, y0 + h_ + WALL_T, 0, yaw=180, scale=sc)
     for j in range(ny):
         sc = ovx if j in (0, ny - 1) else ov
-        place('%s_Wall_W%d' % (tag, j), B + ('SM_Bld_Wall_01' if j % 2 else 'SM_Bld_Wall_01_Alt'), x0 - WALL_T, y0 + (j + 1) * CELL + (EXT if j == ny - 1 else 0.0), 0, yaw=-90, scale=sc)
-        place('%s_Wall_E%d' % (tag, j), B + ('SM_Bld_Wall_01_Alt' if j % 2 else 'SM_Bld_Wall_01'), x0 + w_ + WALL_T, y0 + j * CELL - (EXT if j == 0 else 0.0), 0, yaw=90, scale=sc)
+        place('%s_Wall_W%d' % (tag, j), B + ('SM_Bld_Wall_01_Alt' if j % 2 else 'SM_Bld_Wall_01_Alt'), x0 - WALL_T, y0 + (j + 1) * CELL + (EXT if j == ny - 1 else 0.0), 0, yaw=-90, scale=sc)
+        place('%s_Wall_E%d' % (tag, j), B + ('SM_Bld_Wall_01_Alt' if j % 2 else 'SM_Bld_Wall_01_Alt'), x0 + w_ + WALL_T, y0 + j * CELL - (EXT if j == 0 else 0.0), 0, yaw=90, scale=sc)
     for (x, y, yaw, nm) in [(x0, y0, 180, 'SW'), (x0 + w_, y0, -90, 'SE'), (x0 + w_, y0 + h_, 0, 'NE'), (x0, y0 + h_, 90, 'NW')]:
         place('%s_Pillar_%s' % (tag, nm), B + 'SM_Bld_Wall_Corner_Pillar_Wide_01', x, y, 0, yaw=yaw)
 
@@ -438,9 +443,9 @@ for label in REMOVE:
 # ---- The bay -----------------------------------------------------------------
 # The bay's ceiling and everything hung from it sit BAY_CEIL_DROP lower: a gap showed at the
 # back of the bay between the ceiling's underside and the wall tops (the walls run on above it).
-BAY_CEIL_DROP = 50.0
+BAY_CEIL_DROP = 0.0   # the bay led the way; CEIL_DROP now lowers every top-level ceiling by the same amount
 REVISE |= {l for l in existing if l.startswith(('Bay_Ceiling_', 'CeilingArm_', 'Back_Tray_', 'Back_CeilingPipes'))}   # re-placed with the drop (a kept label is never moved)
-shell(0, 0, NX, NY, 'Bay', south='wall', north='open', ceiling_z=-BAY_CEIL_DROP)
+shell(0, 0, NX, NY, 'Bay', south='wall', north='open', ceiling_z=-(CEIL_DROP + BAY_CEIL_DROP))
 for k, x in enumerate([300.0, 700.0]):
     place('CryoBed_%d' % (k + 1), P + 'SM_Prop_CryoBed_01', x, 720.0, 0, yaw=0)
     place('CeilingArm_%d' % (k + 1), P + 'SM_Prop_MedicalArms_01', x, 720.0, CEIL_ARM, yaw=0)
@@ -484,7 +489,7 @@ place('Machine_R', P + 'SM_Prop_Medical_Machine_01', 700.0, 250.0, 0, yaw=0)
 place('Machine_C', P + 'SM_Prop_Engine_Construction_01', 905.0, 250.0, 0, yaw=0)
 place('Cabinet', P + 'SM_Prop_Detail_Box_03', 60.0, 460.0, 0, yaw=90)
 place('Console_W', P + 'SM_Prop_Detail_Panel_01', 55.0, 300.0, 0, yaw=90)
-place('Wires_Back', P + 'SM_Prop_Wires_03', 120.0, 12.0, 300.0, yaw=0)
+place('Wires_Back', P + 'SM_Prop_Wires_03', 120.0, 12.0, 300.0 - CEIL_DROP - 5.0, yaw=0)
 place('O2_1', P + 'SM_Prop_Oxygen_Tank_Large', 955.0, 420.0, 0, yaw=0)
 place('O2_2', P + 'SM_Prop_Oxygen_Tank_Large', 950.0, 470.0, 0, yaw=35)
 place('Tank_E', P + 'SM_Prop_Detail_Tank_01', 945.0, 560.0, 0, yaw=15)
@@ -507,7 +512,7 @@ place('Back_Plate_2', P + 'SM_Prop_Greeble_Panel_02', 760.0, 6.0, 300.0, yaw=90,
 place('Back_Plate_3', P + 'SM_Prop_Greeble_Panel_03', 6.0, 150.0, 280.0, yaw=0, pitch=90)
 place('Back_WallPanel_1', P + 'SM_Prop_Wall_Panel_Small_01', 520.0, 0.0, 330.0, yaw=0)
 place('Back_WallPanel_2', P + 'SM_Prop_Wall_Panel_Small_02', 600.0, 0.0, 330.0, yaw=0)
-place('Back_Vent', P + 'SM_Prop_AirVent_Small_01', 860.0, 21.0, 340.0, yaw=0)
+place('Back_Vent', P + 'SM_Prop_AirVent_Small_01', 860.0, 21.0, 340.0 - CEIL_DROP, yaw=0)
 place('Back_Strip_1', P + 'SM_Prop_Detail_Lights_02', 150.0, 15.0, 0.0, yaw=180, mat=False)      # floor skirting strips, as in the demo
 place('Back_Strip_2', P + 'SM_Prop_Detail_Lights_02', 850.0, 15.0, 0.0, yaw=180, mat=False)
 place('Back_PipePillar', P + 'SM_Prop_Detail_Pipe_Pillar_01', 940.0, 60.0, 0.0, yaw=0)
@@ -631,7 +636,7 @@ shell(0, FY0, NX, FNY, 'Foyer', south='open', north='open')
 # with the black back out; the corner pillar (995..1150) hides some of it and Tools/
 # audit_wall_backs.py found the rest, uncapped, at x 1180..1300. Laid again here to end under
 # the pillar: pivot 1150, and 400/500 of the length so its west end stays at 750.
-place('Foyer_Wall_N2', B + 'SM_Bld_Wall_01', 1150.0, FY0 + FNY * CELL + WALL_T, 0, yaw=180, scale=(0.8, 1.0, 1.0))
+place('Foyer_Wall_N2', B + 'SM_Bld_Wall_01_Alt', 1150.0, FY0 + FNY * CELL + WALL_T, 0, yaw=180, scale=(0.8, 1.0, 1.0))
 
 # The bay/foyer door: one Doorframe_05 centred on the shared grid line the
 # two back-to-back walls meet on (Synty's own convention, see
@@ -699,10 +704,10 @@ def sign(label, mat_name, x, y, z, pitch, roll, sx, sy):
             a.set_actor_location_and_rotation(unreal.Vector(x, y, z), unreal.Rotator(roll=roll, pitch=pitch, yaw=0), False, True); a.set_actor_scale3d(unreal.Vector(sx, sy, 1.0))
         c.set_mobility(unreal.ComponentMobility.STATIC)
     return ensure(label, spawn, revise)
-sign('Sign_Bay_Door', 'M_Sign_Wide', 500.0, H - 2.0, 335.0, 0, -90, 3.0, 0.75)          # north wall, over the door
+sign('Sign_Bay_Door', 'M_Sign_Wide', 500.0, H - 2.0, 335.0 - CEIL_DROP, 0, -90, 3.0, 0.75)          # north wall, over the door
 sign('Sign_Bay_Badge', 'M_Sign_Badge_L', 2.0, 1000.0, 235.0, -90, 0, 1.7, 1.7)         # west wall
-sign('Sign_Foyer_Airlock', 'M_Sign_Wide', 500.0, FY0 + 2.0, 335.0, 0, 90, 3.0, 0.75)  # foyer south wall
-sign('Sign_Foyer_Exit', 'M_Sign_Mark', 500.0, FY1 - 2.0, 340.0, 0, -90, 0.84, 0.84)     # foyer north wall
+sign('Sign_Foyer_Airlock', 'M_Sign_Wide', 500.0, FY0 + 2.0, 335.0 - CEIL_DROP, 0, 90, 3.0, 0.75)  # foyer south wall
+sign('Sign_Foyer_Exit', 'M_Sign_Mark', 500.0, FY1 - 2.0, 340.0 - CEIL_DROP, 0, -90, 0.84, 0.84)     # foyer north wall
 sign('Sign_Foyer_Stencil', 'M_Sign_Stencil_L', 2.0, FY0 + 220.0, 190.0, -90, 0, 0.9, 1.8)  # foyer west wall, south of the cafeteria door
 
 # The PCS poster behind Hannah (she stands at 470,720 facing -X; the camera
@@ -828,8 +833,8 @@ def tile(label, x, y, floor=None, ceiling_yaw=0.0, floor_yaw=0.0):
     floor = floor or ROOM_FLOOR
     if floor_yaw == 90.0: place(label + '_Floor', B + floor, x + CELL, y, 0, yaw=90)   # pivot at the tile's +x corner: covers x..x+500
     else: place(label + '_Floor', B + floor, x, y, 0, yaw=0)
-    if ceiling_yaw == 0.0: place(label + '_Ceiling', B + 'SM_Bld_Ceiling_01', x, y, 0, yaw=0)            # light strip along y at x + 227.5
-    else: place(label + '_Ceiling', B + 'SM_Bld_Ceiling_01', x, y + CELL, 0, yaw=-90)                   # light strip along x at y + 272.5
+    if ceiling_yaw == 0.0: place(label + '_Ceiling', B + 'SM_Bld_Ceiling_01', x, y, -CEIL_DROP, yaw=0)            # light strip along y at x + 227.5
+    else: place(label + '_Ceiling', B + 'SM_Bld_Ceiling_01', x, y + CELL, -CEIL_DROP, yaw=-90)                   # light strip along x at y + 272.5
 
 def line_piece(label, side, x0, y0, mesh, offset=0.0, scale=None):
     """A wall-like piece (pivot at its left end, detailed side local +y) on one side of tile (x0, y0),
@@ -841,7 +846,7 @@ def line_piece(label, side, x0, y0, mesh, offset=0.0, scale=None):
     elif side == 'N': place(label, path, x0 + CELL - offset, y0 + CELL, 0, yaw=180, scale=scale)
     elif side == 'W': place(label, path, x0, y0 + CELL - offset, 0, yaw=-90, scale=scale)
     elif side == 'E': place(label, path, x0 + CELL, y0 + offset, 0, yaw=90, scale=scale)
-def wall_in(label, side, x0, y0, mesh='SM_Bld_Wall_01'): line_piece(label, side, x0, y0, mesh)
+def wall_in(label, side, x0, y0, mesh='SM_Bld_Wall_01_Alt'): line_piece(label, side, x0, y0, mesh)
 
 def pillar_in(label, corner, x0, y0, mesh='SM_Bld_Wall_Corner_Pillar_01'):
     """An inside corner pillar of tile (x0, y0): pivot on the grid corner, growing into the tile."""
@@ -878,7 +883,7 @@ def door_sign(label, x, y, yaw, text, width=470.0):
     def apply(a):
         # Hand placement wins; see REPOSITION.
         if may_move(label):
-            a.set_actor_location_and_rotation(unreal.Vector(x + bx + sx, y + by + sy, 373.0), unreal.Rotator(roll=0.0, pitch=0.0, yaw=byaw - 90.0), False, True)
+            a.set_actor_location_and_rotation(unreal.Vector(x + bx + sx, y + by + sy, 373.0 - CEIL_DROP), unreal.Rotator(roll=0.0, pitch=0.0, yaw=byaw - 90.0), False, True)
         # Sized to the door bay rather than to the trim's inset plate: measured, the bay between
         # the wall segments is 500 wide and the bulkhead above starts at z 396, so 470 x 42
         # centred on 373 fills it with ~15 cm of padding at each end and clears the bulkhead.
@@ -890,10 +895,11 @@ def door_sign(label, x, y, yaw, text, width=470.0):
         # so every text change made that way sat invisible until the level was reloaded.
         a.set_text(text)
     def spawn():
-        a = eas.spawn_actor_from_class(unreal.SignActor, unreal.Vector(x, y, 373.0)); apply(a); return a
+        a = eas.spawn_actor_from_class(unreal.SignActor, unreal.Vector(x, y, 373.0 - CEIL_DROP)); apply(a); return a
     ensure(label, spawn, apply)
 
-def door_lamps(label, x, y, yaw, z=368.0):
+def door_lamps(label, x, y, yaw, z=None):
+    if z is None: z = 368.0 - CEIL_DROP
     """Lintel lamps on both sides, the same geometry as DoorLamp_Airlock relative to its door."""
     for suffix, (lx, ly), dyaw, ny in (('_A', (250.0, -42.0), 180.0, 16.0), ('_B', (250.0, 42.0), 0.0, -16.0)):
         dx, dy = rot(lx, ly, yaw); ex, ey = rot(0.0, ny, yaw)
@@ -1048,10 +1054,10 @@ for i in range(CXN):
     for j in range(CYN):
         tile('Caf_%d_%d' % (i, j), CX0 + i * CELL, CY0 + j * CELL)
 for i in range(CXN):
-    wall_in('Caf_Wall_S%d' % i, 'S', CX0 + i * CELL, CY0, mesh=('SM_Bld_Wall_01_Alt' if i % 2 else 'SM_Bld_Wall_01'))
+    wall_in('Caf_Wall_S%d' % i, 'S', CX0 + i * CELL, CY0, mesh=('SM_Bld_Wall_01_Alt' if i % 2 else 'SM_Bld_Wall_01_Alt'))
     if i != 1: wall_in('Caf_Wall_N%d' % i, 'N', CX0 + i * CELL, CY0 + (CYN - 1) * CELL)
 for j in range(CYN):
-    wall_in('Caf_Wall_E%d' % j, 'E', CX0 + (CXN - 1) * CELL, CY0 + j * CELL, mesh=('SM_Bld_Wall_01' if j % 2 else 'SM_Bld_Wall_01_Alt'))
+    wall_in('Caf_Wall_E%d' % j, 'E', CX0 + (CXN - 1) * CELL, CY0 + j * CELL, mesh=('SM_Bld_Wall_01_Alt' if j % 2 else 'SM_Bld_Wall_01_Alt'))
     if j == 2: wall_in('Caf_Wall_W%d' % j, 'W', CX0, CY0 + j * CELL)
 # The galley unit fills the middle segment of the north line; its pivot is at its right-hand end (x -528..-28).
 # Posters in the recesses of the cafeteria's plain Wall_01 pieces: the recess floor sits
@@ -1518,11 +1524,11 @@ for _f in range(-LIFT_DOWN, LIFT_UP + 1):
     _run = _back - _front                                                          # side wall length
     # Back wall: textured face toward the car (-Y), so yaw 180; at yaw 180 the body runs from
     # the pivot toward -Y, so the pivot sits at the far face.
-    place('LiftShaft_B%+03d' % _f, B + 'SM_Bld_Wall_01', 750.0, _back + WALL_T, _f * CELL, yaw=180)
+    place('LiftShaft_B%+03d' % _f, B + 'SM_Bld_Wall_01_Alt', 750.0, _back + WALL_T, _f * CELL, yaw=180)
     # West side, face toward +X: yaw -90 puts the body at pivot_x..pivot_x+89 and runs it -Y from
     # the pivot, so the pivot is at the back and outside. East is the mirror at yaw 90.
-    place('LiftShaft_W%+03d' % _f, B + 'SM_Bld_Wall_01', 250.0 - WALL_T, _back, _f * CELL, yaw=-90, scale=(_run / CELL, 1.0, 1.0))
-    place('LiftShaft_E%+03d' % _f, B + 'SM_Bld_Wall_01', 750.0 + WALL_T, _front, _f * CELL, yaw=90, scale=(_run / CELL, 1.0, 1.0))
+    place('LiftShaft_W%+03d' % _f, B + 'SM_Bld_Wall_01_Alt', 250.0 - WALL_T, _back, _f * CELL, yaw=-90, scale=(_run / CELL, 1.0, 1.0))
+    place('LiftShaft_E%+03d' % _f, B + 'SM_Bld_Wall_01_Alt', 750.0 + WALL_T, _front, _f * CELL, yaw=90, scale=(_run / CELL, 1.0, 1.0))
     # CORNER COLUMNS. The side walls are Wall_01 scaled to the shaft's depth, and that depth
     # changes by 20 at the serviced floors (the front wall stands 20 further in), so their panel
     # lines and their ends jog from storey to storey, and where two Wall_01 pieces meet at right
