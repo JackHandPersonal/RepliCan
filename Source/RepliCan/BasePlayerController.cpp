@@ -3506,6 +3506,7 @@ void ABasePlayerController::RefreshHeldWeapon()
 	if (OpticMesh && !Optic->Eye.IsNearlyZero()) { Me->SetWeaponSight(W->OpticMount + Optic->Eye, true, 0.0f); }
 	else { Me->SetWeaponSight(W->Sight, W->bHasSight, W->SightPitch); }
 	Me->SetWeaponGrip(W->Grip);
+	Me->SetWeaponRecoil(W->Recoil);
 	Me->SetWeaponMuzzle(W->Muzzle);
 	Me->SetWeaponForeGrip(W->ForeGrip, W->bHasForeGrip, W->ForeGripPitch);
 	Me->SetWeaponHipFire(W->bHipFire);
@@ -3584,7 +3585,10 @@ void ABasePlayerController::FireHeldWeapon()
 	ImpactEffects::Play(GetWorld(), Hit, Me, Me->IsFirstPerson() ? ImpactScaleFirstPerson : 1.0f);
 	const FString Wav = W->Sound.IsEmpty() ? TEXT("wep_pistol.wav")
 		: (W->Sound.EndsWith(TEXT(".wav")) ? W->Sound : W->Sound + TEXT(".wav"));
-	UAmbientPlayer::PlayOneShot(this, GetWorld(), Wav, Me->IsFirstPerson() ? ReportVolumeFirstPerson : ReportVolumeThirdPerson, FMath::FRandRange(0.94f, 1.06f));   // the report is the loudest thing the player does
+	// The report, then the overpressure: everything else ducks and comes back over a second.
+	UAmbientPlayer::NoteShot(ShotDuckDepth, ShotDuckSeconds);
+	if (Ambient) { Ambient->Duck(GetWorld(), ShotDuckDepth, ShotDuckSeconds); }
+	UAmbientPlayer::PlayOneShot(this, GetWorld(), Wav, Me->IsFirstPerson() ? ReportVolumeFirstPerson : ReportVolumeThirdPerson, FMath::FRandRange(0.94f, 1.06f), /*bIgnoreDuck=*/true);   // the report is the loudest thing the player does
 
 	SetDiagNoteTimed(bHit
 		? FString::Printf(TEXT("%s -> %s at %.0f m"), *W->Name, *Hit.GetActor()->GetActorNameOrLabel(), Hit.Distance / 100.0f)

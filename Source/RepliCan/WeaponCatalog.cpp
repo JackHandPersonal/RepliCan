@@ -111,6 +111,7 @@ namespace
 					for (const TSharedPtr<FJsonValue>& V : *Modes) { const FString M = V->AsString().ToLower().TrimStartAndEnd(); if (!M.IsEmpty()) { W.FireModes.Add(M); } }
 				}
 				double Rate = 0.0; if (Entry->TryGetNumberField(TEXT("fire_rate"), Rate)) { W.FireRate = (float)Rate; }
+				double Rec = 0.0; if (Entry->TryGetNumberField(TEXT("recoil"), Rec)) { W.Recoil = (float)Rec; }
 			}
 			Entry->TryGetStringField(TEXT("icon"), W.Icon);
 			W.Muzzle = ReadVector(Entry, TEXT("muzzle"));
@@ -144,6 +145,13 @@ const WeaponCatalog::FWeapon* WeaponCatalog::Find(const FString& ItemName)
 	LoadIfNeeded();
 	if (ItemName.IsEmpty()) { return nullptr; }
 	return GByName.Find(ItemName.ToLower());
+}
+
+TArray<FString> WeaponCatalog::OpticNames()
+{
+	LoadIfNeeded();
+	TArray<FString> Out; GOptics.GetKeys(Out); Out.Sort();
+	return Out;
 }
 
 const WeaponCatalog::FOptic* WeaponCatalog::FindOptic(const FString& OpticName)

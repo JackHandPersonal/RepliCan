@@ -31,7 +31,14 @@ public:
 	FString Describe() const;
 
 	// Plays <RawAudio>/<File> once (2D). Returns its length, 0 if missing.
-	static float PlayOneShot(UObject* Outer, UWorld* World, const FString& File, float Volume, float Pitch = 1.0f);
+	// One-shots are ducked by the last shot's overpressure (see NoteShot) unless they ARE the shot.
+	static float PlayOneShot(UObject* Outer, UWorld* World, const FString& File, float Volume, float Pitch = 1.0f, bool bIgnoreDuck = false);
+	// A SHOT. Everything else drops by Depth at once and comes back over Seconds -- the ambience
+	// through the loops' fade, the impacts and clicks through PlayOneShot's duck -- so the report
+	// is the loudest thing on the deck and the room is heard returning after it.
+	void Duck(UWorld* World, float Depth, float Seconds);
+	static void NoteShot(float Depth, float Seconds);
+	static float CurrentDuck();
 	static FString RawAudioDir();
 
 private:
@@ -62,6 +69,8 @@ private:
 	UPROPERTY() TArray<TObjectPtr<UAudioComponent>> Components;
 	UPROPERTY() TArray<TObjectPtr<USoundWaveProcedural>> Waves;
 	TArray<TSharedPtr<FLoop>> Loops;   // stable storage for the audio-thread requeue
+	float PreDuckFade = 1.0f;
+	FTimerHandle DuckTimer;
 	TArray<TSharedPtr<FPool>> Pools;
 	float Fade = 1.0f;
 	FTimerHandle DriftTimer;

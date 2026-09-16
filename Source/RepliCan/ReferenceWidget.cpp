@@ -480,7 +480,20 @@ void UReferenceWidget::BuildDetail(UVerticalBox* Into)
 	if (UButtonSlot* SS = Cast<UButtonSlot>(StanceLabel->Slot)) { SS->SetPadding(FMargin(10.0f, 4.0f)); }
 	StanceButton->OnClicked.AddDynamic(this, &UReferenceWidget::OnCycleStance);
 	StanceCol->AddChildToVerticalBox(StanceButton)->SetPadding(FMargin(0, 2, 0, 0));
-	UHorizontalBoxSlot* StanceSlot = Pair->AddChildToHorizontalBox(StanceCol); StanceSlot->SetSize(ESlateSizeRule::Automatic); StanceSlot->SetVerticalAlignment(VAlign_Bottom);
+	UHorizontalBoxSlot* StanceSlot = Pair->AddChildToHorizontalBox(StanceCol); StanceSlot->SetSize(ESlateSizeRule::Automatic); StanceSlot->SetVerticalAlignment(VAlign_Bottom); StanceSlot->SetPadding(FMargin(0, 0, 24, 0));
+	// The optic: which of the catalogue's sights is fitted, or none. Cycled; SAVE writes it and
+	// the weapon in hand is re-equipped with it on the spot.
+	UVerticalBox* OpticCol = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
+	OpticWidget = OpticCol;
+	OpticCol->AddChildToVerticalBox(Crt::FixedText(WidgetTree, TEXT("OPTIC"), S.RowSize, Crt::DimGreen));
+	UButton* OpticButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
+	OpticButton->SetStyle(Crt::ButtonStyle());
+	OpticLabel = Crt::FixedText(WidgetTree, FixedLabel(TEXT("NONE"), 10), S.CaptionSize, Crt::Green);
+	OpticButton->AddChild(OpticLabel);
+	if (UButtonSlot* OS = Cast<UButtonSlot>(OpticLabel->Slot)) { OS->SetPadding(FMargin(10.0f, 4.0f)); }
+	OpticButton->OnClicked.AddDynamic(this, &UReferenceWidget::OnCycleOptic);
+	OpticCol->AddChildToVerticalBox(OpticButton)->SetPadding(FMargin(0, 2, 0, 0));
+	UHorizontalBoxSlot* OpticSlot = Pair->AddChildToHorizontalBox(OpticCol); OpticSlot->SetSize(ESlateSizeRule::Automatic); OpticSlot->SetVerticalAlignment(VAlign_Bottom);
 	Into->AddChildToVerticalBox(Pair)->SetPadding(FMargin(0, 0, 0, 10));
 	// The form: filled per item (FillFields), every field that applies to it.
 	FieldsBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
@@ -545,10 +558,11 @@ void UReferenceWidget::SelectEntry(int32 Index)
 	bHipFireValue = E.bHipFire;
 	ShowHipFire();
 	StanceValue = E.Stance;
+	OpticValue = E.Fields.FindRef(TEXT("optic")); ShowOptic();
 	ShowStance();
 	FillFields(E);
 	const bool bWeapon = E.Category == TEXT("weapons");
-	for (UWidget* W : { FireWidget.Get(), HipWidget.Get(), StanceWidget.Get(), MetaWidget.Get() }) { if (W) { W->SetVisibility(bWeapon ? ESlateVisibility::Visible : ESlateVisibility::Collapsed); } }
+	for (UWidget* W : { FireWidget.Get(), HipWidget.Get(), StanceWidget.Get(), OpticWidget.Get(), MetaWidget.Get() }) { if (W) { W->SetVisibility(bWeapon ? ESlateVisibility::Visible : ESlateVisibility::Collapsed); } }
 	FillMetaTable(bWeapon ? WeaponCatalog::Find(E.Name) : nullptr);
 	if (SoundBox) { SoundBox->SetText(FText::FromString(E.Sound)); }
 	if (DescBox) { DescBox->SetText(FText::FromString(E.Description)); }
@@ -591,6 +605,7 @@ void UReferenceWidget::OnSaveDetail()
 	E.bHipFire = bHipFireValue;
 	E.Stance = StanceValue;
 	ReadFieldsFromForm(E);
+	if (E.Category == TEXT("weapons")) { E.Fields.Add(TEXT("optic"), OpticValue); }
 	// A changed CATEGORY moves the entry to another tab. The record is written with it, and the
 	// list is rebuilt from the file so the card turns up where it now belongs; the tab follows.
 	FString NewCat = E.Fields.FindRef(TEXT("category")).ToLower().TrimStartAndEnd();
@@ -600,6 +615,7 @@ void UReferenceWidget::OnSaveDetail()
 	if (E.Category != TEXT("weapons") && !bKnown && !NewCat.IsEmpty()) { E.Fields.Add(TEXT("category"), E.Category); if (DetailNote) { DetailNote->SetText(FText::FromString(TEXT("CATEGORY must be armor, equipment, consumables or other"))); } }
 	if (bMoved) { E.Category = NewCat; }
 	const bool bOk = SaveEntry(E);
+	if (bOk && E.Category == TEXT("weapons") && OwnerController) { OwnerController->RefreshHeldWeapon(); }   // the weapon in hand picks up its new optic and points now
 	if (DetailNote && !(E.Category != TEXT("weapons") && !bKnown && !NewCat.IsEmpty())) { DetailNote->SetText(FText::FromString(bOk ? (E.Category == TEXT("weapons") ? TEXT("SAVED TO UI/WEAPONS.JSON") : TEXT("SAVED TO UI/ITEMS.JSON")) : TEXT("SAVE FAILED"))); }
 	if (DetailTitle) { DetailTitle->SetText(FText::FromString(E.Name)); }
 	if (bMoved)
@@ -625,6 +641,28 @@ void UReferenceWidget::ShowHipFire()
 	if (!HipFireLabel) { return; }
 	HipFireLabel->SetText(FText::FromString(FixedLabel(bHipFireValue ? TEXT("X  YES") : TEXT("   NO"), 7)));
 	HipFireLabel->SetColorAndOpacity(FSlateColor(bHipFireValue ? Crt::Green : Crt::DimGreen));
+}
+
+void UReferenceWidget::OnCycleOptic()
+{
+	OpticNames = WeaponCatalog::OpticNames();
+	OpticNames.Insert(FString(), 0);   // none first
+	const int32 At = OpticNames.IndexOfByKey(OpticValue);
+	OpticValue = OpticNames[(At + 1) % OpticNames.Num()];
+	if (Entries.IsValidIndex(SelectedIndex))
+	{
+		Entries[SelectedIndex].Fields.Add(TEXT("optic"), OpticValue);
+		if (TObjectPtr<UEditableTextBox>* Box = FieldBoxes.Find(TEXT("optic"))) { if (*Box) { (*Box)->SetText(FText::FromString(OpticValue)); } }
+	}
+	ShowOptic();
+	FillMetaTable(Entries.IsValidIndex(SelectedIndex) ? WeaponCatalog::Find(Entries[SelectedIndex].Name) : nullptr);
+}
+
+void UReferenceWidget::ShowOptic()
+{
+	int32 Widest = 4;
+	for (const FString& N : WeaponCatalog::OpticNames()) { Widest = FMath::Max(Widest, N.Len()); }
+	if (OpticLabel) { OpticLabel->SetText(FText::FromString(FixedLabel(OpticValue.IsEmpty() ? TEXT("NONE") : OpticValue, Widest))); }
 }
 
 void UReferenceWidget::OnCycleStance()
@@ -996,7 +1034,7 @@ static TArray<FRefMarker> MarkersFor(const WeaponCatalog::FWeapon& W)
 	if (Optic && !Optic->Eye.IsNearlyZero())
 	{
 		M.Add({ TEXT("OPTIC MOUNT"), W.OpticMount, FLinearColor(0.3f, 1.0f, 1.0f), W.Optic });
-		M.Add({ TEXT("AIM (optic eye)"), W.OpticMount + Optic->Eye, FLinearColor(1.0f, 0.9f, 0.2f), TEXT("the eye sits behind this") });
+		M.Add({ TEXT("AIM POINT (optic window)"), W.OpticMount + Optic->Eye, FLinearColor(1.0f, 0.9f, 0.2f), TEXT("the eye sits behind this") });
 	}
 	else
 	{
@@ -1090,7 +1128,7 @@ TArray<UReferenceWidget::FMarkerHit> UReferenceWidget::CurrentMarkers() const
 	{
 		const FVector Mount = Point(TEXT("optic_mount"), W->OpticMount);
 		Out.Add({ TEXT("optic_mount"), Mount, FLinearColor(0.3f, 1.0f, 1.0f), TEXT("OPTIC MOUNT") });
-		Out.Add({ TEXT(""), Mount + Optic->Eye, FLinearColor(1.0f, 0.9f, 0.2f), TEXT("AIM (optic eye)") });
+		Out.Add({ TEXT(""), Mount + Optic->Eye, FLinearColor(1.0f, 0.9f, 0.2f), TEXT("AIM POINT (optic window)") });
 	}
 	else
 	{

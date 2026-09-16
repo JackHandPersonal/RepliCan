@@ -2809,8 +2809,15 @@ void ABaseCharacter::OnWeaponFired(const FVector& MuzzleLocal)
 		case EWeaponCarry::LowReady: Scale = RecoilScaleLowReady; break;
 		default: break;
 		}
-		const float Kick = RecoilPitchDegrees * Scale;
-		PC->AddPitchInput(-Kick);
+		// The weapon's own number when it has one (zero is a real answer: no kick), the character's
+		// default otherwise. Applied to the control rotation directly rather than as pitch INPUT:
+		// input goes through InputPitchScale, whose sign is a project setting, and a kick that
+		// arrived through it went DOWN.
+		const float Kick = (WeaponRecoilOverride >= 0.0f ? WeaponRecoilOverride : RecoilPitchDegrees) * Scale;
+		if (Kick > KINDA_SMALL_NUMBER)
+		{
+			FRotator R = PC->GetControlRotation(); R.Pitch = FRotator::NormalizeAxis(R.Pitch + Kick); PC->SetControlRotation(R);
+		}
 		// Queue the return. A burst stacks kicks; each recovers over the same window from now.
 		RecoilToRecover += Kick * FMath::Clamp(RecoilRecoverFraction, 0.0f, 1.0f);
 		RecoilRecoverLeft = RecoilRecoverSeconds;
@@ -2823,7 +2830,7 @@ void ABaseCharacter::TickRecoil(float DeltaSeconds)
 	APlayerController* PC = Cast<APlayerController>(GetController());
 	if (!PC) { RecoilToRecover = 0.0f; RecoilRecoverLeft = 0.0f; return; }
 	const float Step = RecoilToRecover * FMath::Clamp(DeltaSeconds / FMath::Max(RecoilRecoverLeft, KINDA_SMALL_NUMBER), 0.0f, 1.0f);
-	PC->AddPitchInput(Step);
+	{ FRotator R = PC->GetControlRotation(); R.Pitch = FRotator::NormalizeAxis(R.Pitch - Step); PC->SetControlRotation(R); }   // back down, the same way it went up
 	RecoilToRecover -= Step;
 	RecoilRecoverLeft -= DeltaSeconds;
 }

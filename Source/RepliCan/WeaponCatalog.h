@@ -72,6 +72,7 @@ namespace WeaponCatalog
 		// Empty means semi only. "fire_rate" is rounds per second, what auto cycles at.
 		TArray<FString> FireModes;
 		float FireRate = 0.0f;
+		float Recoil = -1.0f;   // "recoil": degrees of kick per shot; absent = the character's default, 0 = none
 	};
 
 	// Loads on first use and caches. Returns null when the name is not a weapon, which is the
@@ -84,6 +85,8 @@ namespace WeaponCatalog
 		FString Name;
 	};
 	REPLICAN_API const FOptic* FindOptic(const FString& OpticName);
+	// Every optic the catalogue knows, by key, sorted: what the Reference page cycles through.
+	REPLICAN_API TArray<FString> OpticNames();
 
 	REPLICAN_API const FWeapon* Find(const FString& ItemName);
 	// Drops the cache so an edited Weapons.json is picked up without restarting.

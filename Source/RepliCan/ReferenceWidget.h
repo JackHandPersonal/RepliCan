@@ -107,6 +107,7 @@ private:
 	UPROPERTY() TObjectPtr<UWidget> FireWidget;
 	UPROPERTY() TObjectPtr<UWidget> HipWidget;
 	UPROPERTY() TObjectPtr<UWidget> StanceWidget;
+	UPROPERTY() TObjectPtr<UWidget> OpticWidget;
 	UPROPERTY() TObjectPtr<UWidget> MetaWidget;
 	UFUNCTION() void OnHipFire();
 	UFUNCTION() void OnToggleMeta();
@@ -130,6 +131,12 @@ private:
 	UPROPERTY() TArray<TObjectPtr<UReferenceFieldBinding>> FieldBindings;
 	void ShowStance();
 	FString StanceValue;
+	// The optic fitted: "" for irons, else a key from the catalogue's optics. Cycled like the stance.
+	FString OpticValue;
+	TArray<FString> OpticNames;
+	UPROPERTY() TObjectPtr<UTextBlock> OpticLabel;
+	UFUNCTION() void OnCycleOptic();
+	void ShowOptic();
 	TArray<FString> StanceNames;   // the catalogue's stances, the order the button cycles them in
 	UPROPERTY() TObjectPtr<UTextBlock> StanceLabel;
 	// The catalogue's points for the weapon on show: filled dots over the render (PaintMarkers)

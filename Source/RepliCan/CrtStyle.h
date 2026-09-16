@@ -121,6 +121,7 @@ namespace Crt
 		// widget up and left of the real hotspot -- fixed in UCrtCursorWidget, not here.
 		Box->SetScrollbarPadding(FMargin(0.0f));
 		Box->SetAllowRightClickDragScrolling(true);
+		Box->SetAllowOverscroll(false);   // a list stops at its end; the rubber-band read as a glitch on a CRT panel
 		// No shadow at the edges when the content runs past them: on a dark panel it read as a
 		// smear over the first and last rows.
 		{

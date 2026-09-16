@@ -194,8 +194,36 @@ void UAmbientPlayer::Stop()
 	CurrentProfile.Reset();
 }
 
-float UAmbientPlayer::PlayOneShot(UObject* Outer, UWorld* World, const FString& File, float Volume, float Pitch)
+namespace
 {
+	double GShotAt = -1000.0; float GShotDepth = 0.0f; float GShotSeconds = 1.0f;
+}
+
+void UAmbientPlayer::NoteShot(float Depth, float Seconds)
+{
+	GShotAt = FPlatformTime::Seconds(); GShotDepth = FMath::Clamp(Depth, 0.0f, 1.0f); GShotSeconds = FMath::Max(0.05f, Seconds);
+}
+
+float UAmbientPlayer::CurrentDuck()
+{
+	const float T = (float)(FPlatformTime::Seconds() - GShotAt) / GShotSeconds;
+	if (T >= 1.0f) { return 0.0f; }
+	const float Left = 1.0f - T;
+	return GShotDepth * Left * Left;   // comes back slowly at first, then all at once, like hearing after a bang
+}
+
+void UAmbientPlayer::Duck(UWorld* World, float Depth, float Seconds)
+{
+	if (!World) { return; }
+	if (!World->GetTimerManager().IsTimerActive(DuckTimer)) { PreDuckFade = Fade; }
+	SetFade(PreDuckFade * (1.0f - FMath::Clamp(Depth, 0.0f, 1.0f)), 0.02f);
+	const float Restore = PreDuckFade;
+	World->GetTimerManager().SetTimer(DuckTimer, FTimerDelegate::CreateWeakLambda(this, [this, Restore, Seconds]() { SetFade(Restore, FMath::Max(0.1f, Seconds * 0.8f)); }), 0.15f, false);
+}
+
+float UAmbientPlayer::PlayOneShot(UObject* Outer, UWorld* World, const FString& File, float Volume, float Pitch, bool bIgnoreDuck)
+{
+	if (!bIgnoreDuck) { Volume *= (1.0f - CurrentDuck()); }
 	if (!World) { return 0.0f; }
 	float Seconds = 0.0f;
 	USoundWave* Sound = VoiceLines::LoadWav(Outer ? Outer : World, FPaths::Combine(RawAudioDir(), File), Seconds);

@@ -376,6 +376,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Weapon|Sound") float ReportVolumeFirstPerson = 1.6f;
 	UPROPERTY(EditAnywhere, Category = "Weapon|Sound") float ReportVolumeThirdPerson = 1.0f;
 	UPROPERTY(EditAnywhere, Category = "Weapon|Sound") float ImpactScaleFirstPerson = 0.45f;
+	// How far the rest of the mix drops on a shot and how long it takes to come back.
+	UPROPERTY(EditAnywhere, Category = "Weapon|Sound") float ShotDuckDepth = 0.85f;
+	UPROPERTY(EditAnywhere, Category = "Weapon|Sound") float ShotDuckSeconds = 1.1f;
 	// The Reference screen (the item catalogue), reached from the menu; closing returns to the menu.
 	UFUNCTION(BlueprintCallable, Category = "Menu") void ShowReference();
 	UFUNCTION(BlueprintCallable, Category = "Menu") void HideReference();

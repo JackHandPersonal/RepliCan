@@ -15,7 +15,8 @@ The mapping is here, by BigSoundBank id (all CC0 -- "free and royalty-free, comm
     0532  shotgun, several shots      -> wep_shotgun (the first shot)
 wep_heavy and wep_launcher stay synthesised until a sample turns up.
 """
-import os, struct, wave, array, audioop
+import os, struct, wave, array, math
+DRIVE = 2.4   # soft-clip drive: 1 = untouched, 3 = brick
 import miniaudio
 
 SRC = r'C:\Dev\Games\RepliCan\RawAudio\samples'
@@ -54,8 +55,11 @@ for stem, (name, max_seconds) in MAP.items():
     fade = min(n, int(0.12 * SR))
     for i in range(fade):
         out[n - 1 - i] *= i / float(fade)
+    # LOUDER: a real shot is one huge transient over a quiet tail, so a peak-normalised take is
+    # mostly quiet. Driving it through a soft clip lifts the body and tail toward the peak
+    # (density, the way a limiter would) without the peak going anywhere.
     m = max(1e-6, max(abs(v) for v in out))
-    out = [v * 0.95 / m for v in out]
+    out = [math.tanh((v / m) * DRIVE) / math.tanh(DRIVE) * 0.95 for v in out]
     with wave.open(os.path.join(OUT, name + '.wav'), 'wb') as w:
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
         w.writeframes(b''.join(struct.pack('<h', int(max(-1.0, min(1.0, v)) * 32767)) for v in out))

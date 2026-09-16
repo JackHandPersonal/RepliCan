@@ -1455,6 +1455,9 @@ public:
 	// alignment falls back to the bore line.
 	void SetWeaponSight(const FVector& SightLocal, bool bHasSight, float SightPitch);
 	bool IsFirstPerson() const { return bInFirstPerson; }
+	// The held weapon's recoil in degrees (its catalogue "recoil"); below zero means it has none listed and RecoilPitchDegrees applies.
+	float WeaponRecoilOverride = -1.0f;
+	void SetWeaponRecoil(float Degrees) { WeaponRecoilOverride = Degrees; }
 	// UNSTUCK. Every couple of seconds on solid ground the spot is remembered; asked to get
 	// unstuck, the character goes back to the newest remembered spot that is a stride away and
 	// has room for the capsule, and failing every one of those, to the player start. Returns

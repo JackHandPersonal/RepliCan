@@ -88,7 +88,13 @@ try:
         create = unreal.GeometryScriptCreateNewStaticMeshAssetOptions(); create.enable_recompute_normals = True; create.enable_recompute_tangents = True
         asset, _ = unreal.GeometryScript_NewAssetUtils.create_new_static_mesh_asset_from_mesh(dyn, full, create)
         if asset: asset.set_editor_property('static_materials', [unreal.StaticMaterial(material_interface=m) for m in (combined if combined else body_mats + [glass_mat])])
-    unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
+    # A brand-new asset is not yet in the registry, and EditorAssetLibrary refuses to save what it
+    # cannot find; the loading-and-saving utility takes the package itself.
+    ok = unreal.EditorLoadingAndSavingUtils.save_packages([asset.get_outermost()], False)
+    import os
+    on_disk = os.path.exists(unreal.Paths.project_content_dir() + 'RepliCan/Optics/' + NAME + '.uasset')
+    print('saved:', ok, ' on disk:', on_disk)
+    if not on_disk: raise RuntimeError('the optic asset did not reach disk')
     doc = json.load(io.open(CAT, encoding='utf-8'))
     doc.setdefault('optics', {})[KEY] = {'mesh': full, 'eye': [round(lens_x, 2), round(yc, 2), round(zc, 2)], 'sit': round(zc, 2), 'name': PRETTY, 'source': SRC}
     if ASSIGN_TO in doc['weapons']:

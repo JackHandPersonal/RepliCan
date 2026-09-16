@@ -76,6 +76,7 @@ namespace ItemFields
 		{ TEXT("spread_aim"),    TEXT("SPREAD AIM"),    TEXT("WEAPON"),   EType::Number,   EScope::Weapons, TEXT("degrees") },
 		{ TEXT("recoil"),        TEXT("RECOIL"),        TEXT("WEAPON"),   EType::Number,   EScope::Weapons, TEXT("degrees of kick") },
 		{ TEXT("range_m"),       TEXT("RANGE M"),       TEXT("WEAPON"),   EType::Number,   EScope::Weapons, TEXT("") },
+		{ TEXT("optic"),         TEXT("OPTIC"),         TEXT("WEAPON"),   EType::Text,     EScope::Weapons, TEXT("an optics key from Weapons.json (the OPTIC cycle above lists them), or empty for irons") },
 		// armour
 		{ TEXT("armor_value"),   TEXT("ARMOR"),         TEXT("ARMOUR"),   EType::Number,   EScope::Armor,   TEXT("") },
 		{ TEXT("body_slot"),     TEXT("BODY SLOT"),     TEXT("ARMOUR"),   EType::Text,     EScope::Armor,   TEXT("Head Chest Arms Hands Legs Feet Back") },
