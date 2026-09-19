@@ -1,4 +1,5 @@
 #include "UI/TerminalWidget.h"
+#include "Core/JsonDataFile.h"
 #include "Core/BasePlayerController.h"
 #include "UI/CrtStyle.h"
 #include "Blueprint/WidgetTree.h"
@@ -71,11 +72,8 @@ void UTerminalWidget::NativeOnInitialized()
 void UTerminalWidget::LoadEntry(const FString& TerminalId)
 {
 	Banner.Reset(); Files.Reset();
-	FString Json;
-	if (!FFileHelper::LoadFileToString(Json, *FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("Terminals.json")))) { Banner.Add(TEXT("NO TERMINAL TABLE (UI/Terminals.json)")); return; }
-	TSharedPtr<FJsonObject> Root;
-	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
-	if (!FJsonSerializer::Deserialize(Reader, Root) || !Root.IsValid()) { Banner.Add(TEXT("TERMINAL TABLE UNREADABLE")); return; }
+	TSharedPtr<FJsonObject> Root = JsonData::Load(TEXT("UI"), TEXT("Terminals.json"), TEXT("Terminals"));
+	if (!Root.IsValid()) { Banner.Add(TEXT("NO TERMINAL TABLE (UI/Terminals.json)")); return; }
 	// The entry by id, else "default"; a "files" map and a "banner" list on each.
 	const TSharedPtr<FJsonObject>* Entry = nullptr;
 	if (!Root->TryGetObjectField(TerminalId, Entry) || !Entry) { if (!Root->TryGetObjectField(TEXT("default"), Entry) || !Entry) { return; } }

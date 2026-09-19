@@ -1,4 +1,5 @@
 #include "Characters/CharacterConfig.h"
+#include "Core/JsonDataFile.h"
 #include "JsonObjectConverter.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
@@ -13,7 +14,7 @@
 
 FString CharacterConfigFile::GetDirectory()
 {
-	return FPaths::Combine(FPaths::ProjectDir(), TEXT("Characters"));
+	return FPaths::Combine(JsonData::DataDir(), TEXT("Characters"));
 }
 
 FString CharacterConfigFile::GetPath(const FString& Name)

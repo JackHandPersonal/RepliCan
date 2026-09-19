@@ -33,7 +33,7 @@ protected:
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;   // a click on a cell picks it
 	virtual FReply NativeOnMouseWheel(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;        // the wheel edits the cell under the cursor, else the picked one
 	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;     // letting go of a pane puts the view back
-	virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;         // dragging a pane moves it
+	virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;         // left drag moves the weapon, right drag looks round it
 	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
 	UFUNCTION() void OnPresetR0(); UFUNCTION() void OnPresetR1(); UFUNCTION() void OnPresetR2(); UFUNCTION() void OnPresetR3(); UFUNCTION() void OnPresetR4();
 	UFUNCTION() void OnPresetL0(); UFUNCTION() void OnPresetL1(); UFUNCTION() void OnPresetL2(); UFUNCTION() void OnPresetL3(); UFUNCTION() void OnPresetL4();
@@ -51,12 +51,18 @@ protected:
 	UFUNCTION() void OnPrevWeapon();
 	UFUNCTION() void OnNextWeapon();
 	UPROPERTY() TObjectPtr<class UTextBlock> WeaponLabel;
+	// WHOSE BODY the page is tuning: the stand-in in the booth and the eyeline are the same choice.
+	UPROPERTY() TObjectPtr<class UTextBlock> CharacterLabel;
+	UPROPERTY() TObjectPtr<class UWidget> CharacterPrev;
+	UPROPERTY() TObjectPtr<class UWidget> CharacterNext;
 	UPROPERTY() TObjectPtr<class UTextBlock> OpticLabel;
 	UPROPERTY() TObjectPtr<class UTextBlock> SaveLabel;
 	UPROPERTY() TObjectPtr<class UWidget> OpticPrev;
 	UPROPERTY() TObjectPtr<class UWidget> OpticNext;
 	UPROPERTY() TObjectPtr<class UWidget> SkinPrev;
 	UFUNCTION() void OnPrevSkin();
+	UFUNCTION() void OnPrevCharacter();
+	UFUNCTION() void OnNextCharacter();
 	UFUNCTION() void OnPrevOptic();
 	UFUNCTION() void OnNextOptic();
 	// The sight own paint, under the sight it belongs to.
@@ -115,6 +121,11 @@ private:
 		class UBorder* Box = nullptr;      // owned by the widget tree
 		class UTextBlock* Text = nullptr;
 		const TCHAR* Axis = TEXT("");
+		// A MODE ROW shows one cell, not three: the column IS the carry (or the aim) in view, so the
+		// other two were always dimmed and never touched. AxisSet names them; bAim says which selector.
+		const TCHAR* const* AxisSet = nullptr;
+		bool bActiveCol = false;
+		bool bAim = false;
 		bool bDegrees = false;
 		bool bWhole = false;               // finger curls read as whole degrees
 	};
@@ -129,7 +140,11 @@ private:
 	UPROPERTY() TArray<TObjectPtr<class UWidget>> PresetButtons;
 	UPROPERTY() TArray<TObjectPtr<class UTextBlock>> PresetLabels;
 	void Preset(int32 Index, bool bSupport);
-	bool bDragging = false;
+	bool bDragging = false;   // left: moving the weapon
+	bool bOrbiting = false;   // right: looking round it
+	int32 DragAxisHeld() const;
+	int32 DragTargetAt(const FVector2D& ScreenPos) const;   // 0 the weapon, 1 the main hand, 2 the support hand
+	int32 DragTarget = 0;
 	FVector2D DragFrom = FVector2D::ZeroVector;
 	int32 HoveredCell() const;
 	void Pick(int32 Index);
@@ -137,5 +152,6 @@ private:
 	// A cell the carry in view does not use -- the hunch away from the sights, low ready's angles
 	// anywhere else, the pull column belonging to another carry -- is greyed and inert.
 	bool CellLive(const FCell& Cell) const;
+	int32 CellColumn(const FCell& Cell) const;
 	void Adjust(int32 Index, float Notches, bool bFine, bool bCoarse);
 };

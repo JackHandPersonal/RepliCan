@@ -1,4 +1,5 @@
 #include "World/AmbientPlayer.h"
+#include "Core/JsonDataFile.h"
 #include "Sound/SoundAttenuation.h"
 #include "Dom/JsonObject.h"
 #include "Serialization/JsonSerializer.h"
@@ -15,7 +16,7 @@
 
 FString UAmbientPlayer::RawAudioDir()
 {
-	return FPaths::ConvertRelativePathToFull(FPaths::Combine(FPaths::ProjectDir(), TEXT("RawAudio")));
+	return FPaths::ConvertRelativePathToFull(FPaths::Combine(JsonData::DataDir(), TEXT("RawAudio")));
 }
 
 void UAmbientPlayer::Start(UWorld* World, const FString& Profile)
@@ -69,12 +70,8 @@ void UAmbientPlayer::Start(UWorld* World, const FString& Profile)
 // no noise. A missing file is not an error -- a level with no steam in it is a valid level.
 void UAmbientPlayer::AddSteamVents(UWorld* World)
 {
-	FString Text;
-	const FString Path = FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("SteamVents.json"));
-	if (!FFileHelper::LoadFileToString(Text, *Path)) { return; }
-	TSharedPtr<FJsonObject> Root;
-	const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Text);
-	if (!FJsonSerializer::Deserialize(Reader, Root) || !Root.IsValid()) { return; }
+	TSharedPtr<FJsonObject> Root = JsonData::Load(TEXT("UI"), TEXT("SteamVents.json"), TEXT("SteamVents"));
+	if (!Root.IsValid()) { return; }
 	const TArray<TSharedPtr<FJsonValue>>* Vents = nullptr;
 	if (!Root->TryGetArrayField(TEXT("vents"), Vents) || !Vents) { return; }
 

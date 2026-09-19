@@ -1,4 +1,5 @@
 #include "Narrative/SequenceData.h"
+#include "Core/JsonDataFile.h"
 #include "Narrative/ConversationData.h"
 #include "Dom/JsonObject.h"
 #include "HAL/FileManager.h"
@@ -18,7 +19,7 @@ int32 FSequence::FindLabel(const FString& Label) const
 
 FString SequenceFile::GetDirectory()
 {
-	return FPaths::ConvertRelativePathToFull(FPaths::Combine(FPaths::ProjectDir(), TEXT("Sequences")));
+	return FPaths::ConvertRelativePathToFull(FPaths::Combine(JsonData::DataDir(), TEXT("Sequences")));
 }
 
 FString SequenceFile::GetPath(const FString& Name)
@@ -58,10 +59,8 @@ namespace
 
 bool SequenceFile::Load(const FString& Name, FSequence& Out)
 {
-	FString Json;
-	if (!FFileHelper::LoadFileToString(Json, *GetPath(Name))) { return false; }
-	TSharedPtr<FJsonObject> Root;
-	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Json), Root) || !Root.IsValid()) { return false; }
+	TSharedPtr<FJsonObject> Root = JsonData::LoadObject(GetPath(Name), TEXT("Sequence"));
+	if (!Root.IsValid()) { return false; }
 
 	Out = FSequence();
 	Out.Name = Name;

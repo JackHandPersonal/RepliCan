@@ -1,4 +1,5 @@
 #include "Core/BasePlayerController.h"
+#include "Core/JsonDataFile.h"
 #include "Characters/BaseCharacter.h"
 #include "UI/CharacterBuilderWidget.h"
 #include "UI/EditToolWidget.h"
@@ -589,7 +590,7 @@ void ABasePlayerController::HandTuneLoadWeapon(const WeaponCatalog::FWeapon* W)
 	auto Five = [](const TArray<float>& In) { TArray<float> Out = In; Out.SetNumZeroed(5); return Out; };
 	HT_FingersR0 = HT_FingersR = Five(W->FingersR); HT_FingersL0 = HT_FingersL = Five(W->FingersL);
 	HT_Hunch0 = HT_Hunch = W->Hunch; HT_Lean0 = HT_Lean = W->LeanDeg;
-	for (int32 i = 0; i < 3; ++i) { HT_Pull3_0[i] = HT_Pull3[i] = W->PullCm[i]; HT_Lat3_0[i] = HT_Lat3[i] = W->LateralCm[i]; }
+	for (int32 i = 0; i < 3; ++i) { HT_Pull3_0[i] = HT_Pull3[i] = W->PullCm[i]; HT_Lat3_0[i] = HT_Lat3[i] = W->LateralCm[i]; HT_Pos3_0[i] = HT_Pos3[i] = W->PositionCm[i]; HT_Grip3_0[i] = HT_Grip3[i] = W->GripCm[i]; HT_Fore3_0[i] = HT_Fore3[i] = W->ForeCm[i]; }
 	HT_LowReady0[0] = HT_LowReady[0] = W->LowReadyPitch; HT_LowReady0[1] = HT_LowReady[1] = W->LowReadyYaw;
 	for (int32 i = 0; i < 3; ++i) { HT_ElbowMain0[i] = HT_ElbowMain[i] = W->ElbowMain[i]; HT_ElbowSup0[i] = HT_ElbowSup[i] = W->ElbowSupport[i]; }
 	HT_OpticKey = W->Optic;
@@ -647,7 +648,7 @@ int32 ABasePlayerController::RefreshTunedWeapon(const FString& WeaponName)
 
 void ABasePlayerController::HandTuneStepWeapon(int32 Dir)
 {
-	if (!bHandTuneOpen) { return; }
+	if (!Screens.IsOpen(EScreen::HandTune)) { return; }
 	const TArray<FString> Names = WeaponCatalog::TunableNames();
 	if (Names.Num() == 0) { return; }
 	int32 At = Names.IndexOfByKey(HandTuneName);
@@ -666,36 +667,42 @@ void ABasePlayerController::ShowHandTune(const FString& WeaponName)
 	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
 	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(WeaponName);
 	if (!Me || !W || !GetWorld()) { SetDiagNoteTimed(FString::Printf(TEXT("HandTune: no pawn, or no weapon named %s"), *WeaponName), 4.0f); return; }
-	if (bHandTuneOpen) { HideHandTune(); }
-	bHandTuneReturnToReference = bReferenceOpen;
-	if (bReferenceOpen) { HideReference(); }
+	if (Screens.IsOpen(EScreen::HandTune)) { HideHandTune(); }
+	bHandTuneReturnToReference = Screens.IsOpen(EScreen::Reference);
+	if (Screens.IsOpen(EScreen::Reference)) { HideReference(); }
 	HandTuneLoadWeapon(W);
-	HT_EyeSide0 = HT_EyeSide = Me->GetEyeSideCm(); HT_EyeUp0 = HT_EyeUp = Me->GetEyeUpCm(); HT_EyeFwd0 = HT_EyeFwd = Me->GetEyeForwardCm();   // the eyeline is the body's, not the weapon's
-	// THE STAND-IN: the player's own likeness (Characters/Player.json) in the booth the character
+	HT_EyeSide0 = HT_EyeSide = Me->GetEyeSideCm(); HT_EyeUp0 = HT_EyeUp = Me->GetEyeUpCm(); HT_EyeFwd0 = HT_EyeFwd = Me->GetEyeForwardCm();   // the eyeline is the body's, not the weapon's -- reseeded below from whichever body the booth ends up as
+	// THE STAND-IN: a saved likeness (Characters/<name>.json) in the booth the character
 	// sheet's mirror uses. Spawned through SpawnBoothCharacter, which spawns DEFERRED and sets the
 	// config name before FinishSpawning so BeginPlay builds the body from the file -- a config
 	// applied after an ordinary spawn leaves the bare crew rig standing there in its overalls.
 	// The player is not touched: the world changes on SAVE and at no other moment.
-	ABaseCharacter* Booth = SpawnBoothCharacter(TEXT("Player"));
-	if (!Booth)
+	// THE DEFAULT BODY IS THE ONE BEING PLAYED -- nose, hair, brow and all. Read off the live pawn
+	// rather than assuming "Player", so the page opens on whoever is actually in the world. Stepping
+	// the CHARACTER selector moves off it; reopening the page comes back to it.
+	if (const ABaseCharacter* LivePlayer = Cast<ABaseCharacter>(GetPawn()))
 	{
-		SetDiagNoteTimed(TEXT("HandTune: no saved likeness to stand in (Characters/Player.json)"), 5.0f);
+		const FString LiveName = LivePlayer->GetCharacterConfig().Name;
+		if (!LiveName.IsEmpty() && IFileManager::Get().FileExists(*CharacterConfigFile::GetPath(LiveName))) { HandTuneCharacter = LiveName; }
+	}
+	if (!HandTuneSpawnBooth(W))
+	{
+		SetDiagNoteTimed(FString::Printf(TEXT("HandTune: no saved likeness to stand in (Characters/%s.json)"), *HandTuneCharacter), 5.0f);
 		if (bHandTuneReturnToReference) { bHandTuneReturnToReference = false; ShowReference(); }
 		return;
 	}
-	HandTunePawn = Booth;
-	// Collision and movement are left exactly as the booth spawned them: the booth has a floor tile
-	// and the figure stands on it, which is how the character sheet's mirror has always worked.
-	// Switching collision off here dropped the stand-in through the floor and out of the light.
-	Booth->SetZoomLevel(2);   // third person: the head stays drawn
-	// Its own controller: a pawn reads its view rotation off its controller, and the page's AIM sets it.
-	FActorSpawnParameters SP; SP.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	HandTuneController = GetWorld()->SpawnActor<AHandTuneController>(AHandTuneController::StaticClass(), Booth->GetActorLocation(), FRotator::ZeroRotator, SP);
-	if (HandTuneController) { HandTuneController->Possess(Booth); HandTuneController->SetTickableWhenPaused(true); }
-	ApplyWeaponToPawn(Booth, W);
-	Booth->SetAiming(false);
-	// The page pauses the game; this one character keeps running, weapon and all.
-	Booth->SetTicksWhenPaused(true);
+	ABaseCharacter* Booth = HandTunePawn;
+	// The eyeline belongs to the BODY, so it comes from whichever body the booth ended up as rather
+	// than from the pawn the page was opened from. They are the same character by default and differ
+	// the moment the CHARACTER selector is stepped.
+	{
+		FCharacterConfig BoothCfg;
+		if (CharacterConfigFile::Load(HandTuneCharacter, BoothCfg))
+		{
+			HT_EyeSide0 = HT_EyeSide = BoothCfg.EyeSideCm; HT_EyeUp0 = HT_EyeUp = BoothCfg.EyeUpCm; HT_EyeFwd0 = HT_EyeFwd = BoothCfg.EyeForwardCm;
+		}
+		if (Booth) { Booth->SetEyeTune(HT_EyeSide, HT_EyeUp, HT_EyeFwd); }
+	}
 	HandTuneResetView();
 	HT_Zoom = 1.0f; HT_ViewIdx = 1;
 	HandTuneSetCarry(1);
@@ -770,7 +777,7 @@ void ABasePlayerController::ShowHandTune(const FString& WeaponName)
 		HandTuneWidget = CreateWidget<UHandTuneWidget>(this, UHandTuneWidget::StaticClass());
 		if (HandTuneWidget) { HandTuneWidget->OnClose.BindUObject(this, &ABasePlayerController::HideHandTune); }
 	}
-	bHandTuneOpen = true;
+	Screens.Open(EScreen::HandTune);
 	TickHandTune();   // the captures on the subject before the first frame is drawn
 	if (HandTuneWidget)
 	{
@@ -788,7 +795,7 @@ void ABasePlayerController::ShowHandTune(const FString& WeaponName)
 
 void ABasePlayerController::TickHandTune()
 {
-	if (!bHandTuneOpen || !HandTunePawn || !HandTunePawn->GetMesh()) { return; }
+	if (!Screens.IsOpen(EScreen::HandTune) || !HandTunePawn || !HandTunePawn->GetMesh()) { return; }
 	ABaseCharacter* Booth = HandTunePawn;
 	// THE PIVOT IS THE WEAPON. It is the thing being tuned, so it holds the middle of both pictures
 	// and a drag swings the camera round it -- the weapon does not slide about the frame while you
@@ -862,8 +869,8 @@ void ABasePlayerController::TickHandTune()
 
 void ABasePlayerController::HideHandTune()
 {
-	if (!bHandTuneOpen) { return; }
-	bHandTuneOpen = false;
+	if (!Screens.IsOpen(EScreen::HandTune)) { return; }
+	Screens.Close(EScreen::HandTune);
 	if (HandTuneWidget && HandTuneWidget->IsInViewport()) { HandTuneWidget->RemoveFromParent(); }
 	if (HandTuneCap) { HandTuneCap->Destroy(); HandTuneCap = nullptr; }
 	if (HandTuneAimLine) { HandTuneAimLine->DestroyComponent(); HandTuneAimLine = nullptr; }
@@ -895,14 +902,22 @@ void ABasePlayerController::HandTuneApply()
 {
 	ABaseCharacter* Me = HandTunePawn;   // the stand-in, never the player
 	if (!Me) { return; }
-	Me->SetWeaponGrip(HT_Grip + WeaponCatalog::StanceGripNudge(HT_Stance));
+	{
+		// PER CARRY, with the stance nudge on each: the character blends between them, so the hands
+		// travel with the gun on a carry change instead of snapping at the end of it.
+		FVector G[3], F[3];
+		const FVector Nudge = WeaponCatalog::StanceGripNudge(HT_Stance);
+		for (int32 i = 0; i < 3; ++i) { G[i] = HT_Grip3[i] + Nudge; F[i] = HT_Fore3[i]; }
+		Me->SetWeaponGripPerCarry(G, F);
+		Me->SetWeaponGrip(G[FMath::Clamp(HandTuneCarryIdx, 0, 2)]);   // the un-blended fallback, for when the sight solve is not running
+	}
 	Me->SetWeaponHandRotation(HT_HandRot);
-	Me->SetWeaponForeGrip(HT_Fore, HT_HasFore || !HT_Fore.IsNearlyZero(), HT_ForePitch);
+	Me->SetWeaponForeGrip(HT_Fore3[FMath::Clamp(HandTuneCarryIdx, 0, 2)], HT_HasFore || !HT_Fore3[1].IsNearlyZero(), HT_ForePitch);
 	Me->SetWeaponForeHandRotation(HT_ForeRot);
 	Me->SetWeaponFingers(HT_FingersR, HT_FingersL);
 	Me->SetWeaponHunch(HT_Hunch);
 	Me->SetWeaponLean(HT_Lean);
-	Me->SetWeaponCarryTune(HT_Pull3, HT_Lat3);
+	Me->SetWeaponCarryPos(HT_Pos3);
 	Me->SetEyeTune(HT_EyeSide, HT_EyeUp, HT_EyeFwd);
 	Me->SetWeaponLowReady(HT_LowReady[0], HT_LowReady[1]);
 	Me->SetWeaponElbowTwist(HT_ElbowMain, HT_ElbowSup);
@@ -918,10 +933,10 @@ float ABasePlayerController::HandTuneValue(int32 Row, int32 Col) const
 	auto F = [](const TArray<float>& A, int32 C) { return A.IsValidIndex(C) ? A[C] : 0.0f; };
 	switch (Row)
 	{
-	case 0: return (float)V(HT_Grip, Col);
+	case 0: return (float)V(HT_Grip3[FMath::Clamp(HandTuneCarryIdx, 0, 2)], Col);
 	case 1: return (float)R(HT_HandRot, Col);
 	case 2: return F(HT_FingersR, Col);
-	case 3: return (float)V(HT_Fore, Col);
+	case 3: return (float)V(HT_Fore3[FMath::Clamp(HandTuneCarryIdx, 0, 2)], Col);
 	case 4: return (float)R(HT_ForeRot, Col);
 	case 5: return F(HT_FingersL, Col);
 	case 6: return HT_Hunch;
@@ -936,6 +951,7 @@ float ABasePlayerController::HandTuneValue(int32 Row, int32 Col) const
 	case 13: return (Col >= 0 && Col < 3) ? HT_ElbowSup[Col] : 0.0f;
 	case 16: return (Col == 0) ? HT_OpticOff.X : (Col == 1) ? HT_OpticOff.Y : HT_OpticOff.Z;
 	case 17: return HT_ScalePct;
+	case 18: { const int32 C = FMath::Clamp(HandTuneCarryIdx, 0, 2); return (Col == 0) ? (float)HT_Pos3[C].X : (Col == 1) ? (float)HT_Pos3[C].Y : (float)HT_Pos3[C].Z; }
 	default: return 0.0f;
 	}
 }
@@ -947,10 +963,10 @@ void ABasePlayerController::HandTuneAdjust(int32 Row, int32 Col, float Delta)
 	auto F = [](TArray<float>& A, int32 C, float D) { if (A.Num() < 5) { A.SetNumZeroed(5); } if (A.IsValidIndex(C)) { A[C] = FMath::Clamp(A[C] + D, -90.0f, 90.0f); } };
 	switch (Row)
 	{
-	case 0: V(HT_Grip, Col, Delta); break;
+	case 0: V(HT_Grip3[FMath::Clamp(HandTuneCarryIdx, 0, 2)], Col, Delta); break;   // the hold for the carry in view
 	case 1: R(HT_HandRot, Col, Delta); break;
 	case 2: F(HT_FingersR, Col, Delta); break;
-	case 3: V(HT_Fore, Col, Delta); break;
+	case 3: V(HT_Fore3[FMath::Clamp(HandTuneCarryIdx, 0, 2)], Col, Delta); break;
 	case 4: R(HT_ForeRot, Col, Delta); break;
 	case 5: F(HT_FingersL, Col, Delta); break;
 	case 6: HT_Hunch = FMath::Clamp(HT_Hunch + Delta, -8.0f, 16.0f); break;   // centimetres of shrug, at the sights
@@ -961,6 +977,15 @@ void ABasePlayerController::HandTuneAdjust(int32 Row, int32 Col, float Delta)
 	case 11: if (Col >= 0 && Col < 2) { HT_LowReady[Col] = FMath::Clamp(HT_LowReady[Col] + Delta, -90.0f, 90.0f); } break;
 	// The optic, along the weapon own axes: x down the barrel, y across, z up off the rail.
 	case 17: HT_ScalePct = FMath::Clamp(HT_ScalePct + Delta, 25.0f, 400.0f); break;
+	// THE WEAPON'S PLACE. Only the carry the page is showing is touched -- the row is one carry wide.
+	case 18:
+	{
+		const int32 C = FMath::Clamp(HandTuneCarryIdx, 0, 2);
+		if (Col == 0) { HT_Pos3[C].X = FMath::Clamp(HT_Pos3[C].X + Delta, -40.0f, 40.0f); }
+		else if (Col == 1) { HT_Pos3[C].Y = FMath::Clamp(HT_Pos3[C].Y + Delta, -20.0f, 40.0f); }
+		else { HT_Pos3[C].Z = FMath::Clamp(HT_Pos3[C].Z + Delta, -40.0f, 40.0f); }
+		break;
+	}
 	case 16:
 		if (Col == 0) { HT_OpticOff.X = FMath::Clamp(HT_OpticOff.X + Delta, -40.0f, 40.0f); }
 		else if (Col == 1) { HT_OpticOff.Y = FMath::Clamp(HT_OpticOff.Y + Delta, -20.0f, 20.0f); }
@@ -972,6 +997,90 @@ void ABasePlayerController::HandTuneAdjust(int32 Row, int32 Col, float Delta)
 	case 13: if (Col >= 0 && Col < 3) { HT_ElbowSup[Col] = FMath::Clamp(HT_ElbowSup[Col] + Delta, -180.0f, 180.0f); } break;
 	default: return;
 	}
+	HandTuneApply();
+	// MEASURING, NOT GUESSING. The position row reports what it just set and where the weapon
+	// actually ended up, so one wheel click separates the two possible faults: if pos[] changes and
+	// the weapon world does not, the value reaches the pawn and the solve is ignoring it; if pos[]
+	// does not change, the break is before the pawn. (The world reading is one frame behind -- the
+	// solve runs on Tick -- so compare successive clicks rather than one.)
+	if (Row == 18 && HandTunePawn && HandTunePawn->WeaponMeshComponent)
+	{
+		const int32 C = FMath::Clamp(HandTuneCarryIdx, 0, 2);
+		const FVector Wp = HandTunePawn->WeaponMeshComponent->GetComponentLocation();
+		SetDiagNoteTimed(FString::Printf(TEXT("pos[%d] %.1f %.1f %.1f   weapon %.1f %.1f %.1f"),
+			C, HT_Pos3[C].X, HT_Pos3[C].Y, HT_Pos3[C].Z, Wp.X, Wp.Y, Wp.Z), 6.0f);
+	}
+}
+
+
+// THE PICTURE'S OWN AXES AND ITS SCALE. The hand-tune capture is ORTHOGRAPHIC, so a pixel is a
+// fixed number of centimetres and no unprojection is needed: right and up come off the camera's
+// rotation, so this is correct in every one of the five views AND after an orbit, rather than
+// needing a case per view.
+
+// WHERE THE TWO HANDS ARE, in world space, so the page can tell which one the pointer is over.
+// Taken from the grip points ON THE WEAPON rather than from the hand bones: the bones lag the solve
+// by an animation frame, and what the drag is about to edit is the grip, not the bone.
+bool ABasePlayerController::HandTuneHandPoints(FVector& OutMain, FVector& OutSupport, bool& bOutHasSupport) const
+{
+	if (!HandTunePawn || !HandTunePawn->WeaponMeshComponent) { return false; }
+	const FTransform WT = HandTunePawn->WeaponMeshComponent->GetComponentTransform();
+	const int32 C = FMath::Clamp(HandTuneCarryIdx, 0, 2);
+	OutMain = WT.TransformPosition(HT_Grip3[C]);
+	OutSupport = WT.TransformPosition(HT_Fore3[C]);
+	bOutHasSupport = HT_HasFore || !HT_Fore3[C].IsNearlyZero();
+	return true;
+}
+
+// DRAGGING A HAND moves where it holds the weapon, which is the grip -- expressed in the WEAPON's
+// own local space, so the world movement is unrotated by the weapon and divided by its draw scale.
+// The weapon itself does not move: the solve still puts it where the carry position says, and it is
+// the hand that slides along it. That is the opposite of dragging the gun, and it is why the two
+// need different targets rather than one drag with a modifier.
+void ABasePlayerController::HandTuneDragGrip(const FVector& WorldDelta, bool bSupport, int32 LockAxis)
+{
+	if (!HandTunePawn || !HandTunePawn->WeaponMeshComponent) { return; }
+	const FTransform WT = HandTunePawn->WeaponMeshComponent->GetComponentTransform();
+	FVector D = WT.GetRotation().UnrotateVector(WorldDelta);
+	const FVector S = WT.GetScale3D();
+	D = FVector(S.X > KINDA_SMALL_NUMBER ? D.X / S.X : D.X, S.Y > KINDA_SMALL_NUMBER ? D.Y / S.Y : D.Y, S.Z > KINDA_SMALL_NUMBER ? D.Z / S.Z : D.Z);
+	if (LockAxis == 0) { D.Y = D.Z = 0.0f; }
+	else if (LockAxis == 1) { D.X = D.Z = 0.0f; }
+	else if (LockAxis == 2) { D.X = D.Y = 0.0f; }
+	const int32 C = FMath::Clamp(HandTuneCarryIdx, 0, 2);
+	FVector& G = bSupport ? HT_Fore3[C] : HT_Grip3[C];
+	G += D;
+	HandTuneApply();
+}
+
+bool ABasePlayerController::HandTuneDragAxes(FVector& OutRight, FVector& OutUp, float& OutOrthoWidth, FVector& OutCamLoc) const
+{
+	if (!HandTuneCap) { return false; }
+	const USceneCaptureComponent2D* Cap = HandTuneCap->GetCaptureComponent2D();
+	if (!Cap) { return false; }
+	const FRotator R = HandTuneCap->GetActorRotation();
+	OutRight = R.RotateVector(FVector::RightVector);
+	OutUp = R.RotateVector(FVector::UpVector);
+	OutOrthoWidth = Cap->OrthoWidth;
+	OutCamLoc = HandTuneCap->GetActorLocation();
+	return OutOrthoWidth > KINDA_SMALL_NUMBER;
+}
+
+// DRAGGING THE WEAPON. The world movement the pointer asked for, turned into the carry frame the
+// position is stored in, and added to the carry in view. LockAxis 0/1/2 pins it to x, y or z --
+// held X, Y or Z on the keyboard -- and -1 is a free drag. Same clamps as the wheel, so the two
+// controls cannot disagree about what is reachable.
+void ABasePlayerController::HandTuneDragPosition(const FVector& WorldDelta, int32 LockAxis)
+{
+	if (!HandTunePawn) { return; }
+	FVector D = HandTunePawn->WorldToCarryFrame(WorldDelta);
+	if (LockAxis == 0) { D.Y = D.Z = 0.0f; }
+	else if (LockAxis == 1) { D.X = D.Z = 0.0f; }
+	else if (LockAxis == 2) { D.X = D.Y = 0.0f; }
+	const int32 C = FMath::Clamp(HandTuneCarryIdx, 0, 2);
+	HT_Pos3[C].X = FMath::Clamp(HT_Pos3[C].X + D.X, -40.0f, 40.0f);
+	HT_Pos3[C].Y = FMath::Clamp(HT_Pos3[C].Y + D.Y, -20.0f, 40.0f);
+	HT_Pos3[C].Z = FMath::Clamp(HT_Pos3[C].Z + D.Z, -40.0f, 40.0f);
 	HandTuneApply();
 }
 
@@ -1018,12 +1127,15 @@ bool ABasePlayerController::HandTuneDirty() const
 		return true;
 	};
 	if (!HT_Grip.Equals(HT_Grip0) || !HT_Fore.Equals(HT_Fore0)) { return true; }
+	for (int32 i = 0; i < 3; ++i) { if (!HT_Grip3[i].Equals(HT_Grip3_0[i], 0.005) || !HT_Fore3[i].Equals(HT_Fore3_0[i], 0.005)) { return true; } }
 	if (!HT_OpticOff.Equals(HT_OpticOff0) || HT_OpticSkin != HT_OpticSkin0 || HT_Optic != HT_Optic0) { return true; }
 	if (!FMath::IsNearlyEqual(HT_ScalePct, HT_ScalePct0)) { return true; }
 	if (!HT_HandRot.Equals(HT_HandRot0) || !HT_ForeRot.Equals(HT_ForeRot0)) { return true; }
 	if (!SameArr(HT_FingersR, HT_FingersR0) || !SameArr(HT_FingersL, HT_FingersL0)) { return true; }
 	if (!FMath::IsNearlyEqual(HT_Hunch, HT_Hunch0) || !FMath::IsNearlyEqual(HT_Lean, HT_Lean0)) { return true; }
 	if (!Same3(HT_Pull3, HT_Pull3_0) || !Same3(HT_Lat3, HT_Lat3_0)) { return true; }
+	// The weapon's place, all three carries: one row on the page, nine numbers behind it.
+	for (int32 i = 0; i < 3; ++i) { if (!HT_Pos3[i].Equals(HT_Pos3_0[i], 0.005)) { return true; } }
 	if (!Same3(HT_ElbowMain, HT_ElbowMain0) || !Same3(HT_ElbowSup, HT_ElbowSup0)) { return true; }
 	if (!Same3(HT_ElbowMainAim, HT_ElbowMainAim0) || !Same3(HT_ElbowSupAim, HT_ElbowSupAim0)) { return true; }
 	if (!FMath::IsNearlyEqual(HT_LowReady[0], HT_LowReady0[0]) || !FMath::IsNearlyEqual(HT_LowReady[1], HT_LowReady0[1])) { return true; }
@@ -1066,8 +1178,88 @@ FString ABasePlayerController::HandTuneOpticLabel() const
 {
 	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(HandTuneName);
 	if (!W) { return FString(); }
-	if (!HandTuneTakesOptic()) { return TEXT("NO MOUNT"); }
-	return HT_Optic.IsEmpty() ? TEXT("IRON SIGHTS") : WeaponCatalog::OpticDisplayName(HT_Optic);   // what is being TRIED, not what is filed
+	// WHAT IS FITTED FIRST, THEN WHETHER IT HAS A MOUNT. This asked about the mount and returned
+	// before ever looking at the sight, and the two are independent: only 49 of the catalogue's
+	// weapons declare an optic_mount, so plenty of rifles carry a scope while failing that test.
+	// Reporting "NO MOUNT" for one of those says the sight is ABSENT when it is fitted and working.
+	// It cost hours: a marksman rifle was diagnosed as having no optic, then as needing a new tuning
+	// control, when the real fault was that optic's eye point sitting 22 cm off its own glass. A
+	// label that is confidently wrong is worse than an empty one -- it reads as information, and
+	// nobody re-checks a screen that has already answered them.
+	const FString Fitted = HT_Optic.IsEmpty() ? FString() : WeaponCatalog::OpticDisplayName(HT_Optic);   // what is being TRIED, not what is filed
+	if (!HandTuneTakesOptic())
+	{
+		return Fitted.IsEmpty() ? TEXT("NO MOUNT") : FString::Printf(TEXT("%s - NO MOUNT"), *Fitted);
+	}
+	return Fitted.IsEmpty() ? TEXT("IRON SIGHTS") : Fitted;
+}
+
+// REAL CHARACTERS ONLY. Characters/ also holds render stand-ins and weapon test rigs, which are
+// bodies but not people; offering them here would make the selector mostly scaffolding. The rule is
+// the naming convention rather than a hand-kept list, so a new character appears without edits here
+// -- at the cost that a real person named "...Test..." would be filtered out. Rename or amend.
+
+// THE STAND-IN, and everything that has to be true about it: the body from the chosen character
+// file, its own controller so the page's AIM can set a view rotation, the weapon in its hands, and
+// ticking while the page has the game paused. Pulled out of ShowHandTune so that changing character
+// rebuilds exactly the same thing rather than a half-set-up copy of it.
+bool ABasePlayerController::HandTuneSpawnBooth(const WeaponCatalog::FWeapon* W)
+{
+	if (HandTuneController) { HandTuneController->Destroy(); HandTuneController = nullptr; }   // or the old one keeps possessing a destroyed pawn
+	ABaseCharacter* Booth = SpawnBoothCharacter(HandTuneCharacter);   // spawns DEFERRED and sets the config before FinishSpawning, so BeginPlay builds the body from the file
+	if (!Booth) { return false; }
+	HandTunePawn = Booth;
+	Booth->SetZoomLevel(2);   // third person: the head stays drawn
+	FActorSpawnParameters SP; SP.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	HandTuneController = GetWorld()->SpawnActor<AHandTuneController>(AHandTuneController::StaticClass(), Booth->GetActorLocation(), FRotator::ZeroRotator, SP);
+	if (HandTuneController) { HandTuneController->Possess(Booth); HandTuneController->SetTickableWhenPaused(true); }
+	if (W) { ApplyWeaponToPawn(Booth, W); }
+	Booth->SetAiming(false);
+	Booth->SetTicksWhenPaused(true);
+	return true;
+}
+
+TArray<FString> ABasePlayerController::HandTuneCharacterList()
+{
+	TArray<FString> All = CharacterConfigFile::List();
+	All.RemoveAll([](const FString& N)
+	{
+		return N.Contains(TEXT("Test")) || N.Contains(TEXT("Preview")) || N.Contains(TEXT("Poster"));
+	});
+	return All;
+}
+
+FString ABasePlayerController::HandTuneCharacterLabel() const
+{
+	return HandTuneCharacter.IsEmpty() ? TEXT("PLAYER") : HandTuneCharacter.ToUpper();
+}
+
+void ABasePlayerController::HandTuneStepCharacter(int32 Dir)
+{
+	// THE EYELINE IS THE ONE THING ON THIS PAGE THAT BELONGS TO THE BODY, so stepping the body
+	// throws it away if it is unsaved. Refuse rather than lose it -- the weapon numbers are not at
+	// risk, they belong to the weapon and the weapon is not changing.
+	if (!FMath::IsNearlyEqual(HT_EyeSide, HT_EyeSide0) || !FMath::IsNearlyEqual(HT_EyeUp, HT_EyeUp0) || !FMath::IsNearlyEqual(HT_EyeFwd, HT_EyeFwd0))
+	{
+		SetDiagNoteTimed(TEXT("EYELINE IS UNSAVED -- SAVE OR RESET BEFORE CHANGING CHARACTER"), 5.0f);
+		return;
+	}
+	const TArray<FString> All = HandTuneCharacterList();
+	if (All.Num() == 0) { return; }
+	int32 At = All.IndexOfByKey(HandTuneCharacter);
+	if (At == INDEX_NONE) { At = 0; }
+	HandTuneCharacter = All[(At + (Dir >= 0 ? 1 : All.Num() - 1)) % All.Num()];
+	// The body in the booth and the eyeline it is read against change together, or the page would
+	// be showing one character's numbers over another character's shoulders.
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(HandTuneName);
+	HandTuneSpawnBooth(W);
+	FCharacterConfig Cfg;
+	if (CharacterConfigFile::Load(HandTuneCharacter, Cfg))
+	{
+		HT_EyeSide0 = HT_EyeSide = Cfg.EyeSideCm; HT_EyeUp0 = HT_EyeUp = Cfg.EyeUpCm; HT_EyeFwd0 = HT_EyeFwd = Cfg.EyeForwardCm;
+	}
+	if (HandTunePawn) { HandTunePawn->SetEyeTune(HT_EyeSide, HT_EyeUp, HT_EyeFwd); }
+	RefreshTunedWeapon(HandTuneName);
 }
 
 void ABasePlayerController::HandTuneStepOptic(int32 Dir)
@@ -1227,8 +1419,9 @@ void ABasePlayerController::HandTuneResetView() { HT_Orbit = FVector2D::ZeroVect
 void ABasePlayerController::HandTuneReset()
 {
 	HT_Grip = HT_Grip0; HT_HandRot = HT_HandRot0; HT_Fore = HT_Fore0; HT_ForeRot = HT_ForeRot0; HT_FingersR = HT_FingersR0; HT_FingersL = HT_FingersL0;
+	for (int32 i = 0; i < 3; ++i) { HT_Grip3[i] = HT_Grip3_0[i]; HT_Fore3[i] = HT_Fore3_0[i]; }
 	HT_Hunch = HT_Hunch0; HT_Lean = HT_Lean0; HT_EyeSide = HT_EyeSide0; HT_EyeUp = HT_EyeUp0; HT_EyeFwd = HT_EyeFwd0;
-	for (int32 i = 0; i < 3; ++i) { HT_Pull3[i] = HT_Pull3_0[i]; HT_Lat3[i] = HT_Lat3_0[i]; }
+	for (int32 i = 0; i < 3; ++i) { HT_Pull3[i] = HT_Pull3_0[i]; HT_Lat3[i] = HT_Lat3_0[i]; HT_Pos3[i] = HT_Pos3_0[i]; }
 	for (int32 i = 0; i < 2; ++i) { HT_LowReady[i] = HT_LowReady0[i]; }
 	for (int32 i = 0; i < 3; ++i) { HT_ElbowMain[i] = HT_ElbowMain0[i]; HT_ElbowSup[i] = HT_ElbowSup0[i]; }
 	HT_OpticOff = HT_OpticOff0; HT_OpticSkin = HT_OpticSkin0; HT_Optic = HT_Optic0; HT_OpticKey = HT_Optic0; HT_ScalePct = HT_ScalePct0;
@@ -1239,16 +1432,20 @@ void ABasePlayerController::HandTuneReset()
 bool ABasePlayerController::HandTuneSave()
 {
 	auto Doubles = [](const TArray<float>& A) { TArray<double> D; for (float V : A) { D.Add(V); } return D; };
-	bool bOk = SaveWeaponField(HandTuneKey, TEXT("grip"), { HT_Grip.X, HT_Grip.Y, HT_Grip.Z });
+	// PER-CARRY GRIPS, three triples each. The single "grip" and "fore_grip" stay as they are: they
+	// are the legacy seed for a weapon that has never been tuned per carry, and overwriting them with
+	// one of the three would quietly change what an untuned weapon falls back to.
+	bool bOk = SaveWeaponTriples(HandTuneKey, TEXT("grip_carry"), HT_Grip3);
+	bOk &= SaveWeaponTriples(HandTuneKey, TEXT("fore_carry"), HT_Fore3);
 	bOk &= SaveWeaponField(HandTuneKey, TEXT("hand_rot"), { HT_HandRot.Pitch, HT_HandRot.Yaw, HT_HandRot.Roll });
-	bOk &= SaveWeaponField(HandTuneKey, TEXT("fore_grip"), { HT_Fore.X, HT_Fore.Y, HT_Fore.Z });
 	bOk &= SaveWeaponField(HandTuneKey, TEXT("fore_hand_rot"), { HT_ForeRot.Pitch, HT_ForeRot.Yaw, HT_ForeRot.Roll });
 	bOk &= SaveWeaponField(HandTuneKey, TEXT("fingers_r"), Doubles(HT_FingersR));
 	bOk &= SaveWeaponField(HandTuneKey, TEXT("fingers_l"), Doubles(HT_FingersL));
 	bOk &= SaveWeaponField(HandTuneKey, TEXT("hunch"), { HT_Hunch }, true);
-	bOk &= SaveWeaponField(HandTuneKey, TEXT("pull"), { HT_Pull3[0], HT_Pull3[1], HT_Pull3[2] });
+	// POSITION REPLACES PULL AND LATERAL. Both still parse as legacy input and seed a weapon that has
+	// no position of its own; once this is written it is the only thing the solve reads.
+	bOk &= SaveWeaponTriples(HandTuneKey, TEXT("position"), HT_Pos3);
 	bOk &= SaveWeaponField(HandTuneKey, TEXT("lean"), { HT_Lean }, true);
-	bOk &= SaveWeaponField(HandTuneKey, TEXT("lateral"), { HT_Lat3[0], HT_Lat3[1], HT_Lat3[2] });
 	bOk &= SaveWeaponField(HandTuneKey, TEXT("low_ready"), { HT_LowReady[0], HT_LowReady[1] });
 	bOk &= SaveWeaponField(HandTuneKey, TEXT("elbow_main"), { HT_ElbowMain[0], HT_ElbowMain[1], HT_ElbowMain[2] });
 	bOk &= SaveWeaponField(HandTuneKey, TEXT("elbow_main_aim"), { HT_ElbowMainAim[0], HT_ElbowMainAim[1], HT_ElbowMainAim[2] });
@@ -1269,7 +1466,7 @@ bool ABasePlayerController::HandTuneSave()
 	// numbers replaced, saved, so nothing else in the likeness is touched by a hand-tuning save.
 	{
 		FCharacterConfig Cfg;
-		if (CharacterConfigFile::Load(TEXT("Player"), Cfg))
+		if (CharacterConfigFile::Load(HandTuneCharacter, Cfg))   // the body the page is tuning, not always the player
 		{
 			Cfg.EyeSideCm = HT_EyeSide; Cfg.EyeUpCm = HT_EyeUp; Cfg.EyeForwardCm = HT_EyeFwd;
 			bOk &= CharacterConfigFile::Save(Cfg);
@@ -1290,8 +1487,9 @@ bool ABasePlayerController::HandTuneSave()
 		HandTuneApply();   // and the stand-in goes on showing the page, which is the only thing it should ever show
 		UE_LOG(LogTemp, Log, TEXT("HandTune: saved %s and re-dressed %d character(s) holding one."), *HandTuneName, Dressed);
 		HT_Grip0 = HT_Grip; HT_HandRot0 = HT_HandRot; HT_Fore0 = HT_Fore; HT_ForeRot0 = HT_ForeRot; HT_FingersR0 = HT_FingersR; HT_FingersL0 = HT_FingersL;
+		for (int32 i = 0; i < 3; ++i) { HT_Grip3_0[i] = HT_Grip3[i]; HT_Fore3_0[i] = HT_Fore3[i]; }
 		HT_Hunch0 = HT_Hunch; HT_Lean0 = HT_Lean; HT_EyeSide0 = HT_EyeSide; HT_EyeUp0 = HT_EyeUp; HT_EyeFwd0 = HT_EyeFwd;
-		for (int32 i = 0; i < 3; ++i) { HT_Pull3_0[i] = HT_Pull3[i]; HT_Lat3_0[i] = HT_Lat3[i]; }
+		for (int32 i = 0; i < 3; ++i) { HT_Pull3_0[i] = HT_Pull3[i]; HT_Lat3_0[i] = HT_Lat3[i]; HT_Pos3_0[i] = HT_Pos3[i]; }
 		for (int32 i = 0; i < 2; ++i) { HT_LowReady0[i] = HT_LowReady[i]; }
 		for (int32 i = 0; i < 3; ++i) { HT_ElbowMain0[i] = HT_ElbowMain[i]; HT_ElbowSup0[i] = HT_ElbowSup[i]; }
 		HT_OpticOff0 = HT_OpticOff; HT_OpticSkin0 = HT_OpticSkin; HT_Optic0 = HT_Optic; HT_ScalePct0 = HT_ScalePct;
@@ -1311,14 +1509,14 @@ void ABasePlayerController::ShowSaveLoad(bool bLoad)
 	}
 	SaveLoadWidget->Open(this, bLoad);
 	if (!SaveLoadWidget->IsInViewport()) { SaveLoadWidget->AddToViewport(60); }
-	bSaveLoadOpen = true;
+	Screens.Open(EScreen::SaveLoad);
 	ApplyInputMode();
 }
 
 void ABasePlayerController::HideSaveLoad()
 {
-	if (!bSaveLoadOpen) { return; }
-	bSaveLoadOpen = false;
+	if (!Screens.IsOpen(EScreen::SaveLoad)) { return; }
+	Screens.Close(EScreen::SaveLoad);
 	if (SaveLoadWidget && SaveLoadWidget->IsInViewport()) { SaveLoadWidget->RemoveFromParent(); }
 	if (!IsPageOpen()) { SetPause(false); }   // see HideReference: a page that pauses must unpause
 	ApplyInputMode();
@@ -1539,7 +1737,7 @@ void ABasePlayerController::DescribeInspectable(AActor* Target, FString& OutName
 	if (OutName.IsEmpty())
 	{
 		// "Camp_Cart_01" / "SM_Prop_Chair_01" -> "Cart" / "Chair".
-		FString Label = Target->GetActorLabel();
+		FString Label = Target->GetActorNameOrLabel();   // GetActorLabel is editor-only
 		for (const TCHAR* Prefix : { TEXT("Camp_"), TEXT("SM_Prop_"), TEXT("SM_") }) { Label.RemoveFromStart(Prefix); }
 		while (Label.Len() > 3 && FChar::IsDigit(Label[Label.Len() - 1])) { Label.LeftChopInline(1); }
 		Label.RemoveFromEnd(TEXT("_"));
@@ -1835,8 +2033,8 @@ void ABasePlayerController::UpdateCallout()
 
 void ABasePlayerController::OnMenuKey()
 {
-	if (bTerminalOpen) { CloseTerminal(); return; }   // Esc leaves the terminal before it means the menu
-	if (bPauseMenuOpen) { HidePauseMenu(); } else { ShowPauseMenu(); }
+	if (Screens.IsOpen(EScreen::Terminal)) { CloseTerminal(); return; }   // Esc leaves the terminal before it means the menu
+	if (Screens.IsOpen(EScreen::PauseMenu)) { HidePauseMenu(); } else { ShowPauseMenu(); }
 }
 
 void ABasePlayerController::SitOnTagged(ABaseCharacter* Me, AActor* Seat)
@@ -1870,7 +2068,7 @@ namespace
 		{
 			bLoaded = true;
 			FString Json; TSharedPtr<FJsonObject> Root;
-			if (FFileHelper::LoadFileToString(Json, *FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("Screens.json"))))
+			if (FFileHelper::LoadFileToString(Json, *FPaths::Combine(JsonData::DataDir(), TEXT("UI"), TEXT("Screens.json"))))
 			{
 				TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
 				if (FJsonSerializer::Deserialize(Reader, Root) && Root.IsValid())
@@ -1905,7 +2103,7 @@ namespace
 	bool TerminalLocked(const FString& Id)
 	{
 		FString Json; TSharedPtr<FJsonObject> Root;
-		if (!FFileHelper::LoadFileToString(Json, *FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("Terminals.json")))) { return true; }
+		if (!FFileHelper::LoadFileToString(Json, *FPaths::Combine(JsonData::DataDir(), TEXT("UI"), TEXT("Terminals.json")))) { return true; }
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
 		if (!FJsonSerializer::Deserialize(Reader, Root) || !Root.IsValid()) { return true; }
 		const TSharedPtr<FJsonObject>* Entry = nullptr;
@@ -2091,7 +2289,7 @@ bool ABasePlayerController::ScreenQuadFor(const AActor* Target, FVector& OutCent
 
 void ABasePlayerController::OpenTerminal(AActor* Target)
 {
-	if (bTerminalOpen || !Target) { return; }
+	if (Screens.IsOpen(EScreen::Terminal) || !Target) { return; }
 	FVector Centre, Normal, Right, Up; float W, H;
 	if (!ScreenQuadFor(Target, Centre, Normal, Right, Up, W, H)) { return; }
 	// Which node this is: its terminal: tag, else its label. Only a node with credentials opens;
@@ -2200,7 +2398,7 @@ void ABasePlayerController::OpenTerminal(AActor* Target)
 		TerminalPointer->AttachToComponent(MyPawn->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		TerminalPointer->RegisterComponent();
 	}
-	bTerminalOpen = true;
+	Screens.Open(EScreen::Terminal);
 	ApplyInputMode();
 	// The camera goes to the seated eye once the sit has settled; the prompt takes the pointer's focus then.
 	GetWorld()->GetTimerManager().SetTimer(TerminalPlaceTimer, this, &ABasePlayerController::PlaceTerminalCamera, 0.45f, false);
@@ -2208,7 +2406,7 @@ void ABasePlayerController::OpenTerminal(AActor* Target)
 
 void ABasePlayerController::PlaceTerminalCamera()
 {
-	if (!bTerminalOpen || !TerminalTarget.IsValid()) { return; }
+	if (!Screens.IsOpen(EScreen::Terminal) || !TerminalTarget.IsValid()) { return; }
 	FVector Centre, Normal, Right, Up; float W, H;
 	if (!ScreenQuadFor(TerminalTarget.Get(), Centre, Normal, Right, Up, W, H)) { return; }
 	// From the character's own eye, a hand's width in front of the face so the head is behind the
@@ -2275,13 +2473,13 @@ void ABasePlayerController::ClickTerminalPrompt()
 
 void ABasePlayerController::RefocusTerminalPrompt()
 {
-	if (!bTerminalOpen || !TerminalWidget) { return; }
+	if (!Screens.IsOpen(EScreen::Terminal) || !TerminalWidget) { return; }
 	if (bTerminalKeysDirect) { TerminalWidget->FocusPromptFor(0); } else { ClickTerminalPrompt(); }
 }
 
 void ABasePlayerController::BindTerminalGlass()
 {
-	if (!bTerminalOpen || !TerminalScreen) { GetWorld()->GetTimerManager().ClearTimer(TerminalBindTimer); return; }
+	if (!Screens.IsOpen(EScreen::Terminal) || !TerminalScreen) { GetWorld()->GetTimerManager().ClearTimer(TerminalBindTimer); return; }
 	UTextureRenderTarget2D* RT = TerminalScreen->GetRenderTarget();
 	if (!RT) { return; }   // not drawn yet; the timer asks again
 	GetWorld()->GetTimerManager().ClearTimer(TerminalBindTimer);
@@ -2299,8 +2497,8 @@ void ABasePlayerController::BindTerminalGlass()
 
 void ABasePlayerController::CloseTerminal()
 {
-	if (!bTerminalOpen) { return; }
-	bTerminalOpen = false;
+	if (!Screens.IsOpen(EScreen::Terminal)) { return; }
+	Screens.Close(EScreen::Terminal);
 	GetWorld()->GetTimerManager().ClearTimer(TerminalPlaceTimer);
 	GetWorld()->GetTimerManager().ClearTimer(TerminalBindTimer);
 	bTerminalKeysDirect = false;
@@ -2321,7 +2519,7 @@ void ABasePlayerController::CloseTerminal()
 void ABasePlayerController::ShowPauseMenu()
 {
 	LowerWeaponForScreen();
-	if (bPauseMenuOpen) { return; }
+	if (Screens.IsOpen(EScreen::PauseMenu)) { return; }
 	if (!PauseMenuWidget)
 	{
 		PauseMenuWidget = CreateWidget<UPauseMenuWidget>(this, UPauseMenuWidget::StaticClass());
@@ -2333,7 +2531,7 @@ void ABasePlayerController::ShowPauseMenu()
 		PauseMenuWidget->SetAnchorsInViewport(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
 		PauseMenuWidget->SetAlignmentInViewport(FVector2D::ZeroVector);
 	}
-	bPauseMenuOpen = true;
+	Screens.Open(EScreen::PauseMenu);
 	SetPause(true);
 	ApplyInputMode();
 }
@@ -2346,7 +2544,7 @@ void ABasePlayerController::ShowReferenceFor(const FString& ItemName)
 
 void ABasePlayerController::ShowReference()
 {
-	if (bReferenceOpen) { return; }
+	if (Screens.IsOpen(EScreen::Reference)) { return; }
 	// The menu steps aside (still paused); the catalogue takes the sheet's panel inset.
 	if (PauseMenuWidget && PauseMenuWidget->IsInViewport()) { PauseMenuWidget->RemoveFromParent(); }
 	if (!ReferenceWidget)
@@ -2357,14 +2555,14 @@ void ABasePlayerController::ShowReference()
 	}
 	ReferenceWidget->Rebuild();
 	PlaceConsolePage(ReferenceWidget, ConsolePageZ);
-	bReferenceOpen = true;
+	Screens.Open(EScreen::Reference);
 	SetPause(true);
 	ApplyInputMode();
 }
 
 void ABasePlayerController::ShowScenesPanel()
 {
-	if (bScenesOpen) { return; }
+	if (Screens.IsOpen(EScreen::Scenes)) { return; }
 	if (PauseMenuWidget && PauseMenuWidget->IsInViewport()) { PauseMenuWidget->RemoveFromParent(); }
 	if (!ScenesWidget)
 	{
@@ -2374,20 +2572,20 @@ void ABasePlayerController::ShowScenesPanel()
 	}
 	ScenesWidget->Rebuild();
 	PlaceConsolePage(ScenesWidget, ++ConsolePageZ);
-	bScenesOpen = true;
+	Screens.Open(EScreen::Scenes);
 	SetPause(true);
 	ApplyInputMode();
 }
 
 void ABasePlayerController::HideScenesPanel()
 {
-	if (!bScenesOpen) { return; }
-	bScenesOpen = false;
+	if (!Screens.IsOpen(EScreen::Scenes)) { return; }
+	Screens.Close(EScreen::Scenes);
 	HideSheetMirror();   // the viewer's booth goes with the page
 	if (ScenesWidget && ScenesWidget->IsInViewport()) { ScenesWidget->RemoveFromParent(); }
 	// Straight back to the menu it came from -- unless a scene is starting, in which case
 	// PlaySequence takes over and closing the menu is exactly what it wants.
-	if (bPauseMenuOpen && PauseMenuWidget && !PauseMenuWidget->IsInViewport())
+	if (Screens.IsOpen(EScreen::PauseMenu) && PauseMenuWidget && !PauseMenuWidget->IsInViewport())
 	{
 		PauseMenuWidget->AddToViewport(100);
 		PauseMenuWidget->SetAnchorsInViewport(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
@@ -2399,7 +2597,7 @@ void ABasePlayerController::HideScenesPanel()
 
 void ABasePlayerController::ShowSettingsPanel()
 {
-	if (bSettingsOpen) { return; }
+	if (Screens.IsOpen(EScreen::Settings)) { return; }
 	// The menu steps aside while the page is up, the same way Reference does.
 	if (PauseMenuWidget && PauseMenuWidget->IsInViewport()) { PauseMenuWidget->RemoveFromParent(); }
 	if (!SettingsWidget)
@@ -2410,18 +2608,18 @@ void ABasePlayerController::ShowSettingsPanel()
 	SettingsWidget->SetShowBack(true);
 	SettingsWidget->Rebuild(/*bTitleContext=*/false);
 	PlaceConsolePage(SettingsWidget, ++ConsolePageZ);
-	bSettingsOpen = true;
+	Screens.Open(EScreen::Settings);
 	SetPause(true);
 	ApplyInputMode();
 }
 
 void ABasePlayerController::HideSettingsPanel()
 {
-	if (!bSettingsOpen) { return; }
-	bSettingsOpen = false;
+	if (!Screens.IsOpen(EScreen::Settings)) { return; }
+	Screens.Close(EScreen::Settings);
 	if (SettingsWidget && SettingsWidget->IsInViewport()) { SettingsWidget->RemoveFromParent(); }
 	// Back to the menu it came from.
-	if (bPauseMenuOpen && PauseMenuWidget && !PauseMenuWidget->IsInViewport())
+	if (Screens.IsOpen(EScreen::PauseMenu) && PauseMenuWidget && !PauseMenuWidget->IsInViewport())
 	{
 		PauseMenuWidget->AddToViewport(100);
 		PauseMenuWidget->SetAnchorsInViewport(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
@@ -2446,7 +2644,7 @@ void ABasePlayerController::PageSettled(const UUserWidget* Incoming)
 
 void ABasePlayerController::ShowConsolePage(int32 Tab)
 {
-	if (bPauseMenuOpen) { HidePauseMenu(); }
+	if (Screens.IsOpen(EScreen::PauseMenu)) { HidePauseMenu(); }
 	// Pulling the outgoing page out first leaves a frame with no panel at all, and the incoming
 	// page paints once before its ASCII rules have measured themselves against their own text and
 	// before the booth capture has written a frame into the render target. Both read as the panel
@@ -2455,9 +2653,9 @@ void ABasePlayerController::ShowConsolePage(int32 Tab)
 	// held page is dropped only when the new one reports it has settled.
 	UUserWidget* Outgoing = nullptr;
 	bRetainPageWidget = true;
-	if (bReferenceOpen) { bReferenceOpen = false; Outgoing = ReferenceWidget; }
-	if (bCharacterSheetOpen) { Outgoing = CharacterSheetWidget; HideCharacterSheet(); }
-	if (bAppearanceOpen) { Outgoing = AppearanceWidget; FinishAppearance(); }
+	if (Screens.IsOpen(EScreen::Reference)) { Screens.Close(EScreen::Reference); Outgoing = ReferenceWidget; }
+	if (Screens.IsOpen(EScreen::CharacterSheet)) { Outgoing = CharacterSheetWidget; HideCharacterSheet(); }
+	if (Screens.IsOpen(EScreen::Appearance)) { Outgoing = AppearanceWidget; FinishAppearance(); }
 	bRetainPageWidget = false;
 	RetirePage(Outgoing);
 	++ConsolePageZ;
@@ -2695,12 +2893,12 @@ void ABasePlayerController::TickWeaponPreview(float DeltaSeconds)
 
 void ABasePlayerController::HideReference()
 {
-	if (!bReferenceOpen) { return; }
-	bReferenceOpen = false;
+	if (!Screens.IsOpen(EScreen::Reference)) { return; }
+	Screens.Close(EScreen::Reference);
 	HideWeaponPreview();
 	if (ReferenceWidget && ReferenceWidget->IsInViewport()) { ReferenceWidget->RemoveFromParent(); }
 	// Back to the menu it came from.
-	if (bPauseMenuOpen && PauseMenuWidget && !PauseMenuWidget->IsInViewport())
+	if (Screens.IsOpen(EScreen::PauseMenu) && PauseMenuWidget && !PauseMenuWidget->IsInViewport())
 	{
 		PauseMenuWidget->AddToViewport(100);
 		PauseMenuWidget->SetAnchorsInViewport(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
@@ -2719,10 +2917,10 @@ void ABasePlayerController::HideReference()
 void ABasePlayerController::HidePauseMenu()
 {
 	HideSaveLoad();
-	if (!bPauseMenuOpen) { return; }
-	if (bSettingsOpen) { bSettingsOpen = false; if (SettingsWidget && SettingsWidget->IsInViewport()) { SettingsWidget->RemoveFromParent(); } }
-	if (bReferenceOpen) { bReferenceOpen = false; if (ReferenceWidget && ReferenceWidget->IsInViewport()) { ReferenceWidget->RemoveFromParent(); } }
-	bPauseMenuOpen = false;
+	if (!Screens.IsOpen(EScreen::PauseMenu)) { return; }
+	if (Screens.IsOpen(EScreen::Settings)) { Screens.Close(EScreen::Settings); if (SettingsWidget && SettingsWidget->IsInViewport()) { SettingsWidget->RemoveFromParent(); } }
+	if (Screens.IsOpen(EScreen::Reference)) { Screens.Close(EScreen::Reference); if (ReferenceWidget && ReferenceWidget->IsInViewport()) { ReferenceWidget->RemoveFromParent(); } }
+	Screens.Close(EScreen::PauseMenu);
 	if (PauseMenuWidget && PauseMenuWidget->IsInViewport()) { PauseMenuWidget->RemoveFromParent(); }
 	SetPause(false);
 	ApplyInputMode();
@@ -2731,7 +2929,7 @@ void ABasePlayerController::HidePauseMenu()
 void ABasePlayerController::ShowCharacterSheet()
 {
 	LowerWeaponForScreen();
-	if (bCharacterSheetOpen || bPauseMenuOpen) { return; }
+	if (Screens.IsOpen(EScreen::CharacterSheet) || Screens.IsOpen(EScreen::PauseMenu)) { return; }
 	if (!CharacterSheetWidget)
 	{
 		CharacterSheetWidget = CreateWidget<UCharacterSheetWidget>(this, UCharacterSheetWidget::StaticClass());
@@ -2741,19 +2939,19 @@ void ABasePlayerController::ShowCharacterSheet()
 	CharacterSheetWidget->Rebuild();   // from UI/CharacterSheet.json, re-read if it changed
 	CharacterSheetWidget->Refresh();
 	PlaceConsolePage(CharacterSheetWidget, ConsolePageZ);
-	bCharacterSheetOpen = true;
+	Screens.Open(EScreen::CharacterSheet);
 	SetPause(true);
 	ApplyInputMode();
 }
 
 void ABasePlayerController::HideCharacterSheet()
 {
-	if (!bCharacterSheetOpen) { return; }
-	bCharacterSheetOpen = false;
+	if (!Screens.IsOpen(EScreen::CharacterSheet)) { return; }
+	Screens.Close(EScreen::CharacterSheet);
 	HideSheetMirror();
 	for (TObjectIterator<UContextMenuWidget> It; It; ++It) { if (It->IsInViewport()) { It->Close(); } }   // a DROP menu left open closes with the sheet
 	if (CharacterSheetWidget && CharacterSheetWidget->IsInViewport() && !bRetainPageWidget) { CharacterSheetWidget->RemoveFromParent(); }
-	if (!bPauseMenuOpen) { SetPause(false); }
+	if (!Screens.IsOpen(EScreen::PauseMenu)) { SetPause(false); }
 	ApplyInputMode();
 }
 
@@ -2768,7 +2966,7 @@ void ABasePlayerController::ReloadUI()
 
 void ABasePlayerController::ToggleCharacterSheet()
 {
-	if (bCharacterSheetOpen) { HideCharacterSheet(); } else { ShowCharacterSheet(); }
+	if (Screens.IsOpen(EScreen::CharacterSheet)) { HideCharacterSheet(); } else { ShowCharacterSheet(); }
 }
 
 void ABasePlayerController::QuitGame()
@@ -3288,7 +3486,7 @@ void ABasePlayerController::ApplyInputMode()
 {
 	UGameViewportClient* Viewport = GetLocalPlayer() ? GetLocalPlayer()->ViewportClient : nullptr;
 
-	if (bPauseMenuOpen || bCharacterSheetOpen || bAppearanceInputMode || bTransferOpen || bReferenceOpen || bTerminalOpen || bSaveLoadOpen || bHandTuneOpen)
+	if (Screens.IsOpen(EScreen::PauseMenu) || Screens.IsOpen(EScreen::CharacterSheet) || bAppearanceInputMode || Screens.IsOpen(EScreen::Transfer) || Screens.IsOpen(EScreen::Reference) || Screens.IsOpen(EScreen::Terminal) || Screens.IsOpen(EScreen::SaveLoad) || Screens.IsOpen(EScreen::HandTune))
 	{
 		// Menu only: free cursor, nothing reaches the game until Back.
 		FInputModeGameAndUI Mode;
@@ -3882,7 +4080,7 @@ void ABasePlayerController::UpdateInspectTarget()
 	}
 	const float Dwell = bCandidateFlavour ? InspectDwellFlavourSeconds : InspectDwellSeconds;
 	const ABaseCharacter* Aimer = Cast<ABaseCharacter>(GetPawn());
-	AActor* Want = (NewTarget && NewTarget != Carried.Get() && !bTerminalOpen && Now - InspectCandidateSince >= Dwell && !(Aimer && Aimer->IsAiming())) ? NewTarget : nullptr;   // no menu down the sights, none on what is in the hand, none at a terminal
+	AActor* Want = (NewTarget && NewTarget != Carried.Get() && !Screens.IsOpen(EScreen::Terminal) && Now - InspectCandidateSince >= Dwell && !(Aimer && Aimer->IsAiming())) ? NewTarget : nullptr;   // no menu down the sights, none on what is in the hand, none at a terminal
 	if (Want != InspectTarget.Get())
 	{
 		if (!ScanLit.Contains(InspectTarget)) { SetInspectHighlight(InspectTarget.Get(), false); }
@@ -4218,20 +4416,20 @@ FString ABasePlayerController::DescribeInput() const
 
 void ABasePlayerController::OpenTransfer(ALootBoxActor* Box)
 {
-	if (!Box || bTransferOpen || bPauseMenuOpen) { return; }
+	if (!Box || Screens.IsOpen(EScreen::Transfer) || Screens.IsOpen(EScreen::PauseMenu)) { return; }
 	HideInspectMenu();
 	if (!TransferWidget) { TransferWidget = CreateWidget<UInventoryTransferWidget>(this, UInventoryTransferWidget::StaticClass()); }
 	TransferWidget->Open(this, Box);
 	PlaceConsolePage(TransferWidget, 90);
-	bTransferOpen = true;
+	Screens.Open(EScreen::Transfer);
 	SetPause(true);
 	ApplyInputMode();
 }
 
 void ABasePlayerController::CloseTransfer()
 {
-	if (!bTransferOpen) { return; }
-	bTransferOpen = false;
+	if (!Screens.IsOpen(EScreen::Transfer)) { return; }
+	Screens.Close(EScreen::Transfer);
 	if (TransferWidget && TransferWidget->IsInViewport()) { TransferWidget->RemoveFromParent(); }
 	SetPause(false);
 	ApplyInputMode();
@@ -4736,7 +4934,7 @@ void ABasePlayerController::UpdateRemoteView()
 	Rot.Roll = Cam.Roll;
 	RemoteCapture->SetActorLocationAndRotation(Eye, Rot);
 	// Eyes on the camera, as on a call; the chooser preview just idles instead.
-	if (!bAppearanceOpen && !bSheetMirror) { Who->SetGazeLock(true, Eye); } else if (Who->IsGazeLocked()) { Who->SetGazeLock(false, Eye); }   // the chooser's and the sheet's figure just idle
+	if (!Screens.IsOpen(EScreen::Appearance) && !bSheetMirror) { Who->SetGazeLock(true, Eye); } else if (Who->IsGazeLocked()) { Who->SetGazeLock(false, Eye); }   // the chooser's and the sheet's figure just idle
 	if (USceneCaptureComponent2D* Cap = RemoteCapture->GetCaptureComponent2D())
 	{
 		Cap->FOVAngle = Cam.Fov;
@@ -4939,7 +5137,7 @@ void ABasePlayerController::DressBoothAsMirror()
 
 bool ABasePlayerController::ShowSheetMirrorFor(const FString& ConfigName)
 {
-	if (bAppearanceOpen || !GetWorld()) { return false; }
+	if (Screens.IsOpen(EScreen::Appearance) || !GetWorld()) { return false; }
 	// One booth at a time: whatever was in it goes first.
 	if (bSheetMirror) { HideSheetMirror(); }
 	if (BoothCharacter.IsValid()) { DestroyBooth(); }
@@ -5068,6 +5266,21 @@ void ABasePlayerController::GiveStartingWeapons()
 		Equipped[Slot] = Item;
 	};
 	for (const FString& Item : StartingWeapons) { Fit(Item); }
+	// AND THE PACK. bPickup false so nothing auto-equips: these are meant to be reached for, which
+	// is the point of putting a thing under test in the inventory rather than into the hands.
+	for (const FString& Item : StartingInventory)
+	{
+		if (Item.IsEmpty()) { continue; }
+		if (!WeaponCatalog::Find(Item) && !ItemCatalog::FindRecord(Item))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("GiveStartingWeapons: %s is in StartingInventory but in no catalogue"), *Item);
+			continue;
+		}
+		if (!AddToInventory(Item, false))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("GiveStartingWeapons: no room in the pack for %s"), *Item);
+		}
+	}
 	RefreshHeldWeapon();
 }
 
@@ -5241,10 +5454,18 @@ void ABasePlayerController::ApplyWeaponToPawn(ABaseCharacter* Me, const WeaponCa
 	Me->SetWeaponHandRotation(W->HandRot);   // this weapon's own turn of the hand on its grip (hand_rot), on top of the character's correction
 	Me->SetWeaponForeHandRotation(W->ForeHandRot);   // and the support hand's on the fore grip (fore_hand_rot)
 	Me->SetWeaponFingers(W->FingersR, W->FingersL);   // and how far each finger closes on it
-	Me->SetWeaponHunch(W->Hunch); Me->SetWeaponLean(W->LeanDeg); Me->SetWeaponCarryTune(W->PullCm, W->LateralCm); Me->SetWeaponShoulderPoint(W->Shoulder);   // and the posture it asks for
+	Me->SetWeaponHunch(W->Hunch); Me->SetWeaponLean(W->LeanDeg); Me->SetWeaponCarryPos(W->PositionCm); Me->SetWeaponShoulderPoint(W->Shoulder);   // and the posture it asks for
 	Me->SetWeaponLowReady(W->LowReadyPitch, W->LowReadyYaw); Me->SetWeaponElbowTwist(W->ElbowMain, W->ElbowSupport);
 	Me->SetWeaponElbowAim(W->ElbowMainAim, W->ElbowSupportAim);
 	Me->SetWeaponGrip(W->Grip + WeaponCatalog::StanceGripNudge(W->Stance));   // the stance may move the hand along the grip
+	{
+		// AND THE PER-CARRY HOLDS. Seeded from the single grip in the catalogue, so a weapon that has
+		// never been tuned this way is identical to what it was; the character blends between them.
+		FVector G[3], F[3];
+		const FVector Nudge = WeaponCatalog::StanceGripNudge(W->Stance);
+		for (int32 i = 0; i < 3; ++i) { G[i] = W->GripCm[i] + Nudge; F[i] = W->ForeCm[i]; }
+		Me->SetWeaponGripPerCarry(G, F);
+	}
 	Me->SetWeaponDrawScale(W->Scale);   // before the grip and sight are read off it
 	Me->SetWeaponRecoil(W->Recoil);
 	Me->SetWeaponMass(W->MassKg);
@@ -5262,7 +5483,7 @@ void ABasePlayerController::ApplyWeaponToPawn(ABaseCharacter* Me, const WeaponCa
 		(OpticMesh && Optic) ? Optic->Reticle : FString(),
 		(OpticMesh && Optic) ? Optic->ReticleColour : FLinearColor(0.45f, 1.0f, 0.65f, 1.0f),
 		(OpticMesh && Optic) ? Optic->ZoomLevels : TArray<float>(),
-		OpticMesh && Optic && Optic->bOverlay);
+		OpticMesh && Optic && Optic->bOverlay, OpticMesh && Optic && Optic->bPiP);
 	// And the sight own paint, which is its property and not the gun it is bolted to.
 	// THE SIGHT WEARS THE GUN'S PAINT UNLESS IT HAS ITS OWN. A factory scope is geometry cut off this
 	// weapon and now shares its material family, so leaving it on the family's default while the gun
@@ -6014,7 +6235,7 @@ void ABasePlayerController::TickFreelookSafety()
 
 bool ABasePlayerController::IsPageOpen() const
 {
-	return bPauseMenuOpen || bScenesOpen || bSettingsOpen || bReferenceOpen || bCharacterSheetOpen || bTransferOpen || bAppearanceOpen || bTerminalOpen || bSaveLoadOpen || bHandTuneOpen
+	return Screens.AnyOpen()
 		|| IsInCinematic() || IsInConversation() || IsBoothActive();
 }
 
@@ -6036,7 +6257,7 @@ bool ABasePlayerController::IsFiringBlocked() const
 
 bool ABasePlayerController::IsAnyScreenOpen() const
 {
-	return bPauseMenuOpen || bScenesOpen || bSettingsOpen || bReferenceOpen || bCharacterSheetOpen || bTransferOpen || bAppearanceOpen || bTerminalOpen || bSaveLoadOpen || bHandTuneOpen
+	return Screens.AnyOpen()
 		|| IsInCinematic() || IsInConversation() || IsInspectMenuOpen() || IsRemoteViewOpen() || IsBoothActive();
 }
 
@@ -6431,7 +6652,7 @@ bool ABasePlayerController::UnequipSlot(int32 Slot)
 
 void ABasePlayerController::BeginAppearance()
 {
-	if (bAppearanceOpen || !GetWorld()) { return; }
+	if (Screens.IsOpen(EScreen::Appearance) || !GetWorld()) { return; }
 	// A preview config to spawn the booth character from; the rows then edit it live.
 	if (!IFileManager::Get().FileExists(*CharacterConfigFile::GetPath(TEXT("PlayerPreview"))))
 	{
@@ -6474,7 +6695,7 @@ void ABasePlayerController::BeginAppearance()
 	if (bFreshPlayerName || (AppearanceFirst.TrimStartAndEnd().IsEmpty() && AppearanceLast.TrimStartAndEnd().IsEmpty())) { AppearanceFirst = TEXT("Repli"); AppearanceLast = TEXT("Can"); }
 	ABaseCharacter* Preview = SpawnBoothCharacter(TEXT("PlayerPreview"));
 	if (!Preview) { UE_LOG(LogTemp, Warning, TEXT("Appearance: could not spawn the preview")); return; }
-	bAppearanceOpen = true;
+	Screens.Open(EScreen::Appearance);
 	AppearanceOrbitYaw = 0.0f; AppearanceOrbitPitch = 0.0f; AppearanceBaseYaw = Preview->GetActorRotation().Yaw;
 	ApplyAppearance();
 	RemoteViewResolution = 1024;          // the mirror is large here; a sharp capture
@@ -6551,7 +6772,7 @@ void ABasePlayerController::ApplyAppearance()
 
 void ABasePlayerController::OrbitAppearanceCamera(float DeltaYaw, float DeltaPitch)
 {
-	if (!bAppearanceOpen) { return; }
+	if (!Screens.IsOpen(EScreen::Appearance)) { return; }
 	AppearanceOrbitYaw = FMath::Fmod(AppearanceOrbitYaw + DeltaYaw, 360.0f);
 	AppearanceOrbitPitch = FMath::Clamp(AppearanceOrbitPitch + DeltaPitch, -30.0f, 40.0f);
 	ApplyAppearance();
@@ -6560,7 +6781,7 @@ void ABasePlayerController::OrbitAppearanceCamera(float DeltaYaw, float DeltaPit
 void ABasePlayerController::SetAppearanceHeadView(bool bHead)
 {
 	const int32 Want = bHead ? 0 : 1;
-	if (!bAppearanceOpen || Appearance.View == Want) { return; }
+	if (!Screens.IsOpen(EScreen::Appearance) || Appearance.View == Want) { return; }
 	Appearance.View = Want;
 	ApplyAppearance();
 }
@@ -6744,7 +6965,7 @@ FString ABasePlayerController::GetPlayerDisplayName() const
 
 void ABasePlayerController::FinishAppearance()
 {
-	if (!bAppearanceOpen) { return; }
+	if (!Screens.IsOpen(EScreen::Appearance)) { return; }
 	if (ABaseCharacter* P = AppearancePreview())
 	{
 		FCharacterConfig Cfg = P->GetCharacterConfig();
@@ -6758,7 +6979,7 @@ void ABasePlayerController::FinishAppearance()
 		CharacterConfigFile::Save(Cfg);
 		if (ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn())) { Me->ApplyCharacterConfig(Cfg); bPlayerConfigApplied = true; }
 	}
-	bAppearanceOpen = false;
+	Screens.Close(EScreen::Appearance);
 	bFreshPlayerName = false;   // from here on the chooser reopens with the chosen name
 	if (AppearanceWidget && AppearanceWidget->IsInViewport() && !bRetainPageWidget) { AppearanceWidget->RemoveFromParent(); }
 	HideRemoteView();   // tears the booth and the preview down
@@ -6788,7 +7009,7 @@ bool ABasePlayerController::SaveWeaponField(const FString& Key, const TCHAR* Fie
 {
 	// Saved on the entry, so the tune outlives the session and every hold of this weapon gets it.
 	FString Json;
-	const FString File = FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("Weapons.json"));
+	const FString File = FPaths::Combine(JsonData::DataDir(), TEXT("UI"), TEXT("Weapons.json"));
 	TSharedPtr<FJsonObject> Root;
 	if (!FFileHelper::LoadFileToString(Json, *File)) { return false; }
 	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
@@ -6801,6 +7022,37 @@ bool ABasePlayerController::SaveWeaponField(const FString& Key, const TCHAR* Fie
 		for (double V : Values) { Arr.Add(MakeShared<FJsonValueNumber>(FMath::RoundToDouble(V * 100.0) / 100.0)); }
 		(*Entry)->SetArrayField(Field, Arr);
 	}
+	FString Out;
+	TSharedRef<TJsonWriter<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>> Writer = TJsonWriterFactory<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>::Create(&Out);
+	if (!(FJsonSerializer::Serialize(Root.ToSharedRef(), Writer) && FFileHelper::SaveStringToFile(Out, *File, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM))) { return false; }
+	WeaponCatalog::Reload();
+	return true;
+}
+
+// THE WEAPON'S PLACE: three triples, low ready / shouldered / sights, in the same order as the old
+// pull and lateral so nobody has to learn a second convention. SaveWeaponField writes flat arrays
+// and this one is nested, so it has its own writer -- same read-modify-write from disk, so a tool
+// editing the file between two saves is not clobbered by a stale in-memory copy.
+bool ABasePlayerController::SaveWeaponTriples(const FString& Key, const TCHAR* Field, const FVector* Pos)
+{
+	FString Json;
+	const FString File = FPaths::Combine(JsonData::DataDir(), TEXT("UI"), TEXT("Weapons.json"));
+	TSharedPtr<FJsonObject> Root;
+	if (!FFileHelper::LoadFileToString(Json, *File)) { return false; }
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
+	const TSharedPtr<FJsonObject>* Weapons = nullptr; const TSharedPtr<FJsonObject>* Entry = nullptr;
+	if (!(FJsonSerializer::Deserialize(Reader, Root) && Root.IsValid() && Root->TryGetObjectField(TEXT("weapons"), Weapons) && Weapons && (*Weapons)->TryGetObjectField(Key, Entry) && Entry)) { return false; }
+	auto Round = [](double V) { return FMath::RoundToDouble(V * 100.0) / 100.0; };
+	TArray<TSharedPtr<FJsonValue>> Rows;
+	for (int32 i = 0; i < 3; ++i)
+	{
+		TArray<TSharedPtr<FJsonValue>> Axis;
+		Axis.Add(MakeShared<FJsonValueNumber>(Round(Pos[i].X)));
+		Axis.Add(MakeShared<FJsonValueNumber>(Round(Pos[i].Y)));
+		Axis.Add(MakeShared<FJsonValueNumber>(Round(Pos[i].Z)));
+		Rows.Add(MakeShared<FJsonValueArray>(Axis));
+	}
+	(*Entry)->SetArrayField(Field, Rows);
 	FString Out;
 	TSharedRef<TJsonWriter<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>> Writer = TJsonWriterFactory<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>::Create(&Out);
 	if (!(FJsonSerializer::Serialize(Root.ToSharedRef(), Writer) && FFileHelper::SaveStringToFile(Out, *File, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM))) { return false; }
@@ -6930,9 +7182,9 @@ void ABasePlayerController::Unstuck()
 
 FString ABasePlayerController::UIAudit()
 {
-	UUserWidget* Page = bCharacterSheetOpen ? Cast<UUserWidget>(CharacterSheetWidget)
-		: bReferenceOpen ? Cast<UUserWidget>(ReferenceWidget)
-		: bAppearanceOpen ? Cast<UUserWidget>(AppearanceWidget) : nullptr;
+	UUserWidget* Page = Screens.IsOpen(EScreen::CharacterSheet) ? Cast<UUserWidget>(CharacterSheetWidget)
+		: Screens.IsOpen(EScreen::Reference) ? Cast<UUserWidget>(ReferenceWidget)
+		: Screens.IsOpen(EScreen::Appearance) ? Cast<UUserWidget>(AppearanceWidget) : nullptr;
 	if (!Page || !Page->WidgetTree) { return TEXT("UIAudit: no console page is open"); }
 	const FGeometry& PG = Page->GetCachedGeometry();
 	const FVector2D PageBR = PG.LocalToAbsolute(FVector2D(PG.GetLocalSize()));

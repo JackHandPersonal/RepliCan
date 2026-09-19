@@ -91,6 +91,21 @@ namespace WeaponCatalog
 		// in the file is taken to mean all three. The defaults are the character's own carries.
 		float PullCm[3] = { 0.0f, 0.0f, 0.0f };
 		float LateralCm[3] = { 12.0f, 11.0f, 0.0f };
+
+		// THE WEAPON'S PLACE, per carry, indexed low ready 0 / shouldered 1 / sights 2. X runs along
+		// the WEAPON's own bore -- this is what "pull" was, and it stays in that frame because an
+		// eye-frame version was tried before and slid the weapon sideways at low ready (see the
+		// comment in ABaseCharacter::SolveWeaponPose). Y and Z are off the eye in the carry frame:
+		// Y is what "lateral" was, Z is new and lifts the weapon toward the eye line.
+		// Seeded from pull and lateral when a weapon has no "position" of its own, so the day this
+		// shipped nothing moved; once "position" is written it is the only thing read.
+		FVector PositionCm[3] = { FVector(0.0f, 12.0f, 0.0f), FVector(0.0f, 11.0f, 0.0f), FVector::ZeroVector };
+
+		// WHERE THE HANDS SIT, PER CARRY (low ready / shouldered / sights). Seeded from the single
+		// "grip" and "fore_grip" so a weapon that has never been tuned per carry holds exactly as it
+		// did; "grip_carry" / "fore_carry", three triples each, override it once written.
+		FVector GripCm[3] = { FVector::ZeroVector, FVector::ZeroVector, FVector::ZeroVector };
+		FVector ForeCm[3] = { FVector::ZeroVector, FVector::ZeroVector, FVector::ZeroVector };
 		// "low_ready": degrees the weapon is turned off the aim while at low ready -- muzzle down
 		// and across. At low ready nothing has to stay on the eye line, so it need not sit parallel
 		// to it; a weapon held ready points at the deck, off to the side.
@@ -225,6 +240,10 @@ namespace WeaponCatalog
 		// overlay. True for a scope and nothing else; kept as its own accessor because that is the
 		// question the HUD and the owner-hide actually ask.
 		bool bOverlay = false;
+		// PICTURE IN PICTURE ("pip"): show a second scene render in the glass instead of narrowing
+		// the world and masking it. The ALTERNATIVE to the overlay, never an addition -- a sight
+		// doing both would magnify inside an already narrowed view. See ABaseCharacter::TickOpticPiP.
+		bool bPiP = false;
 		FLinearColor ReticleColour = FLinearColor(0.45f, 1.0f, 0.65f, 1.0f);
 		FRotator Rot = FRotator::ZeroRotator;
 		FString Skin;

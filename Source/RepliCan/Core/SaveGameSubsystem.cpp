@@ -79,7 +79,9 @@ USyntySaveGame* USaveGameSubsystem::Capture(UWorld* World) const
 		ABaseCharacter* C = *It;
 		FSavedCharacter Rec;
 		Rec.ActorName = C->GetFName().ToString();
-		Rec.Label = C->GetActorLabel();
+		// GetActorNameOrLabel, not GetActorLabel: the latter is editor-only and does not exist in a
+		// game target. This one returns the label in the editor and the actor name in a build.
+		Rec.Label = C->GetActorNameOrLabel();
 		Rec.bRuntimeSpawned = C->bRuntimeSpawned;
 		Rec.Transform = C->GetActorTransform();
 		Rec.bWasPlayer = (C == Player);
@@ -159,7 +161,15 @@ bool USaveGameSubsystem::Apply(UWorld* World, const USyntySaveGame* Save) const
 			FActorSpawnParameters Params;
 			Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 			C = World->SpawnActor<ABaseCharacter>(ABaseCharacter::StaticClass(), Rec.Transform, Params);
-			if (C) { C->bRuntimeSpawned = true; C->SetActorLabel(Rec.Label); }
+			if (C)
+			{
+				C->bRuntimeSpawned = true;
+#if WITH_EDITOR
+				// Editor only -- a label is an editor convenience and SetActorLabel is compiled out of
+				// a game target. The record still carries Rec.Label for logging either way.
+				C->SetActorLabel(Rec.Label);
+#endif
+			}
 		}
 		if (!C) { UE_LOG(LogTemp, Warning, TEXT("SaveGame: character '%s' not in level, skipped"), *Rec.Label); continue; }
 		Seen.Add(Rec.ActorName);

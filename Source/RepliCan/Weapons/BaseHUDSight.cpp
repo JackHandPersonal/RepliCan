@@ -122,6 +122,18 @@ bool ABaseHUD::DrawOpticReticle(float CenterX, float CenterY)
 	if (!PC) { return false; }
 	FString Kind; FLinearColor Colour; float Zoom = 1.0f, Alpha = 0.0f;
 	if (!PC->OpticReticleInfo(Kind, Colour, Zoom, Alpha)) { return false; }
+
+	// THE GLASS OWNS THE MARK WHENEVER YOU CAN SEE THE GLASS. Down a looked-through sight in first
+	// person there is already a real reticle on the lens, drawn by the optic's own material,
+	// collimated and parallax-correct. Drawing this screen-space one as well put TWO marks on one
+	// aim point -- and they disagreed, because the screen mark rides the aim's own wander while the
+	// dot on the glass rides the weapon. Two answers to "where am I pointing" is worse than either
+	// alone. A SCOPE is the opposite case and keeps this mark: at magnification its tube is hidden
+	// from its owner and covered by the overlay, so there is no glass left to carry one.
+	if (const ABaseCharacter* Me = Cast<ABaseCharacter>(GetOwningPawn()))
+	{
+		if (Me->IsFirstPerson() && !Me->OpticUsesOverlay() && Me->CarryAdsAlpha() > 0.5f) { return false; }
+	}
 	Colour.A *= Alpha;
 
 	// SIZED IN SCREEN PIXELS, NOT IN THE WORLD. A reticle is a mark on glass a few centimetres from

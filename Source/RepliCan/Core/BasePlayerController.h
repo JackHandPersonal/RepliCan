@@ -19,6 +19,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Core/ScreenStack.h"
 #include "GameFramework/PlayerController.h"
 #include "Narrative/ConversationData.h"
 #include "Weapons/WeaponCatalog.h"
@@ -65,7 +66,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Sheet") void ShowCharacterSheet();
 	UFUNCTION(BlueprintCallable, Category = "Sheet") void HideCharacterSheet();
 	UFUNCTION(BlueprintCallable, Category = "Sheet") void ToggleCharacterSheet();
-	UFUNCTION(BlueprintPure, Category = "Sheet") bool IsCharacterSheetOpen() const { return bCharacterSheetOpen; }
+	UFUNCTION(BlueprintPure, Category = "Sheet") bool IsCharacterSheetOpen() const { return Screens.IsOpen(EScreen::CharacterSheet); }
 	// The account balance the sheet shows; the replicant starts in debt.
 	UPROPERTY(BlueprintReadWrite, Category = "Sheet") int32 Credits = -13000;
 
@@ -224,7 +225,7 @@ public:
 	// The container transfer screen (a loot box's "Open").
 	UFUNCTION(BlueprintCallable, Category = "Inspect") void OpenTransfer(class ALootBoxActor* Box);
 	UFUNCTION(BlueprintCallable, Category = "Inspect") void CloseTransfer();
-	UFUNCTION(BlueprintPure, Category = "Inspect") bool IsTransferOpen() const { return bTransferOpen; }
+	UFUNCTION(BlueprintPure, Category = "Inspect") bool IsTransferOpen() const { return Screens.IsOpen(EScreen::Transfer); }
 	// The hover highlight and inspect menu are off until the story hands them over (Hannah's call in the cabin).
 	UFUNCTION(BlueprintCallable, Category = "Inspect") void SetInspectEnabled(bool bEnabled) { bInspectEnabled = bEnabled; }
 	UFUNCTION(BlueprintPure, Category = "Inspect") bool IsInspectEnabled() const { return bInspectEnabled; }
@@ -256,7 +257,7 @@ public:
 	// monitor's own. Esc, or "exit", puts it all back.
 	UFUNCTION(BlueprintCallable, Category = "Terminal") void OpenTerminal(AActor* Target);
 	UFUNCTION(BlueprintCallable, Category = "Terminal") void CloseTerminal();
-	UFUNCTION(BlueprintPure, Category = "Terminal") bool IsTerminalOpen() const { return bTerminalOpen; }
+	UFUNCTION(BlueprintPure, Category = "Terminal") bool IsTerminalOpen() const { return Screens.IsOpen(EScreen::Terminal); }
 	bool IsTerminal(const AActor* Target) const;
 	bool ScreenQuadFor(const AActor* Target, FVector& OutCentre, FVector& OutNormal, FVector& OutRight, FVector& OutUp, float& OutW, float& OutH) const;
 	void PlaceTerminalCamera();   // from the seated eye, once the sit has settled
@@ -316,7 +317,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "UI") FString CursorState() const;
 	void EnsureSoftwareCursor();
 	UFUNCTION(BlueprintPure, Category = "Appearance") FString GetAppearanceValue(const FString& Row) const;
-	UFUNCTION(BlueprintPure, Category = "Appearance") bool IsAppearanceOpen() const { return bAppearanceOpen; }
+	UFUNCTION(BlueprintPure, Category = "Appearance") bool IsAppearanceOpen() const { return Screens.IsOpen(EScreen::Appearance); }
 	// The Appearance page frames the head or the whole figure; clicking the face swaps them,
 	// the way the character sheet's mirror does.
 	UFUNCTION(BlueprintPure, Category = "Appearance") bool IsAppearanceHeadView() const { return Appearance.View == 0; }
@@ -416,12 +417,20 @@ public:
 	// the sidearm implied a role the game does not have, and implied a second slot that only
 	// accepted small arms, which was never true.
 	//
-	// SET FOR TESTING THE THREE OPTIC KINDS (2026-09-19), not a considered loadout -- the SMG wears
-	// the only ZOOMED sight in the catalogue (1.5x, no overlay, weapon stays in view) and the pistol
-	// a RED DOT, so one spawn covers both. Previously "Frontier Assault Rifle 01" and "Street
-	// Pistol 01"; put those back when the testing is done.
+	// SET FOR TESTING THE FOUR OPTIC BEHAVIOURS (2026-09-19), not a considered loadout. In hand: the
+	// marksman rifle wears the only PICTURE-IN-PICTURE sight and the pistol a RED DOT. In the pack
+	// below: the SMG wears the only ZOOMED sight, and the assault rifle a SCOPE with the overlay. One
+	// spawn therefore covers all four. Previously "Frontier Assault Rifle 01" and "Street Pistol 01";
+	// put those back, and empty the pack, when the testing is done.
 	UPROPERTY(EditAnywhere, Category = "Weapon")
-	TArray<FString> StartingWeapons = { TEXT("Frontier SMG 03"), TEXT("Frontier Pistol 05") };
+	TArray<FString> StartingWeapons = { TEXT("Frontier Marksman Rifle 02"), TEXT("Frontier Pistol 05") };
+	// AND WHAT IS IN THE PACK. Anything to be TESTED goes here rather than being conjured by a
+	// console command: the player reaches it the way a player would, through the sheet, which means
+	// the test exercises the real equip path instead of a shortcut around it. That matters -- the
+	// picture-in-picture demo looked broken for exactly this reason, because the rifle reached the
+	// hand by a route that left the optic component still wearing the previous weapon's sight.
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	TArray<FString> StartingInventory = { TEXT("Frontier SMG 03"), TEXT("Frontier Assault Rifle 01") };
 	void GiveStartingWeapons();
 	FTimerHandle DiagNoteFadeTimer;
 	UFUNCTION(BlueprintPure, Category = "Debug") FString GetDiagNote() const { return DiagNote; }
@@ -493,7 +502,7 @@ public:
 	// of the pawn holding it as the game holds it, the hand numbers edited live and written back.
 	UFUNCTION(BlueprintCallable, Category = "Reference") void ShowHandTune(const FString& WeaponName);
 	UFUNCTION(BlueprintCallable, Category = "Reference") void HideHandTune();
-	UFUNCTION(BlueprintPure, Category = "Reference") bool IsHandTuneOpen() const { return bHandTuneOpen; }
+	UFUNCTION(BlueprintPure, Category = "Reference") bool IsHandTuneOpen() const { return Screens.IsOpen(EScreen::HandTune); }
 	void HandTuneSetCarry(int32 Idx); void HandTuneSetAim(int32 Idx); void HandTuneReset(); bool HandTuneSave();
 	// The optic fitted to the weapon being tuned, and where it sits on the rail. The offset belongs
 	// to the OPTIC, so it is saved into the optics block and every gun that takes that optic moves
@@ -524,6 +533,10 @@ public:
 	// go: a look from another angle, not a camera to get lost in. The drag ORBITS ABOUT THE WEAPON,
 	// so the thing being tuned stays put in the middle of the frame and only the view moves.
 	void HandTuneOrbit(float DYaw, float DPitch);
+	bool HandTuneDragAxes(FVector& OutRight, FVector& OutUp, float& OutOrthoWidth, FVector& OutCamLoc) const;   // the picture's right/up, its ortho width and where it is seen from
+	void HandTuneDragPosition(const FVector& WorldDelta, int32 LockAxis);   // drag the weapon; LockAxis -1 free, 0/1/2 pinned to x/y/z
+	bool HandTuneHandPoints(FVector& OutMain, FVector& OutSupport, bool& bOutHasSupport) const;   // where the hands hold it, for hit-testing the drag
+	void HandTuneDragGrip(const FVector& WorldDelta, bool bSupport, int32 LockAxis);   // drag a HAND along the weapon
 	// ONE PICTURE, SEEN FROM A CHOSEN SIDE. Two fixed views cost half the panel and still could not
 	// show the one angle a hold needed; a single picture with the sides on call shows more of them.
 	// 0 left, 1 right, 2 top, 3 front, 4 three-quarter.
@@ -542,6 +555,14 @@ public:
 	// point to the optic's own eye and changes the whole hold, so it is written straight to the
 	// catalogue and pushed out, the way fitting a scope to a real rifle is not a preview.
 	void HandTuneStepOptic(int32 Dir);
+	// WHOSE BODY THE PAGE IS TUNING. The eyeline belongs to the character, not the weapon, so the
+	// stand-in in the booth and the eyeline row are the same choice. Real characters only -- the
+	// test rigs and render stand-ins in Characters/ are not people.
+	FString HandTuneCharacter = TEXT("Player");
+	static TArray<FString> HandTuneCharacterList();
+	FString HandTuneCharacterLabel() const;
+	void HandTuneStepCharacter(int32 Dir);
+
 	FString HandTuneOpticLabel() const;
 	bool HandTuneTakesOptic() const;
 	/** The weapon's sight is built in and will not be traded. DISTINCT from HandTuneTakesOptic,
@@ -575,12 +596,14 @@ public:
 	int32 HandTuneAim() const { return HandTuneAimIdx; }
 	// Writes a list of numbers into one field of a weapon's catalogue entry and reloads the catalogue.
 	bool SaveWeaponField(const FString& Key, const TCHAR* Field, const TArray<double>& Values, bool bScalar = false);   // bScalar: one number, written as a number, not a list
+	bool SaveWeaponTriples(const FString& Key, const TCHAR* Field, const FVector* Pos);   // three triples, low ready / shouldered / sights
+	bool HandTuneSpawnBooth(const WeaponCatalog::FWeapon* W);   // the stand-in, fully set up
 	UFUNCTION(BlueprintCallable, Category = "Menu") void ShowSaveLoad(bool bLoad);
 	UFUNCTION(BlueprintCallable, Category = "Menu") void HideSaveLoad();
-	UFUNCTION(BlueprintPure, Category = "Menu") bool IsSaveLoadOpen() const { return bSaveLoadOpen; }
+	UFUNCTION(BlueprintPure, Category = "Menu") bool IsSaveLoadOpen() const { return Screens.IsOpen(EScreen::SaveLoad); }
 	void SaveToSlot(const FString& Slot);
 	void LoadFromSlot(const FString& Slot);
-	UFUNCTION(BlueprintPure, Category = "Menu") bool IsPauseMenuOpen() const { return bPauseMenuOpen; }
+	UFUNCTION(BlueprintPure, Category = "Menu") bool IsPauseMenuOpen() const { return Screens.IsOpen(EScreen::PauseMenu); }
 
 	// Is ANY screen up. Firing a weapon because a click landed on a menu button is the kind of
 	// bug that only shows up as "I shot my own foot in the inventory", so the trigger asks this
@@ -702,7 +725,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Menu") void ShowReference();
 	UFUNCTION(BlueprintCallable, Category = "Menu") void ShowReferenceFor(const FString& ItemName);   // the Reference open at that item's card
 	UFUNCTION(BlueprintCallable, Category = "Menu") void HideReference();
-	UFUNCTION(BlueprintPure, Category = "Menu") bool IsReferenceOpen() const { return bReferenceOpen; }
+	UFUNCTION(BlueprintPure, Category = "Menu") bool IsReferenceOpen() const { return Screens.IsOpen(EScreen::Reference); }
 	// The console pages share a tab strip: 0 the unit's sheet, 1 Reference, 2 Appearance. Closes whatever is open, opens the target.
 	// The settings page, shown over the paused game from the menu. The same widget the title
 	// screen uses, so the two can never drift apart.
@@ -715,12 +738,8 @@ public:
 	// useful to whoever is testing the game as it is to whoever is writing it.
 	UFUNCTION(BlueprintCallable, Category = "Menu") void ShowScenesPanel();
 	UFUNCTION(BlueprintCallable, Category = "Menu") void HideScenesPanel();
-	UFUNCTION(BlueprintPure, Category = "Menu") bool IsScenesOpen() const { return bScenesOpen; }
+	UFUNCTION(BlueprintPure, Category = "Menu") bool IsScenesOpen() const { return Screens.IsOpen(EScreen::Scenes); }
 	UPROPERTY() TObjectPtr<class UScenesWidget> ScenesWidget;
-	bool bScenesOpen = false;
-	bool bSettingsOpen = false;
-	bool bTerminalOpen = false;
-	bool bSaveLoadOpen = false;
 	UPROPERTY() TObjectPtr<class USaveLoadWidget> SaveLoadWidget;
 	UPROPERTY() TObjectPtr<class UHandTuneWidget> HandTuneWidget;
 	UPROPERTY() TObjectPtr<class ASceneCapture2D> HandTuneCap;
@@ -733,12 +752,17 @@ public:
 	// A rod from the stand-in's aiming eye along the aim: it shows which eye the sight comes to.
 	UPROPERTY() TObjectPtr<class UStaticMeshComponent> HandTuneAimLine;
 	void TickHandTune();   // the captures re-aimed at the trigger hand
-	bool bHandTuneOpen = false, bHandTuneReturnToReference = false;
+	bool bHandTuneReturnToReference = false;
 	TArray<float> HT_FingersR, HT_FingersR0, HT_FingersL, HT_FingersL0;
 	float HT_Hunch = 0.0f, HT_Hunch0 = 0.0f, HT_Lean = 0.0f, HT_Lean0 = 0.0f;
 	// Pull and lateral, one per carry: low ready, shouldered, sights.
 	float HT_Pull3[3] = { 0.0f, 0.0f, 0.0f }, HT_Pull3_0[3] = { 0.0f, 0.0f, 0.0f };
 	float HT_Lat3[3] = { 12.0f, 11.0f, 0.0f }, HT_Lat3_0[3] = { 12.0f, 11.0f, 0.0f };
+	// THE WEAPON'S PLACE, per carry: x along the bore, y and z off the eye. Row 18 edits whichever
+	// carry the page is showing, so one row serves low ready, shouldered and the sights.
+	FVector HT_Pos3[3], HT_Pos3_0[3];
+	// AND THE HANDS ARE PER CARRY TOO. One grip meant tuning the shouldered hold wrecked the ADS one.
+	FVector HT_Grip3[3], HT_Grip3_0[3], HT_Fore3[3], HT_Fore3_0[3];
 	// The eyeline: the body's, not the weapon's, so SAVE writes it to the character file.
 	float HT_EyeSide = 4.25f, HT_EyeSide0 = 4.25f, HT_EyeUp = 0.0f, HT_EyeUp0 = 0.0f, HT_EyeFwd = 0.0f, HT_EyeFwd0 = 0.0f;
 	// Low ready's own angles off the aim, and each elbow's swing about its reach line.
@@ -948,12 +972,10 @@ private:
 	UPROPERTY() TObjectPtr<class APointLight> WeaponFlash;
 	void PlaceWeaponPreview();
 	float WeaponYaw = 70.0f, WeaponPitch = 0.0f, WeaponExtent = 100.0f, WeaponKick = 0.0f;
-	bool bReferenceOpen = false;
 	UPROPERTY() TObjectPtr<class UConfirmDialogWidget> ConfirmDialog;
 	bool bBypassSavePrompt = false;   // set while a prompt's choice is being carried out
 	void ShowEditToolNow();
 	void ExitEditModeNow();
-	bool bPauseMenuOpen = false;
 	void OnMenuKey();
 	UPROPERTY() TObjectPtr<class UCharacterSheetWidget> CharacterSheetWidget;
 	UPROPERTY() TObjectPtr<class URemoteViewWidget> RemoteViewWidget;
@@ -977,11 +999,9 @@ private:
 	bool bRemoteConversation = false;
 	UPROPERTY() TObjectPtr<class UAppearanceWidget> AppearanceWidget;
 	UPROPERTY() TObjectPtr<class UMetricsWidget> MetricsWidget;
-	bool bAppearanceOpen = false;
 	bool bFreshPlayerName = false;   // a new game: the chooser starts as "Repli Can" whatever was saved
 	bool bGroggy = false;
 	bool bGroggyArrived = false;   // reached the goal: the cabin call has been placed
-	bool bTransferOpen = false;
 	bool bInspectEnabled = false;
 	UPROPERTY() TObjectPtr<class UInventoryTransferWidget> TransferWidget;
 	FTimerHandle BlinkFadeTimer;
@@ -1000,7 +1020,6 @@ private:
 	float AppearanceOrbitPitch = 0.0f;
 	void ApplyAppearance();
 	ABaseCharacter* AppearancePreview() const { return BoothCharacter.Get(); }
-	bool bCharacterSheetOpen = false;
 	// Where the player was when F12 opened edit mode: the pawn to re-possess
 	// and the view direction to restore when edit mode closes.
 	TWeakObjectPtr<APawn> PreEditPawn;
@@ -1097,6 +1116,10 @@ private:
 
 	void RecordAssistHit(const FHitResult& Hit, const FVector& RayStart);
 	FString GetAssistDirectory() const;
+
+	// Which modal screens are up. Replaces ten parallel bools and the two hand-repeated
+	// disjunctions that had to be kept in step with them. See Core/ScreenStack.h.
+	FScreenStack Screens;
 
 	bool bEditMode = false;
 	bool bAssistMode = false;

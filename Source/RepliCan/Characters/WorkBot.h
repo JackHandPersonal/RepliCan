@@ -24,6 +24,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Work Bot") FVector PatrolMax = FVector(830.0f, 1340.0f, -5000.0f);
 	UPROPERTY(EditAnywhere, Category = "Work Bot") float PatrolSpeed = 0.6f;    // of the WALK speed: it never jogs (SetWalkOnly)
 	UPROPERTY(EditAnywhere, Category = "Work Bot") float HuntSpeed = 1.0f;      // the full walk when it has someone
+	// PATHFINDING, OR THE SWEEP STEERING. On: the bot asks the navmesh for a route and follows it,
+	// which is the only way it can know a corner is a dead end BEFORE walking into it -- a fan of
+	// 70 cm sweeps is a local view, and a concave corner is a local minimum no local rule escapes.
+	// Off: the original reactive steering, kept so the two can be compared directly.
+	//
+	// Safe either way: if there is no navmesh built over the bot, MoveToLocation fails immediately
+	// and it falls through to the sweep steering, so this can never be worse than the old path.
+	UPROPERTY(EditAnywhere, Category = "Work Bot") bool bUseNavMesh = true;
 	UPROPERTY(EditAnywhere, Category = "Work Bot") float StrikeDamage = 14.0f;
 	UPROPERTY(EditAnywhere, Category = "Work Bot") float StrikeReach = 150.0f;
 	UPROPERTY(EditAnywhere, Category = "Work Bot") float StrikeEvery = 1.8f;
@@ -62,6 +70,9 @@ private:
 	// The way round an obstacle, held for a while: choosing afresh every tick made it dither left,
 	// right, left against a crate -- the vibration. Also how long it has been going nowhere.
 	int32 DetourSide = 0; float DetourHold = 0.0f; float NoProgress = 0.0f; FVector ProgressFrom = FVector::ZeroVector;
+	float NextBackOff = 2.0f;   // when the next back-off is due, measured in NoProgress seconds
+	FVector NavGoal = FVector::ZeroVector;   // the destination path following was last given
+	bool bNavUnavailable = false;            // no navmesh here: stop asking, use the steering
 	// The heading actually walked, turned toward the wanted one at a rate, and how long the way
 	// straight ahead has been clear. Both exist to stop the bot buzzing: see Steer.
 	FVector SteerDir = FVector::ZeroVector; float DirectClearFor = 0.0f;

@@ -147,12 +147,15 @@ void UHandTuneWidget::NativeOnInitialized()
 	// picture and the controls huddled top-left. Standing the rows up in two columns puts them in
 	// that empty space, and the page stops being mostly floor.
 	const FRowSpec MidRows[] = {
-		{ TEXT("SIGHTS"),  TEXT("hunch"),         6, 1, CM,    false, false },   // shoulders up, head down: at the sights only
+		{ TEXT("POSTURE"), TEXT("hunch"),         6, 1, CM,    false, false },   // shoulders up, head down: at the sights only
 		{ TEXT(""),        TEXT("lean"),          8, 1, DEGREE, true, false },   // the torso at the waist: at the sights only
-		{ TEXT("CARRY"),   TEXT("pull"),          7, 3, CARRY3, false, false },  // cm along the WEAPON, per carry
-		{ TEXT(""),        TEXT("lateral"),       9, 3, CARRY3, false, false },  // cm off to the main-hand side, per carry
+		// ONE ROW, ONE CARRY. The three cells are x, y and z of the carry the page is SHOWING, not
+		// three carries of one axis -- pick LOW, SHLDR or ADS beside the picture and this row follows.
+		// x runs along the weapon's own bore (this was "pull"), y off to the trigger side (this was
+		// "lateral"), z lifts it toward the eye line. Both old rows are gone: they were two axes of
+		// this one vector wearing different names.
+		{ TEXT("CARRY"),   TEXT("position"),     18, 3, XYZ,   false, false },
 		{ TEXT(""),        TEXT("low ready"),    11, 2, PITCHYAW, true, false }, // degrees off the aim down there
-		{ TEXT("EYELINE"), TEXT("eye"),          10, 3, EYE3,  false, false },   // the BODY's: saved on the character
 	};
 	const FRowSpec RightRows[] = {
 		{ TEXT("ARMS"),    TEXT("elbow main"),   12, 3, CARRY3, true, false },   // the main elbow about its reach line, per carry
@@ -164,7 +167,13 @@ void UHandTuneWidget::NativeOnInitialized()
 		{ TEXT(""),        TEXT("elbow main aim"),   14, 3, AIM3, true, false },
 		{ TEXT(""),        TEXT("elbow sup aim"),    15, 3, AIM3, true, false },
 	};
-	auto BuildRows = [&](const FRowSpec* Specs, int32 Num) -> UVerticalBox*
+	// THE STRIP'S CELLS ARE WIDER THAN THE TABLE'S. The table is three columns of numbers repeated
+	// down the page and lives or dies on fitting; the strip beside the picture has width going
+	// spare, and its numbers -- the size, the optic offset, the eyeline -- are the ones read against
+	// the render while adjusting it, so they get the room.
+	const float StripCellWidth = 132.0f;
+
+	auto BuildRows = [&](const FRowSpec* Specs, int32 Num, float CellW = 94.0f) -> UVerticalBox*
 	{
 		UVerticalBox* Col = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
 		for (int32 r = 0; r < Num; ++r)
@@ -177,14 +186,20 @@ void UHandTuneWidget::NativeOnInitialized()
 			USizeBox* LabelBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass()); LabelBox->SetWidthOverride(104.0f);
 			LabelBox->AddChild(Crt::FixedText(WidgetTree, Spec.Label, S.RowSize, Crt::DimGreen));
 			Line->AddChildToHorizontalBox(LabelBox)->SetVerticalAlignment(VAlign_Center);
-			for (int32 c = 0; c < Spec.Count; ++c)
+			// A MODE ROW COLLAPSES TO ONE CELL. Where the three columns are carries or aims rather
+			// than axes, only the one in view was ever live -- the other two sat dimmed, taking two
+			// thirds of the row's width to show numbers nobody could touch. One cell, and it follows
+			// the CARRY or AIM buttons.
+			const bool bModeRow = (Spec.Axes == CARRY3 || Spec.Axes == AIM3);
+			for (int32 c = 0; c < (bModeRow ? 1 : Spec.Count); ++c)
 			{
 				FCell Cell; Cell.Row = Spec.Row; Cell.Col = c; Cell.Axis = Spec.Axes[c]; Cell.bDegrees = Spec.bDegrees; Cell.bWhole = Spec.bWhole;
+				if (bModeRow) { Cell.AxisSet = Spec.Axes; Cell.bActiveCol = true; Cell.bAim = (Spec.Axes == AIM3); }
 				// THE CELLS CARRY THE WIDTH OF THE PAGE. Three columns of them at 112 plus a 78 gutter
 				// and a 120 label ran the last column off the right edge; the numbers themselves need
 				// about sixty. Narrower cells and gutters bring the whole table inside the panel and
 				// read as one block rather than three drifting apart.
-				USizeBox* CellBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass()); CellBox->SetWidthOverride(94.0f);
+				USizeBox* CellBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass()); CellBox->SetWidthOverride(CellW);
 				Cell.Box = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
 				Cell.Box->SetBrushColor(CellGround);
 				Cell.Box->SetPadding(FMargin(6.0f, 3.0f));
@@ -286,11 +301,19 @@ void UHandTuneWidget::NativeOnInitialized()
 		// the header already closes the page, and two ways out is one too many.
 		// The paint, so a colourway can be judged against the hold without leaving the page.
 		// THE THREE SELECTORS, one above the other: which weapon, which paint, which optic. Each is
-		// "< label >" so the shape of the control says what it does without being read.
+		// "< label >" so the shape of the control says what it does without being read. The two things
+		// that belong TO a selector now ride on its own row rather than under it: how big the weapon
+		// is drawn beside the weapon, and SET DEFAULT beside the paint it would make default. The
+		// strip has the width for it since the cells and the name field were widened.
 		UWidget* WeapPrev = nullptr; UWidget* WeapNext = nullptr;
-		Actions->AddChildToVerticalBox(Selector(TEXT("WEAPON"), WeaponLabel, WeapPrev, WeapNext))->SetPadding(FMargin(0, 0, 0, 10));
+		UHorizontalBox* WeaponRow = Selector(TEXT("WEAPON"), WeaponLabel, WeapPrev, WeapNext);
 		if (UButton* B = Cast<UButton>(WeapPrev)) { B->OnClicked.AddDynamic(this, &UHandTuneWidget::OnPrevWeapon); }
 		if (UButton* B = Cast<UButton>(WeapNext)) { B->OnClicked.AddDynamic(this, &UHandTuneWidget::OnNextWeapon); }
+		{
+			const FRowSpec SizeOnly[] = { { TEXT(""), TEXT("size"), 17, 1, PERCENT, false, false } };
+			WeaponRow->AddChildToHorizontalBox(BuildRows(SizeOnly, UE_ARRAY_COUNT(SizeOnly), StripCellWidth))->SetVerticalAlignment(VAlign_Center);
+		}
+		Actions->AddChildToVerticalBox(WeaponRow)->SetPadding(FMargin(0, 0, 0, 10));
 
 		// Locals, then stored: Selector writes through raw pointer references and a TObjectPtr member
 		// will not bind to one. Every other selector here already did it this way.
@@ -307,24 +330,8 @@ void UHandTuneWidget::NativeOnInitialized()
 		if (UButtonSlot* DS = Cast<UButtonSlot>(SkinDefaultLabel->Slot)) { DS->SetPadding(FMargin(10.0f, 4.0f)); }
 		DefBtn->OnClicked.AddDynamic(this, &UHandTuneWidget::OnSetDefaultSkin);
 		SkinDefaultButton = DefBtn;
-		Actions->AddChildToVerticalBox(SkinRow)->SetPadding(FMargin(0, 0, 0, 4));
-		// On its own line rather than tacked onto the end of the paint row: the row is already a
-		// caption, two arrows and a name, and a fourth thing on the end was what pushed it past the
-		// panel's edge. Indented to the width of the captions so it reads as belonging to PAINT.
-		{
-			UHorizontalBox* DefRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
-			USizeBox* Indent = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-			Indent->SetWidthOverride(64.0f);
-			DefRow->AddChildToHorizontalBox(Indent);
-			DefRow->AddChildToHorizontalBox(DefBtn);
-			Actions->AddChildToVerticalBox(DefRow)->SetPadding(FMargin(0, 0, 0, 6));
-		}
-		// HOW BIG THE WEAPON IS DRAWN, with the weapon's own paint: both are "what this gun looks
-		// like", and neither has anything to do with how it is held.
-		{
-			const FRowSpec SizeOnly[] = { { TEXT(""), TEXT("size"), 17, 1, PERCENT, false, false } };
-			Actions->AddChildToVerticalBox(BuildRows(SizeOnly, UE_ARRAY_COUNT(SizeOnly)))->SetPadding(FMargin(0, 0, 0, 12));
-		}
+		SkinRow->AddChildToHorizontalBox(DefBtn)->SetVerticalAlignment(VAlign_Center);
+		Actions->AddChildToVerticalBox(SkinRow)->SetPadding(FMargin(0, 0, 0, 12));
 
 		UWidget* OptPrev = nullptr; UWidget* OptNext = nullptr;
 		Actions->AddChildToVerticalBox(Selector(TEXT("OPTIC"), OpticLabel, OptPrev, OptNext))->SetPadding(FMargin(0, 0, 0, 14));
@@ -347,7 +354,25 @@ void UHandTuneWidget::NativeOnInitialized()
 		// is one job; having its offset three columns away in the table made it two.
 		{
 			const FRowSpec OpticOnly[] = { { TEXT(""), TEXT("offset"), 16, 3, XYZ, false, false } };
-			Actions->AddChildToVerticalBox(BuildRows(OpticOnly, UE_ARRAY_COUNT(OpticOnly)))->SetPadding(FMargin(0, 0, 0, 6));
+			Actions->AddChildToVerticalBox(BuildRows(OpticOnly, UE_ARRAY_COUNT(OpticOnly), StripCellWidth))->SetPadding(FMargin(0, 0, 0, 6));
+		}
+		// WHOSE BODY, directly above the eyeline that belongs to it. The eyeline is the one number on
+		// this page that is the character's rather than the weapon's, so the two controls are one
+		// idea and sit together. Defaults to the character being played; steps through the real
+		// characters only.
+		{
+			UWidget* ChPrev = nullptr; UWidget* ChNext = nullptr;
+			Actions->AddChildToVerticalBox(Selector(TEXT("BODY"), CharacterLabel, ChPrev, ChNext))->SetPadding(FMargin(0, 0, 0, 6));
+			CharacterPrev = ChPrev; CharacterNext = ChNext;
+			if (UButton* B = Cast<UButton>(ChPrev)) { B->OnClicked.AddDynamic(this, &UHandTuneWidget::OnPrevCharacter); }
+			if (UButton* B = Cast<UButton>(ChNext)) { B->OnClicked.AddDynamic(this, &UHandTuneWidget::OnNextCharacter); }
+		}
+		// THE EYELINE, under the optic offset. Both answer the same question -- where the sight ends
+		// up in front of the eye -- and they were being adjusted against each other from opposite
+		// ends of the page. This one is the BODY's and is saved on the character, not the weapon.
+		{
+			const FRowSpec EyeOnly[] = { { TEXT("EYELINE"), TEXT("eye"), 10, 3, EYE3, false, false } };
+			Actions->AddChildToVerticalBox(BuildRows(EyeOnly, UE_ARRAY_COUNT(EyeOnly), StripCellWidth))->SetPadding(FMargin(0, 0, 0, 6));
 		}
 		Views->AddChildToHorizontalBox(Actions)->SetVerticalAlignment(VAlign_Top);
 	}
@@ -476,6 +501,8 @@ void UHandTuneWidget::Refresh()
 	}
 	// The optic row: greyed and unclickable on a weapon with nowhere to mount one, rather than
 	// hidden, so it is clear the choice exists and this weapon simply cannot take it.
+	if (CharacterLabel) { CharacterLabel->SetText(FText::FromString(Controller->HandTuneCharacterLabel())); }
+
 	const bool bOptic = Controller->HandTuneTakesOptic();
 	// A BUILT-IN SIGHT CANNOT BE SWAPPED, but it reads and tunes like any other -- the label stays
 	// lit and only the stepping is refused. Distinct from bOptic, which means the weapon has nowhere
@@ -485,8 +512,15 @@ void UHandTuneWidget::Refresh()
 	const bool bCanStepOptic = bOptic && !bOpticFixed;
 	if (OpticLabel)
 	{
+		// THE STRING IS THE CONTROLLER'S, THE STYLING IS OURS. HandTuneOpticLabel() now works out what
+		// is fitted before asking about the mount, so the widget no longer rebuilds that text -- two
+		// places composing one string is how a display ends up disagreeing with itself, and while the
+		// widget's copy happened to match character for character, it would have silently WON if the
+		// two ever diverged. What stays here is the treatment: a fitted sight with nowhere to mount it
+		// is real but not adjustable, so it reads dim; faded is kept for a genuine nothing.
+		const bool bFittedNoMount = !bOptic && !Controller->HT_Optic.IsEmpty();
 		OpticLabel->SetText(FText::FromString(Controller->HandTuneOpticLabel() + (bOpticFixed ? TEXT(" FIXED") : TEXT(""))));
-		OpticLabel->SetColorAndOpacity(FSlateColor(bOptic ? Crt::Green : Crt::Faint));
+		OpticLabel->SetColorAndOpacity(FSlateColor(bOptic ? Crt::Green : bFittedNoMount ? Crt::DimGreen : Crt::Faint));
 	}
 	if (OpticPrev) { OpticPrev->SetIsEnabled(bCanStepOptic); OpticPrev->SetRenderOpacity(bCanStepOptic ? 1.0f : 0.35f); }
 	{
@@ -517,24 +551,39 @@ void UHandTuneWidget::Refresh()
 bool UHandTuneWidget::CellLive(const FCell& Cell) const
 {
 	if (!Controller) { return true; }
+	// A MODE CELL IS ALWAYS THE LIVE ONE -- there is only one of it and it shows the selected mode.
+	if (Cell.bActiveCol) { return true; }
 	const int32 C = Controller->HandTuneCarry();   // 0 low ready, 1 shouldered, 2 sights
 	switch (Cell.Row)
 	{
 	case 6: case 8:  return C == 2;            // hunch and lean are what getting behind the sights does
-	case 12: case 13: return Cell.Col == C;    // an elbow per carry: only the one in view
-	case 14: case 15: return Cell.Col == Controller->HandTuneAim();   // an elbow per AIM: the column the AIM buttons are showing
+	// Rows 12-15 (the elbows, per carry and per aim) are not listed: they are mode rows now, caught
+	// by the bActiveCol return above. Leaving their old per-column tests here would be dead code
+	// that reads like live logic.
 	case 11:         return C == 0;            // low ready's own angles off the aim
-	case 7: case 9:  return Cell.Col == C;     // pull and lateral: only the column for the carry in view
+	// Row 18 (position) is NOT listed: all three of its cells are live, because they are x, y and z of
+	// the carry in view rather than one axis across three carries. The old pull and lateral rows were
+	// the other shape and had to pick a column; they are gone.
 	default:         return true;
 	}
+}
+
+// WHICH COLUMN A CELL IS SHOWING. An ordinary cell is its own column; a mode cell is whichever
+// carry or aim the page has selected, resolved now rather than at build time so the buttons move it.
+int32 UHandTuneWidget::CellColumn(const FCell& Cell) const
+{
+	if (!Cell.bActiveCol || !Controller) { return Cell.Col; }
+	return FMath::Clamp(Cell.bAim ? Controller->HandTuneAim() : Controller->HandTuneCarry(), 0, 2);
 }
 
 void UHandTuneWidget::PaintCell(int32 Index)
 {
 	if (!Cells.IsValidIndex(Index) || !Controller) { return; }
 	const FCell& Cell = Cells[Index];
-	const float V = Controller->HandTuneValue(Cell.Row, Cell.Col);
-	const FString Text = Cell.bWhole ? FString::Printf(TEXT("%s %.0f"), Cell.Axis, V) : FString::Printf(TEXT("%s %.1f"), Cell.Axis, V);
+	const int32 Col = CellColumn(Cell);
+	const TCHAR* Axis = (Cell.bActiveCol && Cell.AxisSet) ? Cell.AxisSet[Col] : Cell.Axis;
+	const float V = Controller->HandTuneValue(Cell.Row, Col);
+	const FString Text = Cell.bWhole ? FString::Printf(TEXT("%s %.0f"), Axis, V) : FString::Printf(TEXT("%s %.1f"), Axis, V);
 	const bool bLive = CellLive(Cell);
 	if (Cell.Text) { Cell.Text->SetText(FText::FromString(Text)); Cell.Text->SetColorAndOpacity(FSlateColor(!bLive ? Crt::Faint : Index == Picked ? Crt::Green : Crt::DimGreen)); }
 	if (Cell.Box) { Cell.Box->SetBrushColor(!bLive ? CellDead : Index == Picked ? CellPicked : CellGround); }
@@ -566,7 +615,7 @@ void UHandTuneWidget::Adjust(int32 Index, float Notches, bool bFine, bool bCoars
 	// fifth of that, ctrl five times.
 	float Step = Cell.bWhole ? 1.0f : Cell.bDegrees ? 2.0f : 0.5f;
 	if (bCoarse) { Step *= 5.0f; } else if (bFine) { Step *= 0.2f; }
-	Controller->HandTuneAdjust(Cell.Row, Cell.Col, Step * FMath::Sign(Notches) * FMath::Max(1.0f, FMath::Abs(Notches)));
+	Controller->HandTuneAdjust(Cell.Row, CellColumn(Cell), Step * FMath::Sign(Notches) * FMath::Max(1.0f, FMath::Abs(Notches)));
 	if (Note) { Note->SetText(FText::GetEmpty()); }
 	PaintCell(Index);
 }
@@ -581,43 +630,120 @@ FReply UHandTuneWidget::NativeOnMouseWheel(const FGeometry& InGeometry, const FP
 	return FReply::Handled();
 }
 
+// WHICH AXIS IS PINNED. Held X, Y or Z constrains the drag to that axis of the POSITION -- the
+// axes of the numbers being edited, not the world's -- so what the key says matches what the row
+// says. Read from the player's key state because these keys go to the game, not to the widget.
+// WHAT THE POINTER IS OVER: a hand, or the gun. The capture is orthographic, so projecting a world
+// point into the picture is a dot product and a divide -- no matrices, no unprojection. Whichever
+// hand is within reach of the pointer wins; otherwise the drag moves the weapon. This is why the
+// two drags need no modifier key: you grab the thing you meant.
+int32 UHandTuneWidget::DragTargetAt(const FVector2D& ScreenPos) const
+{
+	if (!Controller || !ViewPane) { return 0; }
+	FVector Right, Up, CamLoc; float OrthoWidth = 0.0f;
+	if (!Controller->HandTuneDragAxes(Right, Up, OrthoWidth, CamLoc)) { return 0; }
+	const FGeometry& Pane = ViewPane->GetCachedGeometry();
+	const FVector2D Size = Pane.GetLocalSize();
+	if (Size.X < 1.0f || OrthoWidth <= KINDA_SMALL_NUMBER) { return 0; }
+	const float CmPerPx = OrthoWidth / (float)Size.X;
+	const FVector2D Local = Pane.AbsoluteToLocal(ScreenPos);
+	FVector Main, Support; bool bHasSupport = false;
+	if (!Controller->HandTuneHandPoints(Main, Support, bHasSupport)) { return 0; }
+	auto ToPane = [&](const FVector& P)
+	{
+		const FVector Rel = P - CamLoc;
+		return FVector2D((float)FVector::DotProduct(Rel, Right) / CmPerPx + Size.X * 0.5f,
+		                 (float)-FVector::DotProduct(Rel, Up) / CmPerPx + Size.Y * 0.5f);
+	};
+	const float Reach = 30.0f;   // pixels; a hand is a small thing in a 260 cm frame
+	const float DMain = (float)FVector2D::Distance(Local, ToPane(Main));
+	const float DSup = bHasSupport ? (float)FVector2D::Distance(Local, ToPane(Support)) : BIG_NUMBER;
+	if (DMain <= Reach && DMain <= DSup) { return 1; }
+	if (DSup <= Reach) { return 2; }
+	return 0;
+}
+
+int32 UHandTuneWidget::DragAxisHeld() const
+{
+	if (const APlayerController* PC = GetOwningPlayer())
+	{
+		if (PC->IsInputKeyDown(EKeys::X)) { return 0; }
+		if (PC->IsInputKeyDown(EKeys::Y)) { return 1; }
+		if (PC->IsInputKeyDown(EKeys::Z)) { return 2; }
+	}
+	return -1;
+}
+
 FReply UHandTuneWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	const int32 Target = HoveredCell();
 	if (Target >= 0) { Pick(Target); }
-	bDragging = PaneHovered();
+	// LEFT DRAGS THE WEAPON, RIGHT LOOKS ROUND IT. Dragging used to orbit, which is the gesture
+	// anyone reaches for first to MOVE the thing they are looking at -- so the obvious action did
+	// the other job and the wanted one did not exist. The look-round is not lost, it moved to the
+	// right button, and it still springs back on release.
+	bDragging = PaneHovered() && InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton;
+	if (bDragging)
+	{
+		// WHAT WAS GRABBED is decided once, on the press, and held for the whole drag. Deciding it
+		// per move would hand the drag to the other thing the moment the pointer crossed it.
+		DragTarget = DragTargetAt(InMouseEvent.GetScreenSpacePosition());
+		if (Controller) { Controller->SetDiagNoteTimed(DragTarget == 1 ? TEXT("DRAGGING THE MAIN HAND ALONG THE WEAPON") : DragTarget == 2 ? TEXT("DRAGGING THE SUPPORT HAND ALONG THE WEAPON") : TEXT("DRAGGING THE WEAPON -- grab a hand to move that instead"), 3.0f); }
+	}
+	bOrbiting = PaneHovered() && InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton;
 	DragFrom = InMouseEvent.GetScreenSpacePosition();
 	SetKeyboardFocus();
 	// Capturing the mouse keeps the drag alive if the pointer runs off the picture.
-	return bDragging ? FReply::Handled().CaptureMouse(TakeWidget()) : FReply::Handled();
+	return (bDragging || bOrbiting) ? FReply::Handled().CaptureMouse(TakeWidget()) : FReply::Handled();
 }
 
 FReply UHandTuneWidget::NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
-	if (!bDragging || !Controller) { return Super::NativeOnMouseMove(InGeometry, InMouseEvent); }
+	if (!Controller || (!bDragging && !bOrbiting)) { return Super::NativeOnMouseMove(InGeometry, InMouseEvent); }
 	const FVector2D Now = InMouseEvent.GetScreenSpacePosition();
-	const FVector2D D = Now - DragFrom;
+	if (bOrbiting)
+	{
+		const FVector2D D = Now - DragFrom;
+		DragFrom = Now;
+		// A quarter of a degree a pixel: the whole forty degrees is a good sweep of the hand, and
+		// dragging right swings the camera right round the weapon, the way a turntable reads.
+		Controller->HandTuneOrbit((float)D.X * 0.25f, (float)-D.Y * 0.25f);
+		return FReply::Handled();
+	}
+	// THE PIXELS ARE CENTIMETRES, EXACTLY. The capture is orthographic, so cm-per-pixel is the ortho
+	// width over the pane's own width -- no unprojection, no guessed sensitivity, and it stays right
+	// when the zoom changes. Measured in the pane's LOCAL space so DPI scaling cannot skew it.
+	FVector Right, Up; float OrthoWidth = 0.0f;
+	const FGeometry& Pane = ViewPane ? ViewPane->GetCachedGeometry() : InGeometry;
+	const float PaneW = (float)Pane.GetLocalSize().X;
+	FVector CamLoc;
+	if (PaneW > 1.0f && Controller->HandTuneDragAxes(Right, Up, OrthoWidth, CamLoc))
+	{
+		const FVector2D D = Pane.AbsoluteToLocal(Now) - Pane.AbsoluteToLocal(DragFrom);
+		const float CmPerPx = OrthoWidth / PaneW;
+		const FVector WorldDelta = Right * (float)D.X * CmPerPx + Up * (float)-D.Y * CmPerPx;
+		if (DragTarget == 1 || DragTarget == 2) { Controller->HandTuneDragGrip(WorldDelta, DragTarget == 2, DragAxisHeld()); }
+		else { Controller->HandTuneDragPosition(WorldDelta, DragAxisHeld()); }
+		Refresh();
+	}
 	DragFrom = Now;
-	// A quarter of a degree a pixel: the whole forty degrees is a good sweep of the hand, and
-	// dragging right swings the camera right round the weapon, the way a turntable reads.
-	Controller->HandTuneOrbit((float)D.X * 0.25f, (float)-D.Y * 0.25f);
 	return FReply::Handled();
 }
 
 FReply UHandTuneWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
-	// Let go and the view is the framed one again: this is a look round, not a camera to park.
-	if (bDragging && Controller) { Controller->HandTuneResetView(); }
-	bDragging = false;
+	// Let go of a LOOK and the view is the framed one again: that is a look round, not a camera to
+	// park. Let go of a DRAG and nothing springs back -- the weapon stays where it was put.
+	if (bOrbiting && Controller) { Controller->HandTuneResetView(); }
+	bDragging = false; bOrbiting = false;
 	return FReply::Handled().ReleaseMouseCapture();
 }
 
 void UHandTuneWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
 {
-	if (Controller && !bDragging) { Controller->HandTuneResetView(); }   // the angle springs back; the zoom stays where it was put
+	if (Controller && !bOrbiting) { Controller->HandTuneResetView(); }   // the angle springs back; the zoom stays where it was put
 	Super::NativeOnMouseLeave(InMouseEvent);
 }
-
 FReply UHandTuneWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	if (InKeyEvent.GetKey() == EKeys::Escape) { OnBack(); return FReply::Handled(); }
@@ -673,7 +799,7 @@ UHorizontalBox* UHandTuneWidget::Selector(const TCHAR* Caption, TObjectPtr<UText
 	Row->AddChildToHorizontalBox(Prev)->SetVerticalAlignment(VAlign_Center);
 	// A fixed width, so stepping through names of different lengths does not make the arrows dance.
 	USizeBox* LabBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-	LabBox->SetWidthOverride(230.0f);
+	LabBox->SetWidthOverride(420.0f);   // the longest optic name plus its qualifier, without the arrows dancing
 	OutLabel = Crt::FixedText(WidgetTree, TEXT(""), S.CaptionSize, Crt::Green);
 	OutLabel->SetJustification(ETextJustify::Center);
 	LabBox->AddChild(OutLabel);
@@ -708,6 +834,20 @@ void UHandTuneWidget::OnPrevSkin()
 
 void UHandTuneWidget::OnPrevOpticSkin() { if (Controller) { Controller->HandTuneStepOpticSkin(-1); } Refresh(); SetKeyboardFocus(); }
 void UHandTuneWidget::OnNextOpticSkin() { if (Controller) { Controller->HandTuneStepOpticSkin(1); } Refresh(); SetKeyboardFocus(); }
+
+
+void UHandTuneWidget::OnPrevCharacter()
+{
+	if (Controller) { Controller->HandTuneStepCharacter(-1); }
+	Refresh();
+	SetKeyboardFocus();
+}
+void UHandTuneWidget::OnNextCharacter()
+{
+	if (Controller) { Controller->HandTuneStepCharacter(1); }
+	Refresh();
+	SetKeyboardFocus();
+}
 
 void UHandTuneWidget::OnPrevOptic()
 {

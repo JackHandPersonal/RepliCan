@@ -233,7 +233,7 @@ public:
 	// sights: a scope does nothing for you from the hip.
 	void SetWeaponOpticOptics(float Zoom, bool bSmart, const FString& Reticle = FString(),
 		const FLinearColor& Colour = FLinearColor(0.45f, 1.0f, 0.65f, 1.0f),
-		const TArray<float>& Levels = TArray<float>(), bool bOverlay = false)
+		const TArray<float>& Levels = TArray<float>(), bool bOverlay = false, bool bPiP = false)
 	{
 		WeaponOpticZoomLevels = Levels;
 		OpticZoomIndex = 0;
@@ -242,11 +242,20 @@ public:
 		WeaponOpticReticle = Reticle;
 		WeaponOpticReticleColour = Colour;
 		bWeaponOpticOverlay = bOverlay;
+		bWeaponOpticPiP = bPiP;
 	}
+	/** PICTURE IN PICTURE: a second scene render at the objective, shown in the glass, instead of
+	 *  narrowing the world and masking everything outside a circle. It REPLACES the overlay rather
+	 *  than joining it -- the two are alternative answers to the same problem, and a sight doing
+	 *  both would narrow the view and then show a magnified picture inside the narrowed view. */
+	bool OpticUsesPiP() const { return bWeaponOpticPiP; }
 	/** Steps a variable scope to the next power. True when it actually changed. */
 	bool StepOpticZoom(int32 Dir);
 	bool HasVariableOptic() const { return WeaponOpticZoomLevels.Num() > 1; }
-	bool OpticUsesOverlay() const { return bWeaponOpticOverlay; }
+	// A PiP sight never uses the overlay: no mask, no hiding the tube from its owner, no narrowed
+	// world. Asking here rather than at each of the three call sites means the two mechanisms cannot
+	// be switched on together by someone wiring up a new optic.
+	bool OpticUsesOverlay() const { return bWeaponOpticOverlay && !bWeaponOpticPiP; }
 	/** 1 when the weapon is settled behind the glass, 0 when it is not. The black ring of a real
 	 *  scope grows the moment your eye is off the axis, and that is what this drives. */
 	float OpticSettle() const;
@@ -1078,6 +1087,31 @@ private:
 	TArray<float> WeaponOpticZoomLevels;
 	int32 OpticZoomIndex = 0;
 	bool bWeaponOpticOverlay = false;
+	bool bWeaponOpticPiP = false;
+	// The second render, and what it renders into. Made when a PiP optic is fitted and torn down
+	// when it is taken off, so a game with no such sight in it pays nothing at all.
+	// BlueprintReadOnly so a remote-exec probe can READ them. A private UPROPERTY is invisible to
+	// Python, so when the picture-in-picture sight showed nothing the only available evidence was
+	// the ABSENCE of a capture component, and the actual cause -- the optic component still wearing
+	// the previous weapon's sight -- had to be inferred from a different probe. A feature whose
+	// state cannot be read from outside costs a round trip every time it misbehaves.
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Weapon|Optic", meta = (AllowPrivateAccess = "true")) TObjectPtr<class USceneCaptureComponent2D> OpticPiPCapture;
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Weapon|Optic", meta = (AllowPrivateAccess = "true")) TObjectPtr<class UTextureRenderTarget2D> OpticPiPTarget;
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Weapon|Optic", meta = (AllowPrivateAccess = "true")) TObjectPtr<UMaterialInstanceDynamic> OpticPiPLensMID;
+	/** EV compensation for the sight picture. A scene capture cannot run the histogram the main view
+	 *  runs -- it renders one frame on demand and has no adaptation history to converge -- so its
+	 *  exposure is fixed here instead. Measured on the facility deck: bias 0 renders a mean of 4 out
+	 *  of 255 (black, and the whole reason this sight appeared to show nothing), +1.0 a mean of 98,
+	 *  +2.0 a mean of 205, and +5 and above clip. Editable because it is a lighting number, not a
+	 *  constant of the feature: a brighter level wants a smaller one. */
+	UPROPERTY(EditAnywhere, Category = "Weapon|Optic") float OpticPiPExposureBias = 1.0f;
+	/** Which optic the pawn believes it is wearing, for the same reason: a probe should never have
+	 *  to deduce this from a mesh name. */
+	UFUNCTION(BlueprintPure, Category = "Weapon|Optic") bool IsOpticPiP() const { return bWeaponOpticPiP; }
+	/** Aims the capture and takes the frame. Called AFTER the weapon has been placed, so the glass
+	 *  and the camera are both final -- aiming a capture from a pose that is about to move is how
+	 *  a picture-in-picture sight ends up a frame behind the world it is showing. */
+	void TickOpticPiP();
 	bool bOpticHiddenForOverlay = false;
 	FString WeaponOpticReticle;
 	FLinearColor WeaponOpticReticleColour = FLinearColor(0.45f, 1.0f, 0.65f, 1.0f);
@@ -1087,6 +1121,13 @@ private:
 	float ViewBobPhase = 0.0f;
 	float ViewPrevYaw = 0.0f, ViewPrevPitch = 0.0f;
 	float ViewSwayYaw = 0.0f, ViewSwayPitch = 0.0f;
+	FVector ViewBobOffset = FVector::ZeroVector;   // this frame's bob, in the eye's frame
+	/** Works out this frame's sway and bob. Called from Tick, BEFORE the solve and so before the
+	 *  hand IK reads it. That ordering is the fix, not an implementation detail: these used to be
+	 *  applied after the camera, where they moved the weapon and left the hand behind. */
+	void TickViewOffsets(float DeltaSeconds, const FRotator& EyeRot);
+	/** Rides this frame's sway and bob on top of a solved pose, in the eye's frame. */
+	FTransform ApplyViewOffsets(const FTransform& Pose, const FVector& EyeLoc, const FRotator& EyeRot) const;
 	bool bViewDampValid = false;
 
 	AActor* PickAmbientLookAtTarget() const;
@@ -1796,18 +1837,63 @@ public:
 	// How much of a given carry is in effect right now, blended across a change.
 	float CarryAlpha(EWeaponCarry Which) const;
 	// Length of pull for a carry, in centimetres along the weapon's own bore.
-	float CarryPullCm(EWeaponCarry Carry) const;
 	void SetWeaponShoulderPoint(const FVector& Local) { WeaponShoulderLocal = Local; }
 	float WeaponLeanDeg = 0.0f;
 	void SetWeaponLean(float Degrees) { WeaponLeanDeg = Degrees; }
 	// PER CARRY, from the weapon: how far along the aim it is held (pull) and how far off to the
 	// trigger side (lateral), indexed low ready 0, shouldered 1, sights 2. ADS is normally zero
 	// sideways -- the optic is in the eye line -- and the other two hold the weapon off the face.
-	float WeaponPullCm[3] = { 0.0f, 0.0f, 0.0f };
-	float WeaponLateralCm[3] = { 12.0f, 11.0f, 0.0f };
-	void SetWeaponCarryTune(const float* Pull, const float* Lateral)
+	// THE WEAPON'S PLACE, per carry, indexed low ready 0 / shouldered 1 / sights 2. X along the
+	// WEAPON's own bore (what "pull" was), Y and Z off the eye in the carry frame (Y is "lateral",
+	// Z is new). X and Y are seeded from the old fields so nothing moved when this landed; Z is
+	// ADDITIVE on the stance's own height, so zero is exactly the stance as it was.
+	FVector WeaponPosCm[3] = { FVector(0.0f, 12.0f, 0.0f), FVector(0.0f, 11.0f, 0.0f), FVector::ZeroVector };
+
+	// WHERE THE HANDS SIT ON THE WEAPON, PER CARRY (low ready 0, shouldered 1, sights 2). The hold is
+	// not the same shouldered as it is at the sights -- the gun comes back into the shoulder and the
+	// support hand shortens up -- and one shared grip made tuning either of them wreck the other.
+	// Blended across a carry change by the same factor the carry offset uses, so the hands travel
+	// rather than jump. Seeded from the weapon's single "grip" when it has no per-carry values, so a
+	// weapon that has never been tuned this way behaves exactly as it did.
+	FVector WeaponGripCm[3] = { FVector::ZeroVector, FVector::ZeroVector, FVector::ZeroVector };
+	FVector WeaponForeCm[3] = { FVector::ZeroVector, FVector::ZeroVector, FVector::ZeroVector };
+	void SetWeaponGripPerCarry(const FVector* Grip, const FVector* Fore)
 	{
-		for (int32 i = 0; i < 3; ++i) { WeaponPullCm[i] = Pull[i]; WeaponLateralCm[i] = Lateral[i]; }
+		for (int32 i = 0; i < 3; ++i) { WeaponGripCm[i] = Grip[i]; WeaponForeCm[i] = Fore[i]; }
+	}
+	// ONE definition of how far through a carry change we are. The solve and the grip blend both
+	// read it; two copies of this formula is how they would drift apart.
+	float CarryBlendT() const
+	{
+		return (CarryBlendTotal > KINDA_SMALL_NUMBER) ? FMath::Clamp(1.0f - CarryBlendLeft / CarryBlendTotal, 0.0f, 1.0f) : 1.0f;
+	}
+	// A WORLD MOVEMENT, IN THE FRAME THE CARRY POSITION IS WRITTEN IN. The offset is applied as
+	// Lerp(YawOnly.Rotate(Off), EyeRot.Rotate(Off), Ads) in SolveWeaponPose, so the inverse has to
+	// use the SAME blend or a drag would land somewhere else as the carry changed. Yaw-only away
+	// from the sights because pointing the muzzle down does not roll the shoulder pocket.
+	FVector WorldToCarryFrame(const FVector& WorldDelta) const
+	{
+		FVector EyeLoc; FRotator EyeRot;
+		if (!GetEye(false, EyeLoc, EyeRot)) { return WorldDelta; }
+		const FRotator YawOnly(0.0f, EyeRot.Yaw, 0.0f);
+		const float Ads = CarryAdsAlpha();
+		return FMath::Lerp(YawOnly.UnrotateVector(WorldDelta), EyeRot.UnrotateVector(WorldDelta), Ads);
+	}
+
+	FVector GripForCarry(EWeaponCarry Carry, bool bFore) const
+	{
+		const FVector* A = bFore ? WeaponForeCm : WeaponGripCm;
+		switch (Carry)
+		{
+		case EWeaponCarry::LowReady:   return A[0];
+		case EWeaponCarry::Shouldered: return A[1];
+		case EWeaponCarry::ADS:        return A[2];
+		default:                       return A[1];   // hip fire holds it as shouldered does
+		}
+	}
+	void SetWeaponCarryPos(const FVector* Pos)
+	{
+		for (int32 i = 0; i < 3; ++i) { WeaponPosCm[i] = Pos[i]; }
 	}
 	// How much of the ADS posture is in effect right now, blended across a carry change: the hunch
 	// and the lean belong to looking through the sights and to nothing else.

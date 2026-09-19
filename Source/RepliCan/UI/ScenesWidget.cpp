@@ -1,4 +1,5 @@
 #include "UI/ScenesWidget.h"
+#include "Core/JsonDataFile.h"
 #include "UI/CrtStyle.h"
 #include "UI/CrtTabsWidget.h"
 #include "UI/CrtRuleWidget.h"
@@ -46,11 +47,9 @@ namespace
 	TMap<FString, float> VoiceSeconds()
 	{
 		TMap<FString, float> Out;
-		FString Json;
-		if (!FFileHelper::LoadFileToString(Json, *FPaths::Combine(FPaths::ProjectDir(), TEXT("Conversations"), TEXT("Voice"), TEXT("manifest.json")))) { return Out; }
-		TSharedPtr<FJsonObject> Root;
-		const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
-		if (!FJsonSerializer::Deserialize(Reader, Root) || !Root.IsValid()) { return Out; }
+		TSharedPtr<FJsonObject> Root = JsonData::LoadObject(
+			FPaths::Combine(JsonData::DataDir(), TEXT("Conversations"), TEXT("Voice"), TEXT("manifest.json")), TEXT("VoiceManifest"));
+		if (!Root.IsValid()) { return Out; }
 		for (const auto& Pair : Root->Values)
 		{
 			const TSharedPtr<FJsonObject>* O = nullptr;
@@ -80,7 +79,7 @@ TArray<UScenesWidget::FRow> UScenesWidget::ScanCharacters() const
 	// Every character file: its name as written, its type and kit, and whether a conversation
 	// file exists for it. Read straight from the JSON so a field added by hand shows up.
 	TArray<FRow> Rows;
-	const FString Dir = FPaths::Combine(FPaths::ProjectDir(), TEXT("Characters"));
+	const FString Dir = FPaths::Combine(JsonData::DataDir(), TEXT("Characters"));
 	TArray<FString> Files;
 	IFileManager::Get().FindFiles(Files, *(Dir / TEXT("*.json")), true, false);
 	Files.Sort();
@@ -89,13 +88,7 @@ TArray<UScenesWidget::FRow> UScenesWidget::ScanCharacters() const
 		FRow Row;
 		Row.File = FPaths::GetBaseFilename(File);
 		Row.Name = Row.File;
-		FString Json;
-		TSharedPtr<FJsonObject> Obj;
-		if (FFileHelper::LoadFileToString(Json, *(Dir / File)))
-		{
-			const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
-			FJsonSerializer::Deserialize(Reader, Obj);
-		}
+		TSharedPtr<FJsonObject> Obj = JsonData::LoadObject(Dir / File, TEXT("Scenes"));
 		if (Obj.IsValid())
 		{
 			FString Name;
@@ -105,8 +98,8 @@ TArray<UScenesWidget::FRow> UScenesWidget::ScanCharacters() const
 			Obj->TryGetStringField(TEXT("type"), Row.Type);
 			Obj->TryGetStringField(TEXT("kit"), Row.Kit);
 			Obj->TryGetStringField(TEXT("description"), Row.Description);
-			Row.bTalks = FPaths::FileExists(FPaths::Combine(FPaths::ProjectDir(), TEXT("Conversations"), Row.Name + TEXT(".json")))
-				|| FPaths::FileExists(FPaths::Combine(FPaths::ProjectDir(), TEXT("Conversations"), Row.File + TEXT(".json")));
+			Row.bTalks = FPaths::FileExists(FPaths::Combine(JsonData::DataDir(), TEXT("Conversations"), Row.Name + TEXT(".json")))
+				|| FPaths::FileExists(FPaths::Combine(JsonData::DataDir(), TEXT("Conversations"), Row.File + TEXT(".json")));
 		}
 		else { Row.bParses = false; Row.Description = TEXT("will not parse"); }
 		Rows.Add(MoveTemp(Row));

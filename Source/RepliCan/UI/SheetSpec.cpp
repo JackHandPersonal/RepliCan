@@ -1,4 +1,5 @@
 #include "UI/SheetSpec.h"
+#include "Core/JsonDataFile.h"
 #include "Dom/JsonObject.h"
 #include "HAL/FileManager.h"
 #include "Misc/FileHelper.h"
@@ -8,7 +9,7 @@
 
 FString FSheetSpec::Path()
 {
-	return FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("CharacterSheet.json"));
+	return FPaths::Combine(JsonData::DataDir(), TEXT("UI"), TEXT("CharacterSheet.json"));
 }
 
 FSheetSpec FSheetSpec::Defaults()

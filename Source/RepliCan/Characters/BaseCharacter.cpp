@@ -1,4 +1,5 @@
 #include "Characters/BaseCharacter.h"
+#include "Core/JsonDataFile.h"
 #include "Characters/Vitality.h"
 #include "Weapons/ShotReactions.h"
 #include "Characters/DeathThrash.h"
@@ -43,6 +44,9 @@
 #include "Animation/Skeleton.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Engine/GameViewportClient.h"
+#include "Components/SceneCaptureComponent2D.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "Kismet/KismetRenderingLibrary.h"
 #include "Engine/LocalPlayer.h"
 #include "Core/BasePlayerController.h"
 #include "Weapons/WeaponCatalog.h"
@@ -1456,7 +1460,13 @@ void ABaseCharacter::TickOpticDot(float DeltaSeconds)
 		// invisible to its owner with the sights down. Probed live: both the rifle body and its
 		// optic were owner-hidden at a 90 degree field of view, which is to say while not aiming at
 		// all. Asking each component what it is doing and correcting it cannot get out of step.
-		const bool bMaskUp = bWeaponOpticOverlay && AdsAlpha() > 0.55f;
+		// OpticUsesOverlay(), NOT the raw flag. The hide and the draw have to agree about what
+		// "overlay" means, and they did not: the mask is drawn behind OpticUsesOverlay(), which is
+		// false for a picture-in-picture sight, while this hid the weapon behind bWeaponOpticOverlay,
+		// which is true for one. So a PiP scope hid the rifle AND drew nothing over it, and aiming
+		// made the whole gun disappear -- in third person too, because bOwnerNoSee follows the owning
+		// player rather than the camera. One expression, asked in both places.
+		const bool bMaskUp = OpticUsesOverlay() && AdsAlpha() > 0.55f;
 		bOpticHiddenForOverlay = bMaskUp;
 		if (OpticMeshComponent && OpticMeshComponent->bOwnerNoSee != bMaskUp) { OpticMeshComponent->SetOwnerNoSee(bMaskUp); }
 		// The weapon goes too: the mask covers everything outside the opening, and anything of
@@ -1720,7 +1730,12 @@ FVector ABaseCharacter::CarryOffset(EWeaponCarry Carry) const
 	// hand page. Doing it here rather than in the sight solve means they blend with the carry
 	// change instead of snapping. Hip fire keeps the character's own defaults.
 	const int32 CarrySlot = Carry == EWeaponCarry::LowReady ? 0 : Carry == EWeaponCarry::Shouldered ? 1 : Carry == EWeaponCarry::ADS ? 2 : -1;
-	if (CarrySlot >= 0) { V.Y = WeaponLateralCm[CarrySlot]; }   // the PULL is not here: it runs along the weapon, see SolveWeaponPose
+	// ALL THREE AXES ARE THE EYE'S. X used to run along the weapon's own bore (it was "pull", the
+	// length from trigger to butt), which meant a wheel click moved the weapon somewhere different
+	// depending on how the weapon happened to be pitched or yawed. Tuning wants one stable frame: up
+	// is up and forward is forward whatever the gun is doing. Y replaces the stance's value (it was
+	// "lateral"); X and Z add to it, so zero is the stance untouched.
+	if (CarrySlot >= 0) { V.X += WeaponPosCm[CarrySlot].X; V.Y = WeaponPosCm[CarrySlot].Y; V.Z += WeaponPosCm[CarrySlot].Z; }
 	return V;
 }
 
@@ -1971,7 +1986,7 @@ void ABaseCharacter::PlayVoiceBark(const FString& Kind)
 {
 	if (!GetWorld() || !GetMesh()) { return; }
 	const bool bFemale = CurrentConfig.Gender.Equals(TEXT("Female"), ESearchCase::IgnoreCase);
-	const FString Folder = FPaths::Combine(FPaths::ProjectDir(), TEXT("Conversations"), TEXT("Voice"), bFemale ? TEXT("PlayerGruntsFemale") : TEXT("PlayerGruntsMale"));
+	const FString Folder = FPaths::Combine(JsonData::DataDir(), TEXT("Conversations"), TEXT("Voice"), bFemale ? TEXT("PlayerGruntsFemale") : TEXT("PlayerGruntsMale"));
 	TArray<FString> Files;
 	IFileManager::Get().FindFiles(Files, *FPaths::Combine(Folder, Kind + TEXT("_*.wav")), true, false);
 	if (Files.Num() == 0) { return; }
@@ -2176,6 +2191,58 @@ void ABaseCharacter::TickWeaponSway(float DeltaSeconds)
 	SwayRoll = FMath::Sin(SwayPhase) * SwayRollDegrees * Scale;
 }
 
+void ABaseCharacter::TickViewOffsets(float DeltaSeconds, const FRotator& EyeRot)
+{
+	// THE WEAPON'S OWN MOVEMENT IN THE VIEW, computed in Tick so the solve can carry it and the hand
+	// can follow it. Everything here used to live in PostCameraTick, which runs after the animation:
+	// the weapon got these and the hand did not.
+	const float Dt = FMath::Clamp(DeltaSeconds, 0.0f, 0.05f);
+	if (!bInFirstPerson)
+	{
+		ViewBobOffset = FVector::ZeroVector;
+		ViewSwayYaw = ViewSwayPitch = 0.0f;
+		ViewPrevYaw = EyeRot.Yaw; ViewPrevPitch = EyeRot.Pitch;
+		return;
+	}
+
+	// ---- SWAY: the weapon trails the turn and catches up ----
+	const float TurnYaw = (Dt > KINDA_SMALL_NUMBER) ? FRotator::NormalizeAxis(EyeRot.Yaw - ViewPrevYaw) / Dt : 0.0f;
+	const float TurnPitch = (Dt > KINDA_SMALL_NUMBER) ? FRotator::NormalizeAxis(EyeRot.Pitch - ViewPrevPitch) / Dt : 0.0f;
+	ViewPrevYaw = EyeRot.Yaw; ViewPrevPitch = EyeRot.Pitch;
+	// Eased rather than taken raw: a mouse delivers turn in spikes, and a sway that followed them
+	// exactly would be the very jitter this is here to remove.
+	// MAGNIFICATION MAGNIFIES THE WOBBLE. A 6x scope shows six times the shake, because it shows six
+	// times of everything -- which is what makes a strong scope hard to hold and a red dot easy,
+	// with no special-casing anywhere.
+	const float ZoomSway = FMath::Sqrt(FMath::Max(1.0f, WeaponOpticZoom));
+	const float WantSwayYaw = FMath::Clamp(-TurnYaw * ViewSwayScale * ZoomSway, -ViewSwayMaxDeg * ZoomSway, ViewSwayMaxDeg * ZoomSway);
+	const float WantSwayPitch = FMath::Clamp(-TurnPitch * ViewSwayScale, -ViewSwayMaxDeg, ViewSwayMaxDeg);
+	ViewSwayYaw = FMath::FInterpTo(ViewSwayYaw, WantSwayYaw, Dt, 9.0f);
+	ViewSwayPitch = FMath::FInterpTo(ViewSwayPitch, WantSwayPitch, Dt, 9.0f);
+
+	// ---- BOB: a figure of eight, sized by how fast the body is really moving ----
+	const FVector Flat(GetVelocity().X, GetVelocity().Y, 0.0f);
+	const float Stride = FMath::Clamp(Flat.Size() / FMath::Max(1.0f, ViewBobSpeedRef), 0.0f, 1.0f);
+	ViewBobPhase = FMath::Fmod(ViewBobPhase + Dt * ViewBobHz * (0.6f + Stride) * 2.0f * PI, 2.0f * PI);
+	ViewBobOffset = FVector(0.0f,
+		FMath::Sin(ViewBobPhase) * ViewBobCm * Stride,
+		FMath::Cos(ViewBobPhase * 2.0f) * ViewBobCm * 0.5f * Stride);
+}
+
+FTransform ABaseCharacter::ApplyViewOffsets(const FTransform& Pose, const FVector& EyeLoc, const FRotator& EyeRot) const
+{
+	// The sway and the bob, in the EYE's frame -- a turn of the head is not motion there, so only
+	// what should move moves. Applied to the SOLVE, which is what the hand IK aims at, so the weapon
+	// and the hand holding it are displaced by the same amount and cannot come apart.
+	if (!bInFirstPerson) { return Pose; }
+	const FTransform EyeXf(EyeRot, EyeLoc);
+	FTransform Rel = Pose.GetRelativeTransform(EyeXf);
+	Rel.SetLocation(Rel.GetLocation() + ViewBobOffset
+		+ FVector(0.0f, ViewSwayYaw * ViewSwayShiftCm / FMath::Max(1.0f, ViewSwayMaxDeg), 0.0f));
+	Rel.SetRotation((FRotator(ViewSwayPitch, ViewSwayYaw, 0.0f).Quaternion() * Rel.GetRotation()).GetNormalized());
+	return Rel * EyeXf;
+}
+
 void ABaseCharacter::TickSightAlignment(float DeltaSeconds)
 {
 	if (!WeaponMeshComponent || !WeaponMesh) { SightAlignAlpha = 0.0f; bSightSolvedValid = false; return; }
@@ -2230,6 +2297,29 @@ void ABaseCharacter::TickSightAlignment(float DeltaSeconds)
 	FRotator EyeRot;
 	if (!GetEye(false, EyeLoc, EyeRot)) { return; }
 
+	// ONE AIM, AND THE WEAPON IS ON IT. GetAimRotation() is AimRotationSteady + AimSway, and its own
+	// comment says "the shot, the reticle and the weapon in the hands all follow it" -- but the sway
+	// was added in PostCameraTick AFTER the weapon had been placed, so it reached nothing except the
+	// diagnostics printed below it. The shot swayed, the HUD mark swayed, and the weapon did not: a
+	// red dot on the glass sat perfectly still while the round went somewhere else. Adding it HERE,
+	// before the solve, is what makes the sight tell the truth about where the shot goes.
+	EyeRot += AimSway;
+	// The view's own movement -- the weapon trailing a turn, and the walking bob -- computed before
+	// the solve for the same reason. TickHandIK aims the arm at the solve, so anything that moves
+	// the weapon and is NOT in the solve is, by definition, a gap between the gun and the hand.
+	TickViewOffsets(DeltaSeconds, EyeRot);
+
+	// THE HANDS' PLACE ON THE WEAPON, for this carry. Blended with the same factor and the same ease
+	// as the carry offset, so a change of hold moves the grip and the gun together instead of
+	// sliding the hands along the weapon a frame ahead of it. Set here, before the solve, because
+	// WeaponOnSocket() reads WeaponGripLocal both forward and inverted in the same frame and the two
+	// only cancel while they are the SAME value.
+	{
+		const float GripT = FMath::InterpEaseInOut(0.0f, 1.0f, CarryBlendT(), 2.0f);
+		WeaponGripLocal = FMath::Lerp(GripForCarry(CarryFrom, false), GripForCarry(CurrentCarry, false), GripT);
+		WeaponForeGripLocal = FMath::Lerp(GripForCarry(CarryFrom, true), GripForCarry(CurrentCarry, true), GripT);
+	}
+
 	PlaceWeapon(EyeLoc, EyeRot);
 }
 
@@ -2246,8 +2336,7 @@ FTransform ABaseCharacter::SolveWeaponPose(const FVector& EyeLoc, const FRotator
 	// Between two postures for as long as the move takes, so the weapon travels rather than
 	// teleports, and the travel is the configured duration rather than a spring constant that
 	// nobody can put a number on.
-	const float T = (CarryBlendTotal > KINDA_SMALL_NUMBER)
-		? FMath::Clamp(1.0f - CarryBlendLeft / CarryBlendTotal, 0.0f, 1.0f) : 1.0f;
+	const float T = CarryBlendT();   // one definition, shared with the grip blend
 	FVector Offset = FMath::Lerp(CarryOffset(CarryFrom), CarryOffset(CurrentCarry), FMath::InterpEaseInOut(0.0f, 1.0f, T, 2.0f));
 	Offset += FVector(0.0f, AimSightNudgeCm.X, AimSightNudgeCm.Y);
 	Offset += FVector(0.0f, SwayOffset.X, SwayOffset.Y);   // the stride's sway, in the same eye frame
@@ -2279,7 +2368,6 @@ FTransform ABaseCharacter::SolveWeaponPose(const FVector& EyeLoc, const FRotator
 	// The anchor is pinned where the weapon ALREADY sits with the aim level, so a carry tuned at
 	// AIM MIDDLE does not move at all; all that changes is what the pitch turns the weapon about.
 	const FQuat QLevel = FRotator(WeaponSightPitch + HandlingPitch, EyeRot.Yaw, SwayRoll + HandlingRoll).Quaternion();
-	const float PullNow = FMath::Lerp(CarryPullCm(CarryFrom), CarryPullCm(CurrentCarry), FMath::InterpEaseInOut(0.0f, 1.0f, T, 2.0f));
 	auto PoseFor = [&](float S, FVector& OutSightWorld) -> FTransform
 	{
 		const FVector Off(Offset.X * S, Offset.Y, Offset.Z);
@@ -2312,7 +2400,7 @@ FTransform ABaseCharacter::SolveWeaponPose(const FVector& EyeLoc, const FRotator
 		// trigger to the butt, so it can only mean "further out along its own bore" -- adding it to
 		// the carry offset's forward component moved the weapon along the EYE's X instead, which
 		// at low ready, where the weapon is turned well off the aim, slid it sideways through the air.
-		const FVector Loc = AnchorWorld - Q.RotateVector(AnchorLocal) + Q.RotateVector(FVector(PullNow, 0.0f, 0.0f));
+		const FVector Loc = AnchorWorld - Q.RotateVector(AnchorLocal);
 		const FVector Scale = WeaponMeshComponent ? WeaponMeshComponent->GetComponentScale() : FVector::OneVector;
 		return FTransform(Q, Loc, Scale);
 	};
@@ -2378,11 +2466,19 @@ FTransform ABaseCharacter::SolveWeaponPose(const FVector& EyeLoc, const FRotator
 		}
 		if (Scale < 1.0f)
 		{
+			// MEASURED, NOT APPLIED. The weapon goes where it was asked to go; a hand that cannot
+			// reach is left behind with the arm extended, and the gap is visible rather than the gun
+			// being quietly dragged back toward the shoulder. Pulling it in made the forward axis of
+			// the carry position silently inert whenever the arms were already at full stretch -- a
+			// control that refuses without saying so. ReachClampScale is still measured, so the
+			// diagnostics (and anything that wants to warn) can say how far past the arm the ask is.
 			ReachClampScale = Scale;
-			Pose = PoseFor(ReachClampScale, SightWorld);
 		}
 	}
-	return Pose;
+	// LAST, so the reach rule measures the pose the arm actually has to make. The view's sway and
+	// bob ride on top of the finished solve, and because they are IN the solve the hand IK carries
+	// them too -- which is the whole point of doing it here instead of after the camera.
+	return ApplyViewOffsets(Pose, EyeLoc, EyeRot);
 }
 
 void ABaseCharacter::PlaceWeapon(const FVector& EyeLoc, const FRotator& EyeRot)
@@ -2464,16 +2560,6 @@ float ABaseCharacter::CarryElbow(EWeaponCarry Carry, bool bSupport) const
 	}
 }
 
-float ABaseCharacter::CarryPullCm(EWeaponCarry Carry) const
-{
-	switch (Carry)
-	{
-	case EWeaponCarry::LowReady:   return WeaponPullCm[0];
-	case EWeaponCarry::Shouldered: return WeaponPullCm[1];
-	case EWeaponCarry::ADS:        return WeaponPullCm[2];
-	default:                       return 0.0f;
-	}
-}
 
 bool ABaseCharacter::EyeFromRig(const FRotator& Ctl, FVector& OutLoc) const
 {
@@ -2625,8 +2711,8 @@ FString ABaseCharacter::DumpHold() const
 		}
 		L.Add(FString::Printf(TEXT("  \"forward\": { \"along_aim_cm\": %.2f, \"across_cm\": %.2f, \"up_cm\": %.2f,"),
 			(float)FVector::DotProduct(ToWeapon, Fwd), (float)FVector::DotProduct(ToWeapon, Right), (float)FVector::DotProduct(ToWeapon, Up)));
-		L.Add(FString::Printf(TEXT("    \"carry_offset\": %s, \"pull_cm\": %.2f, \"anchor_local\": %s, \"shoulder_local\": %s },"),
-			*V(Ads0), CarryPullCm(CurrentCarry), *V(AnchorLocal), *V(WeaponShoulderLocal)));
+		L.Add(FString::Printf(TEXT("    \"carry_offset\": %s, \"anchor_local\": %s, \"shoulder_local\": %s },"),
+			*V(Ads0), *V(AnchorLocal), *V(WeaponShoulderLocal)));
 	}
 	L.Add(FString::Printf(TEXT("  \"actual_weapon\": { \"loc\": %s, \"rot\": %s },"),
 		WeaponMeshComponent ? *V(WeaponMeshComponent->GetComponentLocation()) : TEXT("null"),
@@ -2638,8 +2724,8 @@ FString ABaseCharacter::DumpHold() const
 		*V(WeaponGripLocal), *R3(TriggerHandRotation), *V(WeaponForeGripLocal), *R3(WeaponForeHandRotation), WeaponForeGripPitch));
 	L.Add(FString::Printf(TEXT("    \"elbow_main\": %s, \"elbow_support\": %s, \"elbow_main_aim\": %s, \"elbow_support_aim\": %s,"),
 		*Three(WeaponElbowMain), *Three(WeaponElbowSupport), *Three(WeaponElbowMainAim), *Three(WeaponElbowSupportAim)));
-	L.Add(FString::Printf(TEXT("    \"pull\": %s, \"lateral\": %s, \"low_ready\": [%.2f, %.2f], \"hunch\": %.2f, \"lean\": %.2f,"),
-		*Three(WeaponPullCm), *Three(WeaponLateralCm), WeaponLowReadyPitch, WeaponLowReadyYaw, WeaponHunch, WeaponLeanDeg));
+	L.Add(FString::Printf(TEXT("    \"position\": [%s, %s, %s], \"low_ready\": [%.2f, %.2f], \"hunch\": %.2f, \"lean\": %.2f,"),
+		*V(WeaponPosCm[0]), *V(WeaponPosCm[1]), *V(WeaponPosCm[2]), WeaponLowReadyPitch, WeaponLowReadyYaw, WeaponHunch, WeaponLeanDeg));
 	L.Add(FString::Printf(TEXT("    \"sight_local\": %s, \"sight_pitch\": %.2f }"), *V(WeaponSightLocal), WeaponSightPitch));
 	L.Add(TEXT("}"));
 	return FString::Join(L, TEXT("\n"));
@@ -2724,35 +2810,25 @@ void ABaseCharacter::PostCameraTick(float DeltaSeconds)
 
 		const float Dt = FMath::Clamp(DeltaSeconds, 0.0f, 0.05f);   // a hitch must not launch the spring
 
-		// ---- SWAY: the weapon trails the turn and catches up ----
-		const float TurnYaw = (Dt > KINDA_SMALL_NUMBER) ? FRotator::NormalizeAxis(EyeRot.Yaw - ViewPrevYaw) / Dt : 0.0f;
-		const float TurnPitch = (Dt > KINDA_SMALL_NUMBER) ? FRotator::NormalizeAxis(EyeRot.Pitch - ViewPrevPitch) / Dt : 0.0f;
-		ViewPrevYaw = EyeRot.Yaw; ViewPrevPitch = EyeRot.Pitch;
-		// Eased rather than taken raw: a mouse delivers turn in spikes, and a sway that followed
-		// them exactly would be the very jitter this is here to remove.
-		// MAGNIFICATION MAGNIFIES THE WOBBLE. A 6x scope shows six times the shake, because it shows
-		// six times of everything -- that is what makes a strong scope hard to hold and a red dot
-		// easy, with no special-casing anywhere.
-		const float ZoomSway = FMath::Sqrt(FMath::Max(1.0f, WeaponOpticZoom));
-		const float WantSwayYaw = FMath::Clamp(-TurnYaw * ViewSwayScale * ZoomSway, -ViewSwayMaxDeg * ZoomSway, ViewSwayMaxDeg * ZoomSway);
-		const float WantSwayPitch = FMath::Clamp(-TurnPitch * ViewSwayScale, -ViewSwayMaxDeg, ViewSwayMaxDeg);
-		ViewSwayYaw = FMath::FInterpTo(ViewSwayYaw, WantSwayYaw, Dt, 9.0f);
-		ViewSwayPitch = FMath::FInterpTo(ViewSwayPitch, WantSwayPitch, Dt, 9.0f);
-
-		// ---- BOB: a figure of eight, sized by how fast the body is really moving ----
-		const FVector Flat(GetVelocity().X, GetVelocity().Y, 0.0f);
-		const float Stride = FMath::Clamp(Flat.Size() / FMath::Max(1.0f, ViewBobSpeedRef), 0.0f, 1.0f);
-		ViewBobPhase = FMath::Fmod(ViewBobPhase + Dt * ViewBobHz * (0.6f + Stride) * 2.0f * PI, 2.0f * PI);
-		const FVector Bob(0.0f,
-			FMath::Sin(ViewBobPhase) * ViewBobCm * Stride,
-			FMath::Cos(ViewBobPhase * 2.0f) * ViewBobCm * 0.5f * Stride);
-
-		// Sway and bob are applied to the TARGET, in the eye's frame, so the spring smooths them too
-		// and there is exactly one thing moving the weapon.
-		Target.SetLocation(Target.GetLocation() + Bob + FVector(0.0f, ViewSwayYaw * ViewSwayShiftCm / FMath::Max(1.0f, ViewSwayMaxDeg), 0.0f));
-		Target.SetRotation((FRotator(ViewSwayPitch, ViewSwayYaw, 0.0f).Quaternion() * Target.GetRotation()).GetNormalized());
-
-		if (!bViewDampValid)
+		// SWAY AND BOB ARE NOT APPLIED HERE ANY MORE -- they are in the solve, put there by
+		// TickViewOffsets before the hand IK reads it (see ApplyViewOffsets). They used to be added
+		// to this Target, which moved the weapon and left the hand at the undisplaced solve; the
+		// difference between the two IS the "weapon and hand desync when moving" that was reported,
+		// and it was largest when moving because the bob scales with stride.
+		//
+		// WHICH LEAVES THE SPRING WITH NOTHING TO DO WHEN THE WEAPON LEADS FROM THE SOLVE. It exists
+		// to filter the arm animation's own noise, and the solve has no animation in it -- its own
+		// comment says so. Springing toward a target the hand is already sitting on can only put the
+		// two out of step. So when leading from the solve the weapon goes exactly there; the spring
+		// is kept for the animation-driven path, where there is real noise to take out.
+		if (bViewLeadFromSolve && bSightSolvedValid)
+		{
+			ViewDampedLocal = Target;
+			ViewVel = FVector::ZeroVector;
+			ViewRotVel = FVector::ZeroVector;
+			bViewDampValid = true;
+		}
+		else if (!bViewDampValid)
 		{
 			ViewDampedLocal = Target; ViewVel = FVector::ZeroVector; ViewRotVel = FVector::ZeroVector;
 			bViewDampValid = true;
@@ -2837,6 +2913,10 @@ void ABaseCharacter::PostCameraTick(float DeltaSeconds)
 				HandReachRatio * 100.0f, ArmReachR, ReachClampScale, HandGapCm, SightOffEyeCm, TriggerIKAlpha, SightAlignAlpha));
 		}
 	}
+	// LAST, with the weapon placed and the camera settled: both the glass and the view are final
+	// here, and a capture aimed from a pose that is about to move shows the world a frame late.
+	TickOpticPiP();
+
 	if (LagTestLeft > 0.0f)
 	{
 		++LagFrames;
@@ -2986,6 +3066,98 @@ void ABaseCharacter::SetWeaponOptic(UStaticMesh* OpticMesh, const FVector& Mount
 	// The head is hidden from its owner in first person; the optic must NOT be, or the player
 	// aims down a sight they cannot see.
 	OpticMeshComponent->SetOwnerNoSee(false);
+	// A new sight means a new piece of glass: drop the picture-in-picture instance so the next one
+	// is found on the mesh that is actually fitted rather than the one that was.
+	OpticPiPLensMID = nullptr;
+}
+
+void ABaseCharacter::TickOpticPiP()
+{
+	// TORN DOWN WHENEVER THERE IS NOTHING TO SHOW. A second scene render every frame is the entire
+	// cost of this feature, so it must not survive taking the sight off, stowing the weapon, or
+	// simply dropping out of the sights.
+	const bool bWant = bWeaponOpticPiP && OpticMeshComponent && OpticMeshComponent->GetStaticMesh()
+		&& bInFirstPerson && AdsAlpha() > 0.35f;
+	if (!bWant) { return; }
+
+	const APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC || !PC->PlayerCameraManager) { return; }
+
+	if (!OpticPiPTarget)
+	{
+		// SHAPED LIKE THE VIEWPORT, because the lens samples this by SCREEN position: the capture
+		// and the view have to address the same direction through the same UV, or the picture slides
+		// against the world behind it. Half resolution -- it is seen through a small circle, and the
+		// second render is exactly the thing worth keeping cheap.
+		FVector2D Size(1280.0f, 720.0f);
+		if (GEngine && GEngine->GameViewport) { GEngine->GameViewport->GetViewportSize(Size); }
+		const int32 W = FMath::Clamp(FMath::RoundToInt(Size.X * 0.5f), 256, 1920);
+		const int32 H = FMath::Clamp(FMath::RoundToInt(Size.Y * 0.5f), 144, 1080);
+		OpticPiPTarget = UKismetRenderingLibrary::CreateRenderTarget2D(this, W, H,
+			ETextureRenderTargetFormat::RTF_RGBA8_SRGB, FLinearColor::Black, false);
+	}
+	if (!OpticPiPCapture)
+	{
+		OpticPiPCapture = NewObject<USceneCaptureComponent2D>(this, TEXT("OpticPiPCapture"));
+		OpticPiPCapture->SetupAttachment(GetRootComponent());
+		OpticPiPCapture->RegisterComponent();
+		OpticPiPCapture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+		OpticPiPCapture->bAlwaysPersistRenderingState = true;
+		OpticPiPCapture->TextureTarget = OpticPiPTarget;
+		// THE GUN MUST NOT APPEAR IN ITS OWN SIGHT PICTURE. The capture shares the camera's own
+		// origin, so without this the rifle -- and the shooter holding it -- fill the glass.
+		OpticPiPCapture->HiddenActors.Add(this);
+		// Taken outright once a frame from here, not on the component's own schedule, so it happens
+		// after the weapon has been placed rather than wherever the tick order puts it.
+		OpticPiPCapture->bCaptureEveryFrame = false;
+		OpticPiPCapture->bCaptureOnMovement = false;
+	}
+	if (!OpticPiPLensMID)
+	{
+		// The glass is the slot wearing a reticle or red-dot material; the rest is housing.
+		for (int32 i = 0; i < OpticMeshComponent->GetNumMaterials(); ++i)
+		{
+			const UMaterialInterface* M = OpticMeshComponent->GetMaterial(i);
+			if (!M) { continue; }
+			const FString N = M->GetName();
+			if (!N.Contains(TEXT("Reticle")) && !N.Contains(TEXT("RedDot"))) { continue; }
+			if (UMaterialInterface* Base = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/RepliCan/Materials/M_ScopePiP.M_ScopePiP"), nullptr, LOAD_NoWarn | LOAD_Quiet))
+			{
+				OpticPiPLensMID = UMaterialInstanceDynamic::Create(Base, this);
+				OpticPiPLensMID->SetTextureParameterValue(TEXT("Scene"), OpticPiPTarget);
+				OpticMeshComponent->SetMaterial(i, OpticPiPLensMID);
+			}
+			break;
+		}
+		if (!OpticPiPLensMID) { return; }   // no glass on this sight: nothing to show a picture in
+	}
+
+	// AIMED ALONG THE VIEW, POSITIONED AT THE GLASS. Along the view rather than down the barrel so a
+	// screen-space sample registers exactly with the world behind it; at full ADS the sight solve has
+	// put the two on one line anyway, so they agree where it matters.
+	const FMinimalViewInfo& View = PC->PlayerCameraManager->GetCameraCacheView();
+	// AT THE EYE, NOT AT THE GLASS. The lens samples this by SCREEN position, so the capture has to
+	// share the view's own origin or the picture slides against the world behind it by exactly the
+	// parallax between the two. The previous position was wrong twice over: it meant to be the glass
+	// and was actually the mount, because ApplyOptic() has ALREADY put the mount into the optic
+	// component's relative location, so transforming it again by that component's transform counted
+	// it a second time and left the capture at the weapon's origin -- about 25 cm below the bore.
+	OpticPiPCapture->SetWorldLocationAndRotation(View.Location, View.Rotation);
+	// Re-asserted every frame rather than once at creation, so the bias above can be tuned on a
+	// running game instead of costing a rebuild to try a number.
+	FPostProcessSettings& PP = OpticPiPCapture->PostProcessSettings;
+	PP.bOverride_AutoExposureMethod = true;
+	PP.AutoExposureMethod = EAutoExposureMethod::AEM_Manual;
+	PP.bOverride_AutoExposureApplyPhysicalCameraExposure = true;
+	PP.AutoExposureApplyPhysicalCameraExposure = 0;   // exposure is 2^bias and nothing else
+	PP.bOverride_AutoExposureBias = true;
+	PP.AutoExposureBias = OpticPiPExposureBias;
+	// THE MAGNIFICATION IS THE RATIO OF TWO FIELDS OF VIEW, not a number set anywhere. The world is
+	// drawn at the camera's and the glass at this one, so dividing by the zoom is what makes a 4x
+	// sight show four times the size inside a view that has not narrowed at all -- which is the
+	// whole difference between this and the overlay.
+	OpticPiPCapture->FOVAngle = FMath::Clamp(View.FOV / FMath::Max(1.0f, WeaponOpticZoom), 1.0f, 170.0f);
+	OpticPiPCapture->CaptureScene();
 }
 
 void ABaseCharacter::SetWeaponMesh(UStaticMesh* NewMesh)
@@ -3809,9 +3981,7 @@ void ABaseCharacter::TickRecoil(float DeltaSeconds)
 
 float ABaseCharacter::AdsAlpha() const
 {
-	const float T = (CarryBlendTotal > KINDA_SMALL_NUMBER)
-		? FMath::InterpEaseInOut(0.0f, 1.0f, FMath::Clamp(1.0f - CarryBlendLeft / CarryBlendTotal, 0.0f, 1.0f), 2.0f)
-		: 1.0f;
+	const float T = FMath::InterpEaseInOut(0.0f, 1.0f, CarryBlendT(), 2.0f);   // eased, unlike the raw fraction
 	if (CurrentCarry == EWeaponCarry::ADS) { return (CarryFrom == EWeaponCarry::ADS || CarryBlendLeft <= 0.0f) ? 1.0f : T; }
 	if (CarryFrom == EWeaponCarry::ADS && CarryBlendLeft > 0.0f) { return 1.0f - T; }
 	return 0.0f;
@@ -4409,7 +4579,12 @@ void ABaseCharacter::Tick(float DeltaSeconds)
 		// reaches its target, which is what "mushy" is. The blend IS the animation; the field of
 		// view is a function of it and of nothing else, and it lands exactly when the weapon does.
 		const float Up = FMath::Clamp(AdsAlpha(), 0.0f, 1.0f);
-		const float AimFov = AimFieldOfView / FMath::Max(1.0f, WeaponOpticZoom);
+		// A PiP SIGHT DOES NOT NARROW THE WORLD. The magnification lives in the glass, and keeping
+		// the view wide is the entire point of it -- peripheral vision is what it buys in exchange
+		// for a second scene render. Narrowing here as well would magnify inside an already
+		// narrowed view and the two would multiply.
+		const float AimFov = OpticUsesPiP() ? AimFieldOfView
+		                                    : AimFieldOfView / FMath::Max(1.0f, WeaponOpticZoom);
 		// Interpolated in the TANGENT, not in degrees: tan(fov/2) is what the image is actually
 		// scaled by, so this is a view that grows evenly. Lerping the angle at a 9x scope spends
 		// most of the blend barely changing and then rushes the last part.

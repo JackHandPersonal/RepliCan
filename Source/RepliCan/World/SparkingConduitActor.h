@@ -16,8 +16,11 @@ public:
 	ASparkingConduitActor();
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, Category = "Conduit") float IntervalMin = 4.0f;
-	UPROPERTY(EditAnywhere, Category = "Conduit") float IntervalMax = 11.0f;
+	// MOSTLY NOT SPARKING. These were 4 and 11, which is often enough that the deck reads as
+	// permanently broken and the ear stops noticing. A fault you catch out of the corner of your eye
+	// every half minute is worth more than one you can set your watch by.
+	UPROPERTY(EditAnywhere, Category = "Conduit") float IntervalMin = 14.0f;
+	UPROPERTY(EditAnywhere, Category = "Conduit") float IntervalMax = 46.0f;
 	UPROPERTY(EditAnywhere, Category = "Conduit") FVector Normal = FVector(0.0f, 0.0f, -1.0f);   // the way the sparks leave
 	UPROPERTY(EditAnywhere, Category = "Conduit") int32 Count = 10;
 	UPROPERTY(EditAnywhere, Category = "Conduit") float Scale = 0.9f;

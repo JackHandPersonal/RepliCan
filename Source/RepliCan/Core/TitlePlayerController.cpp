@@ -1,4 +1,5 @@
 #include "Core/TitlePlayerController.h"
+#include "Core/JsonDataFile.h"
 #include "UI/TitleScreenWidget.h"
 #include "World/AmbientPlayer.h"
 #include "Core/RepliCanUserSettings.h"
@@ -314,11 +315,8 @@ void ATitlePlayerController::Tick(float DeltaSeconds)
 
 bool ATitlePlayerController::LoadIntroLines(TArray<FIntroLine>& Out, float& CharsPerSecond) const
 {
-	const FString Path = FPaths::Combine(FPaths::ProjectDir(), TEXT("Data"), TEXT("Intro.json"));
-	FString Json;
-	if (!FFileHelper::LoadFileToString(Json, *Path)) { return false; }
-	TSharedPtr<FJsonObject> Root;
-	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Json), Root) || !Root.IsValid()) { return false; }
+	TSharedPtr<FJsonObject> Root = JsonData::Load(TEXT("Data"), TEXT("Intro.json"), TEXT("Intro"));
+	if (!Root.IsValid()) { return false; }
 	Root->TryGetNumberField(TEXT("charsPerSecond"), CharsPerSecond);
 	const TArray<TSharedPtr<FJsonValue>>* Lines = nullptr;
 	if (!Root->TryGetArrayField(TEXT("lines"), Lines)) { return false; }

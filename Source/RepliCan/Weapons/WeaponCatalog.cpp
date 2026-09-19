@@ -1,4 +1,5 @@
 #include "Weapons/WeaponCatalog.h"
+#include "Core/JsonDataFile.h"
 #include "Items/ItemInstance.h"
 #include "Policies/PrettyJsonPrintPolicy.h"
 #include "Serialization/JsonWriter.h"
@@ -34,7 +35,7 @@ namespace
 
 	FString CatalogueFile()
 	{
-		return FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("Weapons.json"));
+		return FPaths::Combine(JsonData::DataDir(), TEXT("UI"), TEXT("Weapons.json"));
 	}
 
 	// A list of Count numbers, zero-filled where the file has fewer; empty when the field is absent.
@@ -71,19 +72,8 @@ namespace
 		GWeaponCatalogLoaded = true;
 		GByName.Reset();
 
-		FString Text;
-		if (!FFileHelper::LoadFileToString(Text, *CatalogueFile()))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("WeaponCatalog: could not read %s"), *CatalogueFile());
-			return;
-		}
-		TSharedPtr<FJsonObject> Root;
-		const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Text);
-		if (!FJsonSerializer::Deserialize(Reader, Root) || !Root.IsValid())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("WeaponCatalog: %s is not valid JSON"), *CatalogueFile());
-			return;
-		}
+		TSharedPtr<FJsonObject> Root = JsonData::LoadObject(CatalogueFile(), TEXT("WeaponCatalog"));
+		if (!Root.IsValid()) { return; }
 		// Stances first: a weapon's stance is only meaningful next to the folder metadata.
 		GStances.Reset();
 		GFingerPresets.Reset();
@@ -190,6 +180,8 @@ namespace
 					// rather than claiming a zoom of 1 and then behaving like one anyway.
 					if (O.Kind != EOpticKind::RedDot && O.Zoom <= 1.01f) { O.Kind = EOpticKind::RedDot; }
 					O.bOverlay = (O.Kind == EOpticKind::Scope);
+					// Only a magnified sight has anything to put in the picture.
+					{ bool B = false; if (Obj->TryGetBoolField(TEXT("pip"), B)) { O.bPiP = B && O.Zoom > 1.01f; } }
 				}
 				{
 					const FVector C = ReadVector(Obj, TEXT("reticle_colour"));
@@ -259,6 +251,22 @@ namespace
 			{ double N = 0.0; if (Entry->TryGetNumberField(TEXT("hunch"), N)) { W.Hunch = (float)N; } }
 			ReadTriple(Entry, TEXT("pull"), W.PullCm);
 			ReadTriple(Entry, TEXT("lateral"), W.LateralCm);
+			// POSITION, after pull and lateral because it defaults FROM them.
+			for (int32 i = 0; i < 3; ++i) { W.PositionCm[i] = FVector(W.PullCm[i], W.LateralCm[i], 0.0f); }
+			{
+				const TArray<TSharedPtr<FJsonValue>>* Rows = nullptr;
+				if (Entry->TryGetArrayField(TEXT("position"), Rows) && Rows)
+				{
+					for (int32 i = 0; i < 3 && i < Rows->Num(); ++i)
+					{
+						const TArray<TSharedPtr<FJsonValue>>* Axis = nullptr;
+						if ((*Rows)[i]->TryGetArray(Axis) && Axis && Axis->Num() >= 3)
+						{
+							W.PositionCm[i] = FVector((*Axis)[0]->AsNumber(), (*Axis)[1]->AsNumber(), (*Axis)[2]->AsNumber());
+						}
+					}
+				}
+			}
 			ReadTriple(Entry, TEXT("elbow_main"), W.ElbowMain);
 			ReadTriple(Entry, TEXT("elbow_support"), W.ElbowSupport);
 			{ bool B = false; if (Entry->TryGetBoolField(TEXT("hidden"), B)) { W.bHidden = B; } }
@@ -319,6 +327,25 @@ namespace
 			const TArray<TSharedPtr<FJsonValue>>* ForeArr = nullptr;
 			W.bHasForeGrip = Entry->TryGetArrayField(TEXT("fore_grip"), ForeArr) && ForeArr && ForeArr->Num() >= 3;
 			if (W.bHasForeGrip) { W.ForeGrip = ReadVector(Entry, TEXT("fore_grip")); }
+			// PER-CARRY GRIPS, defaulting to the one grip so nothing moves until they are tuned.
+			{
+				for (int32 i = 0; i < 3; ++i) { W.GripCm[i] = W.Grip; W.ForeCm[i] = W.ForeGrip; }
+				auto ReadCarryVecs = [&](const TCHAR* Field, FVector (&Out)[3])
+				{
+					const TArray<TSharedPtr<FJsonValue>>* Rows = nullptr;
+					if (!Entry->TryGetArrayField(Field, Rows) || !Rows) { return; }
+					for (int32 i = 0; i < 3 && i < Rows->Num(); ++i)
+					{
+						const TArray<TSharedPtr<FJsonValue>>* Axis = nullptr;
+						if ((*Rows)[i]->TryGetArray(Axis) && Axis && Axis->Num() >= 3)
+						{
+							Out[i] = FVector((*Axis)[0]->AsNumber(), (*Axis)[1]->AsNumber(), (*Axis)[2]->AsNumber());
+						}
+					}
+				};
+				ReadCarryVecs(TEXT("grip_carry"), W.GripCm);
+				ReadCarryVecs(TEXT("fore_carry"), W.ForeCm);
+			}
 			double ForePitch = 0.0;
 			if (Entry->TryGetNumberField(TEXT("fore_grip_pitch"), ForePitch)) { W.ForeGripPitch = static_cast<float>(ForePitch); }
 			bool bHip = false;

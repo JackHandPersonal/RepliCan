@@ -7,6 +7,12 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
 
+// HOW BIG A MOTE IS, as a fraction of the engine sphere (which is a metre across). Spawn and Tick
+// both size from this. They used to carry separate literals -- 0.030 and 0.014 -- and the smaller
+// one won from the second frame onward; a one-pixel additive speck is exactly what temporal
+// anti-aliasing averages away, so however hot the colour, the result was a dim fleck.
+static constexpr float SparkMoteScale = 0.030f;
+
 ASparkBurstActor::ASparkBurstActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -64,7 +70,7 @@ void ASparkBurstActor::Init(const FVector& Where, const FVector& Normal, int32 C
 		// one-pixel additive speck is exactly what temporal anti-aliasing is built to average away,
 		// so however hot the colour the result on screen is a dim fleck: the reason these read as
 		// specks of oil rather than fire was never the colour, it was the size.
-		const FTransform Xf(FQuat::Identity, M.Pos, FVector(0.030f * M.Size));
+		const FTransform Xf(FQuat::Identity, M.Pos, FVector(SparkMoteScale * M.Size));
 		UInstancedStaticMeshComponent* Bank = M.bWarm ? Warm : Cool;
 		M.Slot = Bank ? Bank->AddInstance(Xf, /*bWorldSpace=*/true) : 0;
 		Motes.Add(M);
@@ -112,7 +118,12 @@ void ASparkBurstActor::Tick(float DeltaSeconds)
 		M.Vel *= FMath::Max(0.0f, 1.0f - 1.6f * DeltaSeconds);   // the air takes the speed off quickly
 		M.Pos += M.Vel * DeltaSeconds;
 		const float Fade = 1.0f - M.Age / M.Life;
-		Into[M.Slot] = FTransform(FQuat::Identity, M.Pos, FVector(0.014f * M.Size * (0.35f + 0.65f * Fade)));
+		// THE SAME BASE SIZE THE MOTE WAS BORN AT. This read 0.014 -- the old sub-pixel value the
+		// spawn above was fixed away from -- so every burst was the right size for exactly one
+		// frame and fourteen millimetres or less from the second frame on. The size fix was inert
+		// wherever anyone could actually see it, which is why these still read as dark flecks after
+		// the material was corrected. One constant now, so the two cannot drift apart again.
+		Into[M.Slot] = FTransform(FQuat::Identity, M.Pos, FVector(SparkMoteScale * M.Size * (0.60f + 0.40f * Fade)));
 	}
 	if (Cool && CoolXf.Num() > 0) { Cool->BatchUpdateInstancesTransforms(0, CoolXf, /*bWorldSpace=*/true, /*bMarkRenderStateDirty=*/true, /*bTeleport=*/true); }
 	if (Warm && WarmXf.Num() > 0) { Warm->BatchUpdateInstancesTransforms(0, WarmXf, /*bWorldSpace=*/true, /*bMarkRenderStateDirty=*/true, /*bTeleport=*/true); }

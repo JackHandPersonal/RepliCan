@@ -1,4 +1,5 @@
 #include "Weapons/ImpactEffects.h"
+#include "Core/JsonDataFile.h"
 #include "World/AmbientPlayer.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
@@ -57,7 +58,7 @@ namespace
 
 	FString RuleFile()
 	{
-		return FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("Impacts.json"));
+		return FPaths::Combine(JsonData::DataDir(), TEXT("UI"), TEXT("Impacts.json"));
 	}
 
 	void ReadRule(const TSharedPtr<FJsonObject>& Obj, FRule& R)
@@ -114,15 +115,8 @@ namespace
 		if (GImpactEffectsLoaded) { return; }
 		GImpactEffectsLoaded = true;
 		GRules.Reset();
-		FString Text;
-		if (!FFileHelper::LoadFileToString(Text, *RuleFile()))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("ImpactEffects: could not read %s"), *RuleFile());
-			return;
-		}
-		TSharedPtr<FJsonObject> Root;
-		const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Text);
-		if (!FJsonSerializer::Deserialize(Reader, Root) || !Root.IsValid()) { return; }
+		TSharedPtr<FJsonObject> Root = JsonData::LoadObject(RuleFile(), TEXT("ImpactEffects"));
+		if (!Root.IsValid()) { return; }
 
 		// A "default" block every rule starts from, so a rule only has to say what differs.
 		FRule Base;

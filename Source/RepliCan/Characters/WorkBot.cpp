@@ -1,9 +1,11 @@
 #include "Characters/WorkBot.h"
+#include "Core/JsonDataFile.h"
 #include "World/AmbientPlayer.h"
 #include "Core/BasePlayerController.h"
 #include "Weapons/ShotReactions.h"
 #include "Weapons/SparkFx.h"
 #include "Characters/Vitality.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "Narrative/VoiceLines.h"
 #include "Animation/AnimSequence.h"
 #include "Components/AudioComponent.h"
@@ -59,7 +61,7 @@ void AWorkBotController::OnPossess(APawn* InPawn)
 	if (!B) { return; }
 	if (B->Alertness) { B->Alertness->OnStateChanged.AddUObject(this, &AWorkBotController::OnAlert); }
 	// Its lines: whatever the bake left in the folder, sorted by the kind in the file name.
-	const FString Dir = FPaths::Combine(FPaths::ProjectDir(), TEXT("Conversations"), TEXT("Voice"), B->BarkFolder);
+	const FString Dir = FPaths::Combine(JsonData::DataDir(), TEXT("Conversations"), TEXT("Voice"), B->BarkFolder);
 	TArray<FString> Files;
 	IFileManager::Get().FindFiles(Files, *FPaths::Combine(Dir, TEXT("*.wav")), true, false);
 	for (const FString& F : Files)
@@ -96,6 +98,8 @@ void AWorkBotController::PickPatrolGoal()
 	}
 	GoalTimeout = 8.0f + FVector::Dist2D(Goal, Here) / 60.0f;
 	ModeClock = 0.0f; StuckClock = 0.0f; SteerDir = FVector::ZeroVector; DirectClearFor = 0.0f;   // a new goal starts from the heading it is given
+	NoProgress = 0.0f; NextBackOff = 2.0f; ProgressFrom = FVector::ZeroVector;   // and from a clean progress record
+	NavGoal = FVector::ZeroVector;   // and re-asks the navmesh rather than finishing the old route
 }
 
 void AWorkBotController::Steer(float DeltaSeconds, const FVector& To, float Speed)
@@ -106,6 +110,34 @@ void AWorkBotController::Steer(float DeltaSeconds, const FVector& To, float Spee
 	if (!FMath::IsNearlyEqual(CurrentSpeed, Wanted)) { CurrentSpeed = Wanted; B->SetSpeedMultiplier(Wanted); }
 	const FVector Dir = (To - B->GetActorLocation()).GetSafeNormal2D();
 	if (Dir.IsNearlyZero()) { return; }
+
+	// THE NAVMESH ROUTE. Everything the bot does goes through this function, so the choice between
+	// pathfinding and the sweep steering is made once, here.
+	if (B->bUseNavMesh && !bNavUnavailable)
+	{
+		// Only re-issue when the destination has actually moved or the move has stopped. Calling
+		// MoveToLocation every frame restarts path following each tick, and a bot that restarts its
+		// path sixty times a second never gets anywhere -- it looks exactly like being stuck.
+		const bool bMoving = GetMoveStatus() == EPathFollowingStatus::Moving;
+		if (!bMoving || FVector::Dist2D(NavGoal, To) > 60.0f)
+		{
+			NavGoal = To;
+			const EPathFollowingRequestResult::Type R = MoveToLocation(To, 45.0f, /*bStopOnOverlap=*/true,
+				/*bUsePathfinding=*/true, /*bProjectDestinationToNavigation=*/true, /*bCanStrafe=*/false);
+			if (R == EPathFollowingRequestResult::Failed)
+			{
+				// No navmesh over this floor, or the goal is off it. Say so once and fall back for
+				// good rather than asking every frame -- a failed request per tick is not free, and
+				// silently doing nothing is how the old bug hid.
+				bNavUnavailable = true;
+				UE_LOG(LogTemp, Warning, TEXT("WorkBot: no navigation path available -- falling back to "
+					"sweep steering. Is there a NavMeshBoundsVolume over the deck?"));
+			}
+		}
+		// Path following is driving the capsule; the twitch, stutter and footfalls in Tick are
+		// unchanged and still ride on top of it.
+		if (!bNavUnavailable) { return; }
+	}
 	// A wall or a crate ahead: the way round, thirty degrees at a time, either side. A person in
 	// the way is not an obstacle -- it is where it is going.
 	const float R = B->GetCapsuleComponent() ? B->GetCapsuleComponent()->GetScaledCapsuleRadius() : 34.0f;
@@ -139,12 +171,21 @@ void AWorkBotController::Steer(float DeltaSeconds, const FVector& To, float Spee
 	}
 	// Going nowhere for two seconds with a clear-looking way ahead: hung on a corner. Back off
 	// and try the other side, and let the stuck clock change the goal after that.
-	if (FVector::Dist2D(B->GetActorLocation(), ProgressFrom) > 25.0f) { ProgressFrom = B->GetActorLocation(); NoProgress = 0.0f; }
-	else { NoProgress += DeltaSeconds; }
-	if (NoProgress > 2.0f)
+	if (FVector::Dist2D(B->GetActorLocation(), ProgressFrom) > 25.0f)
 	{
-		NoProgress = 0.0f; DetourSide = -DetourSide; DetourHold = 1.5f;
-		B->AddMovementInput(-Dir, 1.0f); StuckClock += 1.0f;
+		ProgressFrom = B->GetActorLocation(); NoProgress = 0.0f; NextBackOff = 2.0f;
+	}
+	else { NoProgress += DeltaSeconds; }
+	// THE BACK-OFF MUST NOT ERASE THE RECORD OF BEING STUCK. This used to set NoProgress back to
+	// zero, so each recovery wiped the evidence that the recovery was needed; paired with the
+	// velocity test below -- backing off IS movement -- the bot could wedge itself on a corner and
+	// never reach the StuckClock > 2.5 escape that picks a different goal. It backed off, walked
+	// straight back in, and repeated, which is what looked like walking backwards half the time.
+	// The clock keeps running now; only actually getting somewhere resets it.
+	if (NoProgress > NextBackOff)
+	{
+		NextBackOff += 2.0f; DetourSide = -DetourSide; DetourHold = 1.5f;
+		B->AddMovementInput(-Dir, 1.0f);
 		return;
 	}
 	if (!bFound)
@@ -156,7 +197,11 @@ void AWorkBotController::Steer(float DeltaSeconds, const FVector& To, float Spee
 		StuckClock += DeltaSeconds;
 		return;
 	}
-	if (B->GetVelocity().Size2D() < 8.0f) { StuckClock += DeltaSeconds; } else { StuckClock = 0.0f; }
+	// STUCK MEANS "GETTING NOWHERE", NOT "NOT MOVING". Keyed off instantaneous velocity this read
+	// a bot grinding along a wall, or backing off a corner, as perfectly fine -- so the escape that
+	// gives it a new goal never fired. NoProgress already measures real displacement over time,
+	// which is the question actually being asked.
+	StuckClock = (NoProgress > 0.0f) ? StuckClock + DeltaSeconds : 0.0f;
 	// Second: the heading turns at a rate instead of snapping. Even correct angles, swapped every
 	// frame, look like a shiver; a bot that can only turn so fast per second cannot shiver.
 	if (SteerDir.IsNearlyZero()) { SteerDir = Go; }
@@ -340,7 +385,13 @@ void AWorkBotController::Tick(float DeltaSeconds)
 				static const TCHAR* Spots[] = { TEXT("spine_02"), TEXT("head"), TEXT("upperarm_l"), TEXT("thigh_r"), TEXT("spine_01"), TEXT("lowerarm_r") };
 				const TCHAR* Spot = Spots[FMath::RandRange(0, 5)];
 				const FVector Where = (B->GetMesh() && B->GetMesh()->DoesSocketExist(Spot)) ? B->GetMesh()->GetSocketLocation(Spot) : B->GetActorLocation();
-				SparkFx::Burst(World, Where, FMath::VRand(), 26, 1.1f);   // a wounded machine arcs where you can see it
+				// BRIGHT, and big enough to light the room for an instant. The defaults are tuned for a
+				// scratch on metal; this is a failing power system on the only machine down here, in a
+				// dark basement, and it is the thing the player is meant to notice. The colours are
+				// pushed well past white so the bloom catches them -- a spark no brighter than a
+				// painted wall reads as a dark fleck coming off the machine.
+				SparkFx::Burst(World, Where, FMath::VRand(), 90, 1.8f,
+					FLinearColor(3.2f, 6.8f, 15.0f, 1.0f), FLinearColor(18.0f, 9.2f, 2.2f, 1.0f));
 				PlayAt(FString::Printf(TEXT("spark_crackle_%02d.wav"), FMath::RandRange(1, 3)), 0.5f, &Where);
 			}
 		}

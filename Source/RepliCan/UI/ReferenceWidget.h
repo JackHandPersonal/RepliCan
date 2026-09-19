@@ -256,7 +256,12 @@ private:
 	UPROPERTY() TObjectPtr<UTextBlock> DetailTitle;
 	UPROPERTY() TObjectPtr<UTextBlock> DetailMesh;
 	UPROPERTY() TObjectPtr<UEditableTextBox> NameBox;
-	UPROPERTY() TObjectPtr<UEditableTextBox> SoundBox;
+	UPROPERTY() TObjectPtr<class UTextBlock> SoundLabel;
+	FString SoundValue;
+	TArray<FString> SoundNames() const;
+	void ShowSound();
+	UFUNCTION() void OnCycleSound();
+	UFUNCTION() void OnPlaySound();
 	UPROPERTY() TObjectPtr<UEditableTextBox> MakeBox;    // weapons and optics: MAKE and MODEL where NAME was
 	UPROPERTY() TObjectPtr<UEditableTextBox> ModelBox;
 	UPROPERTY() TObjectPtr<UTextBlock> NameLabel;

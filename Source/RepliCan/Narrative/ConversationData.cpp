@@ -1,4 +1,5 @@
 #include "Narrative/ConversationData.h"
+#include "Core/JsonDataFile.h"
 #include "Dom/JsonObject.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
@@ -8,7 +9,7 @@
 
 FString ConversationFile::GetDirectory()
 {
-	return FPaths::ConvertRelativePathToFull(FPaths::Combine(FPaths::ProjectDir(), TEXT("Conversations")));
+	return FPaths::ConvertRelativePathToFull(FPaths::Combine(JsonData::DataDir(), TEXT("Conversations")));
 }
 
 FString ConversationFile::GetPath(const FString& CharacterName)
@@ -48,10 +49,8 @@ FString ConversationFile::StripVoiceMarkup(const FString& Text)
 
 bool ConversationFile::Load(const FString& CharacterName, FConversation& Out)
 {
-	FString Json;
-	if (!FFileHelper::LoadFileToString(Json, *GetPath(CharacterName))) { return false; }
-	TSharedPtr<FJsonObject> Root;
-	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Json), Root) || !Root.IsValid()) { return false; }
+	TSharedPtr<FJsonObject> Root = JsonData::LoadObject(GetPath(CharacterName), TEXT("Conversation"));
+	if (!Root.IsValid()) { return false; }
 
 	Out = FConversation();
 	Out.Character = CharacterName;

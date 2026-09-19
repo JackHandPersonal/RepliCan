@@ -1,4 +1,5 @@
 #include "Items/ItemCatalog.h"
+#include "Core/JsonDataFile.h"
 #include "Items/ItemInstance.h"
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
@@ -15,8 +16,8 @@ namespace
 	FDateTime GStampWeapons, GStampItems;
 	bool GLoaded = false;
 
-	FString WeaponsFile() { return FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("Weapons.json")); }
-	FString ItemsFile() { return FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("Items.json")); }
+	FString WeaponsFile() { return FPaths::Combine(JsonData::DataDir(), TEXT("UI"), TEXT("Weapons.json")); }
+	FString ItemsFile() { return FPaths::Combine(JsonData::DataDir(), TEXT("UI"), TEXT("Items.json")); }
 
 	FString NumberText(double V)
 	{
@@ -30,11 +31,8 @@ namespace
 
 	void LoadFile(const FString& Path, const TCHAR* RootKey, const TCHAR* DefaultCategory)
 	{
-		FString Json;
-		if (!FFileHelper::LoadFileToString(Json, *Path)) { return; }
-		TSharedPtr<FJsonObject> Root;
-		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
-		if (!FJsonSerializer::Deserialize(Reader, Root) || !Root.IsValid()) { UE_LOG(LogTemp, Warning, TEXT("ItemCatalog: %s did not parse"), *Path); return; }
+		TSharedPtr<FJsonObject> Root = JsonData::LoadObject(Path, TEXT("ItemCatalog"));
+		if (!Root.IsValid()) { return; }
 		const TSharedPtr<FJsonObject>* Entries = nullptr;
 		if (!Root->TryGetObjectField(RootKey, Entries) || !Entries) { return; }
 		for (const TPair<FString, TSharedPtr<FJsonValue>>& Pair : (*Entries)->Values)

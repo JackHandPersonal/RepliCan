@@ -1,4 +1,5 @@
 #include "UI/ReferenceWidget.h"
+#include "Core/JsonDataFile.h"
 #include "UI/PaneShape.h"
 #include "Weapons/WeaponSkins.h"
 #include "UI/CrtStyle.h"
@@ -8,6 +9,7 @@
 #include "UI/InventoryGridWidget.h"
 #include "UI/SheetSpec.h"
 #include "Weapons/WeaponCatalog.h"
+#include "World/AmbientPlayer.h"
 #include "Items/ItemCatalog.h"
 #include "Items/ItemFields.h"
 #include "Blueprint/WidgetTree.h"
@@ -86,19 +88,16 @@ void UReferenceWidget::NativeDestruct()
 	Super::NativeDestruct();
 }
 
-static FString CatalogueFile() { return FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("Weapons.json")); }
-static FString RefItemsFile() { return FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("Items.json")); }
+static FString CatalogueFile() { return FPaths::Combine(JsonData::DataDir(), TEXT("UI"), TEXT("Weapons.json")); }
+static FString RefItemsFile() { return FPaths::Combine(JsonData::DataDir(), TEXT("UI"), TEXT("Items.json")); }
 static const TCHAR* Categories[] = { TEXT("weapons"), TEXT("optics"), TEXT("armor"), TEXT("equipment"), TEXT("consumables"), TEXT("other") };
 
 // UI/Weapons.json: { "weapons": { "<Pack>/<asset>": { name, kind, pack, description, icon, mesh } } }
 void UReferenceWidget::LoadCatalogue()
 {
 	Entries.Reset();
-	FString Json;
-	if (!FFileHelper::LoadFileToString(Json, *CatalogueFile())) { UE_LOG(LogTemp, Warning, TEXT("Reference: %s missing"), *CatalogueFile()); return; }
-	TSharedPtr<FJsonObject> Root;
-	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
-	if (!FJsonSerializer::Deserialize(Reader, Root) || !Root.IsValid()) { UE_LOG(LogTemp, Warning, TEXT("Reference: %s did not parse"), *CatalogueFile()); return; }
+	TSharedPtr<FJsonObject> Root = JsonData::LoadObject(CatalogueFile(), TEXT("Reference"));
+	if (!Root.IsValid()) { return; }
 	StanceNames.Reset();
 	const TSharedPtr<FJsonObject>* Stances = nullptr;
 	if (Root->TryGetObjectField(TEXT("stances"), Stances) && Stances) { for (const TPair<FString, TSharedPtr<FJsonValue>>& Pair : (*Stances)->Values) { StanceNames.Add(Pair.Key); } }
@@ -180,11 +179,8 @@ void UReferenceWidget::LoadCatalogue()
 // Writes one entry's name and description back, marking it kept so the generator leaves it alone.
 bool UReferenceWidget::SaveItemEntry(const FReferenceEntry& E)
 {
-	FString Json;
-	if (!FFileHelper::LoadFileToString(Json, *RefItemsFile())) { return false; }
-	TSharedPtr<FJsonObject> Root;
-	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
-	if (!FJsonSerializer::Deserialize(Reader, Root) || !Root.IsValid()) { return false; }
+	TSharedPtr<FJsonObject> Root = JsonData::LoadObject(RefItemsFile(), TEXT("Reference"));
+	if (!Root.IsValid()) { return false; }
 	const TSharedPtr<FJsonObject>* Items = nullptr;
 	if (!Root->TryGetObjectField(TEXT("items"), Items) || !Items) { return false; }
 	const TSharedPtr<FJsonObject>* Entry = nullptr;
@@ -638,8 +634,19 @@ void UReferenceWidget::BuildDetail(UVerticalBox* Into)
 		USizeBox* SoundCell = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass()); SoundCell->SetWidthOverride(170.0f);
 		SoundCell->AddChild(Crt::FixedText(WidgetTree, TEXT("SOUND"), S.RowSize, Crt::DimGreen));
 		Pair->AddChildToHorizontalBox(SoundCell)->SetVerticalAlignment(VAlign_Center);
-		SoundBox = StyledBox(WidgetTree, S.CaptionSize);
-		UHorizontalBoxSlot* SoundSlot = Pair->AddChildToHorizontalBox(SoundBox); SoundSlot->SetSize(ESlateSizeRule::Fill); SoundSlot->SetVerticalAlignment(VAlign_Center); SoundSlot->SetPadding(FMargin(0, 0, 16, 0));
+		// SOUND IS A CHOICE, NOT A SPELLING. It was a free-text box, so a typo was a weapon that
+		// fired silently and nothing said why. Cycled like STANCE and OPTIC, from the wep_* files in
+		// RawAudio, with PLAY beside it so the choice can be heard without firing anything.
+		UButton* SoundButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
+		SoundButton->SetStyle(Crt::ButtonStyle());
+		SoundLabel = Crt::FixedText(WidgetTree, FixedLabel(TEXT("-"), 14), S.CaptionSize, Crt::Green);
+		SoundButton->AddChild(SoundLabel);
+		if (UButtonSlot* SB = Cast<UButtonSlot>(SoundLabel->Slot)) { SB->SetPadding(FMargin(8.0f, 2.0f)); }
+		SoundButton->OnClicked.AddDynamic(this, &UReferenceWidget::OnCycleSound);
+		Pair->AddChildToHorizontalBox(SoundButton)->SetVerticalAlignment(VAlign_Center);
+		UButton* PlayButton = Crt::Button(WidgetTree, TEXT("[ PLAY ]"), S.CaptionSize, Crt::DimGreen);
+		PlayButton->OnClicked.AddDynamic(this, &UReferenceWidget::OnPlaySound);
+		UHorizontalBoxSlot* PlaySlot = Pair->AddChildToHorizontalBox(PlayButton); PlaySlot->SetVerticalAlignment(VAlign_Center); PlaySlot->SetPadding(FMargin(8, 0, 16, 0));
 	}
 	auto Control = [&](const TCHAR* Caption, UButton* Button) -> UWidget*
 	{
@@ -776,7 +783,7 @@ void UReferenceWidget::SelectEntry(int32 Index)
 	RefreshSkinLabel();
 	if (MetaWidget) { MetaWidget->SetVisibility((bWeapon || bOpticEntry) ? ESlateVisibility::Visible : ESlateVisibility::Collapsed); }
 	FillMetaTable(bWeapon ? WeaponCatalog::Find(E.Name) : nullptr);
-	if (SoundBox) { SoundBox->SetText(FText::FromString(E.Sound)); }
+	SoundValue = E.Sound; ShowSound();
 	if (DescBox) { DescBox->SetText(FText::FromString(E.Description)); }
 	if (DetailNote) { DetailNote->SetText(FText::GetEmpty()); }
 	DetailBox->SetVisibility(ESlateVisibility::Visible);
@@ -972,7 +979,7 @@ void UReferenceWidget::OnSaveDetail()
 	if (!Entries.IsValidIndex(SelectedIndex)) { return; }
 	FReferenceEntry& E = Entries[SelectedIndex];
 	if (NameBox) { E.Name = NameBox->GetText().ToString().TrimStartAndEnd(); }
-	if (SoundBox) { E.Sound = SoundBox->GetText().ToString().TrimStartAndEnd(); }
+	E.Sound = SoundValue;
 	if (DescBox) { E.Description = DescBox->GetText().ToString().TrimStartAndEnd(); }
 	E.bHipFire = bHipFireValue;
 	E.Stance = StanceValue;
@@ -1049,6 +1056,51 @@ void UReferenceWidget::OnCycleOptic()
 	}
 	ShowOptic();
 	FillMetaTable(Entries.IsValidIndex(SelectedIndex) ? WeaponCatalog::Find(Entries[SelectedIndex].Name) : nullptr);
+}
+
+
+// THE SOUNDS A WEAPON CAN FIRE: the wep_* files in RawAudio, plus "-" for none and plus whatever
+// this entry already names, so an older hand-typed value can still be cycled back to rather than
+// being silently unreachable the moment the control became a list.
+TArray<FString> UReferenceWidget::SoundNames() const
+{
+	TArray<FString> Out;
+	Out.Add(FString());
+	TArray<FString> Files;
+	IFileManager::Get().FindFiles(Files, *FPaths::Combine(UAmbientPlayer::RawAudioDir(), TEXT("wep_*.wav")), true, false);
+	Files.Sort();
+	for (const FString& F : Files) { Out.Add(FPaths::GetBaseFilename(F)); }
+	if (!SoundValue.IsEmpty() && !Out.Contains(SoundValue)) { Out.Add(SoundValue); }
+	return Out;
+}
+
+void UReferenceWidget::ShowSound()
+{
+	if (SoundLabel) { SoundLabel->SetText(FText::FromString(FixedLabel(SoundValue.IsEmpty() ? TEXT("-") : SoundValue, 14))); }
+}
+
+void UReferenceWidget::OnCycleSound()
+{
+	const TArray<FString> All = SoundNames();
+	if (All.Num() == 0) { return; }
+	const int32 At = FMath::Max(0, All.IndexOfByKey(SoundValue));
+	SoundValue = All[(At + 1) % All.Num()];
+	if (Entries.IsValidIndex(SelectedIndex)) { Entries[SelectedIndex].Sound = SoundValue; }
+	ShowSound();
+}
+
+// HEARD, NOT GUESSED. Plays the chosen file straight through the ambient player, the same route the
+// shot itself uses, so what the page plays is what the weapon will play.
+void UReferenceWidget::OnPlaySound()
+{
+	if (SoundValue.IsEmpty())
+	{
+		if (DetailNote) { DetailNote->SetText(FText::FromString(TEXT("NO SOUND CHOSEN"))); }
+		return;
+	}
+	const FString Wav = SoundValue.EndsWith(TEXT(".wav")) ? SoundValue : SoundValue + TEXT(".wav");
+	const float Seconds = UAmbientPlayer::PlayOneShot(this, GetWorld(), Wav, 1.0f, 1.0f, true);
+	if (DetailNote) { DetailNote->SetText(FText::FromString(Seconds > 0.0f ? FString::Printf(TEXT("PLAYING %s (%.2fs)"), *Wav.ToUpper(), Seconds) : FString::Printf(TEXT("COULD NOT PLAY %s"), *Wav.ToUpper()))); }
 }
 
 void UReferenceWidget::ShowOptic()
