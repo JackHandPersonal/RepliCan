@@ -1,0 +1,12 @@
+Electricity Sound Effects -- Brian MacIntosh
+https://opengameart.org/content/electricity-sound-effects-0
+
+Licence: CC0 (public domain). No attribution required; credit optional and given here anyway.
+Recorded from a small Tesla generator.
+
+  spark.wav            a single discharge
+  continuousspark.wav  a sustained arc
+
+Downloaded 2026-09-19 for the basement's ceiling conduits and the work bot's failing-power arcs.
+These are the RECORDINGS, unmodified. Anything the game plays is cut from these by a Tools script;
+nothing here is generated.
