@@ -8,8 +8,23 @@ Edit PACK / MAPS below for another pack. Output: Docs/<Pack>_DemoAssemblies.md a
 The current level is saved first, then reloaded at the end.
 """
 import unreal, json, math, os
-PACK = 'PolygonCyberCity'
-MAPS = ['/Game/PolygonCyberCity/Maps/Demo_Interior', '/Game/PolygonCyberCity/Maps/Demo', '/Game/PolygonCyberCity/Maps/Overview']
+# One entry per pack, so a pack's map list is recorded rather than overwritten each time somebody
+# points this at a different one. Set PACK to whichever is being scanned.
+PACKS = {
+    'PolygonCyberCity': ['/Game/PolygonCyberCity/Maps/Demo_Interior',
+                         '/Game/PolygonCyberCity/Maps/Demo',
+                         '/Game/PolygonCyberCity/Maps/Overview'],
+    'PolygonSciFiWorlds': ['/Game/PolygonSciFiWorlds/Maps/Demo_Explorer',
+                           '/Game/PolygonSciFiWorlds/Maps/Demo_Corporation',
+                           '/Game/PolygonSciFiWorlds/Maps/Demo_Scavenger',
+                           '/Game/PolygonSciFiWorlds/Maps/Demo_BlackMarket',
+                           '/Game/PolygonSciFiWorlds/Maps/Overview'],
+    'PolygonSciFiSpace': ['/Game/PolygonSciFiSpace/Maps/Demonstration_Interior',
+                          '/Game/PolygonSciFiSpace/Maps/Demonstration_Exterior',
+                          '/Game/PolygonSciFiSpace/Maps/Overview'],
+}
+PACK = 'PolygonSciFiWorlds'
+MAPS = PACKS[PACK]
 OUT = r'C:\Dev\Games\RepliCan\Docs'
 RADIUS = 400.0   # a part further than this from its root is another assembly's
 

@@ -37,7 +37,7 @@ disagree with what was actually done to the vertices.
 """
 import unreal, json, io, traceback, collections
 
-CAT = r'C:\Dev\Games\RepliCan\UI\Weapons.json'
+CAT = r'C:\Dev\Games\RepliCan\Content\GameData\UI\Weapons.json'
 DRY_RUN = False
 # Where the hand closes, in the mesh's CURRENT space, for weapons the shape rule gets wrong.
 # Read off the side-view icon (RawArt/Icons, muzzle right, bounds centred): the Frontier

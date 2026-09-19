@@ -151,5 +151,5 @@ def run(path, root_key, is_weapon):
     io.open(path, 'w', encoding='utf-8', newline='\n').write(json.dumps(doc, indent=1, ensure_ascii=False))
     print('%s: %d entries, %d filled' % (os.path.basename(path), n, touched))
 
-run(os.path.join(ROOT, 'UI', 'Weapons.json'), 'weapons', True)
-run(os.path.join(ROOT, 'UI', 'Items.json'), 'items', False)
+run(os.path.join(ROOT, 'Content', 'GameData', 'UI', 'Weapons.json'), 'weapons', True)
+run(os.path.join(ROOT, 'Content', 'GameData', 'UI', 'Items.json'), 'items', False)

@@ -26,7 +26,7 @@ then Tools/import_icons.py.
 """
 import unreal, io, json, os, traceback
 
-CAT = os.path.join(unreal.Paths.project_dir(), 'UI', 'Weapons.json')
+CAT = os.path.join(unreal.Paths.project_dir(), 'Content', 'GameData', 'UI', 'Weapons.json')
 # catalogue key -> (pack mesh folder, [(part asset, (x, y, z) seat, (roll, pitch, yaw)) in the parent's pack frame])
 MERGES = {
     'Horror/Wep_Wrench_01': ('/Game/Synty/PolygonSciFiHorror/Meshes/Weapons/', [

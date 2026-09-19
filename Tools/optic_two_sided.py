@@ -69,7 +69,7 @@ def optic_meshes():
             out.append(a)
     try:
         import json, io as _io, os
-        cat = os.path.join(unreal.Paths.project_dir(), 'UI', 'Weapons.json')
+        cat = os.path.join(unreal.Paths.project_dir(), 'Content', 'GameData', 'UI', 'Weapons.json')
         for o in json.load(_io.open(cat, encoding='utf-8')).get('optics', {}).values():
             path = (o.get('mesh') or '').split('.')[0]
             if path:

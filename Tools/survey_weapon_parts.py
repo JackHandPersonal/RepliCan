@@ -19,7 +19,7 @@ HAC1 space throughout: +X downrange, +Z up, origin at the trigger hand.
 """
 import unreal, io, json, os, traceback
 
-CAT = os.path.join(unreal.Paths.project_dir(), 'UI', 'Weapons.json')
+CAT = os.path.join(unreal.Paths.project_dir(), 'Content', 'GameData', 'UI', 'Weapons.json')
 OUT = os.path.join(unreal.Paths.project_dir(), 'Tools', 'weapon_parts.json')
 MIN_TRIS = 24           # smaller than this is a screw head, not a part
 ABOVE_BORE_CM = 1.0     # a part has to sit at least this far above the bore to count as on top

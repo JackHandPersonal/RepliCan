@@ -27,7 +27,7 @@ Tools/fit_optics.py to mount the way it mounts SM_Optic_RedDot_01.
 """
 import unreal, io, json, os, re, traceback
 
-CAT = os.path.join(unreal.Paths.project_dir(), 'UI', 'Weapons.json')
+CAT = os.path.join(unreal.Paths.project_dir(), 'Content', 'GameData', 'UI', 'Weapons.json')
 SRC = '/Game/PolygonSciFiWorlds/Models/Weapons/Parts/'
 SCOPES = '/Game/PolygonSciFiWorlds/Models/Weapons/Scopes/'
 OUT_PKG = '/Game/RepliCan/Weapons/Worlds/Parts'

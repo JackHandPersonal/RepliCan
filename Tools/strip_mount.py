@@ -11,7 +11,7 @@ that is left, so a fitted optic sits on metal rather than floating where the mou
 """
 import unreal, json, io, traceback, collections
 MQ = unreal.GeometryScript_MeshQueries; AU = unreal.GeometryScript_AssetUtils
-CAT = r'C:\Dev\Games\RepliCan\UI\Weapons.json'
+CAT = r'C:\Dev\Games\RepliCan\Content\GameData\UI\Weapons.json'
 ONLY = ['Worlds/Wep_Assault_01']
 MOUNT_HEIGHT = 5.0
 MARGIN = 1.0

@@ -22,7 +22,7 @@ PKG = '/Game/RepliCan/Optics'; GLASS = '/Game/RepliCan/Materials/M_RedDot'
 # length, Tools scratch window_probe), centre 4.2.
 WINDOW_OVERRIDE = {'y': 0.0, 'z': 4.2, 'w': 4.9, 'h': 3.6}
 PANE_INSET = 0.94   # the pane is this much of the window: inside the hoop, never past it (1.08 poked out of RedDot_02's frame)
-CAT = r'C:\Dev\Games\RepliCan\UI\Weapons.json'
+CAT = r'C:\Dev\Games\RepliCan\Content\GameData\UI\Weapons.json'
 MQ = unreal.GeometryScript_MeshQueries; AU = unreal.GeometryScript_AssetUtils; SP = unreal.GeometryScript_MeshSpatial
 XF = unreal.GeometryScript_MeshTransforms; P = unreal.GeometryScript_Primitives
 

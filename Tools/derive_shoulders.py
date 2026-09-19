@@ -13,7 +13,7 @@ left alone unless FORCE.
 """
 import unreal, json, io, traceback
 MQ = unreal.GeometryScript_MeshQueries; AU = unreal.GeometryScript_AssetUtils
-CAT = r'C:\Dev\Games\RepliCan\UI\Weapons.json'
+CAT = r'C:\Dev\Games\RepliCan\Content\GameData\UI\Weapons.json'
 ONLY = []
 FORCE = False
 STOCK_MIN = 12.0      # cm behind the grip before it counts as a stock

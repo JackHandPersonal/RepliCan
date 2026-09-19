@@ -15,7 +15,7 @@ it, and the handguard is shallow again. Which is which stops being a guess.
 import unreal, io, json, traceback, collections
 
 WEAPONS = ['Worlds/Wep_Assault_01']
-CAT = r'C:\Dev\Games\RepliCan\UI\Weapons.json'
+CAT = r'C:\Dev\Games\RepliCan\Content\GameData\UI\Weapons.json'
 BUCKET = 2.0
 BAND = 3.0
 

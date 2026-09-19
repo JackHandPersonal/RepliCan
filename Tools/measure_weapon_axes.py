@@ -9,7 +9,7 @@ meshes it is worth knowing what they currently are.
 """
 import unreal, json, io, collections
 
-CAT = r'C:\Dev\Games\RepliCan\UI\Weapons.json'
+CAT = r'C:\Dev\Games\RepliCan\Content\GameData\UI\Weapons.json'
 OUT = r'C:\Dev\Games\RepliCan\Tools\weapon_axes.json'
 
 cat = json.load(io.open(CAT, encoding='utf-8'))['weapons']

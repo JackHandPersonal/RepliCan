@@ -16,18 +16,19 @@ so the code can ask for "robot_step_01.wav" and be handed the recording instead.
 """
 import unreal, os
 
-SRC = os.path.join('C:/Dev/Games/RepliCan', 'RawAudio', 'Kenney')
+SRC = os.path.join('C:/Dev/Games/RepliCan', 'Content', 'GameData', 'RawAudio', 'Kenney')
 PKG = '/Game/RepliCan/Audio'
 
 # game sound -> the sample that plays instead. The name on the left is the loose .wav the code
 # already asks for, so nothing at the call sites has to change.
 MAP = [
-    # A WORKBOT IS A HEAVY THING ON A STEEL DECK. Medium metal impacts: struck plate, not a tap.
-    ('robot_step_01', 'impactMetal_medium_000.ogg'),
-    ('robot_step_02', 'impactMetal_medium_001.ogg'),
-    ('robot_step_03', 'impactMetal_medium_002.ogg'),
-    ('robot_step_04', 'impactMetal_medium_003.ogg'),
-    ('robot_step_05', 'impactMetal_medium_004.ogg'),
+    # THE STEPS ARE NOT LISTED HERE ANY MORE. They were impactMetal_medium_* -- a struck steel
+    # plate, which is a real recording and genuinely what it sounds like: a plate RINGS, and a step
+    # every 0.6 s lays each ring over the last until the bot sounds like a steel drum. They are now
+    # cut from impactMetal_light_* with the resonance damped out (Tools/make_robot_steps.py) and
+    # written into RawAudio, so the EXTRA sweep below picks them up like any other loose wav. They
+    # were briefly in BOTH lists, and only the order of the two decided which won -- which is not a
+    # thing to leave to the order of a list.
     # Its heavier noises: a fall, a strike.
     ('robot_thump',   'impactMetal_heavy_000.ogg'),
     ('robot_strike',  'impactMetal_heavy_002.ogg'),
@@ -48,7 +49,7 @@ MAP = [
 # more than it does for the rest -- the death cry runs four and a half seconds, and four and a half
 # seconds is a long time for a procedural wave to be relying on a timer that a paused game will not
 # fire. An imported sound knows its own length and ends on its own.
-EXTRA_SRC = os.path.join('C:/Dev/Games/RepliCan', 'RawAudio')
+EXTRA_SRC = os.path.join('C:/Dev/Games/RepliCan', 'Content', 'GameData', 'RawAudio')
 
 # EVERY LOOSE WAV, not a hand-written list. This sweeps RawAudio because a hand-written list is how
 # the clicking survived twice: the beds were named and fixed, and the steam vents' two hiss loops

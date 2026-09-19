@@ -21,7 +21,7 @@ import unreal, json, io, os
 AU = unreal.GeometryScript_AssetUtils
 PRIM = unreal.GeometryScript_Primitives
 MATS = unreal.GeometryScript_Materials
-CAT = os.path.join(unreal.Paths.project_dir(), 'UI', 'Weapons.json')
+CAT = os.path.join(unreal.Paths.project_dir(), 'Content', 'GameData', 'UI', 'Weapons.json')
 BEAM = '/Game/RepliCan/Materials/M_LaserBeam'
 OUT_DIR = '/Game/RepliCan/Optics'
 SLOT = 'Crosshair'

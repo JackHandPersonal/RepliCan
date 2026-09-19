@@ -17,7 +17,7 @@ script only fills a muzzle in when the entry does not already have one, so hand 
 """
 import unreal, json, io, collections
 
-CAT = r'C:\Dev\Games\RepliCan\UI\Weapons.json'
+CAT = r'C:\Dev\Games\RepliCan\Content\GameData\UI\Weapons.json'
 GUN_FAMILIES = {'wep_pistol', 'wep_smg', 'wep_rifle', 'wep_sniper', 'wep_shotgun',
                 'wep_heavy', 'wep_launcher', 'wep_laser', 'wep_alien'}
 

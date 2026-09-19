@@ -19,7 +19,7 @@ import unreal, io, json, traceback
 BODY = '/Game/PolygonSciFiSpace/Meshes/CharactersUE4/SK_Chr_SpaceSoldier_Male_01'
 POSE = '/Game/Characters/Animations/Lyra/Rifle/MM_Rifle_Idle_Hipfire'
 WEAPON_KEY = 'Worlds/Wep_Assault_01'
-CAT = r'C:\Dev\Games\RepliCan\UI\Weapons.json'
+CAT = r'C:\Dev\Games\RepliCan\Content\GameData\UI\Weapons.json'
 
 V = unreal.Vector
 ML = unreal.MathLibrary

@@ -10,7 +10,7 @@ optic_mount is set onto the receiver top that remains under the scope footprint.
 """
 import unreal, json, io, traceback
 MQ = unreal.GeometryScript_MeshQueries; AU = unreal.GeometryScript_AssetUtils
-CAT = r'C:\Dev\Games\RepliCan\UI\Weapons.json'
+CAT = r'C:\Dev\Games\RepliCan\Content\GameData\UI\Weapons.json'
 JOBS = {
     'Worlds/Wep_Assault_01': {'boxes': [((10.0, -6.0, 15.5), (22.0, 1.5, 28.0))], 'mount_x': 8.0},
 }

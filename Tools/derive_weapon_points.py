@@ -39,7 +39,7 @@ written as sight_pitch and the runtime applies it.
 """
 import unreal, json, io, math, traceback, collections
 
-CAT = r'C:\Dev\Games\RepliCan\UI\Weapons.json'
+CAT = r'C:\Dev\Games\RepliCan\Content\GameData\UI\Weapons.json'
 
 CENTRE_BAND = 2.2        # how near the centreline a vertex has to be to count
 TOP_PCT = 0.92           # ignore a carry handle or an aerial: not the sight

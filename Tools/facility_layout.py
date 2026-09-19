@@ -86,6 +86,14 @@ if os.path.isfile(MANIFEST):
     manifest = json.load(open(MANIFEST, encoding='utf-8'))
 placed = set(manifest.get('placed', [])); removed = set(manifest.get('removed', []))
 existing = {a.get_actor_label(): a for a in eas.get_all_level_actors()}
+
+# RETIRED 2026-09-19, having run once: the south cabin row, its doors, inner frames, sills and
+# number plates moved 75 cm out of the hall to match the north row. Measured after: both sides
+# 27.2 proud of their wall line, both inner frames 160.3 behind it. Uncomment for one run only if
+# the coordinates in DOOR_D ever change again -- left in place it would drag hand edits back every
+# run, and BOTH lines are needed together (see the REPOSITION note).
+# REVISE |= {l for l in existing if l.startswith('Cabin_S')}
+
 # The wing was mirrored (hall west, cafeteria east): everything in it moves this run.
 # RETIRED 2026-09-17: a one-run migration that had been re-running on every run since, reprocessing actors nobody had asked it to touch. Uncomment for one run if it is ever needed again.
 # REVISE |= {l for l in existing if l.startswith(('Hall_', 'Cabin_', 'Caf_', 'Door_FoyerHall', 'Door_FoyerCaf', 'Door_Trim_Hall', 'Door_Trim_Caf', 'DoorLamp_Hall', 'DoorLamp_Caf'))}
@@ -217,6 +225,11 @@ def ensure(label, spawn, revise=None):
 #
 # When a coordinate in this file genuinely changes and the thing has to follow, put its prefix
 # in here for that run, or simply delete the actor in the editor and let it be re-spawned.
+# ONE RUN ONLY -- set back to () once this has run. The south cabin row, its doors, inner frames,
+# sills and number plates move 75 cm out of the hall to match the north row (see DOOR_D). REVISE is
+# NOT enough for this and trying it first proved it: a revise refreshes mesh, material, scale and
+# tags and deliberately leaves the transform alone, so the re-run reported success and every
+# measurement came back byte-identical.
 REPOSITION = ()   # prefixes; REPOSITION_EXACT (defined above the REVISE block) holds exact labels
 
 def may_move(label):
@@ -241,7 +254,7 @@ def may_move(label):
 RETAG_ALL = True   # one run: every auto-tagged prop is revised so the tags land on what is already placed (retire after)
 ITEM_BY_MESH = {}
 try:
-    for _k, _e in json.load(open('C:/Dev/Games/RepliCan/UI/Items.json', encoding='utf-8'))['items'].items():
+    for _k, _e in json.load(open('C:/Dev/Games/RepliCan/Content/GameData/UI/Items.json', encoding='utf-8'))['items'].items():
         _m = (_e.get('mesh') or '').split('.')[0]
         if _m: ITEM_BY_MESH[_m] = _e
 except Exception as _ex:
@@ -1166,7 +1179,19 @@ pillar_in('Hall_Pillar_SW', 'SW', hall_tile_x(HN - 1), HY); pillar_in('Hall_Pill
 # The cabin behind each door is a tile on the far side of the line; only cabin S1 (room four:
 # out of the foyer door, right, second door on the right) is built so far, the other seven doors are locked.
 CAB_X = [CX - 750.0 - k * 750.0 for k in range(4)]      # door / cabin tile pivots: -839, -1589, -2339, -3089
-DOOR_D = 15.0                                           # the cabin tile's door edge sits this far short of the hall's door line: the inner Doorframe_06 is centred 7.5 behind the line and is 45 thick, so its cabin face is at HY - 15 (the lift pair needed 92)
+# HOW FAR THE CABIN ROW STEPS BACK FROM THE HALL LINE. 90, matching the north row's own +90 -- the
+# two sides must be the same number or the hall is lopsided, and for a long time they were not.
+#
+# MEASURED 2026-09-19, the fault the user reported as "the cabins on one side are shifted in": with
+# this at 15, every SOUTH door stood 102.2 cm proud of its wall line while every NORTH door stood
+# 27.2 -- the assemblies 75 cm out of step, on a hall whose walls are symmetrical to within a
+# millimetre (S inner face 2248.3, N inner face 2607.7, clear width 359.4). The doors, their inner
+# frames and the cabins behind them all inherited it, so the left-hand rooms ate 75 cm of corridor
+# and the floor grate either side came out visibly different widths.
+#
+# The north row's 90 is the correct one: two back-to-back Doorframe_06 boxes are 90 deep against the
+# hall face, so the cabin floor starts where the second frame ends. 15 only ever fitted ONE frame.
+DOOR_D = 90.0
 BUILT_CABINS = {('S', 1), ('S', 3), ('S', 0), ('N', 1), ('N', 2)}   # rooms four, eight, two, three, five: unlocked, a cabin behind each (room one's cabin was moved to eight, 2026-09-17)
 def hall_side(side):
     y = HY + CELL if side == 'N' else HY
@@ -1190,10 +1215,10 @@ def hall_side(side):
         # runs under the whole door band, 1.5 below the room floors so they draw over it where the
         # three overlap. A south door's hole is the DOOR_D strip between the cabin's floor edge and
         # the hall's; a north door's the 15 + 30 + 15 between and beside its two sills (traced).
-        place('Cabin_%s%d_Sill' % (side, k), B + ROOM_FLOOR, x, y - (242.5 if side == 'S' else 205.0), -1.5, yaw=0)
+        place('Cabin_%s%d_Sill' % (side, k), B + ROOM_FLOOR, x, y - (317.5 if side == 'S' else 205.0), -1.5, yaw=0)   # the south plate follows its door out by the same 75
         if side == 'S':
-            sliding_door('Cabin_S%d_Door' % k, x, y + 52.5, 0.0, kind='cabin', locked=not mine, hold_open=held)   # box y+30..y+75, painted face to the hall (+y)
-            place('Cabin_S%d_DoorIn' % k, B + 'SM_Bld_Wall_Doorframe_06', x + 500.0, y + 7.5, 0, yaw=180)                # box y-15..y+30, painted face to the cabin (-y)
+            sliding_door('Cabin_S%d_Door' % k, x, y - 22.5, 0.0, kind='cabin', locked=not mine, hold_open=held)   # box y-45..y, painted face to the hall (+y): its face ON the wall line, mirroring the north door
+            place('Cabin_S%d_DoorIn' % k, B + 'SM_Bld_Wall_Doorframe_06', x + 500.0, y - 67.5, 0, yaw=180)                # box y-90..y-45, painted face to the cabin (-y): mirrors the north inner frame
         else:
             sliding_door('Cabin_N%d_Door' % k, x + 500.0, y + 22.5, 180.0, kind='cabin', locked=not mine, hold_open=held)   # box y..y+45, painted face to the hall (-y)
             place('Cabin_N%d_DoorIn' % k, B + 'SM_Bld_Wall_Doorframe_06', x, y + 67.5, 0, yaw=0)                # box y+45..y+90, painted face to the cabin (+y)
@@ -1214,7 +1239,7 @@ for t in range(HN):
 # take the _F twin of the texture (Tools/import_door_numbers.py makes both).
 DOOR_NUM_Z, DOOR_NUM_Y, DOOR_NUM_SIZE = 218.0, 9.9, 0.2   # centre height; off the frame's origin plane; a 20 cm plane
 for k, x in enumerate(CAB_X):
-    sign('Cabin_S%d_Num' % k, 'M_Sign_Door_Num_%d' % (2 * k + 2), x + 250.0, HY + 52.5 + DOOR_NUM_Y, DOOR_NUM_Z, 0, 90, DOOR_NUM_SIZE, DOOR_NUM_SIZE)          # the S door: sliding_door(x, HY + 52.5, 0), opening centred at local x 250
+    sign('Cabin_S%d_Num' % k, 'M_Sign_Door_Num_%d' % (2 * k + 2), x + 250.0, HY - 22.5 + DOOR_NUM_Y, DOOR_NUM_Z, 0, 90, DOOR_NUM_SIZE, DOOR_NUM_SIZE)          # the S door: sliding_door(x, HY - 22.5, 0), opening centred at local x 250
     sign('Cabin_N%d_Num' % k, 'M_Sign_Door_Num_%d_F' % (2 * k + 1), x + 250.0, HY + CELL + 22.5 - DOOR_NUM_Y, DOOR_NUM_Z, 0, -90, DOOR_NUM_SIZE, DOOR_NUM_SIZE)  # the N door: sliding_door(x + 500, HY + CELL + 22.5, 180)
 # Two-way switching for the hall lights: the cabin panel's button box (cut out of Blank_02 by
 # Tools/cut_from_click.py, so it keeps the wall's own coordinates: local x 42..73, z 134..175 on
@@ -2942,6 +2967,47 @@ if hasattr(unreal, 'WorkBot'):
 else:
     print('WorkBot class not built yet: the work bot is skipped this run')
 
+# THE NAVMESH THE BOT WALKS ON. Without one it falls back to reactive sweep steering, which sees only
+# what a 70 cm trace hits this frame -- so a concave corner is a local minimum it grinds against
+# rather than a dead end it knows to avoid. AWorkBot::bUseNavMesh chooses between the two; this
+# volume is what makes the pathfinding side possible at all.
+#
+# Sized by ACTOR SCALE, not a brush builder: unreal.CubeBuilder is not exposed to Python, and a
+# NavMeshBoundsVolume spawned from script comes up as a 200 cm cube (measured: half-extent 100 at
+# scale 1). So scale = half-extent / 100.
+_NAV_MIN = (300.0 - 400.0, R1_YS + 140.0 - 400.0, R1_Z - 120.0)
+_NAV_MAX = (830.0 + 400.0, 1340.0 + 400.0, R1_Z + 500.0)
+_nav_c = [(_NAV_MIN[i] + _NAV_MAX[i]) * 0.5 for i in range(3)]
+_nav_s = [max(0.1, (_NAV_MAX[i] - _NAV_MIN[i]) * 0.5 / 100.0) for i in range(3)]
+
+
+def nav_volume(label):
+    def apply(a, place_it=False):
+        a.set_actor_scale3d(unreal.Vector(*_nav_s))
+        if place_it:
+            a.set_actor_location(unreal.Vector(*_nav_c), False, True)
+
+    def spawn():
+        a = eas.spawn_actor_from_class(unreal.NavMeshBoundsVolume, unreal.Vector(*_nav_c), unreal.Rotator())
+        if a:
+            apply(a, True)
+        return a
+
+    ensure(label, spawn, apply)
+
+
+if hasattr(unreal, 'NavMeshBoundsVolume'):
+    nav_volume('S10_NavBounds')
+    # The navmesh is BUILT DATA -- it does not exist merely because the volume does, and it needs
+    # rebuilding when the geometry under it changes, which this script does every run. There is no
+    # Python entry point for it (NavigationSystemV1.build_navigation is not exposed), so the editor's
+    # own Build Paths is the way. If the bot logs "no navigation path available", that is what is
+    # missing, and it falls back to the sweep steering rather than standing still.
+    print('S10_NavBounds placed at %s scale %s -- run Build > Build Paths if the navmesh is empty'
+          % (tuple(round(v) for v in _nav_c), tuple(round(v, 2) for v in _nav_s)))
+else:
+    print('NavMeshBoundsVolume unavailable: the bot will use sweep steering')
+
 # ---- The middle of the deck: big pieces across it, in two staggered rows, so whoever steps out of
 # the lift at the north end cannot see the south half where the bot keeps its round -- only hear
 # it. The gaps between them are a person wide and the second row stands behind each gap.
@@ -2962,7 +3028,7 @@ for lab, mesh, x, y, yaw in (
 # the horror kit's big pieces -- along the walkways, over the grate, in the new south end. Spots were
 # checked against what already stands (sphere overlaps, scratch deck_spots); the south wall's 125-deep
 # moulding keeps everything off that wall by that much.
-WEAPONS = json.load(io.open(os.path.join(unreal.Paths.project_dir(), 'UI', 'Weapons.json'), encoding='utf-8'))['weapons']
+WEAPONS = json.load(io.open(os.path.join(unreal.Paths.project_dir(), 'Content', 'GameData', 'UI', 'Weapons.json'), encoding='utf-8'))['weapons']
 def floor_weapon(label, key, x, y, yaw, roll=90.0, floor_z=None):
     """A weapon lying on the deck: the catalogue's own mesh on its side (HAC1's thin axis, Y, turned
     vertical: roll +90 sends +Y down, -90 up), resting on its flat, wearing the catalogue name so Take
@@ -3313,9 +3379,40 @@ else: print('no LocalFogVolume in this engine: the deck keeps its two fog sheets
 # shorthand and it drew the eye away from everything else in the room. ASwingingLampActor itself
 # stays in the source for somewhere it suits better.)
 if hasattr(unreal, 'SparkingConduitActor'):
-    for k, (cx, cy, cz) in enumerate(((280.0, 553.0, R1_Z + R1_H - 46.0), (720.0, 2053.0, R1_Z + R1_H - 46.0))):
-        ensure('S10_Conduit_%d' % k, (lambda cx=cx, cy=cy, cz=cz: eas.spawn_actor_from_class(unreal.SparkingConduitActor, unreal.Vector(cx, cy, cz))))
-        if HAVE_GRIME: decal_actor('S10_Puddle_%d' % k, GRIMEMAT + 'MI_Grime_01', cx + 8.0, cy - 6.0, R1_Z + 6.0, (12.0, 62.0, 48.0), roll=GRIME_RNG.uniform(0.0, 360.0))
+    # CEILING EMITTERS, spread down the deck. The first two sit on the pipe racks and have a puddle
+    # under each; the rest hang from the ceiling proper, off the walking lanes and away from the two
+    # originals so a spit of sparks is never in the same place twice running.
+    #
+    # Each is quiet most of the time by design -- IntervalMin/Max on the actor are 14-46 s, so with
+    # six of them the deck averages one small fault somewhere every few seconds without any single
+    # spot becoming a metronome. Staggered intervals rather than identical ones, or six emitters on
+    # the same clock beat together and read as one event.
+    _CEIL = R1_Z + R1_H - 46.0
+    _conduits = (
+        (280.0, 553.0, _CEIL, 14.0, 46.0, True),    # pipe rack, with puddle
+        (720.0, 2053.0, _CEIL, 14.0, 46.0, True),   # pipe rack, with puddle
+        (505.0, 900.0, _CEIL, 19.0, 58.0, False),
+        (330.0, 1480.0, _CEIL, 24.0, 66.0, False),
+        (760.0, 1180.0, _CEIL, 16.0, 52.0, False),
+        (545.0, 1760.0, _CEIL, 27.0, 74.0, False),
+    )
+
+    def _conduit(label, cx, cy, cz, lo, hi):
+        def apply(a, place_it=False):
+            a.set_editor_property('interval_min', lo)
+            a.set_editor_property('interval_max', hi)
+            a.set_editor_property('normal', unreal.Vector(0.0, 0.0, -1.0))   # sparks fall off the ceiling
+            if place_it: a.set_actor_location(unreal.Vector(cx, cy, cz), False, True)
+        def spawn():
+            a = eas.spawn_actor_from_class(unreal.SparkingConduitActor, unreal.Vector(cx, cy, cz))
+            if a: apply(a, True)
+            return a
+        ensure(label, spawn, apply)
+
+    for k, (cx, cy, cz, lo, hi, puddle) in enumerate(_conduits):
+        _conduit('S10_Conduit_%d' % k, cx, cy, cz, lo, hi)
+        if puddle and HAVE_GRIME:
+            decal_actor('S10_Puddle_%d' % k, GRIMEMAT + 'MI_Grime_01', cx + 8.0, cy - 6.0, R1_Z + 6.0, (12.0, 62.0, 48.0), roll=GRIME_RNG.uniform(0.0, 360.0))
 def clear_spot(mesh_path, x, y, yaw, radius=150.0):
     mesh = unreal.load_asset(mesh_path)
     if not mesh: return None
@@ -3336,7 +3433,7 @@ for lab, mesh, x, y, yaw in (('S10_Occluder_0', HPR + 'SM_Prop_Cargo_03', 250.0,
     if spot: place(lab, mesh, spot[0], spot[1], R1_Z, yaw=yaw, mat=False)
     else: print('OCCLUDER %s: no clear floor near (%.0f, %.0f)' % (lab, x, y))
 
-io.open(os.path.join(unreal.Paths.project_dir(), 'UI', 'SteamVents.json'), 'w', encoding='utf-8', newline='\n').write(
+io.open(os.path.join(unreal.Paths.project_dir(), 'Content', 'GameData', 'UI', 'SteamVents.json'), 'w', encoding='utf-8', newline='\n').write(
     json.dumps({'_': 'Written by Tools/facility_layout.py. UAmbientPlayer reads it to hang a positional hiss on every vent that has one, so the coordinates live in exactly one place.',
                 'vents': STEAM_VENTS}, indent=1))
 print('steam vents:', len(STEAM_VENTS), 'audible of', sum(1 for _ in STEAM_VENTS))

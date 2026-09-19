@@ -39,8 +39,8 @@ import wave
 from datetime import datetime, timezone
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CONV_DIR = os.path.join(PROJECT_DIR, "Conversations")
-SEQ_DIR = os.path.join(PROJECT_DIR, "Sequences")
+CONV_DIR = os.path.join(PROJECT_DIR, 'Content', 'GameData', "Conversations")
+SEQ_DIR = os.path.join(PROJECT_DIR, 'Content', 'GameData', "Sequences")
 VOICE_DIR = os.path.join(CONV_DIR, "Voice")
 MANIFEST_PATH = os.path.join(VOICE_DIR, "manifest.json")
 VOICES_DIR = os.environ.get("PIPER_VOICES", r"C:\Dev\Tools\piper-voices")

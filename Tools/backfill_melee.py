@@ -4,7 +4,7 @@ FORCE. Shields are left alone: they are held, not swung, for now.
     python Tools/backfill_melee.py
 """
 import json, io, collections
-P = 'C:/Dev/Games/RepliCan/UI/Weapons.json'
+P = 'C:/Dev/Games/RepliCan/Content/GameData/UI/Weapons.json'
 FORCE = False
 d = json.load(io.open(P, encoding='utf-8'))
 tally = collections.Counter()

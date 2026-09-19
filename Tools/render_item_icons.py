@@ -52,7 +52,7 @@ DIAGONAL_DEGREES = 45.0
 # Room left around the piece once it has been fitted.
 FIT_MARGIN = 1.10
 OUT = r'C:\Dev\Games\RepliCan\RawArt\Icons'
-cat = json.load(io.open(r'C:\Dev\Games\RepliCan\UI\Items.json', encoding='utf-8'))['items']
+cat = json.load(io.open(r'C:\Dev\Games\RepliCan\Content\GameData\UI\Items.json', encoding='utf-8'))['items']
 def icon_name(item): return 'T_Icon_' + re.sub(r'[^A-Za-z0-9]+', '_', item).strip('_')
 try:
     ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)

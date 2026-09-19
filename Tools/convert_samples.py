@@ -19,7 +19,7 @@ import os, struct, wave, array, math
 DRIVE = 2.4   # soft-clip drive: 1 = untouched, 3 = brick
 import miniaudio
 
-SRC = r'C:\Dev\Games\RepliCan\RawAudio\samples'
+SRC = r'C:\Dev\Games\RepliCan\Content\GameData\RawAudio\samples'
 OUT = r'C:\Dev\Games\RepliCan\RawAudio'
 SR = 22050
 MAP = {'bsb_0438': ('wep_pistol', 0.70), 'bsb_0437': ('wep_smg', 0.55), 'bsb_2853': ('wep_rifle', 1.00),

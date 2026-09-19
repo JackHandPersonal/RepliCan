@@ -24,7 +24,7 @@ import unreal, json, io, traceback, collections
 
 SRC = '/Game/Synty/PolygonSciFiHorror/Meshes/Weapons/'
 DST = '/Game/RepliCan/Weapons/Horror/'
-CAT = r'C:\Dev\Games\RepliCan\UI\Weapons.json'
+CAT = r'C:\Dev\Games\RepliCan\Content\GameData\UI\Weapons.json'
 
 # name, kind, sound, ranged, description. The kinds are the ones the equipment slots already
 # understand; nothing new is invented here.

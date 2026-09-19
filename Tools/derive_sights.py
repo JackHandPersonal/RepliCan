@@ -30,7 +30,7 @@ runtime aims down the bore instead.
 """
 import unreal, json, io, traceback, collections
 
-CAT = r'C:\Dev\Games\RepliCan\UI\Weapons.json'
+CAT = r'C:\Dev\Games\RepliCan\Content\GameData\UI\Weapons.json'
 # Which slice along the barrel the rear sight lives in, as fractions of total length from the back.
 REAR_FROM = 0.05
 REAR_TO = 0.45

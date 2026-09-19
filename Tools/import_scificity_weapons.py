@@ -16,7 +16,7 @@ import unreal, json, io, traceback, collections
 
 SRC = '/Game/PolygonScifi/Meshes/Weapons/'
 DST = '/Game/RepliCan/Weapons/SciFiCity/'
-CAT = r'C:\Dev\Games\RepliCan\UI\Weapons.json'
+CAT = r'C:\Dev\Games\RepliCan\Content\GameData\UI\Weapons.json'
 
 # mesh, kind, sound, ranged, description. Kinds and sounds are ones the catalogue already has.
 WEAPONS = [

@@ -10,7 +10,8 @@ import unreal, io, re, os, math
 WEAPON = '/Game/RepliCan/Weapons/Worlds/SM_Wep_Pistol_05'
 PKG = '/Game/RepliCan/Optics'; NAME = 'SM_Optic_Lens_Small'
 GLASS = '/Game/RepliCan/Materials/M_RedDot'
-WJ = 'C:/Dev/Games/RepliCan/UI/Weapons.json'
+WJ = next(q for q in (os.path.join(unreal.Paths.project_dir(), 'Content', 'GameData', 'UI', 'Weapons.json'),
+                      os.path.join(unreal.Paths.project_dir(), 'Content', 'GameData', 'UI', 'Weapons.json')) if os.path.exists(q))
 ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 if ues.get_game_world() is not None: raise RuntimeError('the editor is in Play')
 
@@ -116,6 +117,7 @@ if scope:
             p, ok = Q.get_vertex_position(body, vi); yz_of[vi] = (p.y, p.z) if ok else (0.0, 0.0)
         return yz_of[vi]
     caps, walls = [], 0
+    plane_tris, plane_covers = {}, {}
     for t in range(Q.get_num_triangle_i_ds(body)):
         r = Q.get_triangle_indices(body, t); idx = r[0] if isinstance(r, tuple) else r
         vs = (int(idx.x), int(idx.y), int(idx.z))
@@ -140,13 +142,43 @@ if scope:
         # hole through every such disc and leaves the outer annulus, so the rims and bevels survive
         # and the tube still reads as a tube -- which is what "the tube looked eaten" was about the
         # first time this was cut too wide.
-        HOLE_R = 1.0
+        # A CAP IS A PLANE THAT COVERS THE BORE; A BEVEL RING IS A PLANE WITH A HOLE IN IT. A fixed
+        # radius cannot tell them apart, and picking one too small is what left a ring of cap behind:
+        # a 1.0 hole through a 1.48 disc opens the middle and keeps an annulus 0.48 wide at each end,
+        # which is precisely the "some of it is see-through, the rest is the inside of the tube" the
+        # player then reports. Too large a radius eats the bevels instead and the tube looks chewed.
+        # So the test is the honest one -- does this plane's geometry reach the bore axis at all? --
+        # and every triangle of a plane that does is a cap triangle, whatever its own radius.
         planar = max(xs_) - min(xs_) < 0.25
-        ctr_y = sum(pyz(v)[0] for v in vs) / 3.0 - cy
-        ctr_z = sum(pyz(v)[1] for v in vs) / 3.0 - cz
-        if planar and (ctr_y * ctr_y + ctr_z * ctr_z) ** 0.5 < HOLE_R: caps.append(t)
+        if planar:
+            key = round(sum(xs_) / 3.0, 1)
+            plane_tris.setdefault(key, []).append(t)
+            # DOES THIS TRIANGLE COVER THE BORE AXIS? Point-in-triangle in the (y, z) plane. The
+            # obvious proxy -- how near the axis the plane's nearest VERTEX is -- does not work:
+            # these discs are triangulated as a fan over an inner octagon, so the innermost vertices
+            # sit at radius 0.80 while the triangles between them cover the middle completely. By
+            # vertex distance that reads as a ring with a hole; it is a solid lid.
+            p = [(pyz(v)[0] - cy, pyz(v)[1] - cz) for v in vs]
+            d1 = (0 - p[1][0]) * (p[0][1] - p[1][1]) - (p[0][0] - p[1][0]) * (0 - p[1][1])
+            d2 = (0 - p[2][0]) * (p[1][1] - p[2][1]) - (p[1][0] - p[2][0]) * (0 - p[2][1])
+            d3 = (0 - p[0][0]) * (p[2][1] - p[0][1]) - (p[2][0] - p[0][0]) * (0 - p[0][1])
+            has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0)
+            has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0)
+            if not (has_neg and has_pos): plane_covers[key] = True   # this one spans the axis
         else: walls += 1
-    print('scope in the body: %d cap triangles cut from BOTH ends, %d wall triangles kept -- the tube is open and can be looked through' % (len(caps), walls))
+    # A plane whose nearest geometry sits within REACH of the axis is closing the bore: take all of
+    # it. One that keeps its distance is a ring around the opening and stays.
+    # A plane that COVERS the axis is a lid: all of it goes, out to the tube wall, so no annulus of
+    # lid is left behind to read as "the inside of the tube". A plane that does not cover the axis
+    # is a rim or a bevel around an opening that is already clear, and it stays.
+    for key, tris_ in sorted(plane_tris.items()):
+        if plane_covers.get(key):
+            caps.extend(tris_)
+            print('   LID at x %.1f: %d triangles cut (its faces span the bore axis)' % (key, len(tris_)))
+        else:
+            walls += len(tris_)
+            print('   rim at x %.1f: %d triangles kept (nothing of it crosses the axis)' % (key, len(tris_)))
+    print('scope in the body: %d cap triangles cut, %d kept -- the bore is open end to end' % (len(caps), walls))
     if caps:
         r = SEL.convert_index_array_to_mesh_selection(body, caps, unreal.GeometryScriptMeshSelectionType.TRIANGLES)
         sel = [x for x in r if isinstance(x, unreal.GeometryScriptMeshSelection)][0] if isinstance(r, tuple) else r

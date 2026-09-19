@@ -38,7 +38,7 @@ try:
 except ImportError:
     raise SystemExit('this needs numpy and soundfile to read the Ogg samples (pip install soundfile numpy)')
 
-SRC = 'C:/Dev/Games/RepliCan/RawAudio/Kenney_SciFi'
+SRC = 'C:/Dev/Games/RepliCan/Content/GameData/RawAudio/Kenney_SciFi'
 DST = 'C:/Dev/Games/RepliCan/RawAudio'
 SR = 44100
 

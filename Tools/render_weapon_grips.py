@@ -31,7 +31,7 @@ LIGHT_SCALE = 0.55
 GRIP_OFFSET = unreal.Vector(0.0, 0.0, 0.0)
 GRIP_ROTATION = unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0)
 
-cat = json.load(io.open(r'C:\Dev\Games\RepliCan\UI\Weapons.json', encoding='utf-8'))['weapons']
+cat = json.load(io.open(r'C:\Dev\Games\RepliCan\Content\GameData\UI\Weapons.json', encoding='utf-8'))['weapons']
 
 try:
     ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)

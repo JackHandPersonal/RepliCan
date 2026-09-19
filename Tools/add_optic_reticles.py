@@ -22,10 +22,23 @@ so aiming actually looks through the new glass instead of at the rail.
 """
 import unreal, json, io, os
 
+
+def _cat(root):
+    """UI/Weapons.json moved under Content/GameData/ so a packaged build stages it. Try the new
+    home first and fall back to the old one, so this tool cannot quietly write a file nobody
+    reads -- and shout rather than inventing a path if neither is there."""
+    import os as _os
+    for p in (_os.path.join(root, 'Content', 'GameData', 'UI', 'Weapons.json'),
+              _os.path.join(root, 'UI', 'Weapons.json')):
+        if _os.path.exists(p):
+            return p
+    raise SystemExit('Weapons.json is at neither Content/GameData/UI nor UI, under ' + root)
+
+
 AU = unreal.GeometryScript_AssetUtils
 PRIM = unreal.GeometryScript_Primitives
 MATS = unreal.GeometryScript_Materials
-CAT = os.path.join(unreal.Paths.project_dir(), 'UI', 'Weapons.json')
+CAT = _cat(unreal.Paths.project_dir())
 RED_DOT = '/Game/RepliCan/Materials/M_RedDot'
 OUT_DIR = '/Game/RepliCan/Optics'
 

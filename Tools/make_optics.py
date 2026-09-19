@@ -102,7 +102,13 @@ try:
         return n
 
     def link(a, ao, b, bi):
-        MEL.connect_material_expressions(a, ao, b, bi)
+        # ASSERTED. connect_material_expressions returns false and says NOTHING when a pin name is
+        # wrong, leaving the node reading its default -- which is how M_ScopeMask shipped as a black
+        # screen for days with a graph that looked complete in the editor. Never let one fail quietly.
+        if not MEL.connect_material_expressions(a, ao, b, bi):
+            raise RuntimeError('%s -> %s.%s did not connect; its pins are %s'
+                               % (a.get_class().get_name(), b.get_class().get_name(), bi,
+                                  [str(n) for n in MEL.get_material_expression_input_names(b)]))
 
     # -- the eye's direction through the glass, in the optic's own space --
     cam = node(unreal.MaterialExpressionCameraVectorWS, -1500, 0)
@@ -184,6 +190,24 @@ try:
     link(across, '', from_centre, 'A')
     link(lens_size, '', from_centre, 'B')
 
+    # ---- THE BEZEL, and the dot kept inside it ----------------------------------------------
+    # A real sight has a housing around its glass, and the dot cannot travel past it: move your head
+    # far enough and the dot leaves through the edge rather than sliding across the rim. Both halves
+    # are here -- an opaque black ring outside BezelRadius, and a CLAMP on the parallax shift so the
+    # dot's centre can never reach it.
+    #
+    # In FRACTIONS OF THE PANE, not centimetres, so one number is right for every optic: from_centre
+    # is already -0.5..0.5 across the glass, so 0.5 is the pane's edge and BezelRadius 0.42 leaves a
+    # rim of about a sixth of the radius.
+    bezel_r = scalar('BezelRadius', 0.42, -700, 640)
+    bezel_soft = scalar('BezelSoft', 0.03, -700, 720)
+
+    # THE DOT IS NOT CLAMPED. It goes wherever the parallax puts it and the bezel simply covers it,
+    # which is what a reflex sight actually does: move your head far enough off axis and the dot
+    # does not slide to a stop against the rim, it goes BEHIND the housing and is gone. Clamping
+    # would keep a dot visible at the edge that a real sight would have lost, and a dot that stops
+    # moving is a dot that is lying about where the weapon points.
+
     # The eye moves the dot the OPPOSITE way to the head, which is what keeps it on target.
     offset = node(unreal.MaterialExpressionAdd, -400, 140)
     link(from_centre, '', offset, 'A')
@@ -196,6 +220,19 @@ try:
     link(lens_size, '', offset_cm, 'B')
     dist = node(unreal.MaterialExpressionLength, -200, 140)
     link(offset_cm, '', dist, '')
+
+    # The ring itself: 0 over the clear glass, 1 out on the housing. Measured from where the PIXEL
+    # is on the pane (from_centre), not from the dot -- the bezel belongs to the sight and does not
+    # move when the head does.
+    glass_r = node(unreal.MaterialExpressionLength, -560, 800)
+    link(from_centre, '', glass_r, '')
+    bezel_out = node(unreal.MaterialExpressionAdd, -430, 720)
+    link(bezel_r, '', bezel_out, 'A')
+    link(bezel_soft, '', bezel_out, 'B')
+    bezel = node(unreal.MaterialExpressionSmoothStep, -300, 760)
+    link(bezel_r, '', bezel, 'Min')
+    link(bezel_out, '', bezel, 'Max')
+    link(glass_r, '', bezel, 'Value')
 
     def falloff(edge_node, x, y, power):
         """saturate(1 - d/edge) ^ power -- a soft round blob with no texture involved."""
@@ -256,17 +293,63 @@ try:
     lit = node(unreal.MaterialExpressionMultiply, 1040, 40)
     link(tint, '', lit, 'A')
     link(bright, '', lit, 'B')
-    emissive = node(unreal.MaterialExpressionMultiply, 1180, 120)
-    link(lit, '', emissive, 'A')
-    link(shape_vis, '', emissive, 'B')
+    dot_lit = node(unreal.MaterialExpressionMultiply, 1180, 120)
+    link(lit, '', dot_lit, 'A')
+    link(shape_vis, '', dot_lit, 'B')
 
-    # The glass is very slightly visible even where the dot is not, or the lens looks like a
-    # hole in the weapon.
-    glass_a = scalar('GlassOpacity', 0.10, 900, 560)
-    opacity = node(unreal.MaterialExpressionAdd, 1180, 520)
-    link(shape_vis, '', opacity, 'A')
-    link(glass_a, '', opacity, 'B')
-    opacity_sat = node(unreal.MaterialExpressionSaturate, 1320, 520)
+    # ---- THE GLASS ITSELF: a lens, not a window ---------------------------------------------
+    # Square on, a coated lens is nearly clear -- you are looking THROUGH it, which is the whole
+    # point of a sight. From any other angle it turns into a bright shiny disc, and that shine is
+    # what makes it read as glass rather than as a hole cut in the housing.
+    #
+    # xabs is ALREADY the cosine of the viewing angle against the lens normal: the optic looks down
+    # its own +X, and the camera vector was transformed into the optic's space for the parallax
+    # above. So 1 - xabs is the Fresnel term exactly, with no extra nodes and no Fresnel node whose
+    # parameters would have to be matched to this geometry by hand.
+    grazing = node(unreal.MaterialExpressionOneMinus, 760, 620)
+    link(xabs, '', grazing, '')
+    sheen = node(unreal.MaterialExpressionPower, 900, 620)
+    link(grazing, '', sheen, 'Base')
+    sheen.set_editor_property('const_exponent', 2.5)   # how fast it goes from clear to shiny
+    clear_a = scalar('GlassClear', 0.05, 760, 700)     # face on: see through it
+    edge_a = scalar('GlassEdge', 0.92, 760, 780)       # side on: a solid bright disc
+    glass_a = node(unreal.MaterialExpressionLinearInterpolate, 1040, 700)
+    link(clear_a, '', glass_a, 'A')
+    link(edge_a, '', glass_a, 'B')
+    link(sheen, '', glass_a, 'Alpha')
+
+    # THE BEZEL GOES OVER THE TOP. Inside is 1 on the glass and 0 on the housing, so multiplying by
+    # it hides whatever the dot is doing out there -- the dot itself is never clamped, it simply
+    # goes behind the rim and is gone, which is what a real sight does when your head moves off axis.
+    inside = node(unreal.MaterialExpressionOneMinus, -160, 760)
+    link(bezel, '', inside, '')
+
+    # The glass's own shine, tinted and gated the same way.
+    glass_tint = node(unreal.MaterialExpressionVectorParameter, 760, 860)
+    glass_tint.set_editor_property('parameter_name', 'GlassTint')
+    glass_tint.set_editor_property('default_value', unreal.LinearColor(0.16, 0.26, 0.34, 1.0))
+    shine = node(unreal.MaterialExpressionMultiply, 1040, 860)
+    link(glass_tint, '', shine, 'A')
+    link(sheen, '', shine, 'B')
+
+    lens_lit = node(unreal.MaterialExpressionAdd, 1320, 200)
+    link(dot_lit, '', lens_lit, 'A')
+    link(shine, '', lens_lit, 'B')
+    emissive = node(unreal.MaterialExpressionMultiply, 1460, 200)   # nothing of the lens lights the rim
+    link(lens_lit, '', emissive, 'A')
+    link(inside, '', emissive, 'B')
+
+    # Opacity: the dot and the glass inside the aperture, and the housing solid outside it.
+    lens_a = node(unreal.MaterialExpressionAdd, 1180, 520)
+    link(shape_vis, '', lens_a, 'A')
+    link(glass_a, '', lens_a, 'B')
+    lens_a_in = node(unreal.MaterialExpressionMultiply, 1320, 520)
+    link(lens_a, '', lens_a_in, 'A')
+    link(inside, '', lens_a_in, 'B')
+    opacity = node(unreal.MaterialExpressionAdd, 1460, 520)
+    link(lens_a_in, '', opacity, 'A')
+    link(bezel, '', opacity, 'B')
+    opacity_sat = node(unreal.MaterialExpressionSaturate, 1600, 520)
     link(opacity, '', opacity_sat, '')
 
     MEL.connect_material_property(emissive, '', unreal.MaterialProperty.MP_EMISSIVE_COLOR)

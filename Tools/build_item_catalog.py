@@ -13,7 +13,7 @@ import io, json, os, re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SURVEY = os.path.join(ROOT, 'RawArt', 'item_survey.json')
-CAT = os.path.join(ROOT, 'UI', 'Items.json')
+CAT = os.path.join(ROOT, 'Content', 'GameData', 'UI', 'Items.json')
 
 accepted = json.load(io.open(SURVEY, encoding='utf-8'))['accepted']
 old = json.load(io.open(CAT, encoding='utf-8')).get('items', {}) if os.path.exists(CAT) else {}

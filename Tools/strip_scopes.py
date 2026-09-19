@@ -17,7 +17,7 @@ which the equip uses whenever an optic is on (ABasePlayerController::RefreshHeld
 """
 import unreal, io, json, os, traceback
 
-CAT = os.path.join(unreal.Paths.project_dir(), 'UI', 'Weapons.json')
+CAT = os.path.join(unreal.Paths.project_dir(), 'Content', 'GameData', 'UI', 'Weapons.json')
 ONLY = []
 MARGIN = 0.05
 FORCE = True

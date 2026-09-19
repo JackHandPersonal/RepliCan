@@ -6,7 +6,7 @@
 # remote-exec tool from the project root. Re-runnable: meshes and instances rebuilt, entries kept.
 import unreal, io, json, os
 PROPS = '/Game/RepliCan/Props'; MATDIR = '/Game/RepliCan/Materials'; CUT = '/Game/RepliCan/CutLibrary/SciFiSpace'
-ITEMS = 'C:/Dev/Games/RepliCan/UI/Items.json'; SHEET = 'C:/Dev/Games/RepliCan/UI/CharacterSheet.json'
+ITEMS = 'C:/Dev/Games/RepliCan/Content/GameData/UI/Items.json'; SHEET = 'C:/Dev/Games/RepliCan/Content/GameData/UI/CharacterSheet.json'
 ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 if ues.get_game_world() is not None: raise RuntimeError('the editor is in Play')
 tools = unreal.AssetToolsHelpers.get_asset_tools(); MEL = unreal.MaterialEditingLibrary; eal = unreal.EditorAssetLibrary

@@ -24,11 +24,24 @@ follows it.
 """
 import json, io, os, sys
 
+
+def _cat(root):
+    """UI/Weapons.json moved under Content/GameData/ so a packaged build stages it. Try the new
+    home first and fall back to the old one, so this tool cannot quietly write a file nobody
+    reads -- and shout rather than inventing a path if neither is there."""
+    import os as _os
+    for p in (_os.path.join(root, 'Content', 'GameData', 'UI', 'Weapons.json'),
+              _os.path.join(root, 'UI', 'Weapons.json')):
+        if _os.path.exists(p):
+            return p
+    raise SystemExit('Weapons.json is at neither Content/GameData/UI nor UI, under ' + root)
+
+
 try:
     import unreal
-    CAT = os.path.join(unreal.Paths.project_dir(), 'UI', 'Weapons.json')
+    CAT = _cat(unreal.Paths.project_dir())
 except ImportError:                                   # runs fine outside the editor too
-    CAT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'UI', 'Weapons.json')
+    CAT = _cat(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 RECLASSIFY = {}
 for a in sys.argv[1:]:

@@ -7,7 +7,7 @@ the make is chosen by pack and kind, the way the manufacturers document maps the
 that already has both is left alone, so hand edits in the Reference survive a re-run.
 """
 import json, io, re
-CAT = r'C:\Dev\Games\RepliCan\UI\Weapons.json'
+CAT = r'C:\Dev\Games\RepliCan\Content\GameData\UI\Weapons.json'
 
 # (pack, keyword in the key, make) -- first match wins; the pack's last row is its default
 RULES = [

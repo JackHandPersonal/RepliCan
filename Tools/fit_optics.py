@@ -18,7 +18,7 @@ The optic's own eye point is a property of the optic, not of the weapon, so it l
 """
 import unreal, json, io, traceback
 
-CAT = r'C:\Dev\Games\RepliCan\UI\Weapons.json'
+CAT = r'C:\Dev\Games\RepliCan\Content\GameData\UI\Weapons.json'
 
 # The optics themselves. "eye" is the lens centre in the optic's own space, which for the
 # generated red dot is the middle of the glass disc -- see Tools/make_optics.py.

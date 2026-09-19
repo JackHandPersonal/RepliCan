@@ -24,7 +24,7 @@ import unreal, json, io, os, collections
 AU = unreal.GeometryScript_AssetUtils
 Q = unreal.GeometryScript_MeshQueries
 ED = unreal.GeometryScript_MeshEdits
-CAT = os.path.join(unreal.Paths.project_dir(), 'UI', 'Weapons.json')
+CAT = os.path.join(unreal.Paths.project_dir(), 'Content', 'GameData', 'UI', 'Weapons.json')
 TWO_SIDED = '/Game/RepliCan/Optics/MI_PolygonScifiWorlds_01_A_TwoSided'
 
 

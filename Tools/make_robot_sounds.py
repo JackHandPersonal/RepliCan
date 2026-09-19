@@ -88,4 +88,8 @@ write('robot_scream.wav', scream())
 write('robot_strike.wav', strike())
 write('robot_thump.wav', thump())
 for k in (1, 2, 3): write('robot_step_%02d.wav' % k, step(seed=k * 7))
-for k in (1, 2, 3): write('spark_crackle_%02d.wav' % k, crackle(seed=k))
+# THE SPARK CRACKLES ARE NOT WRITTEN HERE ANY MORE. They were synthesised noise bursts and sounded
+# it. Tools/make_spark_sounds.py builds them by granulating real CC0 metal impacts instead -- every
+# sample recorded, only the cutting and spacing done here. Leaving the old line in would silently
+# overwrite those three files with the synthesised version the next time this tool ran.
+# for k in (1, 2, 3): write('spark_crackle_%02d.wav' % k, crackle(seed=k))

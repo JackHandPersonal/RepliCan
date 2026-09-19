@@ -15,7 +15,7 @@ import unreal, json, io, os
 
 AU = unreal.GeometryScript_AssetUtils
 MATS = unreal.GeometryScript_Materials
-CAT = os.path.join(unreal.Paths.project_dir(), 'UI', 'Weapons.json')
+CAT = os.path.join(unreal.Paths.project_dir(), 'Content', 'GameData', 'UI', 'Weapons.json')
 
 cat = json.load(io.open(CAT, encoding='utf-8'))
 cleared = []
