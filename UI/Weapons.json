@@ -167,7 +167,7 @@
    ],
    "fore_grip": [
     30,
-    0,
+    -11.5,
     9.64
    ],
    "sight_pitch": 0,
@@ -225,6 +225,61 @@
    "moa": 5,
    "fire_modes": [
     "laser"
+   ],
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
    ]
   },
   "CyberCity/Paint_Gun_01": {
@@ -394,11 +449,9 @@
    "model": "Street Pistol 01",
    "hip_fire": false,
    "grip": [],
-   "optic_mount": [],
    "attachments": [],
    "fire_modes": [],
    "skin": "MI_PolygonCyberCity_03_C",
-   "optic": "",
    "moa": 5
   },
   "CyberCity/Rifle_01": {
@@ -435,7 +488,7 @@
    ],
    "fore_grip": [
     25,
-    0,
+    -11.5,
     -2.26
    ],
    "sight_pitch": 1.89,
@@ -490,7 +543,62 @@
    ],
    "make": "Sixth Ward Machine Co.",
    "model": "Street Rifle 01",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ]
   },
   "CyberCity/SMG_01": {
    "name": "Street SMG 01",
@@ -526,7 +634,7 @@
    ],
    "fore_grip": [
     19,
-    0,
+    -11.5,
     -0.13
    ],
    "sight_pitch": 0,
@@ -581,7 +689,62 @@
    ],
    "make": "Kato Pattern Works",
    "model": "Street SMG 01",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ]
   },
   "CyberCity/Shock_Stick_01": {
    "name": "Street Shock Stick 01",
@@ -1020,7 +1183,7 @@
    "description": "A weapon of uncertain provenance. Pattern 1 of the street issue.",
    "icon": "CyberCity_Shuriken_01",
    "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shuriken_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -1066,7 +1229,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -1077,7 +1240,20 @@
    "model": "Street Shuriken 01",
    "moa": 5,
    "attack_set": "light",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "CyberCity/Shuriken_03": {
    "name": "Street Shuriken 03",
@@ -1086,7 +1262,7 @@
    "description": "A weapon of uncertain provenance. Pattern 3 of the street issue.",
    "icon": "CyberCity_Shuriken_03",
    "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shuriken_03",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -1132,7 +1308,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -12.17,
@@ -1143,7 +1319,20 @@
    "model": "Street Shuriken 03",
    "moa": 5,
    "attack_set": "light",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "CyberCity/Shuriken_05": {
    "name": "Street Shuriken 05",
@@ -1152,7 +1341,7 @@
    "description": "A weapon of uncertain provenance. Pattern 5 of the street issue.",
    "icon": "CyberCity_Shuriken_05",
    "mesh": "/Game/RepliCan/Weapons/CyberCity/SM_Wep_Shuriken_05",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -1198,7 +1387,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -1209,7 +1398,20 @@
    "model": "Street Shuriken 05",
    "moa": 5,
    "attack_set": "light",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "CyberCity/Sniper_Rifle_01": {
    "name": "Street Marksman Rifle Rifle 01",
@@ -1245,7 +1447,7 @@
    ],
    "fore_grip": [
     17,
-    0,
+    -11.5,
     0.49
    ],
    "sight_pitch": 0.21,
@@ -1295,7 +1497,62 @@
    ],
    "make": "Sixth Ward Machine Co.",
    "model": "Street Marksman Rifle Rifle 01",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ]
   },
   "CyberCity/Sword_01": {
    "name": "Street Sword 01",
@@ -1858,9 +2115,9 @@
     15.22
    ],
    "fore_grip": [
-    1.5,
-    -2.2,
-    -1.5
+    -3,
+    -13.7,
+    4
    ],
    "sight_pitch": 0,
    "fore_grip_pitch": 0,
@@ -1904,7 +2161,72 @@
    "reviewdate": "",
    "make": "Helion Standard Arms",
    "model": "Fleet Pistol 01",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    0,
+    2,
+    -3
+   ],
+   "hand_rot": [
+    0,
+    -4,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -44
+   ],
+   "fingers_r": [
+    28,
+    6,
+    34,
+    34,
+    34
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "pull": [
+    0,
+    0,
+    0
+   ],
+   "lean": 0,
+   "lateral": [
+    12,
+    11,
+    0
+   ],
+   "low_ready": [
+    -30,
+    -30
+   ],
+   "elbow_main": [
+    0,
+    0,
+    0
+   ],
+   "elbow_main_aim": [
+    0,
+    0,
+    0
+   ],
+   "elbow_support_aim": [
+    0,
+    0,
+    0
+   ],
+   "elbow_support": [
+    0,
+    0,
+    0
+   ]
   },
   "Space/Wep_Rifle_01": {
    "name": "Fleet Rifle 01",
@@ -1940,7 +2262,7 @@
    ],
    "fore_grip": [
     9,
-    0,
+    -11.5,
     4.42
    ],
    "sight_pitch": -2.36,
@@ -1995,7 +2317,62 @@
    ],
    "make": "Helion Standard Arms",
    "model": "Fleet Rifle 01",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ]
   },
   "Space/Wep_Shield_01": {
    "name": "Fleet Shield 01",
@@ -2004,7 +2381,7 @@
    "description": "A slab to hide behind. It does not hit back, but it does not have to. Pattern 1 of the fleet issue.",
    "icon": "Space_Wep_Shield_01",
    "mesh": "/Game/RepliCan/Weapons/Space/SM_Wep_Shield_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blunt",
    "ranged": false,
    "muzzle": [
@@ -2050,7 +2427,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -2059,7 +2436,22 @@
    ],
    "make": "Helion Standard Arms",
    "model": "Fleet Shield 01",
-   "moa": 5
+   "moa": 5,
+   "hip_fire": false,
+   "category": "",
+   "armor_value": 0,
+   "body_slot": "",
+   "hides_hair": false,
+   "wear_sex": "",
+   "wear_torso": "",
+   "wear_arms": "",
+   "wear_legs": "",
+   "wear_torso_male": "",
+   "wear_torso_female": "",
+   "wear_arms_male": "",
+   "wear_arms_female": "",
+   "wear_legs_male": "",
+   "wear_legs_female": ""
   },
   "Space/Wep_Shield_Extended_01": {
    "name": "Fleet Shield Extended 01",
@@ -2068,7 +2460,7 @@
    "description": "A slab to hide behind. It does not hit back, but it does not have to. Pattern 1 of the fleet issue.",
    "icon": "Space_Wep_Shield_Extended_01",
    "mesh": "/Game/RepliCan/Weapons/Space/SM_Wep_Shield_Extended_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blunt",
    "ranged": false,
    "muzzle": [
@@ -2114,7 +2506,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -2123,7 +2515,22 @@
    ],
    "make": "Helion Standard Arms",
    "model": "Fleet Shield Extended 01",
-   "moa": 5
+   "moa": 5,
+   "hip_fire": false,
+   "category": "",
+   "armor_value": 0,
+   "body_slot": "",
+   "hides_hair": false,
+   "wear_sex": "",
+   "wear_torso": "",
+   "wear_arms": "",
+   "wear_legs": "",
+   "wear_torso_male": "",
+   "wear_torso_female": "",
+   "wear_arms_male": "",
+   "wear_arms_female": "",
+   "wear_legs_male": "",
+   "wear_legs_female": ""
   },
   "Space/Wep_Shotgun_01": {
    "name": "Fleet Shotgun 01",
@@ -2223,7 +2630,7 @@
    "description": "An edged weapon. Quiet, tireless, and never out of ammunition. Pattern 1 of the fleet issue.",
    "icon": "Space_Wep_Sword_01",
    "mesh": "/Game/RepliCan/Weapons/Space/SM_Wep_Sword_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -2269,7 +2676,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -27.45,
@@ -2280,7 +2687,20 @@
    "model": "Fleet Sword 01",
    "moa": 5,
    "attack_set": "blade",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Space/Wep_Sword_Double_01": {
    "name": "Fleet Sword Double 01",
@@ -2289,7 +2709,7 @@
    "description": "An edged weapon. Quiet, tireless, and never out of ammunition. Pattern 1 of the fleet issue.",
    "icon": "Space_Wep_Sword_Double_01",
    "mesh": "/Game/RepliCan/Weapons/Space/SM_Wep_Sword_Double_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -2335,7 +2755,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -33.58,
@@ -2346,7 +2766,20 @@
    "model": "Fleet Sword Double 01",
    "moa": 5,
    "attack_set": "blade",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_Alien_01": {
    "name": "Frontier Alien Weapon 01",
@@ -2382,7 +2815,7 @@
    ],
    "fore_grip": [
     56.26,
-    0,
+    -11.5,
     -3.08
    ],
    "sight_pitch": 3.67,
@@ -2447,7 +2880,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -2458,16 +2891,68 @@
    "model": "Frontier Alien Weapon 01",
    "hip_fire": false,
    "grip": [
-    17.31,
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "attachments": [],
+   "fire_modes": [],
+   "skin": "",
+   "moa": 5,
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
     0,
     0
    ],
    "optic_mount": [],
-   "attachments": [],
-   "fire_modes": [],
-   "skin": "",
-   "optic": "",
-   "moa": 5
+   "attack_set": "blade",
+   "blunt": false,
+   "optic": ""
   },
   "Worlds/Wep_Alien_02": {
    "name": "Frontier Alien Weapon 02",
@@ -2476,7 +2961,7 @@
    "description": "Not made for human hands. It works anyway, which is the unsettling part. Pattern 2 of the frontier issue.",
    "icon": "Worlds_Wep_Alien_02",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Alien_02",
-   "keep": false,
+   "keep": true,
    "sound": "wep_alien",
    "ranged": true,
    "muzzle": [
@@ -2503,7 +2988,7 @@
    ],
    "fore_grip": [
     22,
-    0,
+    -11.5,
     0.78
    ],
    "sight_pitch": 0.28,
@@ -2568,7 +3053,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -41.39,
@@ -2577,7 +3062,70 @@
    ],
    "make": "Unattributed",
    "model": "Frontier Alien Weapon 02",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ],
+   "hip_fire": false,
+   "optic_mount": [],
+   "attachments": [],
+   "attack_set": "blade",
+   "blunt": false,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_Alien_03": {
    "name": "Frontier Alien Weapon 03",
@@ -2586,7 +3134,7 @@
    "description": "Not made for human hands. It works anyway, which is the unsettling part. Pattern 3 of the frontier issue.",
    "icon": "Worlds_Wep_Alien_03",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Alien_03",
-   "keep": false,
+   "keep": true,
    "sound": "wep_alien",
    "ranged": true,
    "muzzle": [
@@ -2613,7 +3161,7 @@
    ],
    "fore_grip": [
     41,
-    0,
+    -11.5,
     -4.95
    ],
    "sight_pitch": 0,
@@ -2678,7 +3226,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -17.52,
@@ -2687,7 +3235,70 @@
    ],
    "make": "Unattributed",
    "model": "Frontier Alien Weapon 03",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ],
+   "hip_fire": false,
+   "optic_mount": [],
+   "attachments": [],
+   "attack_set": "blade",
+   "blunt": false,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_Alien_04": {
    "name": "Frontier Alien Weapon 04",
@@ -2696,7 +3307,7 @@
    "description": "Not made for human hands. It works anyway, which is the unsettling part. Pattern 4 of the frontier issue.",
    "icon": "Worlds_Wep_Alien_04",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Alien_04",
-   "keep": false,
+   "keep": true,
    "sound": "wep_alien",
    "ranged": true,
    "muzzle": [
@@ -2723,7 +3334,7 @@
    ],
    "fore_grip": [
     31,
-    0,
+    -11.5,
     -1.15
    ],
    "sight_pitch": 2.92,
@@ -2796,7 +3407,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "body_mesh": "/Game/RepliCan/Weapons/Worlds/Body/SM_Wep_Alien_04_Body.SM_Wep_Alien_04_Body",
    "shoulder": [
@@ -2806,13 +3417,76 @@
    ],
    "make": "Unattributed",
    "model": "Frontier Alien Weapon 04",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ],
+   "hip_fire": false,
+   "optic_mount": [],
+   "attachments": [],
+   "attack_set": "blade",
+   "blunt": false,
+   "fire_modes": [],
+   "skin": "",
+   "optic": "Factory_Wep_Alien_04"
   },
   "Worlds/Wep_Assault_01": {
    "name": "Frontier Assault Rifle 01",
    "kind": "Assault Rifle",
    "pack": "Worlds",
-   "description": "A selective-fire rifle. The standard answer to most questions out here. Pattern 1 of the frontier issue.",
+   "description": "Widely adopted fighting rifle from Martian arms giant Amazonis.",
    "icon": "Worlds_Wep_Assault_01",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Assault_01",
    "keep": true,
@@ -2841,9 +3515,9 @@
     19.94
    ],
    "fore_grip": [
-    34.5,
-    0,
-    1.53
+    27,
+    -11.5,
+    4.53
    ],
    "sight_pitch": 0,
    "grip_reseated": [
@@ -2851,7 +3525,7 @@
     0,
     -4.17
    ],
-   "optic": "RedDot_02",
+   "optic": "Factory_Wep_Assault_01",
    "optic_mount": [
     8,
     0,
@@ -2950,9 +3624,84 @@
     0,
     12.69
    ],
-   "make": "Vestergaard Dynamics",
-   "model": "Frontier Assault Rifle 01",
-   "moa": 5
+   "make": "Amazonis",
+   "model": "Spear 350",
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 2,
+   "pull": [
+    -11,
+    -7,
+    -2
+   ],
+   "lean": 0,
+   "eye_side": 4.25,
+   "shoulder_side": 6,
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow": [
+    -74,
+    0
+   ],
+   "elbow_main": [
+    -74,
+    -4,
+    -12
+   ],
+   "elbow_support": [
+    0,
+    0,
+    0
+   ],
+   "elbow_main_aim": [
+    0,
+    0,
+    0
+   ],
+   "elbow_support_aim": [
+    0,
+    0,
+    0
+   ],
+   "skin": "M_PolygonSciFiWorlds_03_A_Alt",
+   "attachments": [],
+   "attack_set": "blade",
+   "blunt": false
   },
   "Worlds/Wep_Assault_02": {
    "name": "Frontier Assault Rifle 02",
@@ -2987,9 +3736,9 @@
     19.29
    ],
    "fore_grip": [
-    16,
-    0,
-    3.52
+    6.5,
+    -11.5,
+    8.02
    ],
    "sight_pitch": 0,
    "grip_reseated": [
@@ -3097,9 +3846,74 @@
     0,
     12.29
    ],
-   "make": "Vestergaard Dynamics",
+   "make": "Amazonis",
    "model": "Frontier Assault Rifle 02",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -18,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lean": 0,
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ],
+   "elbow_main_aim": [
+    0,
+    0,
+    0
+   ],
+   "elbow_support_aim": [
+    0,
+    0,
+    0
+   ]
   },
   "Worlds/Wep_Assault_03": {
    "name": "Frontier Assault Rifle 03",
@@ -3135,7 +3949,7 @@
    ],
    "fore_grip": [
     16,
-    0,
+    -11.5,
     -0.42
    ],
    "sight_pitch": 0,
@@ -3218,9 +4032,64 @@
     0,
     7.82
    ],
-   "make": "Vestergaard Dynamics",
+   "make": "Amazonis",
    "model": "Frontier Assault Rifle 03",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ]
   },
   "Worlds/Wep_BigAxe_01": {
    "name": "Frontier Great Axe 01",
@@ -3229,7 +4098,7 @@
    "description": "A two-handed axe. Commits fully to every swing. Pattern 1 of the frontier issue.",
    "icon": "Worlds_Wep_BigAxe_01",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -3275,7 +4144,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -68.1,
@@ -3286,7 +4155,20 @@
    "model": "Frontier Great Axe 01",
    "moa": 5,
    "attack_set": "heavy",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_BigAxe_02": {
    "name": "Frontier Great Axe 02",
@@ -3295,7 +4177,7 @@
    "description": "A two-handed axe. Commits fully to every swing. Pattern 2 of the frontier issue.",
    "icon": "Worlds_Wep_BigAxe_02",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_02",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -3341,7 +4223,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -66.36,
@@ -3352,7 +4234,20 @@
    "model": "Frontier Great Axe 02",
    "moa": 5,
    "attack_set": "heavy",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_BigAxe_03": {
    "name": "Frontier Great Axe 03",
@@ -3361,7 +4256,7 @@
    "description": "A two-handed axe. Commits fully to every swing. Pattern 3 of the frontier issue.",
    "icon": "Worlds_Wep_BigAxe_03",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_03",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -3407,7 +4302,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -56.73,
@@ -3418,7 +4313,20 @@
    "model": "Frontier Great Axe 03",
    "moa": 5,
    "attack_set": "heavy",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_BigAxe_04": {
    "name": "Frontier Great Axe 04",
@@ -3427,7 +4335,7 @@
    "description": "A two-handed axe. Commits fully to every swing. Pattern 4 of the frontier issue.",
    "icon": "Worlds_Wep_BigAxe_04",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_04",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -3473,7 +4381,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -73.81,
@@ -3484,7 +4392,20 @@
    "model": "Frontier Great Axe 04",
    "moa": 5,
    "attack_set": "heavy",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_BigAxe_05": {
    "name": "Frontier Great Axe 05",
@@ -3493,7 +4414,7 @@
    "description": "A two-handed axe. Commits fully to every swing. Pattern 5 of the frontier issue.",
    "icon": "Worlds_Wep_BigAxe_05",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_05",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -3539,7 +4460,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -46.27,
@@ -3550,7 +4471,20 @@
    "model": "Frontier Great Axe 05",
    "moa": 5,
    "attack_set": "heavy",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_BigAxe_06": {
    "name": "Frontier Great Axe 06",
@@ -3559,7 +4493,7 @@
    "description": "A two-handed axe. Commits fully to every swing. Pattern 6 of the frontier issue.",
    "icon": "Worlds_Wep_BigAxe_06",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_06",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -3605,7 +4539,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -46.94,
@@ -3616,7 +4550,20 @@
    "model": "Frontier Great Axe 06",
    "moa": 5,
    "attack_set": "heavy",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_BigAxe_07": {
    "name": "Frontier Great Axe 07",
@@ -3625,7 +4572,7 @@
    "description": "A two-handed axe. Commits fully to every swing. Pattern 7 of the frontier issue.",
    "icon": "Worlds_Wep_BigAxe_07",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_BigAxe_07",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -3671,7 +4618,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -92.88,
@@ -3682,7 +4629,20 @@
    "model": "Frontier Great Axe 07",
    "moa": 5,
    "attack_set": "heavy",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_Dagger_01": {
    "name": "Frontier Dagger 01",
@@ -3691,7 +4651,7 @@
    "description": "A short stabbing blade. Fast, close, personal. Pattern 1 of the frontier issue.",
    "icon": "Worlds_Wep_Dagger_01",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Dagger_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -3737,7 +4697,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -3748,7 +4708,20 @@
    "model": "Frontier Dagger 01",
    "moa": 5,
    "attack_set": "light",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_Dagger_02": {
    "name": "Frontier Dagger 02",
@@ -3757,7 +4730,7 @@
    "description": "A short stabbing blade. Fast, close, personal. Pattern 2 of the frontier issue.",
    "icon": "Worlds_Wep_Dagger_02",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Dagger_02",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -3803,7 +4776,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -13.73,
@@ -3814,7 +4787,20 @@
    "model": "Frontier Dagger 02",
    "moa": 5,
    "attack_set": "light",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_Dagger_03": {
    "name": "Frontier Dagger 03",
@@ -3823,7 +4809,7 @@
    "description": "A short stabbing blade. Fast, close, personal. Pattern 3 of the frontier issue.",
    "icon": "Worlds_Wep_Dagger_03",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Dagger_03",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -3869,7 +4855,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -16.35,
@@ -3880,7 +4866,20 @@
    "model": "Frontier Dagger 03",
    "moa": 5,
    "attack_set": "light",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_Dagger_04": {
    "name": "Frontier Dagger 04",
@@ -3889,7 +4888,7 @@
    "description": "A short stabbing blade. Fast, close, personal. Pattern 4 of the frontier issue.",
    "icon": "Worlds_Wep_Dagger_04",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Dagger_04",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -3935,7 +4934,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -15.28,
@@ -3946,7 +4945,20 @@
    "model": "Frontier Dagger 04",
    "moa": 5,
    "attack_set": "light",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_Dagger_05": {
    "name": "Frontier Dagger 05",
@@ -4180,7 +5192,7 @@
    ],
    "fore_grip": [
     15,
-    0,
+    -11.5,
     -3.6
    ],
    "sight_pitch": 0,
@@ -4237,7 +5249,62 @@
    ],
    "make": "Kessler-Rand Armaments",
    "model": "Frontier Grenade Launcher 01",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ]
   },
   "Worlds/Wep_Hammer_02": {
    "name": "Frontier Hammer 02",
@@ -4246,7 +5313,7 @@
    "description": "A hammer. Blunt, patient, decisive. Pattern 2 of the frontier issue.",
    "icon": "Worlds_Wep_Hammer_02",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Hammer_02",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blunt",
    "ranged": false,
    "muzzle": [
@@ -4292,18 +5359,31 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -96.34,
     0,
     0
    ],
-   "make": "Vestergaard Dynamics",
+   "make": "Amazonis",
    "model": "Frontier Hammer 02",
    "moa": 5,
    "attack_set": "heavy",
-   "blunt": true
+   "blunt": true,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_Hammer_03": {
    "name": "Frontier Hammer 03",
@@ -4365,7 +5445,7 @@
     0,
     0
    ],
-   "make": "Vestergaard Dynamics",
+   "make": "Amazonis",
    "model": "Frontier Hammer 03",
    "moa": 5,
    "attack_set": "heavy",
@@ -4405,7 +5485,7 @@
    ],
    "fore_grip": [
     37,
-    0,
+    -11.5,
     0.42
    ],
    "sight_pitch": 0,
@@ -4489,9 +5569,65 @@
     0,
     7.54
    ],
-   "make": "Vestergaard Dynamics",
+   "make": "Amazonis",
    "model": "Frontier Heavy Gun 01",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ],
+   "optic": "Factory_Wep_Heavy_01"
   },
   "Worlds/Wep_Heavy_02": {
    "name": "Frontier Heavy Gun 02",
@@ -4526,9 +5662,9 @@
     19.97
    ],
    "fore_grip": [
-    32,
-    0,
-    -8.76
+    52.5,
+    -9,
+    -2.76
    ],
    "sight_pitch": 0,
    "grip_reseated": [
@@ -4623,9 +5759,74 @@
     0,
     7
    ],
-   "make": "Vestergaard Dynamics",
+   "make": "Amazonis",
    "model": "Frontier Heavy Gun 02",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    4,
+    3,
+    -2
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": -1,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    10.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ],
+   "elbow_main_aim": [
+    0,
+    0,
+    0
+   ],
+   "elbow_support_aim": [
+    0,
+    0,
+    0
+   ]
   },
   "Worlds/Wep_Heavy_03": {
    "name": "Frontier Heavy Gun 03",
@@ -4661,7 +5862,7 @@
    ],
    "fore_grip": [
     29,
-    0,
+    -11.5,
     0.99
    ],
    "sight_pitch": 0,
@@ -4744,9 +5945,64 @@
     0,
     13.57
    ],
-   "make": "Vestergaard Dynamics",
+   "make": "Amazonis",
    "model": "Frontier Heavy Gun 03",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ]
   },
   "Worlds/Wep_Launcher_01": {
    "name": "Frontier Launcher 01",
@@ -4782,7 +6038,7 @@
    ],
    "fore_grip": [
     22,
-    0,
+    -11.5,
     -1.33
    ],
    "sight_pitch": 0,
@@ -4854,7 +6110,62 @@
    ],
    "make": "Kessler-Rand Armaments",
    "model": "Frontier Launcher 01",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ]
   },
   "Worlds/Wep_Launcher_02": {
    "name": "Frontier Launcher 02",
@@ -4890,7 +6201,7 @@
    ],
    "fore_grip": [
     26.29,
-    0,
+    -11.5,
     6.96
    ],
    "sight_pitch": 0,
@@ -4962,7 +6273,62 @@
    ],
    "make": "Kessler-Rand Armaments",
    "model": "Frontier Launcher 02",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ]
   },
   "Worlds/Wep_Launcher_03": {
    "name": "Frontier Launcher 03",
@@ -4998,7 +6364,7 @@
    ],
    "fore_grip": [
     26,
-    0,
+    -11.5,
     3.21
    ],
    "sight_pitch": 0,
@@ -5083,7 +6449,62 @@
    ],
    "make": "Kessler-Rand Armaments",
    "model": "Frontier Launcher 03",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ]
   },
   "Worlds/Wep_Pistol_01": {
    "name": "Frontier Pistol 01",
@@ -5198,9 +6619,10 @@
    "hidden": false,
    "reviewdate": "",
    "body_mesh": "/Game/RepliCan/Weapons/Worlds/Body/SM_Wep_Pistol_01_Body.SM_Wep_Pistol_01_Body",
-   "make": "Vestergaard Dynamics",
+   "make": "Amazonis",
    "model": "Frontier Pistol 01",
-   "moa": 5
+   "moa": 5,
+   "optic": "Factory_Wep_Pistol_01"
   },
   "Worlds/Wep_Pistol_02": {
    "name": "Frontier Pistol 02",
@@ -5322,7 +6744,7 @@
    "glow": false,
    "hidden": false,
    "reviewdate": "",
-   "make": "Vestergaard Dynamics",
+   "make": "Amazonis",
    "model": "Frontier Pistol 02",
    "moa": 5
   },
@@ -5420,7 +6842,7 @@
    "glow": false,
    "hidden": false,
    "reviewdate": "",
-   "make": "Vestergaard Dynamics",
+   "make": "Amazonis",
    "model": "Frontier Pistol 03",
    "moa": 5
   },
@@ -5531,7 +6953,7 @@
    "glow": false,
    "hidden": false,
    "reviewdate": "",
-   "make": "Vestergaard Dynamics",
+   "make": "Amazonis",
    "model": "Frontier Pistol 04",
    "moa": 5
   },
@@ -5550,12 +6972,12 @@
     0,
     10.55
    ],
-   "stance": "Pistol",
+   "stance": "Pistol1H",
    "space": "hac1",
    "sight": [
-    6.18,
+    -0.05,
     0,
-    19.53
+    18.26
    ],
    "rear_sight": [
     6.18,
@@ -5570,7 +6992,7 @@
    "fore_grip": [
     1.5,
     -2.2,
-    -1.5
+    1.23
    ],
    "sight_pitch": 0,
    "parts": {
@@ -5621,9 +7043,9 @@
    "cooldown_s": 0,
    "effects": [],
    "durability_max": 0,
-   "damage": 5,
+   "damage": 10,
    "fire_rate": 5,
-   "ammo_kind": "light",
+   "ammo_kind": "cell",
    "magazine": 12,
    "reload_s": 1.6,
    "spread_hip": 3.5,
@@ -5641,20 +7063,76 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": "",
+   "reviewdate": "2026-09-16",
    "body_mesh": "/Game/RepliCan/Weapons/Worlds/Body/SM_Wep_Pistol_05_Body.SM_Wep_Pistol_05_Body",
    "make": "Mikita",
    "model": "BugBuster",
    "moa": 5,
    "hip_fire": false,
-   "grip": [],
-   "optic_mount": [],
+   "grip": [
+    -0.17,
+    2.85,
+    -5.15
+   ],
+   "optic_mount": [
+    -0.13,
+    0.0,
+    18.24
+   ],
    "attachments": [],
    "fire_modes": [
     "laser"
    ],
    "skin": "",
-   "optic": ""
+   "optic": "Lens_Small",
+   "attack_set": "blade",
+   "blunt": false,
+   "shoulder": [],
+   "hand_rot": [
+    14,
+    6,
+    -12
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "pull": [
+    0,
+    0,
+    0
+   ],
+   "lean": 0,
+   "lateral": [
+    12,
+    11,
+    0
+   ],
+   "low_ready": [
+    -30,
+    -30
+   ],
+   "elbow": [
+    0,
+    0
+   ],
+   "optic_fixed": true
   },
   "Worlds/Wep_Pistol_06": {
    "name": "Frontier Pistol 06",
@@ -5750,7 +7228,7 @@
    "glow": false,
    "hidden": false,
    "reviewdate": "",
-   "make": "Vestergaard Dynamics",
+   "make": "Amazonis",
    "model": "Frontier Pistol 06",
    "moa": 5
   },
@@ -5788,7 +7266,7 @@
    ],
    "fore_grip": [
     10,
-    0,
+    -11.5,
     2.27
    ],
    "sight_pitch": 2.72,
@@ -5871,9 +7349,64 @@
     0,
     13.73
    ],
-   "make": "Vestergaard Dynamics",
+   "make": "Amazonis",
    "model": "Frontier SMG 01",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ]
   },
   "Worlds/Wep_SMG_02": {
    "name": "Frontier SMG 02",
@@ -5909,7 +7442,7 @@
    ],
    "fore_grip": [
     20,
-    0,
+    -11.5,
     7.13
    ],
    "sight_pitch": -1.59,
@@ -5962,9 +7495,64 @@
     0,
     9.2
    ],
-   "make": "Vestergaard Dynamics",
+   "make": "Amazonis",
    "model": "Frontier SMG 02",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ]
   },
   "Worlds/Wep_SMG_03": {
    "name": "Frontier SMG 03",
@@ -6000,7 +7588,7 @@
    ],
    "fore_grip": [
     27,
-    0,
+    -11.5,
     12.64
    ],
    "sight_pitch": 0,
@@ -6084,9 +7672,65 @@
     0.01,
     14.97
    ],
-   "make": "Vestergaard Dynamics",
+   "make": "Amazonis",
    "model": "Frontier SMG 03",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ],
+   "optic": "Factory_Wep_SMG_03"
   },
   "Worlds/Wep_Shield_01": {
    "name": "Frontier Shield 01",
@@ -6095,7 +7739,7 @@
    "description": "A slab to hide behind. It does not hit back, but it does not have to. Pattern 1 of the frontier issue.",
    "icon": "Worlds_Wep_Shield_01",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shield_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blunt",
    "ranged": false,
    "muzzle": [
@@ -6141,7 +7785,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -6150,7 +7794,22 @@
    ],
    "make": "Bastion Civil Systems",
    "model": "Frontier Shield 01",
-   "moa": 5
+   "moa": 5,
+   "hip_fire": false,
+   "category": "",
+   "armor_value": 0,
+   "body_slot": "",
+   "hides_hair": false,
+   "wear_sex": "",
+   "wear_torso": "",
+   "wear_arms": "",
+   "wear_legs": "",
+   "wear_torso_male": "",
+   "wear_torso_female": "",
+   "wear_arms_male": "",
+   "wear_arms_female": "",
+   "wear_legs_male": "",
+   "wear_legs_female": ""
   },
   "Worlds/Wep_Shield_02": {
    "name": "Frontier Shield 02",
@@ -6159,7 +7818,7 @@
    "description": "A slab to hide behind. It does not hit back, but it does not have to. Pattern 2 of the frontier issue.",
    "icon": "Worlds_Wep_Shield_02",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shield_02",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blunt",
    "ranged": false,
    "muzzle": [
@@ -6205,7 +7864,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -6214,7 +7873,22 @@
    ],
    "make": "Bastion Civil Systems",
    "model": "Frontier Shield 02",
-   "moa": 5
+   "moa": 5,
+   "hip_fire": false,
+   "category": "",
+   "armor_value": 0,
+   "body_slot": "",
+   "hides_hair": false,
+   "wear_sex": "",
+   "wear_torso": "",
+   "wear_arms": "",
+   "wear_legs": "",
+   "wear_torso_male": "",
+   "wear_torso_female": "",
+   "wear_arms_male": "",
+   "wear_arms_female": "",
+   "wear_legs_male": "",
+   "wear_legs_female": ""
   },
   "Worlds/Wep_Shield_03": {
    "name": "Frontier Shield 03",
@@ -6223,7 +7897,7 @@
    "description": "A slab to hide behind. It does not hit back, but it does not have to. Pattern 3 of the frontier issue.",
    "icon": "Worlds_Wep_Shield_03",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shield_03",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blunt",
    "ranged": false,
    "muzzle": [
@@ -6269,7 +7943,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -6278,7 +7952,22 @@
    ],
    "make": "Bastion Civil Systems",
    "model": "Frontier Shield 03",
-   "moa": 5
+   "moa": 5,
+   "hip_fire": false,
+   "category": "",
+   "armor_value": 0,
+   "body_slot": "",
+   "hides_hair": false,
+   "wear_sex": "",
+   "wear_torso": "",
+   "wear_arms": "",
+   "wear_legs": "",
+   "wear_torso_male": "",
+   "wear_torso_female": "",
+   "wear_arms_male": "",
+   "wear_arms_female": "",
+   "wear_legs_male": "",
+   "wear_legs_female": ""
   },
   "Worlds/Wep_Shield_04": {
    "name": "Frontier Shield 04",
@@ -6287,7 +7976,7 @@
    "description": "A slab to hide behind. It does not hit back, but it does not have to. Pattern 4 of the frontier issue.",
    "icon": "Worlds_Wep_Shield_04",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shield_04",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blunt",
    "ranged": false,
    "muzzle": [
@@ -6333,7 +8022,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -6342,7 +8031,22 @@
    ],
    "make": "Bastion Civil Systems",
    "model": "Frontier Shield 04",
-   "moa": 5
+   "moa": 5,
+   "hip_fire": false,
+   "category": "",
+   "armor_value": 0,
+   "body_slot": "",
+   "hides_hair": false,
+   "wear_sex": "",
+   "wear_torso": "",
+   "wear_arms": "",
+   "wear_legs": "",
+   "wear_torso_male": "",
+   "wear_torso_female": "",
+   "wear_arms_male": "",
+   "wear_arms_female": "",
+   "wear_legs_male": "",
+   "wear_legs_female": ""
   },
   "Worlds/Wep_Shield_05": {
    "name": "Frontier Shield 05",
@@ -6351,7 +8055,7 @@
    "description": "A slab to hide behind. It does not hit back, but it does not have to. Pattern 5 of the frontier issue.",
    "icon": "Worlds_Wep_Shield_05",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Shield_05",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blunt",
    "ranged": false,
    "muzzle": [
@@ -6397,7 +8101,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -6406,7 +8110,22 @@
    ],
    "make": "Bastion Civil Systems",
    "model": "Frontier Shield 05",
-   "moa": 5
+   "moa": 5,
+   "hip_fire": false,
+   "category": "",
+   "armor_value": 0,
+   "body_slot": "",
+   "hides_hair": false,
+   "wear_sex": "",
+   "wear_torso": "",
+   "wear_arms": "",
+   "wear_legs": "",
+   "wear_torso_male": "",
+   "wear_torso_female": "",
+   "wear_arms_male": "",
+   "wear_arms_female": "",
+   "wear_legs_male": "",
+   "wear_legs_female": ""
   },
   "Worlds/Wep_Shotgun_01": {
    "name": "Frontier Shotgun 01",
@@ -6778,7 +8497,7 @@
    "description": "A one-handed axe. Chops, throws, pries. Pattern 1 of the frontier issue.",
    "icon": "Worlds_Wep_SmallAxe_01",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SmallAxe_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -6824,7 +8543,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -38.69,
@@ -6835,7 +8554,20 @@
    "model": "Frontier Hand Axe 01",
    "moa": 5,
    "attack_set": "blade",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_SmallAxe_02": {
    "name": "Frontier Hand Axe 02",
@@ -6844,7 +8576,7 @@
    "description": "A one-handed axe. Chops, throws, pries. Pattern 2 of the frontier issue.",
    "icon": "Worlds_Wep_SmallAxe_02",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SmallAxe_02",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -6890,7 +8622,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -36.84,
@@ -6901,7 +8633,20 @@
    "model": "Frontier Hand Axe 02",
    "moa": 5,
    "attack_set": "blade",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_SmallAxe_03": {
    "name": "Frontier Hand Axe 03",
@@ -6910,7 +8655,7 @@
    "description": "A one-handed axe. Chops, throws, pries. Pattern 3 of the frontier issue.",
    "icon": "Worlds_Wep_SmallAxe_03",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SmallAxe_03",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -6956,7 +8701,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -36.56,
@@ -6967,7 +8712,20 @@
    "model": "Frontier Hand Axe 03",
    "moa": 5,
    "attack_set": "blade",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_SmallAxe_04": {
    "name": "Frontier Hand Axe 04",
@@ -6976,7 +8734,7 @@
    "description": "A one-handed axe. Chops, throws, pries. Pattern 4 of the frontier issue.",
    "icon": "Worlds_Wep_SmallAxe_04",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SmallAxe_04",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -7022,7 +8780,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -36.6,
@@ -7033,7 +8791,20 @@
    "model": "Frontier Hand Axe 04",
    "moa": 5,
    "attack_set": "blade",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_SmallAxe_05": {
    "name": "Frontier Hand Axe 05",
@@ -7042,7 +8813,7 @@
    "description": "A one-handed axe. Chops, throws, pries. Pattern 5 of the frontier issue.",
    "icon": "Worlds_Wep_SmallAxe_05",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_SmallAxe_05",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -7088,7 +8859,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -43.73,
@@ -7099,7 +8870,20 @@
    "model": "Frontier Hand Axe 05",
    "moa": 5,
    "attack_set": "blade",
-   "blunt": false
+   "blunt": false,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_Sniper_01": {
    "name": "Frontier Marksman Rifle 01",
@@ -7135,8 +8919,8 @@
    ],
    "fore_grip": [
     4,
-    0,
-    -7.97
+    -11.5,
+    2.53
    ],
    "sight_pitch": 0,
    "grip_reseated": [
@@ -7220,7 +9004,72 @@
    ],
    "make": "Cairn Outfitting",
    "model": "Frontier Marksman Rifle 01",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -12,
+    1.5,
+    8.5
+   ],
+   "hand_rot": [
+    10,
+    0,
+    10
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    21,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ],
+   "elbow_main_aim": [
+    0,
+    0,
+    0
+   ],
+   "elbow_support_aim": [
+    0,
+    0,
+    0
+   ]
   },
   "Worlds/Wep_Sniper_02": {
    "name": "Frontier Marksman Rifle 02",
@@ -7256,7 +9105,7 @@
    ],
    "fore_grip": [
     12,
-    0,
+    -11.5,
     0.85
    ],
    "sight_pitch": 4.78,
@@ -7355,7 +9204,63 @@
    ],
    "make": "Cairn Outfitting",
    "model": "Frontier Marksman Rifle 02",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ],
+   "optic": "Factory_Wep_Sniper_02"
   },
   "Worlds/Wep_Sniper_03": {
    "name": "Frontier Marksman Rifle 03",
@@ -7391,7 +9296,7 @@
    ],
    "fore_grip": [
     6,
-    0,
+    -11.5,
     4.93
    ],
    "sight_pitch": 3.96,
@@ -7490,7 +9395,63 @@
    ],
    "make": "Cairn Outfitting",
    "model": "Frontier Marksman Rifle 03",
-   "moa": 5
+   "moa": 5,
+   "grip": [
+    -0.5,
+    1.5,
+    -0.5
+   ],
+   "hand_rot": [
+    20,
+    0,
+    0
+   ],
+   "fingers_r": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "fore_hand_rot": [
+    0,
+    0,
+    -66
+   ],
+   "fingers_l": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hunch": 0,
+   "lean": 0,
+   "pull": [
+    -11,
+    -4,
+    -1.5
+   ],
+   "lateral": [
+    12,
+    6,
+    0
+   ],
+   "low_ready": [
+    -22,
+    -30
+   ],
+   "elbow_main": [
+    -74,
+    -16,
+    -18
+   ],
+   "elbow_support": [
+    112,
+    0,
+    0
+   ],
+   "optic": "Factory_Wep_Sniper_03"
   },
   "Worlds/Wep_Sword_01a": {
    "name": "Frontier Sword 01a",
@@ -8027,7 +9988,7 @@
    "description": "A working tool that hurts when swung. Nobody will ask why you are carrying it. Pattern 1 of the frontier issue.",
    "icon": "Worlds_Wep_Tool_01",
    "mesh": "/Game/RepliCan/Weapons/Worlds/SM_Wep_Tool_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blunt",
    "ranged": false,
    "muzzle": [
@@ -8075,7 +10036,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -22.81,
@@ -8086,7 +10047,20 @@
    "model": "Frontier Tool 01",
    "moa": 5,
    "attack_set": "light",
-   "blunt": true
+   "blunt": true,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Worlds/Wep_Tool_02": {
    "name": "Frontier Tool 02",
@@ -8349,7 +10323,7 @@
    "description": "A hull cutter. Slow, silent, and it does not care what the hull is made of.",
    "icon": "Horror_Laser_Cutter_01",
    "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Laser_Cutter_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_laser",
    "ranged": true,
    "muzzle": [
@@ -8421,7 +10395,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": true,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -8433,7 +10407,17 @@
    "moa": 5,
    "fire_modes": [
     "laser"
-   ]
+   ],
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "optic_mount": [],
+   "attachments": [],
+   "attack_set": "blade",
+   "blunt": false,
+   "skin": "",
+   "optic": ""
   },
   "Horror/Wep_Mining_Laser_01": {
    "name": "Mining Laser 01",
@@ -8667,7 +10651,7 @@
    "description": "Core drill. Two hands, and a wind-up long enough to regret.",
    "icon": "Horror_Drill_01",
    "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Drill_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blunt",
    "ranged": false,
    "muzzle": [
@@ -8712,7 +10696,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -12.47,
@@ -8724,7 +10708,20 @@
    "moa": 5,
    "attack_set": "light",
    "blunt": true,
-   "stance": "Blade"
+   "stance": "Blade",
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Horror/Wep_Axe_01": {
    "name": "Axe 01",
@@ -8733,7 +10730,7 @@
    "description": "Emergency axe off a bulkhead mount. Every deck has one and nobody logs them.",
    "icon": "Horror_Axe_01",
    "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Axe_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -8779,18 +10776,33 @@
    "sound_use": "equip",
    "glow": false,
    "hidden": false,
-   "reviewdate": "",
+   "reviewdate": "2026-09-16",
    "shoulder": [
-    -64.52,
-    0,
-    0.41
+    -44.95,
+    0.63,
+    3.14
    ],
-   "make": "Northlight Defense Group",
-   "model": "Axe 01",
+   "make": "NerveNet",
+   "model": "Fire Axe",
    "moa": 5,
    "attack_set": "blade",
    "blunt": false,
-   "stance": "Blade"
+   "stance": "Blade",
+   "hip_fire": false,
+   "grip": [
+    -30,
+    0,
+    0
+   ],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Horror/Wep_Hammer_01": {
    "name": "Hammer 01",
@@ -8799,7 +10811,7 @@
    "description": "A mallet for seating deck plate. Unsubtle, and entirely effective.",
    "icon": "Horror_Hammer_01",
    "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Hammer_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blunt",
    "ranged": false,
    "muzzle": [
@@ -8851,12 +10863,23 @@
     0,
     0
    ],
-   "make": "Northlight Defense Group",
-   "model": "Hammer 01",
+   "make": "Grafton",
+   "model": "5lb Sledge",
    "moa": 5,
    "attack_set": "heavy",
    "blunt": true,
-   "stance": "Blade"
+   "stance": "Blade",
+   "hip_fire": false,
+   "grip": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Horror/Wep_Knife_01": {
    "name": "Knife 01",
@@ -8931,11 +10954,11 @@
    "description": "Pipe wrench, adjustable, heavy at the head. The oldest weapon on this list by several centuries.",
    "icon": "Horror_Wrench_01",
    "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Wrench_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blunt",
    "ranged": false,
    "muzzle": [
-    44.09,
+    51.79,
     0,
     -3.18
    ],
@@ -8983,12 +11006,26 @@
     0,
     0
    ],
-   "make": "Northlight Defense Group",
-   "model": "Wrench 01",
+   "make": "Grafton",
+   "model": "Heavy Spanner",
    "moa": 5,
    "attack_set": "heavy",
    "blunt": true,
-   "stance": "Blade"
+   "stance": "Blade",
+   "hip_fire": false,
+   "grip": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": "",
+   "merged_parts": [
+    "SM_Wep_Wrench_01_Clamp_01"
+   ]
   },
   "Horror/Wep_Shock_Stick_01": {
    "name": "Shock Stick 01",
@@ -9063,7 +11100,7 @@
    "description": "A surgical instrument, sterile and very sharp. Found a long way from any surgery.",
    "icon": "Horror_Surgical_Tool_01",
    "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Surgical_Tool_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -9110,7 +11147,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -18.34,
@@ -9122,7 +11159,20 @@
    "moa": 5,
    "attack_set": "light",
    "blunt": false,
-   "stance": "Blade"
+   "stance": "Blade",
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Horror/Wep_Surgical_Tool_02": {
    "name": "Surgical Tool 02",
@@ -9131,7 +11181,7 @@
    "description": "The second instrument from the same tray. The tray is not aboard.",
    "icon": "Horror_Surgical_Tool_02",
    "mesh": "/Game/RepliCan/Weapons/Horror/SM_Wep_Surgical_Tool_02",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blade",
    "ranged": false,
    "muzzle": [
@@ -9178,7 +11228,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -9190,7 +11240,20 @@
    "moa": 5,
    "attack_set": "light",
    "blunt": false,
-   "stance": "Blade"
+   "stance": "Blade",
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Police/Wep_Pistol_01": {
    "name": "Pistol 01",
@@ -9199,7 +11262,7 @@
    "description": "Issue sidearm, polymer frame, fifteen rounds. Every one of these has a serial and most of them still match a record.",
    "icon": "Police_Pistol_01",
    "mesh": "/Game/RepliCan/Weapons/Police/SM_Wep_Pistol_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_pistol",
    "ranged": true,
    "muzzle": [
@@ -9266,7 +11329,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -9275,7 +11338,18 @@
    ],
    "make": "Meridian Public Order",
    "model": "Pistol 01",
-   "moa": 5
+   "moa": 5,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "optic_mount": [],
+   "attachments": [],
+   "attack_set": "blade",
+   "blunt": false,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Police/Wep_Revolver_01": {
    "name": "Revolver 01",
@@ -9284,7 +11358,7 @@
    "description": "Six-shot revolver. Older than the department that issued it and never once jammed.",
    "icon": "Police_Revolver_01",
    "mesh": "/Game/RepliCan/Weapons/Police/SM_Wep_Revolver_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_pistol",
    "ranged": true,
    "muzzle": [
@@ -9351,7 +11425,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -9360,7 +11434,18 @@
    ],
    "make": "Meridian Public Order",
    "model": "Revolver 01",
-   "moa": 5
+   "moa": 5,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "optic_mount": [],
+   "attachments": [],
+   "attack_set": "blade",
+   "blunt": false,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Police/Wep_Rifle_01": {
    "name": "Rifle 01",
@@ -9369,7 +11454,7 @@
    "description": "Patrol carbine with a light and a reflex sight. Kept in the car, signed out by the shift.",
    "icon": "Police_Rifle_01",
    "mesh": "/Game/RepliCan/Weapons/Police/SM_Wep_Rifle_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_rifle",
    "ranged": true,
    "muzzle": [
@@ -9441,7 +11526,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -39.37,
@@ -9450,7 +11535,18 @@
    ],
    "make": "Bastion Civil Systems",
    "model": "Rifle 01",
-   "moa": 5
+   "moa": 5,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "optic_mount": [],
+   "attachments": [],
+   "attack_set": "blade",
+   "blunt": false,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Police/Wep_Shotgun_01": {
    "name": "Shotgun 01",
@@ -9459,7 +11555,7 @@
    "description": "Pump shotgun with a light under the barrel and shells on the stock. Doors, mostly.",
    "icon": "Police_Shotgun_01",
    "mesh": "/Game/RepliCan/Weapons/Police/SM_Wep_Shotgun_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_shotgun",
    "ranged": true,
    "muzzle": [
@@ -9526,7 +11622,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -9535,7 +11631,18 @@
    ],
    "make": "Meridian Public Order",
    "model": "Shotgun 01",
-   "moa": 5
+   "moa": 5,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "optic_mount": [],
+   "attachments": [],
+   "attack_set": "blade",
+   "blunt": false,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Police/Wep_DoubleBarrel_01": {
    "name": "DoubleBarrel 01",
@@ -9544,7 +11651,7 @@
    "description": "Side-by-side twelve gauge. Came in as evidence and stayed as something else.",
    "icon": "Police_DoubleBarrel_01",
    "mesh": "/Game/RepliCan/Weapons/Police/SM_Wep_DoubleBarrel_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_shotgun",
    "ranged": true,
    "muzzle": [
@@ -9611,7 +11718,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -9620,7 +11727,18 @@
    ],
    "make": "Meridian Public Order",
    "model": "DoubleBarrel 01",
-   "moa": 5
+   "moa": 5,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "optic_mount": [],
+   "attachments": [],
+   "attack_set": "blade",
+   "blunt": false,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Police/Wep_Sniper_01": {
    "name": "Sniper 01",
@@ -9629,7 +11747,7 @@
    "description": "Bolt-action marksman rifle with a scope and a bipod. Signed for by name, always.",
    "icon": "Police_Sniper_01",
    "mesh": "/Game/RepliCan/Weapons/Police/SM_Wep_Sniper_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_sniper",
    "ranged": true,
    "muzzle": [
@@ -9701,7 +11819,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -9710,7 +11828,18 @@
    ],
    "make": "Meridian Public Order",
    "model": "Sniper 01",
-   "moa": 5
+   "moa": 5,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "optic_mount": [],
+   "attachments": [],
+   "attack_set": "blade",
+   "blunt": false,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Police/Wep_Launcher_01": {
    "name": "Launcher 01",
@@ -9719,7 +11848,7 @@
    "description": "Forty-millimetre launcher, single shot. Fires gas, smoke and the occasional thing it should not.",
    "icon": "Police_Launcher_01",
    "mesh": "/Game/RepliCan/Weapons/Police/SM_Wep_Launcher_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_launcher",
    "ranged": true,
    "muzzle": [
@@ -9791,7 +11920,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -9800,7 +11929,18 @@
    ],
    "make": "Kessler-Rand Armaments",
    "model": "Launcher 01",
-   "moa": 5
+   "moa": 5,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "optic_mount": [],
+   "attachments": [],
+   "attack_set": "blade",
+   "blunt": false,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Police/Wep_Stungun_01": {
    "name": "Stungun 01",
@@ -9894,7 +12034,7 @@
    "description": "Contact stun gun. Has to touch you, and then it does.",
    "icon": "Police_Stungun_02",
    "mesh": "/Game/RepliCan/Weapons/Police/SM_Wep_Stungun_02",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blunt",
    "ranged": false,
    "muzzle": [
@@ -9939,7 +12079,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -9951,7 +12091,20 @@
    "moa": 5,
    "attack_set": "light",
    "blunt": true,
-   "stance": "Blade"
+   "stance": "Blade",
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Police/Wep_Stun_Baton_01": {
    "name": "Stun Baton 01",
@@ -10026,7 +12179,7 @@
    "description": "Side-handle baton. Cheap, hard, and on every belt in the building.",
    "icon": "Police_Baton_01",
    "mesh": "/Game/RepliCan/Weapons/Police/SM_Wep_Baton_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blunt",
    "ranged": false,
    "muzzle": [
@@ -10071,7 +12224,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -23.43,
@@ -10083,7 +12236,20 @@
    "moa": 5,
    "attack_set": "heavy",
    "blunt": true,
-   "stance": "Blade"
+   "stance": "Blade",
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Police/Wep_Baton_02": {
    "name": "Baton 02",
@@ -10092,7 +12258,7 @@
    "description": "Collapsible baton. Fits in a pocket; does not feel like it when it opens.",
    "icon": "Police_Baton_02",
    "mesh": "/Game/RepliCan/Weapons/Police/SM_Wep_Baton_02",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blunt",
    "ranged": false,
    "muzzle": [
@@ -10137,7 +12303,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -34.71,
@@ -10149,7 +12315,20 @@
    "moa": 5,
    "attack_set": "heavy",
    "blunt": true,
-   "stance": "Blade"
+   "stance": "Blade",
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "Police/Wep_Door_Ram_01": {
    "name": "Door Ram 01",
@@ -10158,7 +12337,7 @@
    "description": "Breaching ram. Sixteen kilos of steel with handles, for doors that will not be talked to.",
    "icon": "Police_Door_Ram_01",
    "mesh": "/Game/RepliCan/Weapons/Police/SM_Wep_Door_Ram_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_blunt",
    "ranged": false,
    "muzzle": [
@@ -10203,7 +12382,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -61.01,
@@ -10215,7 +12394,20 @@
    "moa": 5,
    "attack_set": "heavy",
    "blunt": true,
-   "stance": "Blade"
+   "stance": "Blade",
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "sight": [],
+   "fore_grip": [],
+   "optic_mount": [],
+   "attachments": [],
+   "sight_pitch": 0,
+   "fore_grip_pitch": 0,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "SciFiCity/Wep_Pistol_01": {
    "name": "Pistol 01",
@@ -10655,7 +12847,8 @@
    ],
    "make": "Sixth Ward Machine Co.",
    "model": "SMG 01",
-   "moa": 5
+   "moa": 5,
+   "skin": "M_PolygonScifi_01_F"
   },
   "SciFiCity/Wep_Rifle_Small_01": {
    "name": "Rifle Small 01",
@@ -11477,7 +13670,7 @@
    "description": "Syringe gun off a medical cart. What it loads is up to whoever holds it.",
    "icon": "SciFiCity_Syringe_Gun_01",
    "mesh": "/Game/RepliCan/Weapons/SciFiCity/SM_Wep_Syringe_Gun_01",
-   "keep": false,
+   "keep": true,
    "sound": "wep_pistol",
    "ranged": true,
    "muzzle": [
@@ -11546,7 +13739,7 @@
    "sound_pickup": "pickup_hard",
    "sound_use": "equip",
    "glow": false,
-   "hidden": false,
+   "hidden": true,
    "reviewdate": "",
    "shoulder": [
     -28,
@@ -11555,7 +13748,18 @@
    ],
    "make": "Sixth Ward Machine Co.",
    "model": "Syringe Gun 01",
-   "moa": 5
+   "moa": 5,
+   "hip_fire": false,
+   "grip": [],
+   "hand_rot": [],
+   "fore_hand_rot": [],
+   "optic_mount": [],
+   "attachments": [],
+   "attack_set": "blade",
+   "blunt": false,
+   "fire_modes": [],
+   "skin": "",
+   "optic": ""
   },
   "SciFiCity/Wep_Knife_01": {
    "name": "Knife 01",
@@ -11793,17 +13997,17 @@
      -14
     ],
     "ads": [
-     56.0,
-     0.0,
-     0.0
+     56,
+     0,
+     0
     ]
    },
    "_carry": "where the grip sits in the eye frame (x forward, y right, z up, cm) per posture: arms out for a pistol; a first guess, tune in play",
    "_ads": "the rear sight this far out from the eye, on the eye line, down the sights: arm's length for a pistol (a rifle keeps the character default at the cheek)",
    "elbow_down": 0.75,
    "grip_nudge": [
-    0.0,
-    0.0,
+    0,
+    0,
     3.5
    ]
   },
@@ -11832,37 +14036,37 @@
    "two_handed": false,
    "carry": {
     "shouldered": [
-     50.0,
-     10.0,
-     -13.0
+     50,
+     10,
+     -13
     ],
     "hip": [
-     30.0,
-     16.0,
-     -27.0
+     30,
+     16,
+     -27
     ],
     "low_ready": [
-     26.0,
-     14.0,
-     -33.0
+     26,
+     14,
+     -33
     ],
     "low_ready_first_person": [
-     30.0,
-     12.0,
-     -15.0
+     30,
+     12,
+     -15
     ],
     "ads": [
-     60.0,
-     0.0,
-     0.0
+     60,
+     0,
+     0
     ]
    },
-   "_note": "one-handed pistol: the Pistol clips (fallback) applied from the right clavicle down, so only the gun arm takes the hold and the other arm keeps the body’s own motion; not two-handed, so no support hand reaches for it; carried 6 cm further right than the two-handed hold, in line with the shoulder rather than the chest -- a first guess, tune in play",
+   "_note": "one-handed pistol: the Pistol clips (fallback) applied from the right clavicle down, so only the gun arm takes the hold and the other arm keeps the body\u2019s own motion; not two-handed, so no support hand reaches for it; carried 6 cm further right than the two-handed hold, in line with the shoulder rather than the chest -- a first guess, tune in play",
    "_ads": "the rear sight this far out from the eye, on the eye line, down the sights: arm's length for a pistol (a rifle keeps the character default at the cheek)",
    "elbow_down": 0.6,
    "grip_nudge": [
-    0.0,
-    0.0,
+    0,
+    0,
     3.5
    ]
   },
@@ -11896,6 +14100,32 @@
  },
  "_optics": "Optics that can be fitted to a weapon. A weapon naming one in its 'optic' field mounts it at 'optic_mount' (its own space) and AIMS THROUGH IT: the lens centre replaces the weapon's rear sight, so the ADS solve needs no special case. Fitted by Tools/fit_optics.py.",
  "optics": {
+  "Lens_Small": {
+   "mesh": "/Game/RepliCan/Optics/SM_Optic_Lens_Small",
+   "eye": [
+    -0.6,
+    0,
+    0
+   ],
+   "sit": 0,
+   "name": "Built-in lens",
+   "make": "Mikita",
+   "model": "BugBuster lens",
+   "icon": "",
+   "comment": "Tools/make_lens_optic.py: a glass disc for a scope that is part of its weapon",
+   "description": "",
+   "mount": [],
+   "source": "",
+   "hidden": true,
+   "reticle": "dot",
+   "reticle_colour": [
+    0.45,
+    1.0,
+    0.65
+   ],
+   "overlay": false,
+   "kind": "red_dot"
+  },
   "RedDot_01": {
    "mesh": "/Game/RepliCan/Optics/SM_Optic_RedDot_01",
    "eye": [
@@ -11907,7 +14137,16 @@
    "name": "RDS-1 reflex sight",
    "make": "Halcyon Optics",
    "model": "RDS-1 reflex sight",
-   "icon": "Optic_RedDot_01"
+   "icon": "Optic_RedDot_01",
+   "smart": true,
+   "reticle": "dot",
+   "reticle_colour": [
+    0.45,
+    1.0,
+    0.65
+   ],
+   "overlay": false,
+   "kind": "red_dot"
   },
   "SM_Wep_Scope_Alien_01": {
    "mesh": "/Game/RepliCan/Weapons/Optics/SM_Wep_Scope_Alien_01.SM_Wep_Scope_Alien_01",
@@ -11923,7 +14162,31 @@
    ],
    "make": "Unattributed",
    "model": "Scope Alien 01",
-   "icon": "Optic_Scope_Alien_01"
+   "icon": "Optic_Scope_Alien_01",
+   "rot": [
+    0,
+    90,
+    0
+   ],
+   "eye": [
+    -34.023,
+    -0.0,
+    7.717
+   ],
+   "zoom": 3,
+   "smart": true,
+   "reticle": "chevron",
+   "reticle_colour": [
+    0.65,
+    0.55,
+    1.0
+   ],
+   "zoom_levels": [
+    3,
+    7
+   ],
+   "overlay": true,
+   "kind": "scope"
   },
   "SM_Wep_Scope_Small_01": {
    "mesh": "/Game/RepliCan/Weapons/Optics/SM_Wep_Scope_Small_01.SM_Wep_Scope_Small_01",
@@ -11939,7 +14202,26 @@
    ],
    "make": "Meridian Sightworks",
    "model": "Scope Small 01",
-   "icon": "Optic_Scope_Small_01"
+   "icon": "Optic_Scope_Small_01",
+   "rot": [
+    0,
+    90,
+    0
+   ],
+   "eye": [
+    -5.419,
+    -0.0,
+    2.027
+   ],
+   "zoom": 2.0,
+   "reticle": "crosshair",
+   "reticle_colour": [
+    0.45,
+    1.0,
+    0.65
+   ],
+   "overlay": true,
+   "kind": "scope"
   },
   "SM_Wep_Scope_Small_02": {
    "mesh": "/Game/RepliCan/Weapons/Optics/SM_Wep_Scope_Small_02.SM_Wep_Scope_Small_02",
@@ -11955,7 +14237,26 @@
    ],
    "make": "Meridian Sightworks",
    "model": "Scope Small 02",
-   "icon": "Optic_Scope_Small_02"
+   "icon": "Optic_Scope_Small_02",
+   "rot": [
+    0,
+    90,
+    0
+   ],
+   "eye": [
+    -8.064,
+    0.0,
+    0.0
+   ],
+   "zoom": 2.0,
+   "reticle": "crosshair",
+   "reticle_colour": [
+    0.45,
+    1.0,
+    0.65
+   ],
+   "overlay": true,
+   "kind": "scope"
   },
   "SM_Wep_Scope_Small_03": {
    "mesh": "/Game/RepliCan/Weapons/Optics/SM_Wep_Scope_Small_03.SM_Wep_Scope_Small_03",
@@ -11971,7 +14272,26 @@
    ],
    "make": "Meridian Sightworks",
    "model": "Scope Small 03",
-   "icon": "Optic_Scope_Small_03"
+   "icon": "Optic_Scope_Small_03",
+   "rot": [
+    0,
+    90,
+    0
+   ],
+   "eye": [
+    -12.762,
+    -0.0,
+    0.0
+   ],
+   "zoom": 3.0,
+   "reticle": "crosshair",
+   "reticle_colour": [
+    0.45,
+    1.0,
+    0.65
+   ],
+   "overlay": true,
+   "kind": "scope"
   },
   "SM_Wep_Scope_Sniper_01": {
    "mesh": "/Game/RepliCan/Weapons/Optics/SM_Wep_Scope_Sniper_01.SM_Wep_Scope_Sniper_01",
@@ -11987,7 +14307,30 @@
    ],
    "make": "Vestergaard Precision",
    "model": "Scope Sniper 01",
-   "icon": "Optic_Scope_Sniper_01"
+   "icon": "Optic_Scope_Sniper_01",
+   "rot": [
+    0,
+    90,
+    0
+   ],
+   "eye": [
+    -23.191,
+    -0.0,
+    7.158
+   ],
+   "zoom": 4,
+   "reticle": "crosshair",
+   "reticle_colour": [
+    0.45,
+    1.0,
+    0.65
+   ],
+   "zoom_levels": [
+    4,
+    9
+   ],
+   "overlay": true,
+   "kind": "scope"
   },
   "SM_Wep_Scope_Sniper_02": {
    "mesh": "/Game/RepliCan/Weapons/Optics/SM_Wep_Scope_Sniper_02.SM_Wep_Scope_Sniper_02",
@@ -12003,7 +14346,30 @@
    ],
    "make": "Vestergaard Precision",
    "model": "Scope Sniper 02",
-   "icon": "Optic_Scope_Sniper_02"
+   "icon": "Optic_Scope_Sniper_02",
+   "rot": [
+    0,
+    90,
+    0
+   ],
+   "eye": [
+    -22.34,
+    -0.0,
+    5.265
+   ],
+   "zoom": 4,
+   "reticle": "crosshair",
+   "reticle_colour": [
+    0.45,
+    1.0,
+    0.65
+   ],
+   "zoom_levels": [
+    4,
+    9
+   ],
+   "overlay": true,
+   "kind": "scope"
   },
   "SM_Wep_Scope_Sniper_03": {
    "mesh": "/Game/RepliCan/Weapons/Optics/SM_Wep_Scope_Sniper_03.SM_Wep_Scope_Sniper_03",
@@ -12019,7 +14385,30 @@
    ],
    "make": "Vestergaard Precision",
    "model": "Scope Sniper 03",
-   "icon": "Optic_Scope_Sniper_03"
+   "icon": "Optic_Scope_Sniper_03",
+   "rot": [
+    0,
+    90,
+    0
+   ],
+   "eye": [
+    -32.353,
+    0.0,
+    5.965
+   ],
+   "zoom": 6,
+   "reticle": "crosshair",
+   "reticle_colour": [
+    0.45,
+    1.0,
+    0.65
+   ],
+   "zoom_levels": [
+    6,
+    12
+   ],
+   "overlay": true,
+   "kind": "scope"
   },
   "SM_Wep_Scope_Unique_01": {
    "mesh": "/Game/RepliCan/Weapons/Optics/SM_Wep_Scope_Unique_01.SM_Wep_Scope_Unique_01",
@@ -12035,7 +14424,22 @@
    ],
    "make": "Kesh Provenance",
    "model": "Scope Unique 01",
-   "icon": "Optic_Scope_Unique_01"
+   "icon": "Optic_Scope_Unique_01",
+   "eye": [
+    0,
+    9.711,
+    8.259
+   ],
+   "zoom": 3.0,
+   "smart": true,
+   "reticle": "chevron",
+   "reticle_colour": [
+    0.65,
+    0.55,
+    1.0
+   ],
+   "overlay": true,
+   "kind": "scope"
   },
   "RedDot_02": {
    "mesh": "/Game/RepliCan/Optics/SM_Optic_RedDot_02",
@@ -12047,7 +14451,330 @@
    "sit": 4.2,
    "name": "RDS-2 reflex sight",
    "source": "/Game/PolygonSciFiWorlds/Models/Weapons/Parts/SM_Wep_Assault_02_RedDot_01",
-   "icon": "Optic_RedDot_02"
+   "icon": "Optic_RedDot_02",
+   "offset": [
+    0,
+    0,
+    0
+   ],
+   "smart": true,
+   "reticle": "dot",
+   "reticle_colour": [
+    0.45,
+    1.0,
+    0.65
+   ],
+   "overlay": false,
+   "kind": "red_dot"
+  },
+  "Factory_Wep_Alien_04": {
+   "name": "Frontier Alien Weapon 04 factory scope",
+   "mesh": "/Game/RepliCan/Weapons/Worlds/Parts/SM_Wep_Alien_04_Optic_01.SM_Wep_Alien_04_Optic_01",
+   "mount": [
+    0,
+    0,
+    0
+   ],
+   "eye": [
+    0.23,
+    0,
+    26.6
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "offset": [
+    0,
+    0,
+    0
+   ],
+   "zoom": 2.0,
+   "reticle": "chevron",
+   "reticle_colour": [
+    0.65,
+    0.55,
+    1.0
+   ],
+   "overlay": true,
+   "kind": "scope"
+  },
+  "Factory_Wep_Assault_01": {
+   "name": "Spear 350 factory scope",
+   "mesh": "/Game/RepliCan/Weapons/Worlds/Parts/SM_Wep_Assault_01_Optic_01.SM_Wep_Assault_01_Optic_01",
+   "mount": [
+    8,
+    0,
+    17.85
+   ],
+   "eye": [
+    4.22,
+    0,
+    22.91
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "offset": [
+    0,
+    0,
+    0
+   ],
+   "zoom": 2.0,
+   "reticle": "crosshair",
+   "reticle_colour": [
+    0.45,
+    1.0,
+    0.65
+   ],
+   "overlay": true,
+   "kind": "scope"
+  },
+  "Factory_Wep_Heavy_01": {
+   "name": "Frontier Heavy Gun 01 factory scope",
+   "mesh": "/Game/RepliCan/Weapons/Worlds/Parts/SM_Wep_Heavy_01_Optic_01.SM_Wep_Heavy_01_Optic_01",
+   "mount": [
+    0,
+    0,
+    0
+   ],
+   "eye": [
+    36.378,
+    -0.0,
+    38.494
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "offset": [
+    0,
+    0,
+    0
+   ],
+   "zoom": 2.0,
+   "reticle": "crosshair",
+   "reticle_colour": [
+    0.45,
+    1.0,
+    0.65
+   ],
+   "overlay": true,
+   "kind": "scope"
+  },
+  "Factory_Wep_Pistol_01": {
+   "name": "Frontier Pistol 01 factory scope",
+   "mesh": "/Game/RepliCan/Weapons/Worlds/Parts/SM_Wep_Pistol_01_Optic_01.SM_Wep_Pistol_01_Optic_01",
+   "mount": [
+    0,
+    0,
+    0
+   ],
+   "eye": [
+    -10.74,
+    0,
+    20.34
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "offset": [
+    0,
+    0,
+    0
+   ],
+   "reticle": "dot",
+   "reticle_colour": [
+    0.45,
+    1.0,
+    0.65
+   ],
+   "overlay": false,
+   "kind": "red_dot"
+  },
+  "Factory_Wep_Pistol_05": {
+   "name": "BugBuster factory scope",
+   "mesh": "/Game/RepliCan/Weapons/Worlds/Parts/SM_Wep_Pistol_05_Optic_01.SM_Wep_Pistol_05_Optic_01",
+   "mount": [
+    -0.13,
+    0,
+    18.24
+   ],
+   "eye": [
+    6.18,
+    0,
+    19.53
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "offset": [
+    0,
+    0,
+    0
+   ],
+   "reticle": "dot",
+   "reticle_colour": [
+    0.45,
+    1.0,
+    0.65
+   ],
+   "overlay": false,
+   "kind": "red_dot"
+  },
+  "Factory_Wep_SMG_03": {
+   "name": "Frontier SMG 03 factory scope",
+   "mesh": "/Game/RepliCan/Weapons/Worlds/Parts/SM_Wep_SMG_03_Optic_01.SM_Wep_SMG_03_Optic_01",
+   "mount": [
+    0,
+    0,
+    0
+   ],
+   "eye": [
+    6.443,
+    -0.0,
+    26.083
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "offset": [
+    0,
+    0,
+    0
+   ],
+   "zoom": 1.5,
+   "reticle": "circle_dot",
+   "reticle_colour": [
+    0.45,
+    1.0,
+    0.65
+   ],
+   "overlay": false,
+   "kind": "zoomed"
+  },
+  "Factory_Wep_Sniper_02": {
+   "name": "Frontier Marksman Rifle 02 factory scope",
+   "mesh": "/Game/RepliCan/Weapons/Worlds/Parts/SM_Wep_Sniper_02_Optic_01.SM_Wep_Sniper_02_Optic_01",
+   "mount": [
+    0,
+    0,
+    0
+   ],
+   "eye": [
+    25.48,
+    0,
+    27.57
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "offset": [
+    0,
+    0,
+    0
+   ],
+   "zoom": 4,
+   "reticle": "crosshair",
+   "reticle_colour": [
+    0.45,
+    1.0,
+    0.65
+   ],
+   "zoom_levels": [
+    4,
+    9
+   ],
+   "overlay": true,
+   "kind": "scope"
+  },
+  "Factory_Wep_Sniper_03": {
+   "name": "Frontier Marksman Rifle 03 factory scope",
+   "mesh": "/Game/RepliCan/Weapons/Worlds/Parts/SM_Wep_Sniper_03_Optic_01.SM_Wep_Sniper_03_Optic_01",
+   "mount": [
+    0,
+    0,
+    0
+   ],
+   "eye": [
+    -7.73,
+    0,
+    21.72
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "offset": [
+    0,
+    0,
+    0
+   ],
+   "zoom": 4,
+   "reticle": "crosshair",
+   "reticle_colour": [
+    0.45,
+    1.0,
+    0.65
+   ],
+   "zoom_levels": [
+    4,
+    9
+   ],
+   "overlay": true,
+   "kind": "scope"
   }
- }
+ },
+ "finger_presets": {
+  "open": [
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "trigger": [
+   28,
+   6,
+   34,
+   34,
+   34
+  ],
+  "fist": [
+   30,
+   34,
+   34,
+   34,
+   34
+  ],
+  "support": [
+   22,
+   30,
+   32,
+   32,
+   32
+  ],
+  "flat": [
+   10,
+   4,
+   4,
+   4,
+   4
+  ]
+ },
+ "_optics_kind": "red_dot | zoomed | scope -- see Tools/set_optic_kinds.py. red_dot: 1x, no overlay. zoomed: magnified, no overlay, no black surround, weapon stays visible. scope: tube hidden from its owner, circular opening over a blacked-out view, world narrowed by the magnification.",
+ "_optic_fixed": "true = the sight is built into the weapon and cannot be swapped; see Tools/set_optic_fixed.py. Reading it is normal, only changing it is refused."
 }

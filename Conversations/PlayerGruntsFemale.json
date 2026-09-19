@@ -1,0 +1,21 @@
+{
+ "_": "The player's hurt sounds in a woman's voice (ABaseCharacter::NoteHurt picks grunt_*, Die picks death_*), baked by Tools/bake_voices.py into Conversations/Voice/PlayerGruntsFemale/. Not a conversation.",
+ "voice": {
+  "model": "en_US-amy-medium",
+  "length_scale": 0.8,
+  "noise_scale": 0.7,
+  "noise_w_scale": 0.9,
+  "speaker": 0,
+  "volume": 1.0
+ },
+ "nodes": {
+  "grunt_00": { "text": "Ugh!" },
+  "grunt_01": { "text": "Agh!" },
+  "grunt_02": { "text": "Oof!" },
+  "grunt_03": { "text": "Ow!" },
+  "grunt_04": { "text": "Hah!" },
+  "grunt_05": { "text": "Gah!" },
+  "death_00": { "text": "Aaargh!" },
+  "death_01": { "text": "Ah... no..." }
+ }
+}

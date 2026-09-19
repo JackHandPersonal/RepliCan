@@ -209,7 +209,9 @@
     "label": "below",
     "kinds": [
      "Armor",
-     "Chest"
+     "Chest",
+     "Jacket",
+     "Shirt"
     ]
    },
    {
@@ -220,7 +222,9 @@
     "label": "above",
     "kinds": [
      "Legwear",
-     "Legs"
+     "Legs",
+     "Pants",
+     "Trousers"
     ]
    },
    {

@@ -1,4 +1,83 @@
 {
  "_": "Written by Tools/facility_layout.py. UAmbientPlayer reads it to hang a positional hiss on every vent that has one, so the coordinates live in exactly one place.",
- "vents": []
+ "vents": [
+  {
+   "label": "S10_Jet_0",
+   "kind": "horror_steam",
+   "at": [
+    -91.0,
+    303.0,
+    -4882.0
+   ],
+   "sound": "steam_hiss_1",
+   "volume": 0.2,
+   "inner": 240.0,
+   "falloff": 1100.0
+  },
+  {
+   "label": "S10_Jet_1",
+   "kind": "horror_steam",
+   "at": [
+    1091.0,
+    1803.0,
+    -4874.0
+   ],
+   "sound": "steam_hiss_1",
+   "volume": 0.2,
+   "inner": 240.0,
+   "falloff": 1100.0
+  },
+  {
+   "label": "S10_Jet_2",
+   "kind": "horror_steam",
+   "at": [
+    1091.0,
+    53.0,
+    -4888.0
+   ],
+   "sound": "steam_hiss_1",
+   "volume": 0.16,
+   "inner": 240.0,
+   "falloff": 1100.0
+  },
+  {
+   "label": "S10_Jet_3",
+   "kind": "horror_steam",
+   "at": [
+    280.0,
+    803.0,
+    -4602.0
+   ],
+   "sound": "steam_hiss_1",
+   "volume": 0.14,
+   "inner": 240.0,
+   "falloff": 1100.0
+  },
+  {
+   "label": "S10_Jet_4",
+   "kind": "horror_steam",
+   "at": [
+    720.0,
+    2053.0,
+    -4602.0
+   ],
+   "sound": "steam_hiss_1",
+   "volume": 0.14,
+   "inner": 240.0,
+   "falloff": 1100.0
+  },
+  {
+   "label": "S10_Jet_5",
+   "kind": "horror_steam",
+   "at": [
+    250.0,
+    -278.0,
+    -4948.0
+   ],
+   "sound": "steam_hiss_1",
+   "volume": 0.18,
+   "inner": 240.0,
+   "falloff": 1100.0
+  }
+ ]
 }

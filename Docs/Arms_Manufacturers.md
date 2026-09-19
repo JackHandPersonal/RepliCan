@@ -15,7 +15,7 @@ on the catalogue entry, shown in the INFO panel after the kind.
 | **PCS Field Issue** | Prompt Critical Services' complimentary gear: the pocket pistol in the cabin locker. Not a maker, a stamp on someone else's cheapest model. | Space Wep_Pistol_01 |
 | **Meridian Public Order** | Police and station-security contracts. Stun guns, shotguns, revolvers with a badge mount. Ugly, durable, logged. | Police |
 | **Bastion Civil Systems** | Security-grade rifles and launchers for facilities that can afford them. Everything has a key. | Police, Military |
-| **Vestergaard Dynamics** | Old-line military contractor. Rifles and snipers that were expensive once and are surplus now. | Military, Worlds rifles |
+| **Amazonis** | Old-line military contractor. Rifles and snipers that were expensive once and are surplus now. | Military, Worlds rifles |
 | **Kessler-Rand Armaments** | Heavy weapons, launchers, flamethrowers. Sells to whoever files the paperwork. | Police Launcher, Horror Flamethrower |
 | **Northlight Defense Group** | Cold-worlds specialist: weapons that work with gloves on, in the dark, at minus eighty. | Worlds, Space |
 

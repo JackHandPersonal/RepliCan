@@ -239,6 +239,14 @@ try:
     link(ring, '', shape, 'B')
     shape_sat = node(unreal.MaterialExpressionSaturate, 900, 420)
     link(shape, '', shape_sat, '')
+    # A RED DOT IS A DOT ONLY FOR THE EYE BEHIND IT: from any other angle the glass should be
+    # glass. The game drives this from nought to one as the weapon comes to the eye
+    # (ABaseCharacter::TickOpticDot), and it gates the reticle in both the emissive and the opacity
+    # so the dot does not merely dim -- it goes.
+    dot_vis = scalar('DotVisible', 1.0, 900, 300)
+    shape_vis = node(unreal.MaterialExpressionMultiply, 1040, 420)
+    link(shape_sat, '', shape_vis, 'A')
+    link(dot_vis, '', shape_vis, 'B')
 
     # -- colour, brightness, and a hint of glass --
     tint = node(unreal.MaterialExpressionVectorParameter, 760, 0)
@@ -250,13 +258,13 @@ try:
     link(bright, '', lit, 'B')
     emissive = node(unreal.MaterialExpressionMultiply, 1180, 120)
     link(lit, '', emissive, 'A')
-    link(shape_sat, '', emissive, 'B')
+    link(shape_vis, '', emissive, 'B')
 
     # The glass is very slightly visible even where the dot is not, or the lens looks like a
     # hole in the weapon.
     glass_a = scalar('GlassOpacity', 0.10, 900, 560)
     opacity = node(unreal.MaterialExpressionAdd, 1180, 520)
-    link(shape_sat, '', opacity, 'A')
+    link(shape_vis, '', opacity, 'A')
     link(glass_a, '', opacity, 'B')
     opacity_sat = node(unreal.MaterialExpressionSaturate, 1320, 520)
     link(opacity, '', opacity_sat, '')

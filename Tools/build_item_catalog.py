@@ -39,6 +39,9 @@ for r in accepted:
         'keep': keep,
     })
     items[key] = e
+# Entries made by hand (Tools/make_garments and the like: no pack asset behind them) are kept as they are.
+for key, prev in old.items():
+    if prev.get('handmade') and key not in items: items[key] = prev
 doc = {
     '_': 'Things a character can carry, taken from the packs by Tools/survey_items.py and written by Tools/build_item_catalog.py. '
          'category is armor | equipment | consumables | other; mesh is the pack asset; icon names T_Icon_<icon>. '

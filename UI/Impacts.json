@@ -46,6 +46,29 @@
    "sound": "impact_flesh",
    "volume": 0.6,
    "variants": 3
+  },
+  {
+   "_": "Glass. A decal cannot mark it -- a deferred decal needs a surface that writes to the GBuffer and glass is translucent, so the hole was being spawned and never drawn. The crack is a \"patch\" instead: the same mark on a plane laid on the surface. No smoke either, and a brighter, sharper spark than stone gives.",
+   "match": "glass",
+   "decal": "",
+   "patch": "/Game/RepliCan/Materials/M_GlassCrack",
+   "patch_size": 14.0,
+   "patch_life": 90.0,
+   "fx": [
+    {
+     "niagara": "/Game/Synty/PolygonSciFiHorror/FX/NS_Spark_Shower_01",
+     "scale": 0.22,
+     "seconds": 0.12
+    }
+   ],
+   "light_color": [
+    0.8,
+    0.9,
+    1.0
+   ],
+   "light_intensity": 900.0,
+   "sound": "impact_crack",
+   "volume": 0.5
   }
  ],
  "_decals": "'decals' is a list of decal materials picked from at random (bullet holes, three variants); 'decal' alone is one; 'decal': '' is no mark. The size is jittered 0.8..1.25 in code."

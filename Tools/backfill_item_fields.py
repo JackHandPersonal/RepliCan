@@ -1,4 +1,4 @@
-"""Fills every catalogue entry's fields (Source/RepliCan/ItemFields.h) with a best guess.
+"""Fills every catalogue entry's fields (Source/RepliCan/Items/ItemFields.h) with a best guess.
 
     python Tools/backfill_item_fields.py            # fills what is missing
     python Tools/backfill_item_fields.py --force    # recomputes every guessed field

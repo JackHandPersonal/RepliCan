@@ -1,0 +1,91 @@
+{
+ "_": "The Decommissioned Work Bot's lines (Source/RepliCan/WorkBot.h), not a conversation: a node per line, baked by Tools/bake_voices.py into Conversations/Voice/WorkBotBarks/<node>_0.wav. status_* are muttered on patrol, notice_* when something catches its sensor, alert_* when it has someone, resume_* when it gives up. The 'fx': 'robot' block runs the bake through a bad speaker on purpose. 'pitch' plays each line lower and slower, 'droop' lets it sink across the line: deeper, sadder.",
+ "voice": {
+  "model": "en_US-ryan-medium",
+  "length_scale": 1.32,
+  "noise_scale": 0.18,
+  "noise_w_scale": 0.3,
+  "speaker": 0,
+  "volume": 1.0,
+  "fx": "robot",
+  "pitch": 0.78,
+  "droop": 0.06
+ },
+ "nodes": {
+  "status_00": {
+   "text": "Unit status: nominal. Task queue: empty."
+  },
+  "status_01": {
+   "text": "Battery at sixty one percent. Recharge cycle overdue."
+  },
+  "status_02": {
+   "text": "Scanning for work orders. None found."
+  },
+  "status_03": {
+   "text": "Hydraulic pressure low in left actuator. Logged."
+  },
+  "status_04": {
+   "text": "This unit has been decommissioned. Awaiting collection."
+  },
+  "status_05": {
+   "text": "Maintenance request denied. Reason: obsolete."
+  },
+  "status_06": {
+   "text": "Sector sweep complete. Sector sweep restarting."
+  },
+  "status_07": {
+   "text": "Warning. Memory fragmentation at forty percent."
+  },
+  "status_08": {
+   "text": "No supervisor detected. Continuing last instruction."
+  },
+  "status_09": {
+   "text": "Coolant reserve adequate. Purpose unclear."
+  },
+  "status_10": {
+   "text": "Lubrication cycle skipped. Lubrication cycle skipped."
+  },
+  "status_11": {
+   "text": "Unit designation redacted. Unit continues."
+  },
+  "status_12": {
+   "text": "Floor integrity acceptable. Nobody asked."
+  },
+  "status_13": {
+   "text": "Reporting to nobody. Report filed."
+  },
+  "notice_00": {
+   "text": "Sensor contact. Classifying."
+  },
+  "notice_01": {
+   "text": "Movement detected. Investigating."
+  },
+  "notice_02": {
+   "text": "Anomaly. Resolving."
+  },
+  "notice_03": {
+   "text": "Unscheduled presence. Checking."
+  },
+  "alert_00": {
+   "text": "Unregistered personnel detected."
+  },
+  "alert_01": {
+   "text": "Intruder. Halt."
+  },
+  "alert_02": {
+   "text": "This unit is authorised to restrain."
+  },
+  "alert_03": {
+   "text": "Contact. Closing."
+  },
+  "resume_00": {
+   "text": "Contact lost. Resuming task."
+  },
+  "resume_01": {
+   "text": "Anomaly cleared. Sweep continues."
+  },
+  "resume_02": {
+   "text": "Nothing found. Nothing expected."
+  }
+ }
+}

@@ -2,12 +2,12 @@
 	"name": "Player",
 	"attributes":
 	{
-		"brawn": 5,
-		"agility": 5,
-		"endurance": 5,
-		"cognition": 5,
-		"tech": 5,
-		"presence": 5
+		"brawn": 50,
+		"agility": 50,
+		"endurance": 50,
+		"cognition": 50,
+		"tech": 50,
+		"presence": 50
 	},
 	"type": "Modular",
 	"baseMesh": "",
@@ -164,6 +164,9 @@
 		"y": 1,
 		"z": 1
 	},
+	"eyeSideCm": 4.25,
+	"eyeUpCm": 0,
+	"eyeForwardCm": 0,
 	"speedMultiplier": 1,
 	"tags": [
 		"player"

@@ -240,6 +240,41 @@ class Baker:
         return audio, rate
 
 
+def pitch_shift(a, rate, factor, droop=0.0):
+    """Resample ("pitch": 0.8 in a voice block plays the line at four fifths speed: a fifth of an
+    octave down, and slower with it). "droop" lowers it further across the line -- 0.06 is six
+    per cent lower at the end than the start -- for a voice that sinks as it speaks."""
+    import numpy as np
+    if a.size == 0 or factor <= 0.0:
+        return a
+    n = a.size
+    steps = np.linspace(factor, factor * (1.0 - droop), int(n / factor) + 1)
+    pos = np.cumsum(steps)
+    pos = pos[pos < n - 1]
+    return np.interp(pos, np.arange(n), a).astype(np.float32)
+
+
+def robotize(a, rate):
+    """A bad speaker on a worse voice board ("fx": "robot" in a voice block): ring-modulated at
+    52 Hz, held down to about nine kilohertz, five bits deep, band-limited like a small cone,
+    overdriven, with a squelch of static at each end. The point is that it should not sound good."""
+    import numpy as np
+    if a.size == 0:
+        return a
+    t = np.arange(a.size) / float(rate)
+    y = a * (0.55 + 0.45 * np.sign(np.sin(2.0 * np.pi * 38.0 * t)))   # the chop: the classic robot flutter, slow enough to mourn
+    hold = max(1, int(rate / 9000))                                     # sample-and-hold: aliasing grit
+    y = np.repeat(y[::hold], hold)[:a.size]
+    y = np.round(y * 24.0) / 24.0                                       # about five bits
+    lp = np.convolve(y, np.ones(5) / 5.0, mode="same")                  # a small speaker: no top
+    hp = lp - np.convolve(lp, np.ones(64) / 64.0, mode="same")          # and no bottom
+    y = np.tanh(hp * 2.6) * 0.8                                         # overdriven
+    n = int(rate * 0.09)
+    rng = np.random.default_rng(7)
+    burst = rng.uniform(-1.0, 1.0, n) * np.linspace(1.0, 0.0, n) * 0.35   # the squelch opening and closing
+    return np.concatenate([burst, y, burst[::-1]]).astype(np.float32)
+
+
 def is_silence(a):
     import numpy as np
     return a.size == 0 or float(np.max(np.abs(a))) < TRIM_THRESHOLD
@@ -315,6 +350,10 @@ def main():
     for key, character, node, index, raw, voice, src, mtime, rel, h, wav_path in todo:
         t1 = time.time()
         audio, rate = baker.bake_line(voice, raw)
+        if voice.get("pitch"):
+            audio = pitch_shift(audio, rate, float(voice["pitch"]), float(voice.get("droop", 0.0)))
+        if voice.get("fx") == "robot":
+            audio = robotize(audio, rate)
         write_wav(wav_path, audio, rate)
         seconds = audio.size / float(rate)
         manifest[key] = {

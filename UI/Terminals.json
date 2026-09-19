@@ -1,5 +1,5 @@
 {
- "_": "What each terminal shows: an entry per terminal id (the prop's label, or a terminal:<id> tag on it), else 'default'. 'banner' is the lines printed on login; 'files' maps a file name to its text (newlines as \\n).",
+ "_": "What each terminal shows: an entry per terminal id (the prop's label, or a terminal:<id> tag on it), else 'default'. 'banner' is the lines printed on login; 'files' maps a file name to its text (newlines as \\n). 'locked': false is the only thing that opens a node; anything else (and any monitor with no entry) says TERMINAL LOCKED when used.",
  "default": {
   "banner": [
    "PCS CREW NODE  //  ASTEROID OPERATIONS",
@@ -10,7 +10,8 @@
    "readme.txt": "Crew terminals are for shift logs, requisitions and messages.\nDo not store personal material on company nodes.\nDo not attempt to reach the operations network from a crew node.",
    "shift_log.txt": "SHIFT 0412  drill 3 down again, seal on the feed line. Reported.\nSHIFT 0413  seal replaced. Drill 3 up. Tally short by 2 crates.\nSHIFT 0414  tally still short. Nobody has seen crates 17 and 18.\nSHIFT 0415  told to stop logging the tally.",
    "notice.txt": "NOTICE TO ALL CREW\nThe cabins on the crew hall are numbered 1 to 8. Cabin S1 is room four.\nLights in the hall are on the switch at either end.\nReport every leak. Check your seals before the airlock, not after."
-  }
+  },
+  "locked": true
  },
  "Cabin_S1_Terminal": {
   "banner": [
@@ -22,6 +23,55 @@
    "readme.txt": "This node is yours for the length of your contract.\nMessages from the desk arrive here. Read them.",
    "message_01.txt": "FROM: DESK\nWelcome aboard. Your kit is in the footlocker. The stool is bolted down; the company has learned.\nShift assignments follow.",
    "shift_log.txt": "SHIFT 0412  drill 3 down again, seal on the feed line. Reported.\nSHIFT 0413  seal replaced. Drill 3 up. Tally short by 2 crates.\nSHIFT 0414  tally still short. Nobody has seen crates 17 and 18.\nSHIFT 0415  told to stop logging the tally."
-  }
+  },
+  "locked": false
+ },
+ "Cabin_S0_Terminal": {
+  "banner": [
+   "PCS CREW NODE  //  CABIN S0 (ROOM 2)",
+   "logged in as the cabin's occupant",
+   "type HELP for commands, LS for files"
+  ],
+  "files": {
+   "readme.txt": "This node is yours for the length of your contract.\nMessages from the desk arrive here. Read them.",
+   "message_01.txt": "FROM: DESK\nRoom 2 is assigned to you. Keep it as you found it.\nThe hall lights are on the switch at either end; the cabin panel does the rest."
+  },
+  "locked": true
+ },
+ "Cabin_N1_Terminal": {
+  "banner": [
+   "PCS CREW NODE  //  CABIN N1 (ROOM 3)",
+   "logged in as the cabin's occupant",
+   "type HELP for commands, LS for files"
+  ],
+  "files": {
+   "readme.txt": "This node is yours for the length of your contract.\nMessages from the desk arrive here. Read them.",
+   "message_01.txt": "FROM: DESK\nRoom 3 is assigned to you. Keep it as you found it.\nThe hall lights are on the switch at either end; the cabin panel does the rest."
+  },
+  "locked": true
+ },
+ "Cabin_N2_Terminal": {
+  "banner": [
+   "PCS CREW NODE  //  CABIN N2 (ROOM 5)",
+   "logged in as the cabin's occupant",
+   "type HELP for commands, LS for files"
+  ],
+  "files": {
+   "readme.txt": "This node is yours for the length of your contract.\nMessages from the desk arrive here. Read them.",
+   "message_01.txt": "FROM: DESK\nRoom 5 is assigned to you. Keep it as you found it.\nThe hall lights are on the switch at either end; the cabin panel does the rest."
+  },
+  "locked": true
+ },
+ "Cabin_S3_Terminal": {
+  "banner": [
+   "PCS CREW NODE  //  CABIN S3 (ROOM 8)",
+   "logged in as the cabin's occupant",
+   "type HELP for commands, LS for files"
+  ],
+  "files": {
+   "readme.txt": "This node is yours for the length of your contract.\nMessages from the desk arrive here. Read them.",
+   "message_01.txt": "FROM: DESK\nRoom 8 is assigned to you. Keep it as you found it.\nThe hall lights are on the switch at either end; the cabin panel does the rest."
+  },
+  "locked": true
  }
 }
