@@ -1,6 +1,6 @@
-#include "PauseMenuWidget.h"
-#include "BasePlayerController.h"
-#include "CrtStyle.h"
+#include "UI/PauseMenuWidget.h"
+#include "Core/BasePlayerController.h"
+#include "UI/CrtStyle.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/HorizontalBox.h"
 #include "Components/Border.h"
@@ -67,7 +67,7 @@ void UPauseMenuWidget::NativeOnInitialized()
 	LoadSlot->SetHorizontalAlignment(HAlign_Fill);
 	LoadSlot->SetPadding(FMargin(0.0f, 4.0f));
 
-	UButton* Scenes = MakeButton(TEXT("SEQUENCES"));
+	UButton* Scenes = MakeButton(TEXT("NARRATIVE"));
 	Scenes->OnClicked.AddDynamic(this, &UPauseMenuWidget::OnScenes);
 	UVerticalBoxSlot* ScenesSlot = Column->AddChildToVerticalBox(Scenes);
 	ScenesSlot->SetHorizontalAlignment(HAlign_Fill);
@@ -98,12 +98,12 @@ void UPauseMenuWidget::OnSettings()
 
 void UPauseMenuWidget::OnSave()
 {
-	if (OwnerController) { OwnerController->QuickSave(); }
+	if (OwnerController) { OwnerController->ShowSaveLoad(false); }
 }
 
 void UPauseMenuWidget::OnLoad()
 {
-	if (OwnerController) { OwnerController->QuickLoad(); }
+	if (OwnerController) { OwnerController->ShowSaveLoad(true); }
 }
 
 UButton* UPauseMenuWidget::MakeButton(const FString& Label)

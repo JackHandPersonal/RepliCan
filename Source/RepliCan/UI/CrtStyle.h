@@ -177,7 +177,11 @@ namespace Crt
 		B->AddChild(T);
 		if (UButtonSlot* TextSlot = Cast<UButtonSlot>(T->Slot))
 		{
-			TextSlot->SetPadding(FMargin(18.0f, 6.0f));
+			// A BRACKETED LABEL IS ITS OWN BORDER. "[ SAVE ]" draws the button's edges in text, so
+			// padding it pushes the real extent -- the hover box and the hit area -- out past the
+			// brackets, and in a rule header it eats the rule either side. A label with no drawn
+			// edge ("OFF", "<", a settings value) keeps the padding or there is nothing to aim at.
+			TextSlot->SetPadding(Label.StartsWith(TEXT("[")) ? FMargin(0.0f) : FMargin(18.0f, 6.0f));
 			TextSlot->SetHorizontalAlignment(HAlign_Center);
 		}
 		return B;

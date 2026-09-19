@@ -9,6 +9,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Items/ItemInstance.h"
 #include "GameFramework/SaveGame.h"
 #include "SyntySaveGame.generated.h"
 
@@ -46,6 +47,10 @@ public:
 	UPROPERTY() FRotator ControlRotation;
 	UPROPERTY() FString PlayerActorName;
 	UPROPERTY() TArray<FString> Inventory;
+	// The copies those handles refer to. An old save has none, and every plain name in its inventory
+	// still resolves through the catalogue, so it loads unchanged.
+	UPROPERTY() TArray<FItemInstance> ItemInstances;
+	UPROPERTY() int32 NextItemInstanceId = 1;
 	UPROPERTY() TArray<FString> ConversationFlags;
 	UPROPERTY() TArray<FString> ConversationChoicesTaken;
 	UPROPERTY() TArray<FSavedCharacter> Characters;

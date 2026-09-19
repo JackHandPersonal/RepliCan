@@ -1,4 +1,4 @@
-#include "VoiceLines.h"
+#include "Narrative/VoiceLines.h"
 #include "Audio.h"
 #include "HAL/FileManager.h"
 #include "Misc/FileHelper.h"

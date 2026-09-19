@@ -26,13 +26,38 @@ public:
 	void Start(UWorld* World, const FString& Profile);
 	void Stop();
 	bool IsPlaying() const { return Loops.Num() > 0; }
+	const FString& GetProfile() const { return CurrentProfile; }
 	// Scales every loop (and silences the one-shot pools) over Seconds: 0 = passed out.
 	void SetFade(float Level, float Seconds);
 	FString Describe() const;
 
 	// Plays <RawAudio>/<File> once (2D). Returns its length, 0 if missing.
 	// One-shots are ducked by the last shot's overpressure (see NoteShot) unless they ARE the shot.
+	// A REAL RECORDING IN PLACE OF A SYNTHESISED ONE. Where an imported sample exists for a loose
+	// .wav the code asks for -- /Game/RepliCan/Audio/A_<stem> -- it is played instead. An imported
+	// sound knows its own length, ends by itself and needs no timer; the procedural waves that
+	// stand in for the rest do not, which is why a one-shot whose stop timer never fired (a paused
+	// game) left a starved wave clicking away. Tools/import_audio_samples.py makes them.
+	static class USoundBase* SampleFor(const FString& File);   // (no REPLICAN_API: the class already carries it, and a member may not repeat it)
+	// ONE WAY TO PLAY A LOOSE FILE AT A PLACE, and the only one that cleans up after itself.
+	//
+	// A USoundWaveProcedural never reports itself finished, so bAutoDestroy on the component does
+	// nothing: the component stays alive forever, starved, and a starved procedural wave ticks. One
+	// per shell casing, per steam burst, per conduit spark -- they accumulate for the whole session
+	// until the room is full of them. That is the clicking. This prefers the IMPORTED asset, which
+	// knows its own length and destroys itself, and stop-times the procedural fallback so even a
+	// file that was never imported dies when its clip is over.
+	static class UAudioComponent* PlayFileAt(UObject* Outer, UWorld* World, const FString& File,   // (no REPLICAN_API: the class already carries it)
+		const FVector& At, float Volume, float Pitch = 1.0f, class USoundAttenuation* Attenuation = nullptr);
 	static float PlayOneShot(UObject* Outer, UWorld* World, const FString& File, float Volume, float Pitch = 1.0f, bool bIgnoreDuck = false);
+	// THE FALLOFF EVERY POSITIONED SOUND GETS WHEN IT ASKS FOR NONE. Spawning a sound "at a location"
+	// with no attenuation does NOT make it quieter far away -- it plays at full volume across the
+	// whole level, and the only thing the location buys is the stereo pan. Two sparking conduits on
+	// the service deck were therefore crackling into every room in the facility, every few seconds,
+	// all day: the clicking that was reported seven times and hunted six.
+	static class USoundAttenuation* DefaultFalloff();
+	static constexpr float FalloffStartCm = 300.0f;    // full volume this close, about half a room
+	static constexpr float FalloffEndCm = 1500.0f;     // silent past fifteen metres: deck noise stays on the deck
 	// A SHOT. Everything else drops by Depth at once and comes back over Seconds -- the ambience
 	// through the loops' fade, the impacts and clicks through PlayOneShot's duck -- so the report
 	// is the loudest thing on the deck and the room is heard returning after it.

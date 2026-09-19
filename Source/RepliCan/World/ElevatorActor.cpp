@@ -1,4 +1,4 @@
-#include "ElevatorActor.h"
+#include "World/ElevatorActor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/PointLightComponent.h"
@@ -8,8 +8,8 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "EngineUtils.h"
-#include "AmbientPlayer.h"
-#include "SignActor.h"
+#include "World/AmbientPlayer.h"
+#include "World/SignActor.h"
 #include "UObject/ConstructorHelpers.h"
 
 namespace
@@ -20,6 +20,7 @@ namespace
 	const TCHAR* KitShaftL   = TEXT("/Game/PolygonSciFiSpace/Meshes/Buildings/SM_Bld_Lift_Wall_Door_01.SM_Bld_Lift_Wall_Door_01");
 	const TCHAR* KitShaftR   = TEXT("/Game/PolygonSciFiSpace/Meshes/Buildings/SM_Bld_Lift_Wall_Door_02.SM_Bld_Lift_Wall_Door_02");
 	const TCHAR* KitPanel    = TEXT("/Game/PolygonSciFiSpace/Meshes/Props/SM_Prop_Buttons_11.SM_Prop_Buttons_11");
+	const TCHAR* KitPanelBack = TEXT("/Game/PolygonSciFiSpace/Meshes/Props/SM_Prop_Detail_Keypad_01.SM_Prop_Detail_Keypad_01");   // 105 x 75, a keypad board, face up +Z
 
 	UStaticMesh* Kit(const TCHAR* Path) { return LoadObject<UStaticMesh>(nullptr, Path, nullptr, LOAD_NoWarn | LOAD_Quiet); }
 }
@@ -74,6 +75,19 @@ AElevatorActor::AElevatorActor()
 	Panel->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Panel->SetCollisionProfileName(TEXT("BlockAll"));
 	Panel->SetCastShadow(false);
+	// THE BACK-WALL BOARD. Detail_Keypad_01 (105 x 75 x 10, face up +Z) on the inside of the back
+	// wall, centred, at chest-to-eye height, facing the door: the first thing seen on stepping in.
+	// Roll +90 sends +Z to +Y (toward the door at y 0) and its 75 onto the vertical. The car's
+	// outer skin is at y -340.1; the plate's back at -330 assumes the same ten-odd centimetres of
+	// wall the side panel does -- a guess, like that one.
+	PanelBack = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PanelBack"));
+	PanelBack->SetupAttachment(Car);
+	PanelBack->SetRelativeLocation(FVector(250.0f, -330.0f, 140.0f));
+	PanelBack->SetRelativeRotation(FRotator(0.0f, 0.0f, 90.0f));
+	PanelBack->SetMobility(EComponentMobility::Movable);
+	PanelBack->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	PanelBack->SetCollisionProfileName(TEXT("BlockAll"));
+	PanelBack->SetCastShadow(false);
 
 	// THE MESHES ARE ASSIGNED HERE, NOT ONLY AT BEGINPLAY. Loaded at BeginPlay they exist in
 	// play and nowhere else: in the editor viewport the lift was an empty transform, and the
@@ -85,6 +99,8 @@ AElevatorActor::AElevatorActor()
 		static ConstructorHelpers::FObjectFinder<UStaticMesh> DoorLMesh(KitCarDoorL);
 		static ConstructorHelpers::FObjectFinder<UStaticMesh> DoorRMesh(KitCarDoorR);
 		static ConstructorHelpers::FObjectFinder<UStaticMesh> PanelMesh(KitPanel);
+		static ConstructorHelpers::FObjectFinder<UStaticMesh> PanelBackMesh(KitPanelBack);
+		if (PanelBackMesh.Succeeded()) { PanelBack->SetStaticMesh(PanelBackMesh.Object); }
 		if (CarMesh.Succeeded())   { Car->SetStaticMesh(CarMesh.Object); }
 		if (DoorLMesh.Succeeded()) { CarDoorL->SetStaticMesh(DoorLMesh.Object); }
 		if (DoorRMesh.Succeeded()) { CarDoorR->SetStaticMesh(DoorRMesh.Object); }
@@ -116,6 +132,7 @@ void AElevatorActor::BeginPlay()
 	CarDoorL->SetStaticMesh(Kit(KitCarDoorL));
 	CarDoorR->SetStaticMesh(Kit(KitCarDoorR));
 	Panel->SetStaticMesh(Kit(KitPanel));
+	if (PanelBack) { PanelBack->SetStaticMesh(Kit(KitPanelBack)); }
 	if (!Car->GetStaticMesh())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Elevator: the SciFi Space lift meshes are missing; nothing to ride"));
@@ -211,7 +228,7 @@ bool AElevatorActor::IsInspectPoint(const UPrimitiveComponent* Comp) const
 {
 	if (!Comp) { return true; }
 	// Inside: the panel. Outside: the doors, which is where a call button lives on a real lift.
-	if (Comp == Panel) { return true; }
+	if (Comp == Panel || (PanelBack && Comp == PanelBack)) { return true; }
 	if (Comp == CarDoorL || Comp == CarDoorR) { return true; }
 	for (const TObjectPtr<UStaticMeshComponent>& L : ShaftDoorL) { if (Comp == L) { return true; } }
 	for (const TObjectPtr<UStaticMeshComponent>& R : ShaftDoorR) { if (Comp == R) { return true; } }

@@ -1,8 +1,8 @@
-#include "BaseGameMode.h"
-#include "BasePlayerController.h"
-#include "BaseCharacter.h"
-#include "BaseHUD.h"
-#include "EnvironmentDirector.h"
+#include "Core/BaseGameMode.h"
+#include "Core/BasePlayerController.h"
+#include "Characters/BaseCharacter.h"
+#include "UI/BaseHUD.h"
+#include "World/EnvironmentDirector.h"
 
 ABaseGameMode::ABaseGameMode()
 {

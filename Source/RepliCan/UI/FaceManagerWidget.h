@@ -9,7 +9,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CharacterBuilderWidget.h"
+#include "UI/CharacterBuilderWidget.h"
 #include "FaceManagerWidget.generated.h"
 
 UCLASS()

@@ -1,4 +1,4 @@
-#include "CharacterAnimInstance.h"
+#include "Characters/CharacterAnimInstance.h"
 #include "Animation/AnimSequence.h"
 #include "Animation/Skeleton.h"
 #include "Animation/SkeletonRemapping.h"
@@ -1208,10 +1208,16 @@ void FCharacterAnimInstanceProxy::PreUpdate(UAnimInstance* InAnimInstance, float
 	// game thread and the owner rewrites these every frame.
 	CachedIKTargetR = Owner->HandIKTargetR;
 	CachedIKTargetL = Owner->HandIKTargetL;
+	CachedIKTargetLInR = Owner->HandIKTargetLInHandR; bCachedLFollowsR = Owner->bHandIKTargetLFollowsR;
+	CachedForeDelta = Owner->HandIKForeDeltaWeapon; CachedWeaponInHandR = Owner->WeaponInHandR;
+	CachedFingerR = Owner->FingerCurlR; CachedFingerL = Owner->FingerCurlL;
+	CachedHunch = Owner->WeaponHunchDegrees; CachedLean = Owner->WeaponLeanDegrees;
+	if (const AActor* A = Owner->GetOwningActor()) { CachedActorQuat = A->GetActorQuat(); }
 	CachedIKWeightR = FMath::Clamp(Owner->HandIKWeightR, 0.0f, 1.0f);
 	CachedIKWeightL = FMath::Clamp(Owner->HandIKWeightL, 0.0f, 1.0f);
 	CachedIKMaxReach = Owner->HandIKMaxReach;
 	CachedElbowBiasR = Owner->ElbowDownBiasR; CachedElbowBiasL = Owner->ElbowDownBiasL;
+	CachedElbowTwistR = Owner->ElbowTwistR; CachedElbowTwistL = Owner->ElbowTwistL;
 	bCachedFullBody = Owner->bFullBodyAction;
 	CachedIKBones[0] = Owner->IKUpperArmR; CachedIKBones[1] = Owner->IKLowerArmR; CachedIKBones[2] = Owner->IKHandR;
 	CachedIKBones[3] = Owner->IKUpperArmL; CachedIKBones[4] = Owner->IKLowerArmL; CachedIKBones[5] = Owner->IKHandL;
@@ -2100,7 +2106,7 @@ void FCharacterAnimInstanceProxy::ApplyArmOverride(FPoseContext& Output)
 }
 
 void FCharacterAnimInstanceProxy::SolveTwoBone(FCSPose<FCompactPose>& CS, FName UpperName, FName LowerName,
-                                              FName EndName, const FTransform& TargetCS, float Weight, float ElbowDownBias)
+                                              FName EndName, const FTransform& TargetCS, float Weight, float ElbowDownBias, float ElbowTwist)
 {
 	if (Weight <= KINDA_SMALL_NUMBER) { return; }
 	const FBoneContainer& BC = CS.GetPose().GetBoneContainer();
@@ -2163,6 +2169,11 @@ void FCharacterAnimInstanceProxy::SolveTwoBone(FCSPose<FCompactPose>& CS, FName 
 		if (!Want.IsNearlyZero()) { Pole = FMath::Lerp(Pole, Want, FMath::Clamp(ElbowDownBias, 0.0f, 1.0f)).GetSafeNormal(); }
 	}
 
+	// AND THE TUNED TWIST, last, about the reach line itself: that circle is exactly where the
+	// elbow is free to sit, so a weapon can ask for the elbow back behind the ribs rather than
+	// flared out to the side without touching where the hand ends up.
+	if (!FMath::IsNearlyZero(ElbowTwist)) { Pole = Pole.RotateAngleAxis(ElbowTwist, Dir).GetSafeNormal(); }
+
 	// Law of cosines: the angle at the shoulder between the reach line and the upper arm.
 	const float CosShoulder = FMath::Clamp((L1 * L1 + Reach * Reach - L2 * L2) / (2.0f * L1 * Reach), -1.0f, 1.0f);
 	const float Shoulder = FMath::Acos(CosShoulder);
@@ -2198,8 +2209,13 @@ void FCharacterAnimInstanceProxy::SolveTwoBone(FCSPose<FCompactPose>& CS, FName 
 
 void FCharacterAnimInstanceProxy::ApplySpineLean(FPoseContext& Output)
 {
-	const float Total = CachedAimPitch * CachedSpineLeanFraction * CachedSpineLeanWeight;
-	if (FMath::Abs(Total) < 0.05f || CachedSpineLeanBones.Num() == 0) { return; }
+	const float Aim = CachedAimPitch * CachedSpineLeanWeight;
+	const float Total = Aim * CachedSpineLeanFraction;
+	// THE HEAD FOLLOWS THE AIM. The spine takes its fraction; what is left belongs to the neck and
+	// the head, because someone aiming up tips their head back to keep their eye behind the sight.
+	// Without this the body angles up and the face stays dead level, staring past the weapon.
+	const float HeadShare = Aim * (1.0f - CachedSpineLeanFraction);
+	if (FMath::Abs(Total) < 0.05f && FMath::Abs(HeadShare) < 0.05f) { return; }   // the head runs even with no spine bones listed
 	const FBoneContainer& BC = Output.Pose.GetBoneContainer();
 	const USkeleton* Skel = BC.GetSkeletonAsset();
 	if (!Skel) { return; }
@@ -2227,11 +2243,35 @@ void FCharacterAnimInstanceProxy::ApplySpineLean(FPoseContext& Output)
 		const FQuat DeltaLocal = ParentCS.Inverse() * DeltaCS * ParentCS;
 		Output.Pose[Idx].SetRotation((DeltaLocal * Output.Pose[Idx].GetRotation()).GetNormalized());
 	}
+
+	// The neck and the head take the rest, the head slightly more than the neck, the same way.
+	const TPair<FName, float> Look[2] = { TPair<FName, float>(TEXT("neck_01"), 0.4f), TPair<FName, float>(TEXT("head"), 0.6f) };
+	for (const TPair<FName, float>& Bone : Look)
+	{
+		const int32 SkelIdx = Skel->GetReferenceSkeleton().FindBoneIndex(Bone.Key);
+		if (SkelIdx == INDEX_NONE) { continue; }
+		const FCompactPoseBoneIndex Idx = BC.GetCompactPoseIndexFromSkeletonIndex(SkelIdx);
+		if (!Idx.IsValid()) { continue; }
+		const FCompactPoseBoneIndex Parent = Output.Pose.GetParentBoneIndex(Idx);
+		FCSPose<FCompactPose> CS;
+		CS.InitPose(Output.Pose);
+		const FQuat ParentCS = Parent.IsValid() ? CS.GetComponentSpaceTransform(Parent).GetRotation() : FQuat::Identity;
+		const FQuat DeltaCS(Right, FMath::DegreesToRadians(-HeadShare * Bone.Value));
+		Output.Pose[Idx].SetRotation(((ParentCS.Inverse() * DeltaCS * ParentCS) * Output.Pose[Idx].GetRotation()).GetNormalized());
+	}
+}
+
+static bool AnyFingerCurl(const TArray<float>& Curl)
+{
+	for (float C : Curl) { if (!FMath::IsNearlyZero(C)) { return true; } }
+	return false;
 }
 
 void FCharacterAnimInstanceProxy::ApplyHandIK(FPoseContext& Output)
 {
-	if (CachedIKWeightR <= KINDA_SMALL_NUMBER && CachedIKWeightL <= KINDA_SMALL_NUMBER) { return; }
+	const bool bCurl = AnyFingerCurl(CachedFingerR) || AnyFingerCurl(CachedFingerL);
+	const bool bHunch = !FMath::IsNearlyZero(CachedHunch) || !FMath::IsNearlyZero(CachedLean);
+	if (CachedIKWeightR <= KINDA_SMALL_NUMBER && CachedIKWeightL <= KINDA_SMALL_NUMBER && !bCurl && !bHunch) { return; }
 
 	// The targets arrive in world space, because that is what the character can compute from the
 	// weapon's own component. One conversion here, not two solves' worth.
@@ -2241,15 +2281,163 @@ void FCharacterAnimInstanceProxy::ApplyHandIK(FPoseContext& Output)
 	FCSPose<FCompactPose> CS;
 	CS.InitPose(Output.Pose);
 
+	// The hands AS THE CLIP POSED THEM, read before either arm is touched: the left hand's turn
+	// relative to the right is the animator's statement of how the support hand sits on a gun.
+	const FBoneContainer& BC = CS.GetPose().GetBoneContainer();
+	const USkeleton* Skel = BC.GetSkeletonAsset();
+	auto Index = [&](FName Bone) -> FCompactPoseBoneIndex
+	{
+		const int32 SkelIdx = Skel ? Skel->GetReferenceSkeleton().FindBoneIndex(Bone) : INDEX_NONE;
+		return (SkelIdx == INDEX_NONE) ? FCompactPoseBoneIndex(INDEX_NONE) : BC.GetCompactPoseIndexFromSkeletonIndex(SkelIdx);
+	};
+	// HUNCH: head down, shoulders up, by the weapon's own scalar (hunch, degrees), before the hands
+	// are read or solved, so the arms are solved from the hunched shoulders. Each turn is stated in
+	// the ACTOR's frame (pitch - is a nod down; roll + raises the left shoulder, - the right:
+	// measured, roll +90 sends +Z to +Y) and conjugated into component space; a bone is turned
+	// about its own origin and its children, never evaluated before it is set, follow.
+	if (bHunch)
+	{
+		// HUNCH IS A SHRUG, measured in CENTIMETRES, and it is two movements, not a nod: the
+		// shoulders go UP relative to the torso, and the head goes DOWN relative to the shoulders.
+		// Turning the neck and head down instead (which is what this did first) just makes the
+		// character look at the floor. A bone is MOVED here, parent before child, and anything
+		// below it that is never read comes along -- so raising a clavicle raises the whole arm.
+		const FQuat ActorToComp = GetComponentTransform().GetRotation().Inverse() * CachedActorQuat;
+		const FVector Up = ActorToComp.RotateVector(FVector::UpVector);
+		const FVector Fwd = ActorToComp.RotateVector(FVector::ForwardVector);
+		auto Shift = [&](const TCHAR* Bone, const FVector& Delta)
+		{
+			const FCompactPoseBoneIndex B = Index(FName(Bone));
+			if (!B.IsValid()) { return; }
+			FTransform T = CS.GetComponentSpaceTransform(B);
+			T.SetTranslation(T.GetTranslation() + Delta);
+			CS.SetComponentSpaceTransform(B, T);
+		};
+		// LEAN: the torso forward at the waist, which is a turn, not a lift -- so it goes on the
+		// lower spine, parent of everything above, and the head is pitched back by a fraction of it
+		// so the character still looks where it is aiming rather than at its own boots.
+		if (!FMath::IsNearlyZero(CachedLean))
+		{
+			const FVector Right = ActorToComp.RotateVector(FVector::RightVector);
+			auto Pitch = [&](const TCHAR* Bone, float Deg)
+			{
+				const FCompactPoseBoneIndex B = Index(FName(Bone));
+				if (!B.IsValid()) { return; }
+				FTransform T = CS.GetComponentSpaceTransform(B);
+				T.SetRotation((FQuat(Right, FMath::DegreesToRadians(Deg)) * T.GetRotation()).GetNormalized());
+				CS.SetComponentSpaceTransform(B, T);
+			};
+			const float L = CachedLean;
+			Pitch(TEXT("spine_01"), L * 0.5f);
+			Pitch(TEXT("spine_02"), L * 0.3f);
+			Pitch(TEXT("spine_03"), L * 0.2f);
+			Pitch(TEXT("neck_01"), -L * 0.4f);
+			Pitch(TEXT("head"), -L * 0.4f);
+		}
+		const float H = CachedHunch;   // centimetres of shrug; negative drops the shoulders and lifts the head
+		Shift(TEXT("clavicle_l"), Up * H - Fwd * H * 0.15f);   // shoulders up, and a touch forward: a hunch closes across the chest
+		Shift(TEXT("clavicle_r"), Up * H - Fwd * H * 0.15f);
+		Shift(TEXT("neck_01"), Up * (-H * 0.45f));             // the head sinks between them
+		Shift(TEXT("head"), Up * (-H * 0.35f));
+	}
+
+	const FCompactPoseBoneIndex HandR = Index(CachedIKBones[2]), HandL = Index(CachedIKBones[5]);
+	const FTransform AnimR = HandR.IsValid() ? CS.GetComponentSpaceTransform(HandR) : FTransform::Identity;
+	const FTransform AnimL = HandL.IsValid() ? CS.GetComponentSpaceTransform(HandL) : FTransform::Identity;
+
 	if (CachedIKWeightR > KINDA_SMALL_NUMBER)
 	{
 		SolveTwoBone(CS, CachedIKBones[0], CachedIKBones[1], CachedIKBones[2],
-		             CachedIKTargetR * WorldToComp, CachedIKWeightR, CachedElbowBiasR);
+		             CachedIKTargetR * WorldToComp, CachedIKWeightR, CachedElbowBiasR, CachedElbowTwistR);
 	}
 	if (CachedIKWeightL > KINDA_SMALL_NUMBER)
 	{
-		SolveTwoBone(CS, CachedIKBones[3], CachedIKBones[4], CachedIKBones[5],
-		             CachedIKTargetL * WorldToComp, CachedIKWeightL, CachedElbowBiasL);
+		FTransform TargetL = CachedIKTargetL * WorldToComp;
+		if (bCachedLFollowsR && HandR.IsValid() && HandL.IsValid())
+		{
+			// LYRA'S WAY, WITHOUT LYRA'S IK BONES (2026-09-17). Lyra animates ik_hand_l against
+			// ik_hand_gun so the support hand rides the gun exactly as the animator posed it; our
+			// clips came through the Blender clean without those bones, but the clip still poses
+			// BOTH hands on the gun. So: the left hand's TURN relative to the right hand is taken
+			// from the animated pose and carried along with the right hand wherever it was just
+			// solved to (the weapon rides that hand); only its PLACE moves, to this weapon's own
+			// fore grip, because the clip was posed on Lyra's rifle and ours differ in length. No
+			// wrap constant, no socket mirror, nothing to tune: what the animator did is what shows.
+			const FTransform HandRNow = CS.GetComponentSpaceTransform(HandR);
+			const FTransform LInR_Anim = AnimL * AnimR.Inverse();
+			const FTransform Turned = LInR_Anim * HandRNow;               // the clip's hold, moved with the right hand
+			const FTransform Placed = CachedIKTargetLInR * HandRNow;     // this weapon's fore grip on that same hand
+			FQuat Rot = Turned.GetRotation();
+			if (!CachedForeDelta.IsNearlyZero())
+			{
+				// The weapon's own turn for its support hand (fore_hand_rot, tuned on the hand page):
+				// about the weapon's axes, so it is conjugated into component space through where the
+				// weapon sits on the solved right hand.
+				const FQuat WQ = (CachedWeaponInHandR * HandRNow).GetRotation();
+				Rot = WQ * CachedForeDelta.Quaternion() * WQ.Inverse() * Rot;
+			}
+			TargetL = FTransform(Rot, Placed.GetLocation(), FVector::OneVector);
+		}
+		SolveTwoBone(CS, CachedIKBones[3], CachedIKBones[4], CachedIKBones[5], TargetL, CachedIKWeightL, CachedElbowBiasL, CachedElbowTwistL);
+	}
+
+	// FINGER CURL: the weapon's own closing of each finger (fingers_r / fingers_l, degrees per
+	// phalanx, + closes) on top of the clip, on the hands as just solved. The curl axis is read
+	// off the pose itself -- across the bone and the palm's normal (hand, index_01 and pinky_01
+	// span the palm) -- so there is no per-bone constant and the left hand's mirrored bone axes
+	// do not matter. Each phalanx is set parent-first without its children ever being evaluated,
+	// so they follow it (their local transforms are untouched).
+	if (bCurl)
+	{
+		// Thumb, index, middle: all a Synty hand on the UE4 Mannequin skeleton has. Ring and pinky
+		// are looked for anyway, so a fuller hand would just work; a missing bone is skipped.
+		static const TCHAR* Fingers[5] = { TEXT("thumb"), TEXT("index"), TEXT("middle"), TEXT("ring"), TEXT("pinky") };
+		auto CurlHand = [&](const TCHAR* Side, const TArray<float>& Curl, float PalmSign)
+		// PalmSign is no longer trusted: which way a finger closes is measured, see ClosesToward.
+		{
+			if (Curl.Num() < 5 || !AnyFingerCurl(Curl)) { return; }
+			const FCompactPoseBoneIndex Hand = Index(FName(*FString::Printf(TEXT("hand_%s"), Side)));
+			const FCompactPoseBoneIndex Idx1 = Index(FName(*FString::Printf(TEXT("index_01_%s"), Side)));
+			// The far side of the palm: the last knuckle this hand HAS. Asking for pinky_01 outright
+			// was the bug -- this skeleton has no pinky, so the curl gave up before it started.
+			FCompactPoseBoneIndex Far = Index(FName(*FString::Printf(TEXT("pinky_01_%s"), Side)));
+			if (!Far.IsValid()) { Far = Index(FName(*FString::Printf(TEXT("ring_01_%s"), Side))); }
+			if (!Far.IsValid()) { Far = Index(FName(*FString::Printf(TEXT("middle_01_%s"), Side))); }
+			if (!Hand.IsValid() || !Idx1.IsValid() || !Far.IsValid()) { return; }
+			const FVector HandP = CS.GetComponentSpaceTransform(Hand).GetLocation();
+			// The right palm faces cross(far knuckle - hand, index - hand); the left, mirrored, the other way.
+			const FVector Palm = (FVector::CrossProduct(CS.GetComponentSpaceTransform(Far).GetLocation() - HandP, CS.GetComponentSpaceTransform(Idx1).GetLocation() - HandP) * PalmSign).GetSafeNormal();
+			if (Palm.IsNearlyZero()) { return; }
+			for (int32 f = 0; f < 5; ++f)
+			{
+				if (FMath::IsNearlyZero(Curl[f])) { continue; }
+				FCompactPoseBoneIndex Bones[3];
+				for (int32 k = 0; k < 3; ++k) { Bones[k] = Index(FName(*FString::Printf(TEXT("%s_%02d_%s"), Fingers[f], k + 1, Side))); }
+				FVector Along = FVector::ZeroVector;
+				for (int32 k = 0; k < 3; ++k)
+				{
+					if (!Bones[k].IsValid()) { continue; }
+					FTransform T = CS.GetComponentSpaceTransform(Bones[k]);
+					// Along the bone: towards the next phalanx, taken from the reference skeleton in this
+					// bone's own frame (the child itself is never evaluated here). The tip keeps its parent's.
+					if (k < 2 && Bones[k + 1].IsValid()) { Along = T.GetRotation().RotateVector(BC.GetRefPoseTransform(Bones[k + 1]).GetTranslation().GetSafeNormal()); }
+					const FVector Axis = FVector::CrossProduct(Along, Palm).GetSafeNormal();   // across the finger: the joint's hinge
+					if (Axis.IsNearlyZero()) { continue; }
+					// WHICH WAY IS CLOSED. Assuming a sign here is what made fingers bend backwards: the
+					// palm normal's direction depends on the rig's bone axes and mirrors on the left hand.
+					// So it is measured instead -- a finger closing brings its tip nearer the wrist, and
+					// whichever way round the hinge does that is the way that closes. True on either hand.
+					const FVector P = T.GetTranslation();
+					const FQuat Test(Axis, FMath::DegreesToRadians(10.0f));
+					const bool bClosesToward = FVector::DistSquared(P + Test.RotateVector(Along) * 3.0f, HandP) < FVector::DistSquared(P + Along * 3.0f, HandP);
+					const float ClosesToward = bClosesToward ? 1.0f : -1.0f;
+					T.SetRotation((FQuat(Axis, FMath::DegreesToRadians(Curl[f] * ClosesToward)) * T.GetRotation()).GetNormalized());
+					CS.SetComponentSpaceTransform(Bones[k], T);
+				}
+			}
+		};
+		CurlHand(TEXT("r"), CachedFingerR, 1.0f);
+		CurlHand(TEXT("l"), CachedFingerL, -1.0f);
 	}
 
 	FCSPose<FCompactPose>::ConvertComponentPosesToLocalPoses(MoveTemp(CS), Output.Pose);

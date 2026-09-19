@@ -5,8 +5,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ItemFields.h"
-#include "WeaponCatalog.h"
+#include "Items/ItemFields.h"
+#include "Weapons/WeaponCatalog.h"
 
 class FJsonObject;
 class FJsonValue;

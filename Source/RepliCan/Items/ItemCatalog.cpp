@@ -1,4 +1,5 @@
-#include "ItemCatalog.h"
+#include "Items/ItemCatalog.h"
+#include "Items/ItemInstance.h"
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
 #include "HAL/FileManager.h"
@@ -38,6 +39,7 @@ namespace
 		if (!Root->TryGetObjectField(RootKey, Entries) || !Entries) { return; }
 		for (const TPair<FString, TSharedPtr<FJsonValue>>& Pair : (*Entries)->Values)
 		{
+			if (Pair.Key.StartsWith(TEXT("_"))) { continue; }   // a documentation key, not an entry
 			const TSharedPtr<FJsonObject>* O = nullptr;
 			if (!Pair.Value->TryGetObject(O) || !O) { continue; }
 			ItemCatalog::FRecord R; R.Key = Pair.Key; R.Category = DefaultCategory;
@@ -67,7 +69,8 @@ void ItemCatalog::Reload(bool bForce)
 const ItemCatalog::FRecord* ItemCatalog::FindRecord(const FString& Name)
 {
 	Reload();
-	const int32* At = GByName.Find(Name.ToLower());
+	// As in WeaponCatalog::Find: an instance handle is looked up as the thing it is a copy of.
+	const int32* At = GByName.Find(ItemHandle::NameOf(Name).ToLower());
 	return At ? &GRecords[*At] : nullptr;
 }
 

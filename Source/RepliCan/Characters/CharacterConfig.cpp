@@ -1,4 +1,4 @@
-#include "CharacterConfig.h"
+#include "Characters/CharacterConfig.h"
 #include "JsonObjectConverter.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
@@ -398,6 +398,11 @@ const TArray<Appearance::FBody>& Appearance::Bodies()
 		// parametric material). A true bald head, so the hero hair pieces sit on it as designed.
 		{ TEXT("Female / hero head"), TEXT("/Game/RepliCan/PlayerCharacter/SK_PC_Female_01_Torso.SK_PC_Female_01_Torso"), TEXT("/Game/RepliCan/PlayerCharacter/SK_PC_Female_01_Arms.SK_PC_Female_01_Arms"), TEXT("/Game/RepliCan/PlayerCharacter/SK_PC_Female_01_Legs.SK_PC_Female_01_Legs"), TEXT("/Game/RepliCan/PlayerCharacter/SK_PC_Female_02_Head.SK_PC_Female_02_Head"), FVector(11.0f, 12.3f, 4.5f) },
 		{ TEXT("Male / hero head"),   TEXT("/Game/RepliCan/PlayerCharacter/SK_PC_Male_01_Torso.SK_PC_Male_01_Torso"),     TEXT("/Game/RepliCan/PlayerCharacter/SK_PC_Male_01_Arms.SK_PC_Male_01_Arms"),     TEXT("/Game/RepliCan/PlayerCharacter/SK_PC_Male_01_Legs.SK_PC_Male_01_Legs"),     TEXT("/Game/RepliCan/PlayerCharacter/SK_PC_Male_02_Head.SK_PC_Male_02_Head"),     FVector(11.7f, 12.3f, 4.3f) },
+		// The junkers' kit (POLYGON Sci-Fi Space, cut by bone into the library by Tools/cut_library): the salvager's
+		// clothes on the same two heads, so hair, brows and skin carry across. The junker head itself stays in the
+		// cut library for extras; the player keeps their own face.
+		{ TEXT("Female / junker"), TEXT("/Game/RepliCan/CutLibrary/SciFiSpace/Junker_Female_01_Torso.Junker_Female_01_Torso"), TEXT("/Game/RepliCan/CutLibrary/SciFiSpace/Junker_Female_01_Arms.Junker_Female_01_Arms"), TEXT("/Game/RepliCan/CutLibrary/SciFiSpace/Junker_Female_01_Legs.Junker_Female_01_Legs"), TEXT("/Game/RepliCan/PlayerCharacter/SK_PC_Female_01_Head.SK_PC_Female_01_Head"), FVector(11.0f, 12.3f, 4.5f) },
+		{ TEXT("Male / junker"),   TEXT("/Game/RepliCan/CutLibrary/SciFiSpace/Junker_Male_01_Torso.Junker_Male_01_Torso"),     TEXT("/Game/RepliCan/CutLibrary/SciFiSpace/Junker_Male_01_Arms.Junker_Male_01_Arms"),     TEXT("/Game/RepliCan/CutLibrary/SciFiSpace/Junker_Male_01_Legs.Junker_Male_01_Legs"),     TEXT("/Game/RepliCan/PlayerCharacter/SK_PC_Male_01_Head.SK_PC_Male_01_Head"),     FVector(11.7f, 12.3f, 4.3f) },
 	};
 	return B;
 }

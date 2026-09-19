@@ -1,5 +1,5 @@
-#include "DemoGameMode.h"
-#include "DemoPlayerController.h"
+#include "Core/DemoGameMode.h"
+#include "Core/DemoPlayerController.h"
 
 ADemoGameMode::ADemoGameMode()
 {

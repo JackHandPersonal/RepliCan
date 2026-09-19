@@ -1,11 +1,13 @@
-#include "ShotReactions.h"
-#include "BaseCharacter.h"
-#include "ImpactEffects.h"
-#include "ItemCatalog.h"
-#include "Vitality.h"
-#include "DeathThrash.h"
-#include "LootBoxActor.h"
-#include "BasePlayerController.h"
+#include "Weapons/ShotReactions.h"
+#include "Characters/BaseCharacter.h"
+#include "Weapons/ImpactEffects.h"
+#include "Items/ItemCatalog.h"
+#include "Characters/Vitality.h"
+#include "Characters/DeathThrash.h"
+#include "Weapons/SparkFx.h"
+#include "Characters/Alertness.h"
+#include "World/LootBoxActor.h"
+#include "Core/BasePlayerController.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/PoseableMeshComponent.h"
 #include "Animation/AnimSequence.h"
@@ -28,6 +30,8 @@
 #include "HAL/IConsoleManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
+
+static AActor* GStrikeInstigator = nullptr;   // who is doing the hitting, for the hit thing's alertness
 #include "PhysicsEngine/PhysicsAsset.h"
 
 // RepliCan.Dismember 1: a head shot takes the head off (the part goes bouncing, the bone folds
@@ -191,16 +195,41 @@ namespace
 			C->RegisterComponent();
 		};
 		const FQuat Along = FRotationMatrix::MakeFromZ(Dir).ToQuat();
-		// Flesh round the cut.
-		for (int32 i = 0; i < 5; ++i)
+		// A tumbled, random orientation. Five spheres on an even ring, all facing the same way and
+		// all the same size, read as five spheres -- the eye finds the pattern before it finds the
+		// wound. What stops a lump looking like a ball is being squashed on three different axes and
+		// turned to an angle that shares nothing with its neighbours.
+		auto Tumbled = [&]() { return FRotator(FMath::FRandRange(-180.f, 180.f), FMath::FRandRange(-180.f, 180.f), FMath::FRandRange(-180.f, 180.f)).Quaternion(); };
+
+		// TORN FLESH ROUND THE CUT. Many small pieces at unrelated angles and unrelated sizes, some
+		// sunk into the stump and some standing proud of it, so the rim is broken rather than round.
+		const int32 Lumps = FMath::RandRange(13, 19);
+		for (int32 i = 0; i < Lumps; ++i)
 		{
-			const float A = i * 1.3f + 0.2f;
-			const FVector At = Base + Dir * FMath::FRandRange(-0.5f, 0.8f) + (U * FMath::Cos(A) + V * FMath::Sin(A)) * FMath::FRandRange(1.5f, 4.0f);
-			const float R = FMath::FRandRange(0.03f, 0.05f);
-			Make(Ball, At, Along, FVector(R, R, R * 0.5f), MeatMat);
+			const float A = FMath::FRandRange(0.0f, 2.0f * PI);
+			const float Out = FMath::FRandRange(0.6f, 4.4f);
+			const FVector At = Base + Dir * FMath::FRandRange(-1.1f, 1.4f) + (U * FMath::Cos(A) + V * FMath::Sin(A)) * Out;
+			const float R = FMath::FRandRange(0.012f, 0.042f);
+			Make(Ball, At, Tumbled(), FVector(R * FMath::FRandRange(0.5f, 1.6f), R * FMath::FRandRange(0.5f, 1.6f), R * FMath::FRandRange(0.3f, 1.2f)), MeatMat);
 		}
-		// The windpipe, a little forward, and two vessels either side of it, leaning out.
-		Make(Cyl, Base + Dir * 1.6f + U * 1.5f, Along, FVector(0.02f, 0.02f, 0.035f), MeatMat);
+		// AND THE RAGGED ENDS -- strands of it hanging off the rim, stretched thin and pointing
+		// wherever they were torn. These are what sell it as torn rather than cut.
+		const int32 Strands = FMath::RandRange(4, 7);
+		for (int32 i = 0; i < Strands; ++i)
+		{
+			const float A = FMath::FRandRange(0.0f, 2.0f * PI);
+			const FVector Outward = (U * FMath::Cos(A) + V * FMath::Sin(A));
+			// Mostly downward and outward: gravity has had them since the head left.
+			const FVector Hang = (Outward * FMath::FRandRange(0.4f, 1.0f) + Dir * FMath::FRandRange(-0.9f, 0.4f)).GetSafeNormal();
+			const float Len = FMath::FRandRange(0.012f, 0.035f);
+			const float Thin = FMath::FRandRange(0.004f, 0.009f);
+			Make(Cyl, Base + Outward * FMath::FRandRange(1.8f, 3.6f) + Hang * (Len * 45.0f),
+				FRotationMatrix::MakeFromZ(Hang).ToQuat(), FVector(Thin, Thin * FMath::FRandRange(0.6f, 1.5f), Len), MeatMat);
+		}
+		// The windpipe, a little forward, and two vessels either side of it, leaning out. Jittered:
+		// perfectly placed anatomy under torn flesh looks like a diagram.
+		const FVector Jit = (U * FMath::FRandRange(-0.5f, 0.5f) + V * FMath::FRandRange(-0.5f, 0.5f));
+		Make(Cyl, Base + Dir * 1.6f + U * 1.5f + Jit, FRotator(FMath::FRandRange(-12.f, 12.f), 0.0f, FMath::FRandRange(-12.f, 12.f)).Quaternion() * Along, FVector(0.02f, 0.023f, 0.035f), MeatMat);
 		Make(Ball, Base + Dir * 3.3f + U * 1.5f, Along, FVector(0.016f, 0.016f, 0.006f), BoneMat);   // the pale ring of cartilage at its end
 		for (int32 i = 0; i < 2; ++i)
 		{
@@ -581,11 +610,17 @@ namespace
 		AActor* Who = Hit.GetActor();
 		const FString Region = ShotReactions::RegionOf(Hit.BoneName);
 		GLastRegion = Region.IsEmpty() ? TEXT("body") : Region.ToLower();
-		// Blood at the wound, thrown back along the shot, and the mark it leaves; a blunt blow bruises instead.
-		if (!bBlunt)
+		// Blood at the wound, thrown back along the shot, and the mark it leaves; a blunt blow bruises
+		// instead. A machine bleeds sparks, blue and yellow, whatever hit it, and keeps its limbs.
+		const bool bMachine = Who && Who->ActorHasTag(TEXT("robot"));
+		// EVERY HIT ON A MACHINE SPARKS, and sparks properly: a machine that is hit SHOWS it. These
+		// counts were a dozen motes because a dozen was all a burst could afford; a burst is
+		// instanced now (see SparkFx.h) and costs about the same at sixty.
+		if (bMachine) { SparkFx::Burst(World, Hit.ImpactPoint, -ShotDir, bBlunt ? 34 : 64, bBlunt ? 1.2f : 1.45f); }
+		else
 		{
-			ImpactEffects::SpawnBurst(World, { TEXT("/Game/Synty/PolygonGeneric/FX/NS_Blood_Splatter_01"), 0.45f, 0.5f }, Hit.ImpactPoint, (-ShotDir).Rotation());
-			MarkWound(World, Hit, ShotDir);
+			if (!bBlunt) { ImpactEffects::SpawnBurst(World, { TEXT("/Game/Synty/PolygonGeneric/FX/NS_Blood_Splatter_01"), 0.45f, 0.5f }, Hit.ImpactPoint, (-ShotDir).Rotation()); }
+			MarkWound(World, Hit, ShotDir);   // a bruise for a blow, a wound for a shot: the mark rides the bone either way (a blow used to leave nothing to see)
 		}
 		USkeletalMeshComponent* Body = Cast<USkeletalMeshComponent>(Hit.GetComponent());
 		UVitalityComponent* V = UVitalityComponent::FindOrAdd(Who);
@@ -599,14 +634,16 @@ namespace
 		const float Thresh = V ? V->MaxVitality * V->DestroyedFraction : 0.0f;
 		if (V && V->bDead)
 		{
-			if (Body && Body->IsSimulatingPhysics(Hit.BoneName)) { Body->AddImpulse(ShotDir * (bBlunt ? 260.0f : 120.0f), Hit.BoneName, true); }
+			// The shove a body already down takes. As a velocity change, so a heavy one and a light
+			// one move alike; enough to roll it and drag a limb rather than just twitch the bone.
+			if (Body && Body->IsSimulatingPhysics(Hit.BoneName)) { Body->AddImpulse(ShotDir * (bBlunt ? 380.0f : 210.0f), Hit.BoneName, true); }
 			GLastRegion += TEXT(", dead");
 			// A corpse keeps count: enough into a limb still takes it off.
 			if (Damage > 0.0f)
 			{
 				const float Armour = ArmourFor(Who, Region, Hit.BoneName);
 				const UVitalityComponent::FOutcome Out = V->Apply(Region, Damage, Armour);
-				if (Out.bDestroyed && !bBlunt && CVarDismember.GetValueOnGameThread() != 0 && SeverRegion(World, Who, Body, Region, ShotDir)) { GLastRegion += TEXT(", torn off"); }
+				if (Out.bDestroyed && !bBlunt && !bMachine && CVarDismember.GetValueOnGameThread() != 0 && SeverRegion(World, Who, Body, Region, ShotDir)) { GLastRegion += TEXT(", torn off"); }
 				if (Info) { Info->bDestroyed = Out.bDestroyed; if (Out.bDestroyed) { Info->Spent = FMath::Min(Damage, FMath::Min(V->Toughness(Key), FMath::Max(0.0f, Thresh - TakenBefore)) / Factor + Armour); } }   // the cheaper route it came off by
 				if (V->IsPulped()) { PulpBody(World, Who, Body); }
 			}
@@ -616,6 +653,8 @@ namespace
 		{
 			const float Armour = ArmourFor(Who, Region, Hit.BoneName);
 			const UVitalityComponent::FOutcome Out = V->Apply(Region, Damage, Armour);
+			if (UAlertnessComponent* Aware = Who->FindComponentByClass<UAlertnessComponent>()) { Aware->NoteDamage(GStrikeInstigator, Out.Dealt); }   // whoever did this is known at once
+		if (ABaseCharacter* Hurt = Cast<ABaseCharacter>(Who)) { Hurt->NoteHurt(Out.Dealt); }
 			if (Info)
 			{
 				Info->bDied = Out.bDied; Info->bDestroyed = Out.bDestroyed;
@@ -625,7 +664,7 @@ namespace
 			GLastRegion = FString::Printf(TEXT("%s -%.0f%s, %.0f/%.0f"), *GLastRegion, Out.Dealt, Armour > 0.0f ? *FString::Printf(TEXT(" (armour %.0f)"), Armour) : TEXT(""), V->Vitality, V->MaxVitality);
 			ABaseCharacter* Ch = Cast<ABaseCharacter>(Who);
 			if (Out.bInjured || Out.bDestroyed) { if (Ch) { Ch->NoteInjury(Region, Out.bDestroyed); } GLastRegion += Out.bDestroyed ? TEXT(", DESTROYED") : TEXT(", injured"); }
-			if (Out.bDestroyed && !bBlunt && CVarDismember.GetValueOnGameThread() != 0) { SeverRegion(World, Who, Body, Region, ShotDir); }   // an edge takes it off; a hammer only breaks it
+			if (Out.bDestroyed && !bBlunt && !bMachine && CVarDismember.GetValueOnGameThread() != 0) { SeverRegion(World, Who, Body, Region, ShotDir); }   // an edge takes it off; a hammer only breaks it
 			if (Out.bDied) { KillBody(World, Who, Body, ShotDir, &Hit); GLastRegion += TEXT(", DEAD"); return; }
 		}
 		UAnimSequence* Flinch = FlinchFor(Who, ShotDir, bBlunt || Region == TEXT("Head") || Region == TEXT("Neck"));
@@ -741,7 +780,14 @@ void ShotReactions::SettleRagdoll(AActor* Who, USkeletalMeshComponent* Body, int
 	const float Current = Body->GetMass();
 	if (Current > KINDA_SMALL_NUMBER) { Body->SetAllMassScale(Target / Current); }
 	for (FBodyInstance* BI : Body->Bodies) { if (BI) { BI->LinearDamping = 0.6f; BI->AngularDamping = 1.5f; BI->UpdateDampingProperties(); } }
-	Body->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);   // the Ragdoll profile ignores Visibility; traces must still find the body
+	// The Ragdoll profile ignores BOTH of these, and for opposite reasons neither of which is ours.
+	// Visibility: a body that ignored it could not be shot, swung at or picked out to loot.
+	// Pawn: a corpse you can walk through is not a corpse, it is a decal -- and because the capsule
+	// is switched off the moment the character dies (ABaseCharacter::Die), the ragdoll is the only
+	// thing left that could stop anyone. Blocking it makes the body solid, and since SettleRagdoll
+	// has just given it a person's mass, walking into one shoves it about rather than bouncing off.
+	Body->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	Body->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	// Whatever rides its pose keeps bodies of its own sitting inside the ragdoll's: followers, not
 	// obstacles. The same for anything attached (an extra's head actor, a nose).
 	TInlineComponentArray<UPrimitiveComponent*> Prims(Who);
@@ -772,7 +818,7 @@ void ShotReactions::Kill(UWorld* World, AActor* Who, const FVector& Dir)
 ShotReactions::FStrike ShotReactions::Strike(UWorld* World, const FHitResult& Hit, const FVector& Dir, AActor* Instigator, float Budget, bool bBlunt)
 {
 	FStrike Info; Info.Spent = Budget;
-	GLastRegion.Reset();
+	GLastRegion.Reset(); GStrikeInstigator = Instigator;
 	if (!World || !Hit.GetActor() || Hit.GetActor() == Instigator) { Info.Spent = 0.0f; return Info; }
 	FHitResult Resolved = Hit;
 	if (ResolveAttachment(Resolved) && Resolved.GetActor() != Instigator) { ReactPerson(World, Resolved, Dir, Budget, bBlunt, &Info); }
@@ -784,7 +830,7 @@ ShotReactions::FStrike ShotReactions::Strike(UWorld* World, const FHitResult& Hi
 
 void ShotReactions::React(UWorld* World, const FHitResult& Hit, const FVector& ShotDir, AActor* Instigator, float Damage, bool bBlunt)
 {
-	GLastRegion.Reset();
+	GLastRegion.Reset(); GStrikeInstigator = Instigator;
 	if (!World || !Hit.GetActor() || Hit.GetActor() == Instigator) { return; }
 	FHitResult Resolved = Hit;
 	if (ResolveAttachment(Resolved) && Resolved.GetActor() != Instigator) { ReactPerson(World, Resolved, ShotDir, Damage, bBlunt); return; }

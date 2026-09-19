@@ -1,18 +1,20 @@
-#include "BasePlayerController.h"
-#include "BaseCharacter.h"
-#include "CharacterBuilderWidget.h"
-#include "EditToolWidget.h"
-#include "CharacterSheetWidget.h"
-#include "RemoteViewWidget.h"
-#include "TerminalWidget.h"
+#include "Core/BasePlayerController.h"
+#include "Characters/BaseCharacter.h"
+#include "UI/CharacterBuilderWidget.h"
+#include "UI/EditToolWidget.h"
+#include "UI/CharacterSheetWidget.h"
+#include "UI/RemoteViewWidget.h"
+#include "UI/TerminalWidget.h"
 #include "Components/WidgetComponent.h"
 #include "Components/WidgetInteractionComponent.h"
-#include "AppearanceWidget.h"
+#include "ProceduralMeshComponent.h"
+#include "StaticMeshResources.h"
+#include "UI/AppearanceWidget.h"
 #include "Engine/StaticMeshActor.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
-#include "FlickerLightActor.h"
+#include "World/FlickerLightActor.h"
 #include "Engine/PointLight.h"
 #include "Components/PointLightComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -20,13 +22,13 @@
 #include "Components/SceneCaptureComponent2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Kismet/KismetRenderingLibrary.h"
-#include "CharacterGhostActor.h"
-#include "CharacterConfig.h"
-#include "CrtCursorWidget.h"
-#include "MetricsWidget.h"
+#include "Characters/CharacterGhostActor.h"
+#include "Characters/CharacterConfig.h"
+#include "UI/CrtCursorWidget.h"
+#include "UI/MetricsWidget.h"
 #include "Components/AudioComponent.h"
 #include "Engine/GameViewportClient.h"
-#include "FaceController.h"
+#include "Characters/FaceController.h"
 #include "GameFramework/SpectatorPawn.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
@@ -42,7 +44,7 @@
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "PhysicsEngine/BodySetup.h"
-#include "ContextMenuWidget.h"
+#include "UI/ContextMenuWidget.h"
 #include "UObject/UObjectIterator.h"
 #include "Blueprint/UserWidget.h"
 #include "CollisionShape.h"
@@ -62,26 +64,35 @@
 #include "Components/MeshComponent.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
-#include "FaceManagerWidget.h"
-#include "AnimationBrowserWidget.h"
-#include "PauseMenuWidget.h"
-#include "SettingsWidget.h"
-#include "ScenesWidget.h"
-#include "ConfirmDialogWidget.h"
-#include "InspectMenuWidget.h"
-#include "CalloutWidget.h"
-#include "ConversationWidget.h"
-#include "VoiceLines.h"
-#include "SequenceData.h"
-#include "SequenceDirector.h"
-#include "WeaponCatalog.h"
-#include "WeaponSkins.h"
-#include "ShotReactions.h"
-#include "ElevatorActor.h"
-#include "ImpactEffects.h"
-#include "InputBindings.h"
-#include "AmbientPlayer.h"
-#include "BlinkOverlayWidget.h"
+#include "UI/FaceManagerWidget.h"
+#include "UI/AnimationBrowserWidget.h"
+#include "UI/PauseMenuWidget.h"
+#include "UI/SettingsWidget.h"
+#include "UI/ScenesWidget.h"
+#include "UI/ConfirmDialogWidget.h"
+#include "UI/InspectMenuWidget.h"
+#include "UI/CalloutWidget.h"
+#include "UI/ConversationWidget.h"
+#include "Narrative/VoiceLines.h"
+#include "Weapons/BrassFx.h"
+#include "Narrative/SequenceData.h"
+#include "Narrative/SequenceDirector.h"
+#include "Weapons/WeaponCatalog.h"
+#include "Weapons/WeaponSkins.h"
+#include "Weapons/ShotReactions.h"
+#include "Characters/Alertness.h"
+#include "UI/SaveLoadWidget.h"
+#include "UI/HandTuneWidget.h"
+#include "UI/PaneShape.h"
+#include "Weapons/HandTuneController.h"
+#include "Weapons/SparkFx.h"
+#include "Components/PointLightComponent.h"
+#include "Components/DecalComponent.h"
+#include "World/ElevatorActor.h"
+#include "Weapons/ImpactEffects.h"
+#include "Core/InputBindings.h"
+#include "World/AmbientPlayer.h"
+#include "UI/BlinkOverlayWidget.h"
 #include "GameFramework/HUD.h"
 #include "HAL/IConsoleManager.h"
 #include "Blueprint/GameViewportSubsystem.h"
@@ -90,7 +101,7 @@
 #include "Sound/SoundWave.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
-#include "SaveGameSubsystem.h"
+#include "Core/SaveGameSubsystem.h"
 #include "Engine/GameInstance.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -102,23 +113,25 @@
 #include "Components/TextBlock.h"
 #include "Components/ScrollBox.h"
 #include "Blueprint/WidgetTree.h"
-#include "CrtStyle.h"
-#include "ItemCatalog.h"
-#include "SheetSpec.h"
+#include "UI/CrtStyle.h"
+#include "Items/ItemCatalog.h"
+#include "UI/SheetSpec.h"
 #if WITH_EDITOR
 #include "Editor.h"
 #include "EditorViewportClient.h"
 #include "LevelEditorViewport.h"
 #endif
 #include "Engine/Texture.h"
-#include "ReferenceWidget.h"
+#include "UI/ReferenceWidget.h"
 #include "Components/LightComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "GameFramework/PlayerInput.h"
-#include "SlidingDoorActor.h"
-#include "LootBoxActor.h"
-#include "InventoryTransferWidget.h"
-#include "InspectSurface.h"
+#include "World/SlidingDoorActor.h"
+#include "World/LootBoxActor.h"
+#include "UI/InventoryTransferWidget.h"
+#include "World/InspectSurface.h"
+
+static void LockCaptureExposure(USceneCaptureComponent2D* Cap);   // defined with the preview captures below; the hand-tuning captures use it too
 
 static TAutoConsoleVariable<int32> CVarVoices(
 	TEXT("RepliCan.Voices"), 0,
@@ -155,7 +168,7 @@ namespace
 		// here would break that.
 		virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& KeyEvent) override
 		{
-			if (TerminalKey(KeyEvent, false)) { return true; }
+			{ const int32 T = TerminalKey(KeyEvent, false); if (T == 1) { return true; } if (T == 2) { return false; } }
 			ABasePlayerController* PC = Controller.Get();
 			if (!PC || !PC->GetWorld() || !PC->GetWorld()->IsGameWorld()) { return false; }
 			if (InputBindings::KeyFor(TEXT("Freelook")) == KeyEvent.GetKey())
@@ -173,29 +186,30 @@ namespace
 		// each other off the end of the stack.
 		bool bTerminalForwarding = false;
 		struct FForwardScope { bool& Flag; FForwardScope(bool& F) : Flag(F) { Flag = true; } ~FForwardScope() { Flag = false; } };
-		bool TerminalKey(const FKeyEvent& KeyEvent, bool bDown)
+		// 0: not the terminal's. 1: taken by the terminal. 2: the terminal's, and Slate carries it to
+		// the prompt itself (the real keyboard is focused there), so the game must not act on it.
+		int32 TerminalKey(const FKeyEvent& KeyEvent, bool bDown)
 		{
 			ABasePlayerController* PC = Controller.Get();
-			if (!PC || !PC->IsTerminalOpen() || bTerminalForwarding) { return false; }
+			if (!PC || !PC->IsTerminalOpen() || bTerminalForwarding) { return 0; }
+			if (bDown && KeyEvent.GetKey() == EKeys::Escape) { PC->CloseTerminal(); return 1; }
+			if (PC->TerminalKeysDirect()) { return 2; }
 			FForwardScope Scope(bTerminalForwarding);
-			if (bDown && KeyEvent.GetKey() == EKeys::Escape) { PC->CloseTerminal(); return true; }
 			if (UWidgetInteractionComponent* Pointer = PC->GetTerminalPointer())
 			{
-				if (bDown)
-				{
-					Pointer->PressKey(KeyEvent.GetKey(), KeyEvent.IsRepeat());
-					// The processor sees keys, not characters: the typed character comes from the key event.
-					uint32 Ch = KeyEvent.GetCharacter();
-					if (Ch >= 'A' && Ch <= 'Z' && !KeyEvent.IsShiftDown()) { Ch += 'a' - 'A'; }   // key codes are upper case; the shift state says
-					if (Ch >= 32 && Ch < 127) { Pointer->SendKeyChar(FString::Chr((TCHAR)Ch), KeyEvent.IsRepeat()); }
-				}
+				// The processor sees keys, not characters. A printable key goes as its character (PressKey
+				// would type one of its own as well: two of every letter); the rest go as keys.
+				uint32 Ch = bDown ? KeyEvent.GetCharacter() : 0;
+				if (Ch >= 'A' && Ch <= 'Z' && !KeyEvent.IsShiftDown()) { Ch += 'a' - 'A'; }   // key codes are upper case; the shift state says
+				if (bDown && Ch >= 32 && Ch < 127 && !KeyEvent.IsControlDown() && !KeyEvent.IsAltDown()) { Pointer->SendKeyChar(FString::Chr((TCHAR)Ch), KeyEvent.IsRepeat()); }
+				else if (bDown) { Pointer->PressKey(KeyEvent.GetKey(), KeyEvent.IsRepeat()); }
 				else { Pointer->ReleaseKey(KeyEvent.GetKey()); }
 			}
-			return true;
+			return 1;
 		}
 		virtual bool HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& KeyEvent) override
 		{
-			if (TerminalKey(KeyEvent, true)) { return true; }
+			{ const int32 T = TerminalKey(KeyEvent, true); if (T == 1) { return true; } if (T == 2) { return false; } }
 			ABasePlayerController* PC = Controller.Get();
 			if (!PC || KeyEvent.IsRepeat() || !PC->GetWorld() || !PC->GetWorld()->IsGameWorld()) { return false; }
 			const FKey Key = KeyEvent.GetKey();
@@ -265,10 +279,13 @@ namespace
 			}
 			if (bAssist)
 			{
-				// Claude Assist, straight in: the cursor becomes the marking reticle and every click goes to Claude. F12 again ends it.
+				// Claude Assist is a one-shot capture of whatever is under the reticle: no arming,
+				// no edit mode, no UI, no mouse click, and it works during normal play. The old
+				// armed-cursor mode (BeginClaudeAssist/CancelClaudeAssist) is left intact because the
+				// Edit Tool button and the amber marking cursor still drive it -- F12 just no longer
+				// binds to it.
 				if (PC->IsInCinematic() || PC->IsPauseMenuOpen()) { return true; }
-				if (PC->IsClaudeAssistActive()) { PC->CancelClaudeAssist(); PC->ExitEditMode(); }
-				else { PC->HideCharacterSheet(); PC->BeginClaudeAssist(); }
+				PC->CaptureAssistUnderReticle();
 				return true;
 			}
 			if (bEdit)
@@ -285,6 +302,7 @@ namespace
 				return true;
 			}
 			// Esc: the sheet closes first; otherwise the pause menu toggles.
+			if (PC->IsSaveLoadOpen()) { PC->HideSaveLoad(); return true; }
 			if (PC->IsTransferOpen()) { PC->CloseTransfer(); return true; }
 			if (PC->IsCharacterSheetOpen()) { PC->HideCharacterSheet(); return true; }
 			if (PC->IsReferenceOpen()) { PC->HideReference(); } else if (PC->IsPauseMenuOpen()) { PC->HidePauseMenu(); } else { PC->ShowPauseMenu(); }
@@ -345,9 +363,12 @@ namespace
 			// no screen is up. Edit mode keeps the click for placing things.
 			if (!PC->IsEditMode())
 			{
-				// A click that lands on a panel is a click on the panel, never a shot.
-				if (PC->IsAnyScreenOpen()) { return false; }
+				// A click that lands on a panel is a click on the panel, never a shot. The reticle menu
+				// is not a panel: with a person or a crate under the reticle the trigger was dead, which
+				// is exactly when it is wanted. The pull closes the menu, the way aiming does.
+				if (PC->IsFiringBlocked()) { return false; }
 				if (PC->HeldSlot < 0) { return false; }
+				PC->DismissInspectMenu();
 				PC->FireHeldWeapon();
 				PC->SetTriggerHeld(true);   // and stays pulled until the release: auto cycles on it
 				return true;
@@ -513,24 +534,767 @@ void ABasePlayerController::SetupInputComponent()
 	InputComponent->BindKey(EKeys::F9, IE_Pressed, this, &ABasePlayerController::QuickLoad);
 }
 
-void ABasePlayerController::QuickSave()
+void ABasePlayerController::SaveToSlot(const FString& Slot)
 {
 	USaveGameSubsystem* Saves = GetGameInstance() ? GetGameInstance()->GetSubsystem<USaveGameSubsystem>() : nullptr;
-	const bool bOk = Saves && Saves->SaveGame(TEXT("Quick"));
+	const bool bOk = Saves && Saves->SaveGame(Slot);
 	if (APawn* P = GetPawn()) { ShowCallout(P, bOk ? TEXT("Game saved.") : TEXT("Save failed (see log)."), 2.0f, false); }
 }
 
-void ABasePlayerController::QuickLoad()
+void ABasePlayerController::LoadFromSlot(const FString& Slot)
 {
+	HideSaveLoad();
 	USaveGameSubsystem* Saves = GetGameInstance() ? GetGameInstance()->GetSubsystem<USaveGameSubsystem>() : nullptr;
-	if (!Saves || !Saves->SlotExists(TEXT("Quick")))
+	if (!Saves || !Saves->SlotExists(Slot))
 	{
-		if (APawn* P = GetPawn()) { ShowCallout(P, TEXT("No quick save yet."), 2.0f, false); }
+		if (APawn* P = GetPawn()) { ShowCallout(P, *FString::Printf(TEXT("Nothing in %s yet."), *Slot), 2.0f, false); }
 		return;
 	}
 	HidePauseMenu();
-	const bool bOk = Saves->LoadGame(TEXT("Quick"));
+	const bool bOk = Saves->LoadGame(Slot);
 	if (APawn* P = GetPawn()) { ShowCallout(P, bOk ? TEXT("Game loaded.") : TEXT("Load failed (see log)."), 2.0f, false); }
+}
+
+void ABasePlayerController::QuickSave() { SaveToSlot(TEXT("Quick")); }
+void ABasePlayerController::QuickLoad() { LoadFromSlot(TEXT("Quick")); }
+
+static const float HandTuneFrameCm = 185.0f;   // the width of each tuning picture in the world: the upper body and a rifle, with room round them
+static const FVector HandTuneBoothOrigin(60000.0f, -63000.0f, 0.0f);   // the stand-in's booth: off the map, clear of the weapon booth and the character booth
+static const float HandTuneBoothYaw = 0.0f;                             // the stand-in faces +X; the side picture looks along -Y, the top picture down
+
+void ABasePlayerController::UIDump()
+{
+	int32 InViewport = 0;
+	FString Note;
+	for (TObjectIterator<UUserWidget> It; It; ++It)
+	{
+		UUserWidget* W = *It;
+		if (!W || W->GetWorld() != GetWorld()) { continue; }
+		const bool bIn = W->IsInViewport();
+		UE_LOG(LogTemp, Log, TEXT("UIDump: %-32s inViewport=%d visibility=%d opacity=%.2f"), *W->GetClass()->GetName(), bIn ? 1 : 0, (int32)W->GetVisibility(), W->GetRenderOpacity());
+		if (bIn) { ++InViewport; Note += (Note.IsEmpty() ? TEXT("") : TEXT(", ")) + W->GetClass()->GetName(); }
+	}
+	UE_LOG(LogTemp, Log, TEXT("UIDump: %d widget(s) in the viewport | %s"), InViewport, *DescribeInput());
+	SetDiagNoteTimed(FString::Printf(TEXT("UI: %s"), Note.IsEmpty() ? TEXT("nothing in the viewport") : *Note), 8.0f);
+}
+
+void ABasePlayerController::HandTuneLoadWeapon(const WeaponCatalog::FWeapon* W)
+{
+	if (!W) { return; }
+	HandTuneKey = W->Key;   // the Weapons.json entry SAVE writes
+	HandTuneName = W->Name;
+	HT_Skin.Empty();   // a weapon arrives wearing its own default, not the last one's fitting
+	HT_Grip0 = HT_Grip = W->Grip; HT_HandRot0 = HT_HandRot = W->HandRot; HT_Fore0 = HT_Fore = W->ForeGrip; HT_ForeRot0 = HT_ForeRot = W->ForeHandRot;
+	HT_HasFore = W->bHasForeGrip; HT_ForePitch = W->ForeGripPitch; HT_Stance = W->Stance;
+	auto Five = [](const TArray<float>& In) { TArray<float> Out = In; Out.SetNumZeroed(5); return Out; };
+	HT_FingersR0 = HT_FingersR = Five(W->FingersR); HT_FingersL0 = HT_FingersL = Five(W->FingersL);
+	HT_Hunch0 = HT_Hunch = W->Hunch; HT_Lean0 = HT_Lean = W->LeanDeg;
+	for (int32 i = 0; i < 3; ++i) { HT_Pull3_0[i] = HT_Pull3[i] = W->PullCm[i]; HT_Lat3_0[i] = HT_Lat3[i] = W->LateralCm[i]; }
+	HT_LowReady0[0] = HT_LowReady[0] = W->LowReadyPitch; HT_LowReady0[1] = HT_LowReady[1] = W->LowReadyYaw;
+	for (int32 i = 0; i < 3; ++i) { HT_ElbowMain0[i] = HT_ElbowMain[i] = W->ElbowMain[i]; HT_ElbowSup0[i] = HT_ElbowSup[i] = W->ElbowSupport[i]; }
+	HT_OpticKey = W->Optic;
+	HT_Optic = W->Optic;
+	HT_ScalePct0 = HT_ScalePct = W->Scale * 100.0f;
+	{
+		HT_Optic0 = HT_Optic = W->Optic;
+		const WeaponCatalog::FOptic* O = WeaponCatalog::FindOptic(HT_OpticKey);
+		HT_OpticOff0 = HT_OpticOff = O ? O->Offset : FVector::ZeroVector;
+		HT_OpticSkin0 = HT_OpticSkin = O ? O->Skin : FString();
+	}
+	for (int32 i = 0; i < 3; ++i) { HT_ElbowMainAim0[i] = HT_ElbowMainAim[i] = W->ElbowMainAim[i]; HT_ElbowSupAim0[i] = HT_ElbowSupAim[i] = W->ElbowSupportAim[i]; }
+	// The stand-in, if it is already standing there: opening the page loads the numbers before the
+	// booth exists, and the arrows load them when it is already in front of you.
+	if (IsValid(HandTunePawn)) { ApplyWeaponToPawn(HandTunePawn, W); HandTunePawn->SetAiming(false); }
+}
+
+FString ABasePlayerController::HandTuneWeaponLabel() const
+{
+	// THE MODEL, NOT "MAKE MODEL". DisplayName prepends the maker, which on this page is both
+	// redundant -- every weapon in a pack shares one -- and long enough to overrun the selector's
+	// label and collide with its arrows.
+	if (const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(HandTuneName))
+	{
+		if (!W->Model.IsEmpty()) { return W->Model; }
+	}
+	return HandTuneName;
+}
+
+int32 ABasePlayerController::RefreshTunedWeapon(const FString& WeaponName)
+{
+	// Nothing in the bag needs touching: Inventory and Equipped are lists of NAMES, so every weapon
+	// of a type shares the catalogue's one set of numbers and cannot drift from it. What can drift
+	// is the copy pushed onto a character when the weapon was put in its hands -- the player's, an
+	// NPC's, and the tuning page's own stand-in. Those are the ones re-dressed here.
+	if (WeaponName.IsEmpty() || !GetWorld()) { return 0; }
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(WeaponName);
+	if (!W) { return 0; }
+	int32 Dressed = 0;
+	for (TActorIterator<ABaseCharacter> It(GetWorld()); It; ++It)
+	{
+		ABaseCharacter* Who = *It;
+		if (!IsValid(Who) || Who->GetHeldWeaponName() != WeaponName) { continue; }
+		// NOT THE TUNING PAGE'S STAND-IN. That figure is driven by the page's live values, not by
+		// the catalogue, and re-dressing it from the file rebuilds its weapon and stance from
+		// scratch -- which is why saving appeared to throw the edit away and RESET appeared to bring
+		// it back. (RESET restores the page's values, which after a save ARE the saved ones, so it
+		// looked like the fix when it was really the second half of the bug.)
+		if (Who == HandTunePawn) { continue; }
+		ApplyWeaponToPawn(Who, W);
+		++Dressed;
+	}
+	return Dressed;
+}
+
+void ABasePlayerController::HandTuneStepWeapon(int32 Dir)
+{
+	if (!bHandTuneOpen) { return; }
+	const TArray<FString> Names = WeaponCatalog::TunableNames();
+	if (Names.Num() == 0) { return; }
+	int32 At = Names.IndexOfByKey(HandTuneName);
+	if (At == INDEX_NONE) { At = 0; }
+	// Wraps, so the far end of the list is one press from the near end rather than a dead button.
+	At = (At + (Dir >= 0 ? 1 : Names.Num() - 1)) % Names.Num();
+	if (const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(Names[At]))
+	{
+		HandTuneLoadWeapon(W);
+		HandTuneResetView();   // a different weapon is a different shape: start from the standing view
+	}
+}
+
+void ABasePlayerController::ShowHandTune(const FString& WeaponName)
+{
+	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(WeaponName);
+	if (!Me || !W || !GetWorld()) { SetDiagNoteTimed(FString::Printf(TEXT("HandTune: no pawn, or no weapon named %s"), *WeaponName), 4.0f); return; }
+	if (bHandTuneOpen) { HideHandTune(); }
+	bHandTuneReturnToReference = bReferenceOpen;
+	if (bReferenceOpen) { HideReference(); }
+	HandTuneLoadWeapon(W);
+	HT_EyeSide0 = HT_EyeSide = Me->GetEyeSideCm(); HT_EyeUp0 = HT_EyeUp = Me->GetEyeUpCm(); HT_EyeFwd0 = HT_EyeFwd = Me->GetEyeForwardCm();   // the eyeline is the body's, not the weapon's
+	// THE STAND-IN: the player's own likeness (Characters/Player.json) in the booth the character
+	// sheet's mirror uses. Spawned through SpawnBoothCharacter, which spawns DEFERRED and sets the
+	// config name before FinishSpawning so BeginPlay builds the body from the file -- a config
+	// applied after an ordinary spawn leaves the bare crew rig standing there in its overalls.
+	// The player is not touched: the world changes on SAVE and at no other moment.
+	ABaseCharacter* Booth = SpawnBoothCharacter(TEXT("Player"));
+	if (!Booth)
+	{
+		SetDiagNoteTimed(TEXT("HandTune: no saved likeness to stand in (Characters/Player.json)"), 5.0f);
+		if (bHandTuneReturnToReference) { bHandTuneReturnToReference = false; ShowReference(); }
+		return;
+	}
+	HandTunePawn = Booth;
+	// Collision and movement are left exactly as the booth spawned them: the booth has a floor tile
+	// and the figure stands on it, which is how the character sheet's mirror has always worked.
+	// Switching collision off here dropped the stand-in through the floor and out of the light.
+	Booth->SetZoomLevel(2);   // third person: the head stays drawn
+	// Its own controller: a pawn reads its view rotation off its controller, and the page's AIM sets it.
+	FActorSpawnParameters SP; SP.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	HandTuneController = GetWorld()->SpawnActor<AHandTuneController>(AHandTuneController::StaticClass(), Booth->GetActorLocation(), FRotator::ZeroRotator, SP);
+	if (HandTuneController) { HandTuneController->Possess(Booth); HandTuneController->SetTickableWhenPaused(true); }
+	ApplyWeaponToPawn(Booth, W);
+	Booth->SetAiming(false);
+	// The page pauses the game; this one character keeps running, weapon and all.
+	Booth->SetTicksWhenPaused(true);
+	HandTuneResetView();
+	HT_Zoom = 1.0f; HT_ViewIdx = 1;
+	HandTuneSetCarry(1);
+	HandTuneSetAim(1);
+	// THE EYE LINE: a thin rod from the aiming eye straight down the aim. A component of the
+	// stand-in, so the captures show it (their show-only list is taken from the pawn's components,
+	// which is also why it is made BEFORE they are).
+	HandTuneAimLine = NewObject<UStaticMeshComponent>(Booth, TEXT("HandTuneAimLine"));
+	if (HandTuneAimLine)
+	{
+		HandTuneAimLine->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cylinder.Cylinder")));
+		if (UMaterialInterface* Base = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial")))
+		{
+			UMaterialInstanceDynamic* M = UMaterialInstanceDynamic::Create(Base, this);
+			M->SetVectorParameterValue(TEXT("Color"), FLinearColor(1.0f, 0.15f, 0.1f, 1.0f));
+			HandTuneAimLine->SetMaterial(0, M);
+		}
+		HandTuneAimLine->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		HandTuneAimLine->SetCastShadow(false);
+		HandTuneAimLine->SetAbsolute(true, true, true);
+		HandTuneAimLine->SetupAttachment(Booth->GetRootComponent());
+		HandTuneAimLine->RegisterComponent();
+	}
+	// The captures: orthographic, one from the stand-in's right and one from above, each seeing only
+	// the stand-in (and what hangs off it), exposure locked like the booth's. TickHandTune aims them
+	// and asks each for a frame outright, so nothing depends on a capture ticking under a pause.
+	FActorSpawnParameters P; P.Owner = this; P.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	auto MakeCapture = [&](TObjectPtr<ASceneCapture2D>& Actor, TObjectPtr<UTextureRenderTarget2D>& RT)
+	{
+		// MADE TO THE SHAPE OF THE FRAME IT IS SHOWN IN. A square target displayed in a frame that is
+		// not square is stretched on one axis, and an orthographic capture takes its vertical extent
+		// from the target's aspect -- so a square target was both rendering and displaying the wrong
+		// proportions. Derived from the widget's own numbers so the two cannot drift apart.
+		if (!RT)
+		{
+			const int32 RTW = 900;
+			RT = UKismetRenderingLibrary::CreateRenderTarget2D(this, RTW, PaneShape::TargetHeight(PaneShape::HandTune, RTW), ETextureRenderTargetFormat::RTF_RGBA8_SRGB, FLinearColor::Black, false);
+		}
+		Actor = GetWorld()->SpawnActor<ASceneCapture2D>(Booth->GetActorLocation(), FRotator::ZeroRotator, P);
+		if (!Actor) { return; }
+		Actor->SetTickableWhenPaused(true);
+		USceneCaptureComponent2D* Cap = Actor->GetCaptureComponent2D();
+		if (!Cap) { return; }
+		Cap->SetTickableWhenPaused(true);
+		Cap->TextureTarget = RT; Cap->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+		Cap->ProjectionType = ECameraProjectionMode::Orthographic; Cap->OrthoWidth = HandTuneFrameCm;
+		Cap->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;
+		Cap->ShowOnlyActorComponents(Booth, true);
+		Cap->bCaptureEveryFrame = false; Cap->bCaptureOnMovement = false; Cap->bAlwaysPersistRenderingState = true;
+		LockCaptureExposure(Cap);
+	};
+	MakeCapture(HandTuneCap, HandTuneRT);
+	// A three-light rig around the stand-in: key from the side camera's quarter, fill from the other
+	// side, a top light for the top view. The booth's own lights are set for a portrait, not this.
+	const FRotator Face(0.0f, HandTuneBoothYaw, 0.0f);
+	const FVector LightRel[3] = { FVector(120.0f, 220.0f, 160.0f), FVector(80.0f, -200.0f, 60.0f), FVector(60.0f, 0.0f, 260.0f) };
+	const float LightCd[3] = { 220.0f, 90.0f, 140.0f };
+	for (int32 i = 0; i < 3; ++i)
+	{
+		APointLight* Light = GetWorld()->SpawnActor<APointLight>(Booth->GetActorLocation() + Face.RotateVector(LightRel[i]), FRotator::ZeroRotator, P);
+		if (!Light) { continue; }
+		Light->SetMobility(EComponentMobility::Movable);
+		Light->PointLightComponent->SetIntensityUnits(ELightUnits::Candelas);
+		Light->PointLightComponent->SetIntensity(LightCd[i]);
+		Light->PointLightComponent->SetAttenuationRadius(800.0f);
+		Light->PointLightComponent->SetCastShadows(false);
+		Light->SetTickableWhenPaused(true);
+		HandTuneLights.Add(Light);
+	}
+	if (!HandTuneWidget)
+	{
+		HandTuneWidget = CreateWidget<UHandTuneWidget>(this, UHandTuneWidget::StaticClass());
+		if (HandTuneWidget) { HandTuneWidget->OnClose.BindUObject(this, &ABasePlayerController::HideHandTune); }
+	}
+	bHandTuneOpen = true;
+	TickHandTune();   // the captures on the subject before the first frame is drawn
+	if (HandTuneWidget)
+	{
+		// THROUGH THE SAME PLACER AS THE CHARACTER SHEET. AddToViewport gives a widget the whole
+		// screen, which is why this page came up full-bleed while every other console page sits in
+		// the same framed rectangle. PlaceConsolePage puts it in ConsolePageRect() and registers it
+		// so KeepConsolePagesFitted re-fits it when the window changes size. In the viewport first,
+		// either way: focus only lands on a widget that has been built.
+		PlaceConsolePage(HandTuneWidget, 70);
+		HandTuneWidget->Open(this, HandTuneRT);
+	}
+	ApplyInputMode();
+	if (HandTuneWidget) { HandTuneWidget->SetKeyboardFocus(); }
+}
+
+void ABasePlayerController::TickHandTune()
+{
+	if (!bHandTuneOpen || !HandTunePawn || !HandTunePawn->GetMesh()) { return; }
+	ABaseCharacter* Booth = HandTunePawn;
+	// THE PIVOT IS THE WEAPON. It is the thing being tuned, so it holds the middle of both pictures
+	// and a drag swings the camera round it -- the weapon does not slide about the frame while you
+	// are trying to look at where a hand meets it. Its own bounds centre, not the hand: a rifle
+	// tuned by its grip would sit half out of frame.
+	const FRotator Face(0.0f, HandTuneBoothYaw, 0.0f);
+	const FVector Right = FRotationMatrix(Face).GetUnitAxis(EAxis::Y);
+	const FVector Fwd = Face.Vector();
+	// The eye line, from the aiming eye down the aim, a little past the muzzle.
+	if (HandTuneAimLine)
+	{
+		FVector EyeLoc; FRotator EyeRot;
+		if (Booth->GetAimEye(EyeLoc, EyeRot))
+		{
+			const FVector To = EyeLoc + EyeRot.Vector() * 140.0f;
+			HandTuneAimLine->SetVisibility(true);
+			HandTuneAimLine->SetWorldLocation((EyeLoc + To) * 0.5f);
+			HandTuneAimLine->SetWorldRotation(FRotationMatrix::MakeFromZ(To - EyeLoc).Rotator());
+			HandTuneAimLine->SetWorldScale3D(FVector(0.006f, 0.006f, 1.4f));   // the engine cylinder is 100 long and 100 across
+		}
+		else { HandTuneAimLine->SetVisibility(false); }
+	}
+	FVector Pivot;
+	if (Booth->WeaponMeshComponent && Booth->WeaponMeshComponent->GetStaticMesh()) { Pivot = Booth->WeaponMeshComponent->Bounds.Origin; }
+	else if (Booth->GetMesh()->DoesSocketExist(TEXT("hand_r"))) { Pivot = Booth->GetMesh()->GetSocketLocation(TEXT("hand_r")); }
+	else { Pivot = Booth->GetActorLocation() + FVector(0.0f, 0.0f, 40.0f); }
+	// The drag turns the camera's offset about the pivot IN THE PICTURE'S OWN FRAME: a sideways
+	// drag swings it about the picture's up axis, a vertical drag tips it about the picture's
+	// right axis. Each picture must bring its own two axes -- crossing the offset with the world's
+	// up worked for the side view and gave the top view a ZERO axis, because it looks straight
+	// down: that is why dragging the top picture did nothing at all.
+	// FRAME THE MAN AND THE GUN. The pivot is the weapon, but a frame centred on it alone leaves the
+	// body half out of picture. So the camera slides across its own view by half the way to the
+	// head: the orbit still turns about the weapon, and what you see is a man holding one. No
+	// attempt is made to fit the whole eye line -- it runs a metre and a half past the muzzle.
+	const FVector HeadAt = Booth->GetMesh()->DoesSocketExist(TEXT("head")) ? Booth->GetMesh()->GetSocketLocation(TEXT("head")) : Pivot;
+	// WHERE IT IS SEEN FROM. Five standing places round the stand-in; the drag turns whichever is
+	// chosen about the weapon, and lets go back to it.
+	const FVector Up = FVector::UpVector;
+	FVector Offset;
+	switch (HT_ViewIdx)
+	{
+	case 0:  Offset = -Right * 260.0f; break;                                        // from its left
+	case 2:  Offset = Up * 330.0f; break;                                            // from above
+	case 3:  Offset = Fwd * 260.0f; break;                                           // from in front, down the barrel
+	case 4:  Offset = (Fwd * 0.62f + Right * 0.66f + Up * 0.42f).GetSafeNormal() * 285.0f; break;   // three-quarter
+	default: Offset = Right * 260.0f; break;                                         // from its right
+	}
+	// The picture's own two axes, so a drag turns it the way the pointer went whichever way it
+	// faces. Looking straight down there is no horizon to use, so the body's forward stands in.
+	const FVector ViewDir = (-Offset).GetSafeNormal();
+	const FVector PicUp = FMath::Abs(FVector::DotProduct(ViewDir, Up)) > 0.9f ? Fwd : Up;
+	const FVector PicRight = FVector::CrossProduct(PicUp, ViewDir).GetSafeNormal();
+	{
+		ASceneCapture2D* Actor = HandTuneCap;
+		if (Actor)
+		{
+			const FVector Turned = Offset.RotateAngleAxis(HT_Orbit.X, PicUp).RotateAngleAxis(HT_Orbit.Y, PicRight);
+			const FVector View = (-Turned).GetSafeNormal();
+			const FVector ToHead = (HeadAt - Pivot) * 0.5f;
+			const FVector Across = ToHead - View * FVector::DotProduct(ToHead, View);   // only what shows in this picture
+			Actor->SetActorLocationAndRotation(Pivot + Turned + Across, (-Turned).Rotation());
+			if (USceneCaptureComponent2D* Cap = Actor->GetCaptureComponent2D())
+			{
+				Cap->OrthoWidth = HandTuneFrameCm * HT_Zoom;
+				Cap->CaptureScene();   // one frame a tick, asked for outright
+			}
+		}
+	}
+}
+
+void ABasePlayerController::HideHandTune()
+{
+	if (!bHandTuneOpen) { return; }
+	bHandTuneOpen = false;
+	if (HandTuneWidget && HandTuneWidget->IsInViewport()) { HandTuneWidget->RemoveFromParent(); }
+	if (HandTuneCap) { HandTuneCap->Destroy(); HandTuneCap = nullptr; }
+	if (HandTuneAimLine) { HandTuneAimLine->DestroyComponent(); HandTuneAimLine = nullptr; }
+	for (TObjectPtr<APointLight>& L : HandTuneLights) { if (L) { L->Destroy(); } }
+	HandTuneLights.Reset();
+	if (HandTuneController) { HandTuneController->UnPossess(); HandTuneController->Destroy(); HandTuneController = nullptr; }
+	HandTunePawn = nullptr;
+	DestroyBooth();   // the stand-in and its set
+	// The player was never touched: only SAVE changes the world.
+	ApplyInputMode();
+	if (bHandTuneReturnToReference) { bHandTuneReturnToReference = false; ShowReference(); }
+}
+
+void ABasePlayerController::HandTuneSetCarry(int32 Idx)
+{
+	HandTuneCarryIdx = FMath::Clamp(Idx, 0, 2);
+	static const int32 Carries[] = { 0 /*LowReady*/, 2 /*Shouldered*/, 3 /*ADS*/ };
+	if (HandTunePawn) { HandTunePawn->SetCarryOverride(Carries[HandTuneCarryIdx]); }
+}
+
+void ABasePlayerController::HandTuneSetAim(int32 Idx)
+{
+	HandTuneAimIdx = FMath::Clamp(Idx, 0, 2);
+	static const float Pitches[] = { 28.0f, 0.0f, -42.0f };
+	if (HandTuneController) { HandTuneController->SetControlRotation(FRotator(Pitches[HandTuneAimIdx], HandTuneBoothYaw, 0.0f)); }
+}
+
+void ABasePlayerController::HandTuneApply()
+{
+	ABaseCharacter* Me = HandTunePawn;   // the stand-in, never the player
+	if (!Me) { return; }
+	Me->SetWeaponGrip(HT_Grip + WeaponCatalog::StanceGripNudge(HT_Stance));
+	Me->SetWeaponHandRotation(HT_HandRot);
+	Me->SetWeaponForeGrip(HT_Fore, HT_HasFore || !HT_Fore.IsNearlyZero(), HT_ForePitch);
+	Me->SetWeaponForeHandRotation(HT_ForeRot);
+	Me->SetWeaponFingers(HT_FingersR, HT_FingersL);
+	Me->SetWeaponHunch(HT_Hunch);
+	Me->SetWeaponLean(HT_Lean);
+	Me->SetWeaponCarryTune(HT_Pull3, HT_Lat3);
+	Me->SetEyeTune(HT_EyeSide, HT_EyeUp, HT_EyeFwd);
+	Me->SetWeaponLowReady(HT_LowReady[0], HT_LowReady[1]);
+	Me->SetWeaponElbowTwist(HT_ElbowMain, HT_ElbowSup);
+	Me->SetWeaponElbowAim(HT_ElbowMainAim, HT_ElbowSupAim);
+	Me->SetWeaponDrawScale(HT_ScalePct * 0.01f);   // size first: the grip offset is measured on the scaled mesh
+	HandTuneFitOptic();   // the sight, its offset, its paint and the eye line that follows them
+}
+
+float ABasePlayerController::HandTuneValue(int32 Row, int32 Col) const
+{
+	auto V = [](const FVector& P, int32 C) { return C == 0 ? P.X : C == 1 ? P.Y : P.Z; };
+	auto R = [](const FRotator& P, int32 C) { return C == 0 ? P.Pitch : C == 1 ? P.Yaw : P.Roll; };
+	auto F = [](const TArray<float>& A, int32 C) { return A.IsValidIndex(C) ? A[C] : 0.0f; };
+	switch (Row)
+	{
+	case 0: return (float)V(HT_Grip, Col);
+	case 1: return (float)R(HT_HandRot, Col);
+	case 2: return F(HT_FingersR, Col);
+	case 3: return (float)V(HT_Fore, Col);
+	case 4: return (float)R(HT_ForeRot, Col);
+	case 5: return F(HT_FingersL, Col);
+	case 6: return HT_Hunch;
+	case 7: return (Col >= 0 && Col < 3) ? HT_Pull3[Col] : 0.0f;
+	case 8: return HT_Lean;
+	case 9: return (Col >= 0 && Col < 3) ? HT_Lat3[Col] : 0.0f;
+	case 10: return Col == 0 ? HT_EyeSide : Col == 1 ? HT_EyeUp : HT_EyeFwd;
+	case 11: return (Col >= 0 && Col < 2) ? HT_LowReady[Col] : 0.0f;
+	case 12: return (Col >= 0 && Col < 3) ? HT_ElbowMain[Col] : 0.0f;
+	case 14: return (Col >= 0 && Col < 3) ? HT_ElbowMainAim[Col] : 0.0f;
+	case 15: return (Col >= 0 && Col < 3) ? HT_ElbowSupAim[Col] : 0.0f;
+	case 13: return (Col >= 0 && Col < 3) ? HT_ElbowSup[Col] : 0.0f;
+	case 16: return (Col == 0) ? HT_OpticOff.X : (Col == 1) ? HT_OpticOff.Y : HT_OpticOff.Z;
+	case 17: return HT_ScalePct;
+	default: return 0.0f;
+	}
+}
+
+void ABasePlayerController::HandTuneAdjust(int32 Row, int32 Col, float Delta)
+{
+	auto V = [](FVector& P, int32 C, float D) { (C == 0 ? P.X : C == 1 ? P.Y : P.Z) += D; };
+	auto R = [](FRotator& P, int32 C, float D) { (C == 0 ? P.Pitch : C == 1 ? P.Yaw : P.Roll) += D; };
+	auto F = [](TArray<float>& A, int32 C, float D) { if (A.Num() < 5) { A.SetNumZeroed(5); } if (A.IsValidIndex(C)) { A[C] = FMath::Clamp(A[C] + D, -90.0f, 90.0f); } };
+	switch (Row)
+	{
+	case 0: V(HT_Grip, Col, Delta); break;
+	case 1: R(HT_HandRot, Col, Delta); break;
+	case 2: F(HT_FingersR, Col, Delta); break;
+	case 3: V(HT_Fore, Col, Delta); break;
+	case 4: R(HT_ForeRot, Col, Delta); break;
+	case 5: F(HT_FingersL, Col, Delta); break;
+	case 6: HT_Hunch = FMath::Clamp(HT_Hunch + Delta, -8.0f, 16.0f); break;   // centimetres of shrug, at the sights
+	case 7: if (Col >= 0 && Col < 3) { HT_Pull3[Col] = FMath::Clamp(HT_Pull3[Col] + Delta, -30.0f, 30.0f); } break;
+	case 8: HT_Lean = FMath::Clamp(HT_Lean + Delta, -20.0f, 40.0f); break;   // degrees at the waist, at the sights
+	case 9: if (Col >= 0 && Col < 3) { HT_Lat3[Col] = FMath::Clamp(HT_Lat3[Col] + Delta, -20.0f, 40.0f); } break;
+	case 10: if (Col == 0) { HT_EyeSide = FMath::Clamp(HT_EyeSide + Delta, -14.0f, 14.0f); } else if (Col == 1) { HT_EyeUp = FMath::Clamp(HT_EyeUp + Delta, -14.0f, 14.0f); } else { HT_EyeFwd = FMath::Clamp(HT_EyeFwd + Delta, -14.0f, 14.0f); } break;
+	case 11: if (Col >= 0 && Col < 2) { HT_LowReady[Col] = FMath::Clamp(HT_LowReady[Col] + Delta, -90.0f, 90.0f); } break;
+	// The optic, along the weapon own axes: x down the barrel, y across, z up off the rail.
+	case 17: HT_ScalePct = FMath::Clamp(HT_ScalePct + Delta, 25.0f, 400.0f); break;
+	case 16:
+		if (Col == 0) { HT_OpticOff.X = FMath::Clamp(HT_OpticOff.X + Delta, -40.0f, 40.0f); }
+		else if (Col == 1) { HT_OpticOff.Y = FMath::Clamp(HT_OpticOff.Y + Delta, -20.0f, 20.0f); }
+		else { HT_OpticOff.Z = FMath::Clamp(HT_OpticOff.Z + Delta, -20.0f, 20.0f); }
+		break;
+	case 12: if (Col >= 0 && Col < 3) { HT_ElbowMain[Col] = FMath::Clamp(HT_ElbowMain[Col] + Delta, -180.0f, 180.0f); } break;
+	case 14: if (Col >= 0 && Col < 3) { HT_ElbowMainAim[Col] = FMath::Clamp(HT_ElbowMainAim[Col] + Delta, -180.0f, 180.0f); } break;
+	case 15: if (Col >= 0 && Col < 3) { HT_ElbowSupAim[Col] = FMath::Clamp(HT_ElbowSupAim[Col] + Delta, -180.0f, 180.0f); } break;
+	case 13: if (Col >= 0 && Col < 3) { HT_ElbowSup[Col] = FMath::Clamp(HT_ElbowSup[Col] + Delta, -180.0f, 180.0f); } break;
+	default: return;
+	}
+	HandTuneApply();
+}
+
+void ABasePlayerController::HandTuneOrbit(float DYaw, float DPitch)
+{
+	// Forty degrees off the chosen view either way: enough to see round the hand, not enough to
+	// lose which way you are looking at it from.
+	HT_Orbit.X = FMath::Clamp(HT_Orbit.X + DYaw, -40.0f, 40.0f);
+	HT_Orbit.Y = FMath::Clamp(HT_Orbit.Y + DPitch, -40.0f, 40.0f);
+}
+
+void ABasePlayerController::ConfirmHandTuneLeave(int32 Dir)
+{
+	if (!ConfirmDialog) { ConfirmDialog = CreateWidget<UConfirmDialogWidget>(this, UConfirmDialogWidget::StaticClass()); }
+	TWeakObjectPtr<ABasePlayerController> WeakThis(this);
+	// The step happens AFTER the choice, whichever it was -- the dialog's callbacks run once it has
+	// taken itself off the screen, so the page is not being rebuilt underneath a live prompt.
+	const auto Go = [WeakThis, Dir]()
+	{
+		if (!WeakThis.IsValid()) { return; }
+		WeakThis->HandTuneStepWeapon(Dir);
+		if (WeakThis->HandTuneWidget) { WeakThis->HandTuneWidget->Refresh(); }
+	};
+	ConfirmDialog->Setup(TEXT("Unsaved changes"),
+		FString::Printf(TEXT("Save changes to %s?"), *HandTuneWeaponLabel()),
+		[WeakThis, Go]() { if (WeakThis.IsValid()) { WeakThis->HandTuneSave(); } Go(); },
+		[WeakThis, Go]() { if (WeakThis.IsValid()) { WeakThis->HandTuneReset(); } Go(); },
+		[]() {});   // Cancel: stay on this weapon, edits intact
+	if (!ConfirmDialog->IsInViewport())
+	{
+		ConfirmDialog->AddToViewport(95);
+		ConfirmDialog->SetAnchorsInViewport(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
+		ConfirmDialog->SetAlignmentInViewport(FVector2D::ZeroVector);
+	}
+}
+
+bool ABasePlayerController::HandTuneDirty() const
+{
+	auto Same3 = [](const float* A, const float* B) { return FMath::IsNearlyEqual(A[0], B[0]) && FMath::IsNearlyEqual(A[1], B[1]) && FMath::IsNearlyEqual(A[2], B[2]); };
+	auto SameArr = [](const TArray<float>& A, const TArray<float>& B)
+	{
+		if (A.Num() != B.Num()) { return false; }
+		for (int32 i = 0; i < A.Num(); ++i) { if (!FMath::IsNearlyEqual(A[i], B[i])) { return false; } }
+		return true;
+	};
+	if (!HT_Grip.Equals(HT_Grip0) || !HT_Fore.Equals(HT_Fore0)) { return true; }
+	if (!HT_OpticOff.Equals(HT_OpticOff0) || HT_OpticSkin != HT_OpticSkin0 || HT_Optic != HT_Optic0) { return true; }
+	if (!FMath::IsNearlyEqual(HT_ScalePct, HT_ScalePct0)) { return true; }
+	if (!HT_HandRot.Equals(HT_HandRot0) || !HT_ForeRot.Equals(HT_ForeRot0)) { return true; }
+	if (!SameArr(HT_FingersR, HT_FingersR0) || !SameArr(HT_FingersL, HT_FingersL0)) { return true; }
+	if (!FMath::IsNearlyEqual(HT_Hunch, HT_Hunch0) || !FMath::IsNearlyEqual(HT_Lean, HT_Lean0)) { return true; }
+	if (!Same3(HT_Pull3, HT_Pull3_0) || !Same3(HT_Lat3, HT_Lat3_0)) { return true; }
+	if (!Same3(HT_ElbowMain, HT_ElbowMain0) || !Same3(HT_ElbowSup, HT_ElbowSup0)) { return true; }
+	if (!Same3(HT_ElbowMainAim, HT_ElbowMainAim0) || !Same3(HT_ElbowSupAim, HT_ElbowSupAim0)) { return true; }
+	if (!FMath::IsNearlyEqual(HT_LowReady[0], HT_LowReady0[0]) || !FMath::IsNearlyEqual(HT_LowReady[1], HT_LowReady0[1])) { return true; }
+	if (!FMath::IsNearlyEqual(HT_EyeSide, HT_EyeSide0) || !FMath::IsNearlyEqual(HT_EyeUp, HT_EyeUp0) || !FMath::IsNearlyEqual(HT_EyeFwd, HT_EyeFwd0)) { return true; }
+	return false;
+}
+
+bool ABasePlayerController::HandTuneTakesOptic() const
+{
+	// Somewhere to bolt one on. Without a mount point an optic has no position of its own and lands
+	// at the weapon's origin, inside the grip, which is worse than no optic at all.
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(HandTuneName);
+	return W && !W->OpticMount.IsNearlyZero();
+}
+
+FString ABasePlayerController::HandTuneOpticLabel() const
+{
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(HandTuneName);
+	if (!W) { return FString(); }
+	if (!HandTuneTakesOptic()) { return TEXT("NO MOUNT"); }
+	return HT_Optic.IsEmpty() ? TEXT("IRON SIGHTS") : WeaponCatalog::OpticDisplayName(HT_Optic);   // what is being TRIED, not what is filed
+}
+
+void ABasePlayerController::HandTuneStepOptic(int32 Dir)
+{
+	if (!HandTuneTakesOptic()) { return; }
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(HandTuneName);
+	if (!W) { return; }
+	// The empty string first: iron sights are a choice, not the absence of one.
+	TArray<FString> Choices; Choices.Add(FString());
+	Choices.Append(WeaponCatalog::OpticNames());
+	const int32 At = FMath::Max(0, Choices.IndexOfByKey(HT_Optic));
+	HT_Optic = Choices[(At + (Dir >= 0 ? 1 : Choices.Num() - 1)) % Choices.Num()];
+	HT_OpticKey = HT_Optic;
+	// A different sight has its own offset and its own paint; start from what that optic says.
+	if (const WeaponCatalog::FOptic* O = WeaponCatalog::FindOptic(HT_OpticKey))
+	{
+		HT_OpticOff = O->Offset;
+		HT_OpticSkin = O->Skin;
+	}
+	else { HT_OpticOff = FVector::ZeroVector; HT_OpticSkin.Empty(); }
+	HandTuneFitOptic();   // the STAND-IN only. Nothing is written until SAVE.
+	RefreshHeldWeapon();
+	RefreshTunedWeapon(HandTuneName);
+}
+
+void ABasePlayerController::HandTuneStepSkin(int32 Dir)
+{
+	// A FITTING, NOT A DECISION. This used to write the catalogue on every press, so flicking
+	// through the paints to see them repainted every copy of the weapon in the world, one after
+	// another, and there was no way to look without committing. Now the choice lives on the page
+	// until SET DEFAULT adopts it.
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(HandTuneName);
+	if (!W || !HandTunePawn) { return; }
+	const TArray<FString> V = WeaponSkins::Variants(*W);
+	if (V.Num() < 2) { return; }
+	const FString Wearing = HT_Skin.IsEmpty() ? WeaponSkins::Current(*W) : HT_Skin;
+	const int32 At = FMath::Max(0, V.IndexOfByKey(Wearing));
+	HT_Skin = V[(At + (Dir >= 0 ? 1 : V.Num() - 1)) % V.Num()];
+	WeaponSkins::ApplyNamed(HandTunePawn->WeaponMeshComponent, *W, HT_Skin);
+}
+
+bool ABasePlayerController::HandTuneSkinIsDefault() const
+{
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(HandTuneName);
+	if (!W) { return true; }
+	return HT_Skin.IsEmpty() || HT_Skin == WeaponSkins::Current(*W);
+}
+
+void ABasePlayerController::HandTuneSetDefaultSkin()
+{
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(HandTuneName);
+	if (!W || HT_Skin.IsEmpty()) { return; }
+	const FString Key = W->Key;   // the write re-reads the catalogue, so W is stale after it
+	if (!WeaponCatalog::WriteStringField(Key, TEXT("skin"), HT_Skin))
+	{
+		SetDiagNoteTimed(FString::Printf(TEXT("Could not write the paint for %s"), *Key), 4.0f);
+		return;
+	}
+	// Everywhere it appears: the player's hands, every NPC carrying one, and the preview booth,
+	// which is where the inventory icon is rendered from.
+	RefreshHeldWeapon();
+	RefreshTunedWeapon(HandTuneName);
+	SetDiagNoteTimed(FString::Printf(TEXT("%s now wears %s by default"), *HandTuneName, *HT_Skin), 3.0f);
+}
+
+// The optic mesh the page is showing, or null when no sight is fitted.
+static UStaticMesh* TunedOpticMesh(const FString& OpticKey)
+{
+	const WeaponCatalog::FOptic* O = WeaponCatalog::FindOptic(OpticKey);
+	return (O && !O->MeshPath.IsEmpty()) ? LoadObject<UStaticMesh>(nullptr, *O->MeshPath, nullptr, LOAD_NoWarn | LOAD_Quiet) : nullptr;
+}
+
+void ABasePlayerController::HandTuneFitOptic()
+{
+	if (!IsValid(HandTunePawn)) { return; }
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(HandTuneName);
+	if (!W) { return; }
+	const WeaponCatalog::FOptic* O = WeaponCatalog::FindOptic(HT_OpticKey);
+	UStaticMesh* Mesh = (O && !O->MeshPath.IsEmpty()) ? LoadObject<UStaticMesh>(nullptr, *O->MeshPath, nullptr, LOAD_NoWarn | LOAD_Quiet) : nullptr;
+	HandTunePawn->SetWeaponOptic(Mesh, (Mesh && O) ? W->OpticMount - O->Mount : FVector::ZeroVector,
+		(Mesh && O) ? O->Rot : FRotator::ZeroRotator);
+	HandTunePawn->SetWeaponOpticOffset(HT_OpticOff);
+	HandTunePawn->SetWeaponOpticOptics(O ? O->Zoom : 1.0f, O && O->bSmart, O ? O->Reticle : FString(), O ? O->ReticleColour : FLinearColor(0.45f, 1.0f, 0.65f, 1.0f));
+	// The eye goes where the glass is NOW, offset included -- otherwise the page aims through the
+	// place the sight used to be.
+	if (Mesh && O && !O->Eye.IsNearlyZero()) { HandTunePawn->SetWeaponSight(W->OpticMount - O->Mount + HT_OpticOff + O->Eye, true, 0.0f); }
+	else { HandTunePawn->SetWeaponSight(W->Sight, W->bHasSight, W->SightPitch); }
+	if (Mesh && HandTunePawn->OpticMeshComponent) { WeaponSkins::ApplyVariant(HandTunePawn->OpticMeshComponent, HT_OpticSkin); }
+}
+
+void ABasePlayerController::HandTuneStepOpticSkin(int32 Dir)
+{
+	UStaticMesh* Mesh = TunedOpticMesh(HT_OpticKey);
+	if (!Mesh || !HandTunePawn) { return; }
+	const TArray<FString> V = WeaponSkins::VariantsOfMesh(Mesh);
+	if (V.Num() < 2) { return; }
+	const FString Wearing = WeaponSkins::CurrentOfMesh(Mesh, HT_OpticSkin);
+	const int32 At = FMath::Max(0, V.IndexOfByKey(Wearing));
+	HT_OpticSkin = V[(At + (Dir >= 0 ? 1 : V.Num() - 1)) % V.Num()];
+	WeaponSkins::ApplyVariant(HandTunePawn->OpticMeshComponent, HT_OpticSkin);
+}
+
+FString ABasePlayerController::HandTuneOpticSkinLabel() const
+{
+	UStaticMesh* Mesh = TunedOpticMesh(HT_OpticKey);
+	const TArray<FString> V = Mesh ? WeaponSkins::VariantsOfMesh(Mesh) : TArray<FString>();
+	if (V.Num() < 2) { return FString(); }   // one colourway is not a choice
+	const FString Wearing = WeaponSkins::CurrentOfMesh(Mesh, HT_OpticSkin);
+	return FString::Printf(TEXT("[ PAINT %d/%d ]"), V.IndexOfByKey(Wearing) + 1, V.Num());
+}
+
+FString ABasePlayerController::HandTuneSkinLabel() const
+{
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(HandTuneName);
+	const TArray<FString> V = W ? WeaponSkins::Variants(*W) : TArray<FString>();
+	if (V.Num() < 2) { return FString(); }   // nothing to choose between
+	const FString Wearing = HT_Skin.IsEmpty() ? WeaponSkins::Current(*W) : HT_Skin;
+	return FString::Printf(TEXT("[ SKIN %d/%d ]"), V.IndexOfByKey(Wearing) + 1, V.Num());
+}
+
+int32 ABasePlayerController::HandTunePresetCount() const { return WeaponCatalog::FingerPresets().Num(); }
+
+FString ABasePlayerController::HandTunePresetName(int32 Index) const
+{
+	const TArray<WeaponCatalog::FFingerPreset>& P = WeaponCatalog::FingerPresets();
+	return P.IsValidIndex(Index) ? P[Index].Name : FString();
+}
+
+void ABasePlayerController::HandTuneApplyPreset(bool bSupport, int32 Index)
+{
+	const TArray<WeaponCatalog::FFingerPreset>& P = WeaponCatalog::FingerPresets();
+	if (!P.IsValidIndex(Index)) { return; }
+	TArray<float>& Into = bSupport ? HT_FingersL : HT_FingersR;
+	Into = P[Index].Values;
+	Into.SetNumZeroed(5);
+	HandTuneApply();
+}
+
+void ABasePlayerController::HandTuneSetPresetView(int32 Index)
+{
+	HT_ViewIdx = FMath::Clamp(Index, 0, 4);
+	HT_Orbit = FVector2D::ZeroVector;   // a chosen side is a fresh start, not the old drag carried over
+}
+
+void ABasePlayerController::HandTuneZoomStep(int32 Direction)
+{
+	HT_Zoom = FMath::Clamp(HT_Zoom * FMath::Pow(0.8f, (float)FMath::Clamp(Direction, -1, 1)), 0.25f, 2.0f);   // in to a quarter of the frame, out to double
+}
+
+// The DRAG snaps back to the chosen view; the zoom does not.
+void ABasePlayerController::HandTuneResetView() { HT_Orbit = FVector2D::ZeroVector; }
+
+void ABasePlayerController::HandTuneReset()
+{
+	HT_Grip = HT_Grip0; HT_HandRot = HT_HandRot0; HT_Fore = HT_Fore0; HT_ForeRot = HT_ForeRot0; HT_FingersR = HT_FingersR0; HT_FingersL = HT_FingersL0;
+	HT_Hunch = HT_Hunch0; HT_Lean = HT_Lean0; HT_EyeSide = HT_EyeSide0; HT_EyeUp = HT_EyeUp0; HT_EyeFwd = HT_EyeFwd0;
+	for (int32 i = 0; i < 3; ++i) { HT_Pull3[i] = HT_Pull3_0[i]; HT_Lat3[i] = HT_Lat3_0[i]; }
+	for (int32 i = 0; i < 2; ++i) { HT_LowReady[i] = HT_LowReady0[i]; }
+	for (int32 i = 0; i < 3; ++i) { HT_ElbowMain[i] = HT_ElbowMain0[i]; HT_ElbowSup[i] = HT_ElbowSup0[i]; }
+	HT_OpticOff = HT_OpticOff0; HT_OpticSkin = HT_OpticSkin0; HT_Optic = HT_Optic0; HT_OpticKey = HT_Optic0; HT_ScalePct = HT_ScalePct0;
+	for (int32 i = 0; i < 3; ++i) { HT_ElbowMainAim[i] = HT_ElbowMainAim0[i]; HT_ElbowSupAim[i] = HT_ElbowSupAim0[i]; }
+	HandTuneApply();
+}
+
+bool ABasePlayerController::HandTuneSave()
+{
+	auto Doubles = [](const TArray<float>& A) { TArray<double> D; for (float V : A) { D.Add(V); } return D; };
+	bool bOk = SaveWeaponField(HandTuneKey, TEXT("grip"), { HT_Grip.X, HT_Grip.Y, HT_Grip.Z });
+	bOk &= SaveWeaponField(HandTuneKey, TEXT("hand_rot"), { HT_HandRot.Pitch, HT_HandRot.Yaw, HT_HandRot.Roll });
+	bOk &= SaveWeaponField(HandTuneKey, TEXT("fore_grip"), { HT_Fore.X, HT_Fore.Y, HT_Fore.Z });
+	bOk &= SaveWeaponField(HandTuneKey, TEXT("fore_hand_rot"), { HT_ForeRot.Pitch, HT_ForeRot.Yaw, HT_ForeRot.Roll });
+	bOk &= SaveWeaponField(HandTuneKey, TEXT("fingers_r"), Doubles(HT_FingersR));
+	bOk &= SaveWeaponField(HandTuneKey, TEXT("fingers_l"), Doubles(HT_FingersL));
+	bOk &= SaveWeaponField(HandTuneKey, TEXT("hunch"), { HT_Hunch }, true);
+	bOk &= SaveWeaponField(HandTuneKey, TEXT("pull"), { HT_Pull3[0], HT_Pull3[1], HT_Pull3[2] });
+	bOk &= SaveWeaponField(HandTuneKey, TEXT("lean"), { HT_Lean }, true);
+	bOk &= SaveWeaponField(HandTuneKey, TEXT("lateral"), { HT_Lat3[0], HT_Lat3[1], HT_Lat3[2] });
+	bOk &= SaveWeaponField(HandTuneKey, TEXT("low_ready"), { HT_LowReady[0], HT_LowReady[1] });
+	bOk &= SaveWeaponField(HandTuneKey, TEXT("elbow_main"), { HT_ElbowMain[0], HT_ElbowMain[1], HT_ElbowMain[2] });
+	bOk &= SaveWeaponField(HandTuneKey, TEXT("elbow_main_aim"), { HT_ElbowMainAim[0], HT_ElbowMainAim[1], HT_ElbowMainAim[2] });
+	bOk &= SaveWeaponField(HandTuneKey, TEXT("elbow_support_aim"), { HT_ElbowSupAim[0], HT_ElbowSupAim[1], HT_ElbowSupAim[2] });
+	bOk &= SaveWeaponField(HandTuneKey, TEXT("elbow_support"), { HT_ElbowSup[0], HT_ElbowSup[1], HT_ElbowSup[2] });
+	// The optic offset goes to the OPTIC, not to this weapon. Only when one is fitted -- an iron
+	// sighted gun has nothing to place.
+	// THE OPTIC ITSELF, and only now. Which sight is fitted belongs to the weapon; where it sits and
+	// what colour it is belong to the optic.
+	if (HT_Optic != HT_Optic0) { bOk &= WeaponCatalog::WriteStringField(HandTuneKey, TEXT("optic"), HT_Optic); }
+	bOk &= SaveWeaponField(HandTuneKey, TEXT("scale"), { HT_ScalePct * 0.01 }, true);
+	if (!HT_OpticKey.IsEmpty())
+	{
+		bOk &= WeaponCatalog::WriteOpticNumbers(HT_OpticKey, TEXT("offset"), { HT_OpticOff.X, HT_OpticOff.Y, HT_OpticOff.Z });
+		if (HT_OpticSkin != HT_OpticSkin0) { bOk &= WeaponCatalog::WriteOpticString(HT_OpticKey, TEXT("skin"), HT_OpticSkin); }
+	}
+	// THE EYELINE IS THE BODY'S. It goes to the character file, not the weapon: loaded, the two
+	// numbers replaced, saved, so nothing else in the likeness is touched by a hand-tuning save.
+	{
+		FCharacterConfig Cfg;
+		if (CharacterConfigFile::Load(TEXT("Player"), Cfg))
+		{
+			Cfg.EyeSideCm = HT_EyeSide; Cfg.EyeUpCm = HT_EyeUp; Cfg.EyeForwardCm = HT_EyeFwd;
+			bOk &= CharacterConfigFile::Save(Cfg);
+		}
+		if (ABaseCharacter* PlayerPawn = Cast<ABaseCharacter>(GetPawn())) { PlayerPawn->SetEyeTune(HT_EyeSide, HT_EyeUp, HT_EyeFwd); }   // the player aims by it at once
+	}
+	if (bOk)
+	{
+		// AND EVERY COPY OF THAT GUN TAKES THE NEW NUMBERS NOW. ApplyWeaponToPawn pushes the
+		// catalogue onto a character once, when the weapon is put in its hands, and nothing ever
+		// pushed it again: a weapon picked up before a tuning session went on wearing the old values
+		// for as long as it was carried. That is most of why the hold kept looking right in the
+		// tuner and wrong in the world. SaveWeaponField has already dropped the catalogue's cache,
+		// so this re-reads from disk and re-dresses the player, every NPC carrying the same weapon,
+		// and the page's own stand-in.
+		RefreshHeldWeapon();
+		const int32 Dressed = RefreshTunedWeapon(HandTuneName);
+		HandTuneApply();   // and the stand-in goes on showing the page, which is the only thing it should ever show
+		UE_LOG(LogTemp, Log, TEXT("HandTune: saved %s and re-dressed %d character(s) holding one."), *HandTuneName, Dressed);
+		HT_Grip0 = HT_Grip; HT_HandRot0 = HT_HandRot; HT_Fore0 = HT_Fore; HT_ForeRot0 = HT_ForeRot; HT_FingersR0 = HT_FingersR; HT_FingersL0 = HT_FingersL;
+		HT_Hunch0 = HT_Hunch; HT_Lean0 = HT_Lean; HT_EyeSide0 = HT_EyeSide; HT_EyeUp0 = HT_EyeUp; HT_EyeFwd0 = HT_EyeFwd;
+		for (int32 i = 0; i < 3; ++i) { HT_Pull3_0[i] = HT_Pull3[i]; HT_Lat3_0[i] = HT_Lat3[i]; }
+		for (int32 i = 0; i < 2; ++i) { HT_LowReady0[i] = HT_LowReady[i]; }
+		for (int32 i = 0; i < 3; ++i) { HT_ElbowMain0[i] = HT_ElbowMain[i]; HT_ElbowSup0[i] = HT_ElbowSup[i]; }
+		HT_OpticOff0 = HT_OpticOff; HT_OpticSkin0 = HT_OpticSkin; HT_Optic0 = HT_Optic; HT_ScalePct0 = HT_ScalePct;
+		for (int32 i = 0; i < 3; ++i) { HT_ElbowMainAim0[i] = HT_ElbowMainAim[i]; HT_ElbowSupAim0[i] = HT_ElbowSupAim[i]; }
+		RefreshHeldWeapon();   // NOW the world changes: the player's held weapon takes the saved numbers
+	}
+	return bOk;
+}
+
+void ABasePlayerController::ShowSaveLoad(bool bLoad)
+{
+	if (!SaveLoadWidget)
+	{
+		SaveLoadWidget = CreateWidget<USaveLoadWidget>(this, USaveLoadWidget::StaticClass());
+		if (!SaveLoadWidget) { return; }
+		SaveLoadWidget->OnClose.BindUObject(this, &ABasePlayerController::HideSaveLoad);
+	}
+	SaveLoadWidget->Open(this, bLoad);
+	if (!SaveLoadWidget->IsInViewport()) { SaveLoadWidget->AddToViewport(60); }
+	bSaveLoadOpen = true;
+	ApplyInputMode();
+}
+
+void ABasePlayerController::HideSaveLoad()
+{
+	if (!bSaveLoadOpen) { return; }
+	bSaveLoadOpen = false;
+	if (SaveLoadWidget && SaveLoadWidget->IsInViewport()) { SaveLoadWidget->RemoveFromParent(); }
+	if (!IsPageOpen()) { SetPause(false); }   // see HideReference: a page that pauses must unpause
+	ApplyInputMode();
 }
 
 void ABasePlayerController::OnConversationDigit(FKey Key)
@@ -955,9 +1719,25 @@ void ABasePlayerController::ExecuteInspectAction(AActor* Target, const FString& 
 	{
 		// handled: a light switch panel (tags toggle:<Action>=<id> / lightid:<id>)
 	}
+	else if (Action == TEXT("Wear"))
+	{
+		// Straight onto the body: taken, then into the square its kind equips; what was worn takes
+		// the bag square it left. A garment cut for the other body says so and stays where it is.
+		FString Why;
+		if (!ClothingFits(Name, Why)) { ShowCallout(Target, Why, 2.5f, false); return; }
+		if (!AddToInventory(Name, false)) { ShowCallout(GetPawn(), TEXT("No room."), 2.0f, false); return; }
+		const int32 At = Inventory.FindLast(Name);
+		if (At != INDEX_NONE && EquipFromInventory(At)) { ShowCallout(GetPawn(), FString::Printf(TEXT("Wearing %s"), *Name), 2.5f, false); }
+		else { ShowCallout(GetPawn(), FString::Printf(TEXT("Took %s"), *Name), 2.5f, false); }
+		Target->SetActorHiddenInGame(true);
+		Target->SetActorEnableCollision(false);
+		SetInspectHighlight(Target, false);
+		InspectTarget = nullptr;
+		HideInspectMenu();
+	}
 	else if (Action == TEXT("Take"))
 	{
-		if (!AddToInventory(Name)) { ShowCallout(GetPawn(), TEXT("No room."), 2.0f, false); return; }
+		if (!AddToInventory(Name, true)) { ShowCallout(GetPawn(), TEXT("No room."), 2.0f, false); return; }
 		ShowCallout(GetPawn(), FString::Printf(TEXT("Took %s"), *Name), 2.5f, false);
 		// Off the world, kept around for gameplay to reclaim.
 		Target->SetActorHiddenInGame(true);
@@ -968,8 +1748,12 @@ void ABasePlayerController::ExecuteInspectAction(AActor* Target, const FString& 
 	}
 	else
 	{
-		// Hack, Press Button, ...: a note for now; gameplay hooks the event.
-		ShowCallout(Target, FString::Printf(TEXT("%s: %s"), *Action, *Name), 2.5f, false);
+		// A line of its own: an actor tagged say:<text> answers any of its other actions with it,
+		// as a speech bubble -- the dead robots on the deck. Otherwise a note; gameplay hooks the event.
+		FString Line;
+		for (const FName& T : Target->Tags) { const FString S = T.ToString(); if (S.StartsWith(TEXT("say:"))) { Line = S.Mid(4); break; } }
+		if (!Line.IsEmpty()) { ShowCallout(Target, Line, 3.5f, true); }
+		else { ShowCallout(Target, FString::Printf(TEXT("%s: %s"), *Action, *Name), 2.5f, false); }
 	}
 	OnInspectAction.Broadcast(Target, Action);
 }
@@ -986,7 +1770,7 @@ void ABasePlayerController::ShowCallout(AActor* Anchor, const FString& Text, flo
 		CalloutWidget->SetAlignmentInViewport(FVector2D(0.5f, 1.0f));   // bottom-centre sits on the anchor point
 	}
 	CalloutAnchor = Anchor;
-	CalloutEndTime = (GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f) + Seconds;
+	CalloutEndTime = (GetWorld() ? GetWorld()->GetRealTimeSeconds() : 0.0f) + Seconds;   // REAL seconds: a page that pauses the game must not freeze a message on screen
 	UpdateCallout();
 }
 
@@ -994,7 +1778,7 @@ void ABasePlayerController::UpdateCallout()
 {
 	if (!CalloutWidget || !CalloutWidget->IsInViewport()) { return; }
 	AActor* Anchor = CalloutAnchor.Get();
-	const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	const float Now = GetWorld() ? GetWorld()->GetRealTimeSeconds() : 0.0f;
 	if (!Anchor || Now >= CalloutEndTime)
 	{
 		CalloutWidget->RemoveFromParent();
@@ -1086,10 +1870,157 @@ namespace
 	}
 }
 
+namespace
+{
+	// UI/Terminals.json: a node is locked unless its entry says "locked": false. No entry at all
+	// (the "default" banner) is a locked node too: only the cabins the story has given the player
+	// credentials for open.
+	bool TerminalLocked(const FString& Id)
+	{
+		FString Json; TSharedPtr<FJsonObject> Root;
+		if (!FFileHelper::LoadFileToString(Json, *FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("Terminals.json")))) { return true; }
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
+		if (!FJsonSerializer::Deserialize(Reader, Root) || !Root.IsValid()) { return true; }
+		const TSharedPtr<FJsonObject>* Entry = nullptr;
+		if (!Root->TryGetObjectField(Id, Entry) || !Entry) { return true; }
+		bool bLocked = true; (*Entry)->TryGetBoolField(TEXT("locked"), bLocked);
+		return bLocked;
+	}
+}
+
 bool ABasePlayerController::IsTerminal(const AActor* Target) const
 {
 	FVector C, N, R, U; float W, H;
 	return ScreenQuadFor(Target, C, N, R, U, W, H);
+}
+
+namespace
+{
+	// THE SCREEN'S OWN POLYGONS. A monitor prop's screen is a flat patch of the mesh facing the
+	// spec's front axis, recessed behind the bezel. Read straight off the render data: every
+	// triangle facing that way, joined into patches by shared vertices in the same plane, and
+	// the patch chosen is the deepest one of any size that sits where the spec's box estimate
+	// expects the screen. Cached per mesh in the mesh's local space.
+	struct FScreenShape
+	{
+		bool bOk = false;
+		TArray<FVector> Verts; TArray<int32> Tris;   // local, three vertices per triangle
+		FVector Normal, Right;                        // local: the face, and the viewer's right
+		float MinR = 0, MaxR = 0, MinU = 0, MaxU = 0, Depth = 0;
+	};
+	const FScreenShape& ShapeOf(const UStaticMesh* Mesh, const FScreenSpec& S)
+	{
+		static TMap<FString, FScreenShape> Cache;
+		const FString Key = Mesh->GetPathName();
+		if (const FScreenShape* Found = Cache.Find(Key)) { return *Found; }
+		FScreenShape& Out = Cache.Add(Key);
+		FVector LN(0, 1, 0);
+		const FString F = S.Front.ToLower();
+		if (F == TEXT("-y")) { LN = FVector(0, -1, 0); } else if (F == TEXT("+x")) { LN = FVector(1, 0, 0); } else if (F == TEXT("-x")) { LN = FVector(-1, 0, 0); }
+		const FVector LR = FVector::CrossProduct(LN, FVector::UpVector).GetSafeNormal();   // the viewer faces -N; their right is N x up
+		Out.Normal = LN; Out.Right = LR;
+		const FStaticMeshRenderData* RD = Mesh->GetRenderData();
+		if (!RD || RD->LODResources.Num() == 0) { return Out; }
+		const FStaticMeshLODResources& LOD = RD->LODResources[0];
+		const FPositionVertexBuffer& Pos = LOD.VertexBuffers.PositionVertexBuffer;
+		const FStaticMeshVertexBuffer& SV = LOD.VertexBuffers.StaticMeshVertexBuffer;
+		const FRawStaticIndexBuffer& IB = LOD.IndexBuffer;
+		if (!Pos.GetAllowCPUAccess() || !SV.GetAllowCPUAccess() || !IB.GetAllowCPUAccess() || Pos.GetNumVertices() == 0 || IB.GetNumIndices() < 3)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Terminal: %s has no CPU-readable geometry (bAllowCPUAccess); the box estimate is used"), *Mesh->GetName());
+			return Out;
+		}
+		// Where the spec's box estimate puts the screen, as a sanity bound on the patch chosen.
+		const FBoxSphereBounds B = Mesh->GetBounds();
+		const FVector Min = B.Origin - B.BoxExtent, Max = B.Origin + B.BoxExtent;
+		const float Width = FMath::Abs(FVector::DotProduct(Max - Min, LR.GetAbs())), Height = Max.Z - Min.Z;
+		const float InsetL = S.Inset, InsetR = S.InsetRight >= 0.0f ? S.InsetRight : S.Inset;
+		const float EstU = Min.Z + Height * (S.Bottom + (1.0f - S.Bottom - S.Top) * 0.5f);
+		const float EstR = FVector::DotProduct(B.Origin, LR) + Width * (InsetL - InsetR) * 0.5f * -1.0f;
+		const float EstW = Width * (1.0f - InsetL - InsetR), EstH = Height * (1.0f - S.Bottom - S.Top);
+		struct FTri { FVector P[3]; float Depth, Area; };
+		TArray<FTri> Facing;
+		const int32 NumTris = IB.GetNumIndices() / 3;
+		for (int32 t = 0; t < NumTris; ++t)
+		{
+			const uint32 I[3] = { IB.GetIndex(t * 3), IB.GetIndex(t * 3 + 1), IB.GetIndex(t * 3 + 2) };
+			if (I[0] >= Pos.GetNumVertices() || I[1] >= Pos.GetNumVertices() || I[2] >= Pos.GetNumVertices()) { continue; }
+			FTri Tri;
+			for (int32 k = 0; k < 3; ++k) { const FVector3f& P = Pos.VertexPosition(I[k]); Tri.P[k] = FVector(P.X, P.Y, P.Z); }
+			const FVector Cross = FVector::CrossProduct(Tri.P[1] - Tri.P[0], Tri.P[2] - Tri.P[0]);
+			Tri.Area = (float)Cross.Size() * 0.5f;
+			if (Tri.Area < 0.05f) { continue; }
+			if (FMath::Abs(FVector::DotProduct(Cross.GetSafeNormal(), LN)) < 0.9f) { continue; }   // not in the screen's plane
+			FVector VN(0, 0, 0);
+			for (int32 k = 0; k < 3; ++k) { const FVector4f Z = SV.VertexTangentZ(I[k]); VN += FVector(Z.X, Z.Y, Z.Z); }
+			if (FVector::DotProduct(VN.GetSafeNormal(), LN) < 0.5f) { continue; }   // the back of something
+			Tri.Depth = (float)FVector::DotProduct((Tri.P[0] + Tri.P[1] + Tri.P[2]) / 3.0, LN);
+			Facing.Add(Tri);
+		}
+		if (Facing.Num() == 0) { return Out; }
+		// Patches: triangles sharing a vertex position in the same plane.
+		TArray<int32> Parent; Parent.SetNum(Facing.Num()); for (int32 i = 0; i < Parent.Num(); ++i) { Parent[i] = i; }
+		auto Find = [&Parent](int32 a) { while (Parent[a] != a) { Parent[a] = Parent[Parent[a]]; a = Parent[a]; } return a; };
+		TMap<FIntVector, TArray<int32>> AtKey;
+		for (int32 i = 0; i < Facing.Num(); ++i) { for (int32 k = 0; k < 3; ++k) { const FVector& P = Facing[i].P[k]; AtKey.FindOrAdd(FIntVector(FMath::RoundToInt(P.X * 20.0), FMath::RoundToInt(P.Y * 20.0), FMath::RoundToInt(P.Z * 20.0))).Add(i); } }
+		for (const auto& Pair : AtKey)
+		{
+			for (int32 j = 1; j < Pair.Value.Num(); ++j)
+			{
+				const int32 a = Pair.Value[0], b = Pair.Value[j];
+				if (FMath::Abs(Facing[a].Depth - Facing[b].Depth) > 0.3f) { continue; }
+				const int32 Ra = Find(a), Rb = Find(b); if (Ra != Rb) { Parent[Ra] = Rb; }
+			}
+		}
+		struct FPatch { float Area = 0, Depth = 0, MinR = 1e9f, MaxR = -1e9f, MinU = 1e9f, MaxU = -1e9f; TArray<int32> Tris; };
+		TMap<int32, FPatch> Patches;
+		for (int32 i = 0; i < Facing.Num(); ++i)
+		{
+			FPatch& P = Patches.FindOrAdd(Find(i));
+			P.Area += Facing[i].Area; P.Depth += Facing[i].Depth * Facing[i].Area; P.Tris.Add(i);
+			for (int32 k = 0; k < 3; ++k) { const float R = (float)FVector::DotProduct(Facing[i].P[k], LR), U = (float)Facing[i].P[k].Z; P.MinR = FMath::Min(P.MinR, R); P.MaxR = FMath::Max(P.MaxR, R); P.MinU = FMath::Min(P.MinU, U); P.MaxU = FMath::Max(P.MaxU, U); }
+		}
+		float MaxArea = 0.0f; for (auto& Pair : Patches) { Pair.Value.Depth /= FMath::Max(Pair.Value.Area, KINDA_SMALL_NUMBER); MaxArea = FMath::Max(MaxArea, Pair.Value.Area); }
+		const FPatch* Best = nullptr; const FPatch* Biggest = nullptr;
+		for (const auto& Pair : Patches)
+		{
+			const FPatch& P = Pair.Value;
+			if (!Biggest || P.Area > Biggest->Area) { Biggest = &P; }
+			if (P.Area < MaxArea * 0.2f) { continue; }
+			const float CR = (P.MinR + P.MaxR) * 0.5f, CU = (P.MinU + P.MaxU) * 0.5f;
+			if (FMath::Abs(CR - EstR) > EstW * 0.75f || FMath::Abs(CU - EstU) > EstH * 0.75f) { continue; }   // nowhere near where the screen was said to be
+			if (!Best || P.Depth < Best->Depth - 0.3f || (FMath::Abs(P.Depth - Best->Depth) <= 0.3f && P.Area > Best->Area)) { Best = &P; }
+		}
+		if (!Best) { Best = Biggest; }
+		if (!Best) { return Out; }
+		for (int32 i : Best->Tris) { for (int32 k = 0; k < 3; ++k) { Out.Tris.Add(Out.Verts.Num()); Out.Verts.Add(Facing[i].P[k]); } }
+		Out.MinR = Best->MinR; Out.MaxR = Best->MaxR; Out.MinU = Best->MinU; Out.MaxU = Best->MaxU; Out.Depth = Best->Depth;
+		Out.bOk = Out.Verts.Num() >= 3 && (Out.MaxR - Out.MinR) > 1.0f && (Out.MaxU - Out.MinU) > 1.0f;
+		UE_LOG(LogTemp, Log, TEXT("Terminal: %s screen = %d of %d facing triangles in %d patches; %.1f x %.1f at depth %.1f (estimate %.1f x %.1f, %d patches total)"), *Mesh->GetName(), Best->Tris.Num(), Facing.Num(), Patches.Num(), Out.MaxR - Out.MinR, Out.MaxU - Out.MinU, Out.Depth, EstW, EstH, Patches.Num());
+		return Out;
+	}
+}
+
+bool ABasePlayerController::ScreenShapeFor(const AActor* Target, TArray<FVector>& OutVerts, TArray<int32>& OutTris, FVector& OutCentre, FVector& OutNormal, FVector& OutRight, FVector& OutUp, float& OutW, float& OutH) const
+{
+	const UStaticMeshComponent* C = Target ? Target->FindComponentByClass<UStaticMeshComponent>() : nullptr;
+	const UStaticMesh* Mesh = C ? C->GetStaticMesh() : nullptr;
+	if (!Mesh) { return false; }
+	FScreenSpec S;
+	if (!ScreenSpecFor(Mesh->GetName(), S)) { return false; }
+	const FScreenShape& Shape = ShapeOf(Mesh, S);
+	if (!Shape.bOk) { return false; }
+	const FTransform& T = C->GetComponentTransform();
+	OutVerts.Reset(Shape.Verts.Num()); OutTris = Shape.Tris;
+	for (const FVector& V : Shape.Verts) { OutVerts.Add(T.TransformPosition(V + Shape.Normal * 0.15)); }   // a hair proud of the glass
+	const FVector LocalCentre = Shape.Right * ((Shape.MinR + Shape.MaxR) * 0.5f) + FVector::UpVector * ((Shape.MinU + Shape.MaxU) * 0.5f) + Shape.Normal * Shape.Depth;
+	OutCentre = T.TransformPosition(LocalCentre + Shape.Normal * 0.15);
+	OutNormal = T.TransformVectorNoScale(Shape.Normal).GetSafeNormal();
+	OutRight = T.TransformVectorNoScale(Shape.Right).GetSafeNormal();
+	OutUp = T.TransformVectorNoScale(FVector::UpVector).GetSafeNormal();
+	const float Scale = T.GetScale3D().GetAbsMax();
+	OutW = (Shape.MaxR - Shape.MinR) * Scale; OutH = (Shape.MaxU - Shape.MinU) * Scale;
+	return true;
 }
 
 bool ABasePlayerController::ScreenQuadFor(const AActor* Target, FVector& OutCentre, FVector& OutNormal, FVector& OutRight, FVector& OutUp, float& OutW, float& OutH) const
@@ -1099,6 +2030,8 @@ bool ABasePlayerController::ScreenQuadFor(const AActor* Target, FVector& OutCent
 	if (!Mesh) { return false; }
 	FScreenSpec S;
 	if (!ScreenSpecFor(Mesh->GetName(), S)) { return false; }
+	// The mesh's own screen polygons when they can be read; the box estimate below otherwise.
+	{ TArray<FVector> V; TArray<int32> I; if (ScreenShapeFor(Target, V, I, OutCentre, OutNormal, OutRight, OutUp, OutW, OutH)) { return true; } }
 	// The screen: the front face of the mesh's local box, less the stand at the bottom and the
 	// bezel round it, taken into the world through the component's transform.
 	const FBoxSphereBounds B = Mesh->GetBounds();
@@ -1134,6 +2067,16 @@ void ABasePlayerController::OpenTerminal(AActor* Target)
 	if (bTerminalOpen || !Target) { return; }
 	FVector Centre, Normal, Right, Up; float W, H;
 	if (!ScreenQuadFor(Target, Centre, Normal, Right, Up, W, H)) { return; }
+	// Which node this is: its terminal: tag, else its label. Only a node with credentials opens;
+	// every other monitor says so, briefly, and stays a monitor.
+	FString Id = Target->GetActorNameOrLabel();
+	for (const FName& Tag : Target->Tags) { const FString T = Tag.ToString(); if (T.StartsWith(TEXT("terminal:"))) { Id = T.Mid(9); } }
+	if (TerminalLocked(Id))
+	{
+		ShowCallout(Target, TEXT("TERMINAL LOCKED -- no credentials for this node."), 2.5f, false);
+		UAmbientPlayer::PlayOneShot(this, GetWorld(), TEXT("switch_click.wav"), 0.5f, 0.6f);
+		return;
+	}
 	HideInspectMenu();
 	SetInspectHighlight(Target, false);
 	if (InspectTarget.Get() == Target) { InspectTarget = nullptr; }
@@ -1142,6 +2085,10 @@ void ABasePlayerController::OpenTerminal(AActor* Target)
 	if (ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn()))
 	{
 		Me->SetAiming(false);
+		// Hands free for the keyboard: whatever is carried goes down and the weapon is put away
+		// (it comes back on leaving). Using a thing in the world is not done over a gun.
+		if (Carried.IsValid()) { DropCarried(); }
+		if (!bHolstered && HeldSlot >= 0) { bTerminalHolstered = true; bHolstered = true; RefreshHeldWeapon(); }
 		// The seat beside it, if there is one and the character is not already sitting; else square up.
 		if (!Me->IsSitting())
 		{
@@ -1163,25 +2110,57 @@ void ABasePlayerController::OpenTerminal(AActor* Target)
 	{
 		TerminalWidget = CreateWidget<UTerminalWidget>(this, UTerminalWidget::StaticClass());
 		TerminalWidget->OnExit.BindUObject(this, &ABasePlayerController::CloseTerminal);
+		TerminalWidget->OnNeedFocus.BindUObject(this, &ABasePlayerController::RefocusTerminalPrompt);
 	}
-	FString Id = Target->GetActorNameOrLabel();
-	for (const FName& Tag : Target->Tags) { const FString T = Tag.ToString(); if (T.StartsWith(TEXT("terminal:"))) { Id = T.Mid(9); } }
 	TerminalWidget->Open(this, Id);
 	if (TerminalWidget->IsInViewport()) { TerminalWidget->RemoveFromParent(); }
-	const float DrawW = 1024.0f, DrawH = FMath::RoundToFloat(1024.0f * H / FMath::Max(1.0f, W));
+	const float DrawW = 1280.0f, DrawH = FMath::RoundToFloat(1280.0f * H / FMath::Max(1.0f, W));
 	TerminalScreen = NewObject<UWidgetComponent>(Target, TEXT("TerminalScreen"));
 	TerminalScreen->SetWidgetSpace(EWidgetSpace::World);
 	TerminalScreen->SetDrawSize(FVector2D(DrawW, DrawH));
-	TerminalScreen->SetBlendMode(EWidgetBlendMode::Transparent);   // the console has clear corners, so the glass shows through them
+	TerminalScreen->SetBlendMode(EWidgetBlendMode::Transparent);
 	TerminalScreen->SetTwoSided(false);
 	TerminalScreen->SetCollisionProfileName(TEXT("UI"));
+	TerminalScreen->SetTickWhenOffscreen(true);   // it is never on screen itself: the glass mesh wears its picture
 	TerminalScreen->SetWidget(TerminalWidget);
 	static const auto* FlipVar = IConsoleManager::Get().FindConsoleVariable(TEXT("RepliCan.TerminalFlip"));
 	const bool bFlip = FlipVar && FlipVar->GetInt() != 0;
 	const FVector Face = bFlip ? -Normal : Normal;
-	TerminalScreen->SetWorldTransform(FTransform(FRotationMatrix::MakeFromXZ(Face, Up).ToQuat(), Centre + Normal * 0.8f, FVector(1.0f, W / DrawW, W / DrawW)));
+	// The quad is the pointer's hit surface and the picture's renderer, not a thing that is seen:
+	// the glass below shows the picture in the screen's own outline.
+	TerminalScreen->SetWorldTransform(FTransform(FRotationMatrix::MakeFromXZ(Face, Up).ToQuat(), Centre + Normal * 0.6f, FVector(1.0f, W / DrawW, W / DrawW)));
 	TerminalScreen->AttachToComponent(Target->GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
 	TerminalScreen->RegisterComponent();
+	TerminalScreen->SetRenderInMainPass(false);
+	TerminalScreen->SetTintColorAndOpacity(FLinearColor(1.0f, 1.0f, 1.0f, 0.0f));
+	// THE GLASS: the screen's own polygons, a hair proud of the monitor, wearing the widget's
+	// picture once it has drawn (BindTerminalGlass). Whatever shape the modeller gave the screen,
+	// the console has it: chamfers, notches, the lot.
+	{
+		TArray<FVector> Verts; TArray<int32> Tris; FVector SC, SN, SR, SU; float SW = 0.0f, SH = 0.0f;
+		if (ScreenShapeFor(Target, Verts, Tris, SC, SN, SR, SU, SW, SH) && Verts.Num() >= 3)
+		{
+			TArray<FVector> Normals; TArray<FVector2D> UVs; TArray<FLinearColor> Colours; TArray<FProcMeshTangent> Tangents;
+			Normals.Init(SN, Verts.Num()); Colours.Init(FLinearColor::White, Verts.Num()); Tangents.Init(FProcMeshTangent(SR, false), Verts.Num());
+			const FVector Corner = SC - SR * (SW * 0.5f) + SU * (SH * 0.5f);   // the viewer's top left, where the picture starts
+			for (const FVector& V : Verts)
+			{
+				const FVector D = V - Corner;
+				float U = (float)FVector::DotProduct(D, SR) / SW; if (bFlip) { U = 1.0f - U; }
+				UVs.Add(FVector2D(U, -(float)FVector::DotProduct(D, SU) / SH));
+			}
+			TerminalGlass = NewObject<UProceduralMeshComponent>(Target, TEXT("TerminalGlass"));
+			TerminalGlass->SetWorldTransform(FTransform::Identity);
+			TerminalGlass->AttachToComponent(Target->GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
+			TerminalGlass->RegisterComponent();
+			TerminalGlass->CreateMeshSection_LinearColor(0, Verts, Tris, Normals, UVs, Colours, Tangents, false);
+			TerminalGlass->SetCollisionEnabled(ECollisionEnabled::NoCollision);   // the pointer's trace goes through to the quad behind
+			TerminalGlass->SetCastShadow(false);
+			TerminalGlass->SetVisibility(false);   // until the picture is bound
+		}
+		else { UE_LOG(LogTemp, Warning, TEXT("Terminal: no screen shape for %s; the picture stays on the quad"), *Target->GetActorNameOrLabel()); TerminalScreen->SetRenderInMainPass(true); TerminalScreen->SetTintColorAndOpacity(FLinearColor::White); }
+	}
+	GetWorld()->GetTimerManager().SetTimer(TerminalBindTimer, this, &ABasePlayerController::BindTerminalGlass, 0.05f, true);
 	// THE POINTER: the mouse traced from the camera onto the screen, and the keys sent through it,
 	// as a virtual Slate user of its own.
 	if (APawn* MyPawn = GetPawn())
@@ -1208,46 +2187,87 @@ void ABasePlayerController::PlaceTerminalCamera()
 	// From the character's own eye, a hand's width in front of the face so the head is behind the
 	// lens and the shoulders below the frame; the field of view fitted so the screen fills most of
 	// the height. No character: from the screen's normal instead.
-	FVector Eye = Centre + Normal * 60.0f;
+	FVector Eye = Centre + Normal * 45.0f;
 	if (const ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn()))
 	{
 		const USkeletalMeshComponent* M = Me->GetMesh();
 		const FVector Head = (M && M->DoesSocketExist(TEXT("head"))) ? M->GetSocketLocation(TEXT("head")) : Me->GetActorLocation() + FVector(0, 0, 60.0f);
-		// Along the line from the eye to the screen, a screen-and-a-half out from the glass: close.
+		// Along the line from the head to the screen, a screen-and-a-quarter out from the glass,
+		// and always a hand's width in front of the head so the head is behind the lens.
 		const FVector Toward = (Head - Centre).GetSafeNormal();
-		Eye = Centre + Toward * FMath::Clamp(H * 1.5f, 22.0f, 60.0f);
+		const float HeadDist = (float)FVector::Dist(Head, Centre);
+		Eye = Centre + Toward * FMath::Min(FMath::Clamp(H * 1.25f, 20.0f, 48.0f), FMath::Max(12.0f, HeadDist - 12.0f));
 	}
-	const float Dist = FMath::Max(20.0f, (float)FVector::Dist(Eye, Centre));
+	const float Dist = FMath::Max(12.0f, (float)FVector::Dist(Eye, Centre));
 	const FVector2D ViewSize = UWidgetLayoutLibrary::GetViewportSize(this);
 	const float Aspect = ViewSize.Y > 1.0f ? ViewSize.X / ViewSize.Y : 1.777f;
-	const float VNeeded = 2.0f * FMath::Atan((H * 0.5f) / Dist) / 0.72f;
-	const float Fov = FMath::Clamp(FMath::RadiansToDegrees(2.0f * FMath::Atan(FMath::Tan(VNeeded * 0.5f) * Aspect)), 35.0f, 85.0f);
+	const float VNeeded = 2.0f * FMath::Atan((H * 0.5f) / Dist) / 0.9f;   // the screen fills nine tenths of the height
+	const float Fov = FMath::Clamp(FMath::RadiansToDegrees(2.0f * FMath::Atan(FMath::Tan(VNeeded * 0.5f) * Aspect)), 30.0f, 90.0f);
 	FActorSpawnParameters Params; Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	ACameraActor* Previous = TerminalCamera;
 	TerminalCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), Eye, (Centre - Eye).Rotation(), Params);
 	if (TerminalCamera && TerminalCamera->GetCameraComponent()) { TerminalCamera->GetCameraComponent()->SetFieldOfView(Fov); }
 	if (TerminalCamera) { SetViewTargetWithBlend(TerminalCamera, 0.35f, VTBlend_EaseInOut, 2.0f); }
 	if (Previous) { Previous->SetLifeSpan(1.5f); }
-	// Focus the prompt the way a click would: a custom hit on the prompt row through the screen
-	// component, pressed and released on the next ticks, then the pointer goes back to the mouse.
-	// Slate's own focus call cannot reach a widget on a world screen (its window is virtual).
-	if (TerminalPointer && TerminalScreen && TerminalTarget.IsValid())
-	{
-		FHitResult Click;
-		Click.bBlockingHit = true;
-		Click.Component = TerminalScreen;
-		Click.HitObjectHandle = FActorInstanceHandle(TerminalTarget.Get());
-		Click.Location = Click.ImpactPoint = Centre - Up * (H * 0.42f) + Normal * 0.5f;
-		Click.ImpactNormal = Click.Normal = Normal;
-		Click.TraceStart = Eye; Click.TraceEnd = Click.Location - Normal * 5.0f;
-		TerminalPointer->InteractionSource = EWidgetInteractionSource::Custom;
-		TerminalPointer->SetCustomHitResult(Click);
-		TWeakObjectPtr<UWidgetInteractionComponent> WeakPointer(TerminalPointer);
-		FTimerHandle Press, Release, Back;
-		GetWorld()->GetTimerManager().SetTimer(Press, FTimerDelegate::CreateLambda([WeakPointer]() { if (WeakPointer.IsValid()) { WeakPointer->PressPointerKey(EKeys::LeftMouseButton); } }), 0.1f, false);
-		GetWorld()->GetTimerManager().SetTimer(Release, FTimerDelegate::CreateLambda([WeakPointer]() { if (WeakPointer.IsValid()) { WeakPointer->ReleasePointerKey(EKeys::LeftMouseButton); } }), 0.2f, false);
-		GetWorld()->GetTimerManager().SetTimer(Back, FTimerDelegate::CreateLambda([WeakPointer]() { if (WeakPointer.IsValid()) { WeakPointer->InteractionSource = EWidgetInteractionSource::Mouse; } }), 0.3f, false);
-	}
+	// THE KEYBOARD. The real keyboard's user is focused on the prompt (Slate finds the widget in
+	// the screen's virtual window), so every key and character goes straight there with its
+	// proper case and symbols. Should that fail, the pointer's own user is given the focus by a
+	// click on the prompt and the keys are carried through the pointer instead.
+	bTerminalKeysDirect = TerminalWidget && TerminalWidget->FocusPromptFor(0);
+	UE_LOG(LogTemp, Log, TEXT("Terminal: keys %s"), bTerminalKeysDirect ? TEXT("direct to the prompt") : TEXT("carried through the pointer"));
+	if (!bTerminalKeysDirect) { ClickTerminalPrompt(); }
+}
+
+void ABasePlayerController::ClickTerminalPrompt()
+{
+	if (!TerminalPointer || !TerminalScreen || !TerminalWidget) { return; }
+	FVector2D Px;
+	if (!TerminalWidget->PromptCentrePx(Px)) { return; }
+	// The prompt's pixel on the picture, taken back through the component the way its hit test
+	// maps a world point to a pixel (GetLocalHitLocation: x = -Y, y = -Z, less the pivot), so
+	// the click lands on the prompt wherever the layout put it.
+	const FVector2D Draw = TerminalScreen->GetDrawSize(), Pivot = TerminalScreen->GetPivot();
+	const FVector Local(0.0, -(Px.X - Draw.X * Pivot.X), -(Px.Y - Draw.Y * Pivot.Y));
+	const FTransform& T = TerminalScreen->GetComponentTransform();
+	const FVector World = T.TransformPosition(Local), Face = T.GetUnitAxis(EAxis::X);
+	FHitResult Click;
+	Click.bBlockingHit = true;
+	Click.Component = TerminalScreen;
+	Click.HitObjectHandle = FActorInstanceHandle(TerminalScreen->GetOwner());
+	Click.Location = Click.ImpactPoint = World;
+	Click.ImpactNormal = Click.Normal = Face;
+	Click.TraceStart = World + Face * 30.0f; Click.TraceEnd = World - Face * 5.0f;
+	TerminalPointer->InteractionSource = EWidgetInteractionSource::Custom;
+	TerminalPointer->SetCustomHitResult(Click);
+	TWeakObjectPtr<UWidgetInteractionComponent> WeakPointer(TerminalPointer);
+	FTimerHandle Press, Release, Back;
+	GetWorld()->GetTimerManager().SetTimer(Press, FTimerDelegate::CreateLambda([WeakPointer]() { if (WeakPointer.IsValid()) { WeakPointer->PressPointerKey(EKeys::LeftMouseButton); } }), 0.1f, false);
+	GetWorld()->GetTimerManager().SetTimer(Release, FTimerDelegate::CreateLambda([WeakPointer]() { if (WeakPointer.IsValid()) { WeakPointer->ReleasePointerKey(EKeys::LeftMouseButton); } }), 0.2f, false);
+	GetWorld()->GetTimerManager().SetTimer(Back, FTimerDelegate::CreateLambda([WeakPointer]() { if (WeakPointer.IsValid()) { WeakPointer->InteractionSource = EWidgetInteractionSource::Mouse; } }), 0.3f, false);
+}
+
+void ABasePlayerController::RefocusTerminalPrompt()
+{
+	if (!bTerminalOpen || !TerminalWidget) { return; }
+	if (bTerminalKeysDirect) { TerminalWidget->FocusPromptFor(0); } else { ClickTerminalPrompt(); }
+}
+
+void ABasePlayerController::BindTerminalGlass()
+{
+	if (!bTerminalOpen || !TerminalScreen) { GetWorld()->GetTimerManager().ClearTimer(TerminalBindTimer); return; }
+	UTextureRenderTarget2D* RT = TerminalScreen->GetRenderTarget();
+	if (!RT) { return; }   // not drawn yet; the timer asks again
+	GetWorld()->GetTimerManager().ClearTimer(TerminalBindTimer);
+	if (!TerminalGlass) { return; }
+	// The engine's own pass-through material for world widgets, on the glass, fed the same picture.
+	static UMaterialInterface* Parent = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/EngineMaterials/Widget3DPassThrough_Translucent.Widget3DPassThrough_Translucent"));
+	if (!Parent) { UE_LOG(LogTemp, Warning, TEXT("Terminal: no Widget3DPassThrough_Translucent; the glass stays dark")); TerminalScreen->SetRenderInMainPass(true); TerminalScreen->SetTintColorAndOpacity(FLinearColor::White); return; }
+	TerminalGlassMID = UMaterialInstanceDynamic::Create(Parent, this);
+	TerminalGlassMID->SetTextureParameterValue(TEXT("SlateUI"), RT);
+	TerminalGlassMID->SetVectorParameterValue(TEXT("TintColorAndOpacity"), FLinearColor::White);
+	TerminalGlassMID->SetScalarParameterValue(TEXT("OpacityFromTexture"), 1.0f);
+	TerminalGlass->SetMaterial(0, TerminalGlassMID);
+	TerminalGlass->SetVisibility(true);
 }
 
 void ABasePlayerController::CloseTerminal()
@@ -1255,11 +2275,16 @@ void ABasePlayerController::CloseTerminal()
 	if (!bTerminalOpen) { return; }
 	bTerminalOpen = false;
 	GetWorld()->GetTimerManager().ClearTimer(TerminalPlaceTimer);
+	GetWorld()->GetTimerManager().ClearTimer(TerminalBindTimer);
+	bTerminalKeysDirect = false;
 	if (TerminalWidget && TerminalWidget->IsInViewport()) { TerminalWidget->RemoveFromParent(); }
+	if (TerminalGlass) { TerminalGlass->DestroyComponent(); TerminalGlass = nullptr; }
+	TerminalGlassMID = nullptr;
 	if (TerminalScreen) { TerminalScreen->SetWidget(nullptr); TerminalScreen->DestroyComponent(); TerminalScreen = nullptr; }
 	if (TerminalPointer) { TerminalPointer->DestroyComponent(); TerminalPointer = nullptr; }
 	if (ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn())) { if (bTerminalSeated && Me->IsSitting()) { Me->StandUp(); } }
 	bTerminalSeated = false;
+	if (bTerminalHolstered) { bTerminalHolstered = false; bHolstered = false; RefreshHeldWeapon(); }   // the weapon back in hand
 	if (APawn* P = GetPawn()) { SetViewTargetWithBlend(P, 0.35f, VTBlend_EaseInOut, 2.0f); }
 	if (TerminalCamera) { TerminalCamera->SetLifeSpan(1.5f); TerminalCamera = nullptr; }
 	TerminalTarget = nullptr;
@@ -1331,6 +2356,7 @@ void ABasePlayerController::HideScenesPanel()
 {
 	if (!bScenesOpen) { return; }
 	bScenesOpen = false;
+	HideSheetMirror();   // the viewer's booth goes with the page
 	if (ScenesWidget && ScenesWidget->IsInViewport()) { ScenesWidget->RemoveFromParent(); }
 	// Straight back to the menu it came from -- unless a scene is starting, in which case
 	// PlaySequence takes over and closing the menu is exactly what it wants.
@@ -1340,6 +2366,7 @@ void ABasePlayerController::HideScenesPanel()
 		PauseMenuWidget->SetAnchorsInViewport(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
 		PauseMenuWidget->SetAlignmentInViewport(FVector2D::ZeroVector);
 	}
+	if (!IsPageOpen()) { SetPause(false); }   // see HideReference: a page that pauses must unpause
 	ApplyInputMode();
 }
 
@@ -1373,6 +2400,7 @@ void ABasePlayerController::HideSettingsPanel()
 		PauseMenuWidget->SetAnchorsInViewport(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
 		PauseMenuWidget->SetAlignmentInViewport(FVector2D::ZeroVector);
 	}
+	if (!IsPageOpen()) { SetPause(false); }   // see HideReference: a page that pauses must unpause
 	ApplyInputMode();
 }
 
@@ -1465,7 +2493,12 @@ void ABasePlayerController::ShowWeaponPreview(const FString& MeshPath, const FSt
 	if (!WeaponBoothActor) { return; }
 	WeaponBoothActor->SetMobility(EComponentMobility::Movable);
 	WeaponBoothActor->GetStaticMeshComponent()->SetStaticMesh(Mesh);
-	if (const WeaponCatalog::FWeapon* Skinned = WeaponName.IsEmpty() ? nullptr : WeaponCatalog::Find(WeaponName)) { WeaponSkins::Apply(WeaponBoothActor->GetStaticMeshComponent(), *Skinned); }
+	// The booth wears the paint being TRIED, when one is; otherwise the catalogue's own.
+	if (const WeaponCatalog::FWeapon* Skinned = WeaponName.IsEmpty() ? nullptr : WeaponCatalog::Find(WeaponName))
+	{
+		WeaponSkins::ApplyNamed(WeaponBoothActor->GetStaticMeshComponent(), *Skinned,
+			PreviewSkinOverride.IsEmpty() ? Skinned->Skin : PreviewSkinOverride);
+	}
 	WeaponBoothActor->GetStaticMeshComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	WeaponBoothActor->SetTickableWhenPaused(true);
 	// The same rim-glow shell the inspect highlight draws over a character (M_CharacterHighlight:
@@ -1511,7 +2544,7 @@ void ABasePlayerController::ShowWeaponPreview(const FString& MeshPath, const FSt
 		WeaponFlash->SetTickableWhenPaused(true);
 	}
 	// The camera: side on, a little above, looking +X at the piece.
-	if (!WeaponTarget) { WeaponTarget = UKismetRenderingLibrary::CreateRenderTarget2D(this, 1024, 633, ETextureRenderTargetFormat::RTF_RGBA8_SRGB, FLinearColor::Black, false); }   // 1.618, the shape of the pane's box
+	if (!WeaponTarget) { WeaponTarget = UKismetRenderingLibrary::CreateRenderTarget2D(this, 1024, PaneShape::TargetHeight(PaneShape::WeaponPreview, 1024), ETextureRenderTargetFormat::RTF_RGBA8_SRGB, FLinearColor::Black, false); }
 	WeaponCapture = GetWorld()->SpawnActor<ASceneCapture2D>(WeaponBoothOrigin + FVector(-2.6f * WeaponExtent, 0.0f, 0.35f * WeaponExtent), FRotator(-7.5f, 0.0f, 0.0f), Params);
 	if (USceneCaptureComponent2D* Cap = WeaponCapture ? WeaponCapture->GetCaptureComponent2D() : nullptr)
 	{
@@ -1646,11 +2679,19 @@ void ABasePlayerController::HideReference()
 		PauseMenuWidget->SetAnchorsInViewport(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
 		PauseMenuWidget->SetAlignmentInViewport(FVector2D::ZeroVector);
 	}
+	// NOTHING OPEN, NOTHING PAUSED. Every page pauses the game on the way in, and four of them --
+	// this one, the scenes panel, the settings panel and save/load -- never unpaused on the way out.
+	// The world then stayed frozen behind a screen that was no longer there, with whatever the page
+	// had left in front of it, until the pause menu happened to unpause it: "I exit the UI and it
+	// stays; I have to hit escape a few times". Asking IsPageOpen rather than a flag means a page
+	// closed on top of another leaves the pause where it belongs.
+	if (!IsPageOpen()) { SetPause(false); }
 	ApplyInputMode();
 }
 
 void ABasePlayerController::HidePauseMenu()
 {
+	HideSaveLoad();
 	if (!bPauseMenuOpen) { return; }
 	if (bSettingsOpen) { bSettingsOpen = false; if (SettingsWidget && SettingsWidget->IsInViewport()) { SettingsWidget->RemoveFromParent(); } }
 	if (bReferenceOpen) { bReferenceOpen = false; if (ReferenceWidget && ReferenceWidget->IsInViewport()) { ReferenceWidget->RemoveFromParent(); } }
@@ -2220,7 +3261,7 @@ void ABasePlayerController::ApplyInputMode()
 {
 	UGameViewportClient* Viewport = GetLocalPlayer() ? GetLocalPlayer()->ViewportClient : nullptr;
 
-	if (bPauseMenuOpen || bCharacterSheetOpen || bAppearanceInputMode || bTransferOpen || bReferenceOpen || bTerminalOpen)
+	if (bPauseMenuOpen || bCharacterSheetOpen || bAppearanceInputMode || bTransferOpen || bReferenceOpen || bTerminalOpen || bSaveLoadOpen || bHandTuneOpen)
 	{
 		// Menu only: free cursor, nothing reaches the game until Back.
 		FInputModeGameAndUI Mode;
@@ -2304,6 +3345,17 @@ bool ABasePlayerController::RecordAssistRay(const FVector& Start, const FVector&
 	if (!World) { return false; }
 	FCollisionQueryParams Params(TEXT("ClaudeAssist"), true);
 	if (GhostActor) { Params.AddIgnoredActor(GhostActor); }
+	// The player and anything riding them. Without this the ECC_Pawn trace below hits our own
+	// CollisionCylinder at distance 0 and wins as the nearest hit -- every capture recorded the
+	// player instead of what the reticle was on. The attached actors matter now the ray starts at
+	// the eye: the held weapon would otherwise block it at point-blank range.
+	if (APawn* Me = GetPawn())
+	{
+		Params.AddIgnoredActor(Me);
+		TArray<AActor*> Attached;
+		Me->GetAttachedActors(Attached, true, true);
+		Params.AddIgnoredActors(Attached);
+	}
 	FHitResult Hit;
 	// Characters: their capsule blocks Pawn, not Visibility, and their
 	// visible parts have no collision -- so take the nearer of the two.
@@ -2322,6 +3374,22 @@ bool ABasePlayerController::RecordAssistRay(const FVector& Start, const FVector&
 	}
 	RecordAssistHit(Hit, Start);
 	return Hit.GetActor() != nullptr;
+}
+
+void ABasePlayerController::CaptureAssistUnderReticle()
+{
+	if (!GetWorld()) { return; }
+	// Prefer the character's aim accessors over the raw camera: the reticle is not always
+	// camera-centre (see BaseCharacter.h GetAimRotation), and starting at the eye rather than
+	// the near plane under the cursor is what keeps the ray out of our own capsule while flying.
+	FVector Start = PlayerCameraManager ? PlayerCameraManager->GetCameraLocation() : FVector::ZeroVector;
+	FRotator Dir = PlayerCameraManager ? PlayerCameraManager->GetCameraRotation() : FRotator::ZeroRotator;
+	if (ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn()))
+	{
+		Start = Me->GetAimOrigin();
+		Dir = Me->GetAimRotation();
+	}
+	RecordAssistRay(Start, Start + Dir.Vector() * 100000.0f);
 }
 
 void ABasePlayerController::RecordAssistHit(const FHitResult& Hit, const FVector& RayStart)
@@ -2405,7 +3473,10 @@ void ABasePlayerController::RecordAssistHit(const FHitResult& Hit, const FVector
 
 	const FString Dir = GetAssistDirectory();
 	IFileManager::Get().MakeDirectory(*Dir, true);
-	const FString ScreenshotPath = FPaths::Combine(Dir, FString::Printf(TEXT("click_%d.png"), AssistClickCount));
+	// Timestamped, not indexed: AssistClickCount restarts at 1 every PIE session, so click_N.png
+	// was overwritten run to run -- five logged captures shared one PNG on disk. Matters more now
+	// F12 is a fast repeatable one-shot.
+	const FString ScreenshotPath = FPaths::Combine(Dir, FString::Printf(TEXT("click_%s_%d.png"), *FDateTime::UtcNow().ToString(TEXT("%Y%m%d_%H%M%S")), AssistClickCount));
 	Root->SetStringField(TEXT("screenshot"), ScreenshotPath);
 	// Requested, not guaranteed -- it lands a frame later if the viewport
 	// cooperates; the JSON is the reliable part.
@@ -2426,6 +3497,9 @@ void ABasePlayerController::RecordAssistHit(const FHitResult& Hit, const FVector
 	{
 		EditToolWidget->SetStatus(FString::Printf(TEXT("Sent to Claude: %s at (%.0f, %.0f, %.0f)"), *Summary, Hit.Location.X, Hit.Location.Y, Hit.Location.Z));
 	}
+	// The F12 path has no EditToolWidget, so this is the only confirmation the player gets that
+	// the capture happened and what it caught.
+	SetDiagNoteTimed(FString::Printf(TEXT("Sent to Claude: %s"), *Summary), 6.0f);
 }
 
 // ---- Placement -------------------------------------------------------------
@@ -2608,6 +3682,11 @@ void ABasePlayerController::Tick(float DeltaSeconds)
 	TickPendingSwap(DeltaSeconds);
 	TickAutoFire(DeltaSeconds);
 	TickLaser(DeltaSeconds);
+	TickScorches(DeltaSeconds);
+	TickAmbientZone(DeltaSeconds);
+	TickHandTune();
+	TickTracers(DeltaSeconds);
+	if (Brass) { Brass->Tick(DeltaSeconds); }
 	TickMelee(DeltaSeconds);
 	TickCarry(DeltaSeconds);
 	Super::Tick(DeltaSeconds);
@@ -3831,12 +4910,14 @@ void ABasePlayerController::DressBoothAsMirror()
 	}
 }
 
-void ABasePlayerController::ShowSheetMirror()
+bool ABasePlayerController::ShowSheetMirrorFor(const FString& ConfigName)
 {
-	if (bSheetMirror || bAppearanceOpen || BoothCharacter.IsValid() || !GetWorld()) { return; }
-	// The saved likeness (Player.json) in the booth; a fresh player without one gets no mirror yet.
-	ABaseCharacter* Preview = SpawnBoothCharacter(TEXT("Player"));
-	if (!Preview) { return; }
+	if (bAppearanceOpen || !GetWorld()) { return false; }
+	// One booth at a time: whatever was in it goes first.
+	if (bSheetMirror) { HideSheetMirror(); }
+	if (BoothCharacter.IsValid()) { DestroyBooth(); }
+	ABaseCharacter* Preview = SpawnBoothCharacter(ConfigName);
+	if (!Preview) { return false; }
 	bSheetMirror = true;
 	SheetOrbitYaw = 0.0f; SheetOrbitPitch = 0.0f; SheetBaseYaw = Preview->GetActorRotation().Yaw;
 	// The sheet pauses the game; the figure keeps idling and the capture keeps running.
@@ -3845,12 +4926,22 @@ void ABasePlayerController::ShowSheetMirror()
 	RemoteViewResolution = 1024;
 	ShowRemoteView(Preview, false);
 	// The sheet's own portrait target (5:8) replaces the square one on the capture while the sheet is up.
-	if (!SheetTarget) { SheetTarget = UKismetRenderingLibrary::CreateRenderTarget2D(this, 640, 1024, ETextureRenderTargetFormat::RTF_RGBA8_SRGB, FLinearColor::Black, false); }
+	if (!SheetTarget) { SheetTarget = UKismetRenderingLibrary::CreateRenderTarget2D(this, 640, PaneShape::TargetHeight(PaneShape::Mirror, 640), ETextureRenderTargetFormat::RTF_RGBA8_SRGB, FLinearColor::Black, false); }
 	if (RemoteCapture) { RemoteCapture->SetTickableWhenPaused(true); if (USceneCaptureComponent2D* Cap = RemoteCapture->GetCaptureComponent2D()) { Cap->SetTickableWhenPaused(true); Cap->TextureTarget = SheetTarget; } }
 	bSheetHead = false;
 	DressBoothAsMirror();
 	PlaceSheetCamera();
+	return true;
 }
+
+// The sheet's own: the saved likeness (Player.json); a fresh player without one gets no mirror yet.
+void ABasePlayerController::ShowSheetMirror()
+{
+	if (bSheetMirror || BoothCharacter.IsValid()) { return; }
+	ShowSheetMirrorFor(TEXT("Player"));
+}
+
+void ABasePlayerController::HideCharacterPreview() { HideSheetMirror(); }
 
 void ABasePlayerController::PlaceSheetCamera()
 {
@@ -3902,6 +4993,7 @@ bool ABasePlayerController::EquipFromInventory(int32 InventoryIndex)
 	const int32 Slot = Spec.SlotForKind(ItemCatalog::Kind(Item));
 	if (Slot < 0) { ShowCallout(GetPawn(), FString::Printf(TEXT("%s does not equip."), *Item), 2.0f, false); return false; }
 	if (!Spec.Slots[Slot].bEnabled) { ShowCallout(GetPawn(), TEXT("That slot is not available yet."), 2.0f, false); return false; }
+	{ FString Why; if (!ClothingFits(Item, Why)) { ShowCallout(GetPawn(), Why, 2.5f, false); return false; } }
 	Inventory[InventoryIndex] = Equipped[Slot];   // the old one takes the square the new one left (empty when there was none)
 	Equipped[Slot] = Item;
 	RefreshHeldWeapon();
@@ -3923,14 +5015,44 @@ void ABasePlayerController::GiveStartingWeapons()
 		if (Item.IsEmpty()) { return; }
 		const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(Item);
 		if (!W) { UE_LOG(LogTemp, Warning, TEXT("GiveStartingWeapons: %s is not in the catalogue"), *Item); return; }
-		const int32 Slot = Spec.SlotForKind(W->Kind);
-		if (Slot < 0 || !Equipped.IsValidIndex(Slot)) { UE_LOG(LogTemp, Warning, TEXT("GiveStartingWeapons: %s (%s) fits no slot"), *Item, *W->Kind); return; }
-		if (!Equipped[Slot].IsEmpty()) { return; }
+		// THE FIRST SLOT THAT TAKES IT **AND IS FREE**. Slot 1 and Slot 2 carry identical kind
+		// lists, and SlotForKind answers with the first slot accepting the kind whatever is already
+		// sitting in it -- so the first weapon took Slot 1, the second resolved to that same slot,
+		// found it occupied, and was dropped without a word. Only one starting weapon ever arrived.
+		int32 Slot = -1;
+		for (int32 i = 0; i < Spec.Slots.Num() && i < Equipped.Num(); ++i)
+		{
+			// ENABLED, asked explicitly. A disabled slot is not a place a weapon may go, and saying
+			// so beats relying on Slot 3 and Slot 4 happening to carry empty kind lists -- the day
+			// one of them is earned and given kinds, this would start filling a slot the player
+			// cannot use.
+			if (!Spec.Slots[i].bEnabled || !Equipped[i].IsEmpty()) { continue; }
+			const bool bTakesIt = Spec.Slots[i].Kinds.ContainsByPredicate(
+				[&](const FString& K) { return K.Equals(W->Kind, ESearchCase::IgnoreCase); });
+			if (bTakesIt) { Slot = i; break; }
+		}
+		if (Slot < 0)
+		{
+			// Which of the two it is, rather than the silence this used to fail with.
+			UE_LOG(LogTemp, Warning, TEXT("GiveStartingWeapons: %s (%s) %s"), *Item, *W->Kind,
+				Spec.SlotForKind(W->Kind) < 0 ? TEXT("fits no slot") : TEXT("has no free slot that takes it"));
+			return;
+		}
 		Equipped[Slot] = Item;
 	};
-	Fit(StartingPrimary);
-	Fit(StartingSidearm);
+	for (const FString& Item : StartingWeapons) { Fit(Item); }
 	RefreshHeldWeapon();
+}
+
+void ABasePlayerController::SetWeaponPreviewSkin(const FString& WeaponName, const FString& Variant)
+{
+	PreviewSkinOverride = Variant;
+	if (!WeaponBoothActor || WeaponName.IsEmpty()) { return; }
+	if (const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(WeaponName))
+	{
+		WeaponSkins::ApplyNamed(WeaponBoothActor->GetStaticMeshComponent(), *W,
+			PreviewSkinOverride.IsEmpty() ? W->Skin : PreviewSkinOverride);
+	}
 }
 
 void ABasePlayerController::CycleWeaponSkin(const FString& ItemName)
@@ -3951,9 +5073,11 @@ void ABasePlayerController::RefreshHeldWeapon()
 	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
 	if (!Me) { return; }
 	const FSheetSpec& Spec = FSheetSpec::Get();
+	RefreshWornClothing();
 
-	// Slot 1 is the primary, Slot 2 the sidearm. A held slot that is still filled stays held, so
-	// picking something up does not snatch the weapon out of the player's hand.
+	// The enabled weapon slots in order -- they carry no roles, any weapon fits any of them. A held
+	// slot that is still filled stays held, so picking something up does not snatch the weapon out
+	// of the player's hand.
 	int32 Want = -1;
 	if (Equipped.IsValidIndex(StowedSlot) && !Equipped[StowedSlot].IsEmpty()) { Want = StowedSlot; }
 	else if (Equipped.IsValidIndex(HeldSlot) && !Equipped[HeldSlot].IsEmpty()) { Want = HeldSlot; }
@@ -3980,6 +5104,74 @@ void ABasePlayerController::RefreshHeldWeapon()
 
 	const WeaponCatalog::FWeapon* W = (Want >= 0) ? WeaponCatalog::Find(Equipped[Want]) : nullptr;
 	if (!W) { Me->SetWeaponMesh(nullptr); Me->SetWeaponStance(FString()); Me->SetAiming(false); return; }
+	ApplyWeaponToPawn(Me, W, (Want >= 0 && Equipped.IsValidIndex(Want)) ? Equipped[Want] : FString());
+}
+
+bool ABasePlayerController::WantsInstance(const FString& Name)
+{
+	// Weapons, for now: they are what carries accessories, paint and wear. Deliberately narrow --
+	// every instance is a row that has to be saved and eventually released, and there is no sense
+	// paying that for a box of ammunition where one is indistinguishable from the next.
+	return WeaponCatalog::Find(Name) != nullptr;
+}
+
+FString ABasePlayerController::NewItemInstance(const FString& Name)
+{
+	if (Name.IsEmpty() || !WantsInstance(Name)) { return Name; }
+	FItemInstance I;
+	I.Id = NextItemInstanceId++;
+	I.Name = ItemHandle::NameOf(Name);
+	ItemInstances.Add(I);
+	return ItemHandle::Make(I.Name, I.Id);
+}
+
+FItemInstance* ABasePlayerController::FindItemInstance(const FString& Handle)
+{
+	const int32 Id = ItemHandle::IdOf(Handle);
+	if (Id <= 0) { return nullptr; }
+	return ItemInstances.FindByPredicate([Id](const FItemInstance& I) { return I.Id == Id; });
+}
+
+const FItemInstance* ABasePlayerController::FindItemInstance(const FString& Handle) const
+{
+	return const_cast<ABasePlayerController*>(this)->FindItemInstance(Handle);
+}
+
+FString ABasePlayerController::ItemProp(const FString& Handle, const FString& Key, const FString& Fallback) const
+{
+	if (const FItemInstance* I = FindItemInstance(Handle))
+	{
+		if (const FString* V = I->Props.Find(Key)) { return *V; }
+	}
+	return Fallback;
+}
+
+void ABasePlayerController::SetItemProp(const FString& Handle, const FString& Key, const FString& Value)
+{
+	if (FItemInstance* I = FindItemInstance(Handle)) { I->Props.Add(Key, Value); }
+}
+
+void ABasePlayerController::ReleaseItemInstance(const FString& Handle)
+{
+	const int32 Id = ItemHandle::IdOf(Handle);
+	if (Id > 0) { ItemInstances.RemoveAll([Id](const FItemInstance& I) { return I.Id == Id; }); }
+}
+
+FString ABasePlayerController::AccessorySummary(const FString& Handle) const
+{
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(Handle);
+	if (!W) { return FString(); }
+	// The optic this COPY carries, falling back to the type own default. More accessory kinds slot
+	// in here as they arrive; the shape is already right for them.
+	const FString OpticKey = ItemProp(Handle, TEXT("optic"), W->Optic);
+	return FString::Printf(TEXT("FITTED   OPTIC %s"),
+		OpticKey.IsEmpty() ? TEXT("none") : *WeaponCatalog::OpticDisplayName(OpticKey));
+}
+
+void ABasePlayerController::ApplyWeaponToPawn(ABaseCharacter* Me, const WeaponCatalog::FWeapon* W, const FString& Handle)
+{
+	if (!Me || !W) { return; }
+	Me->SetHeldWeaponName(W->Name);   // so a later tuning save can find everyone holding this one
 	UStaticMesh* Mesh = LoadObject<UStaticMesh>(nullptr, *W->MeshPath);
 	if (!Mesh)
 	{
@@ -3992,9 +5184,17 @@ void ABasePlayerController::RefreshHeldWeapon()
 	// (Tools/strip_scopes.py writes body_mesh; the weapon's full mesh stays for everything
 	// else) -- and the sight point is the optic's EYE, on the optic's glass, not the weapon's
 	// own rear sight; collimated glass has no pitch to correct for.
-	const WeaponCatalog::FOptic* Optic = WeaponCatalog::FindOptic(W->Optic);
+	// THIS COPY optic if it has one of its own, otherwise the type default. An unmodified rifle has
+	// no opinion and so behaves exactly as it did before instances existed.
+	const WeaponCatalog::FOptic* Optic = WeaponCatalog::FindOptic(ItemProp(Handle, TEXT("optic"), W->Optic));
 	UStaticMesh* OpticMesh = Optic ? LoadObject<UStaticMesh>(nullptr, *Optic->MeshPath, nullptr, LOAD_NoWarn | LOAD_Quiet) : nullptr;
-	if (OpticMesh && !W->BodyMeshPath.IsEmpty())
+	// THE CUT-DOWN MESH WHENEVER THERE IS ONE, optic or no optic. This used to fall back to the
+	// UN-cut mesh when nothing was fitted, which meant "no optic" quietly put the weapon's moulded-on
+	// factory scope back -- so the option reading IRON SIGHTS actually showed a scope, and that scope
+	// could not be chosen deliberately because it was not an optic at all. Those parts are optics
+	// now (Tools/promote_factory_scopes.py), each weapon wears its own by default so nothing looks
+	// different, and no optic finally means no optic.
+	if (!W->BodyMeshPath.IsEmpty())
 	{
 		if (UStaticMesh* Body = LoadObject<UStaticMesh>(nullptr, *W->BodyMeshPath, nullptr, LOAD_NoWarn | LOAD_Quiet)) { Mesh = Body; }
 	}
@@ -4005,16 +5205,46 @@ void ABasePlayerController::RefreshHeldWeapon()
 	Me->SetWeaponRelativeRotation(FRotator::ZeroRotator);
 	Me->SetWeaponMesh(Mesh);
 	WeaponSkins::Apply(Me->WeaponMeshComponent, *W);   // its chosen paint
-	if (OpticMesh && !Optic->Eye.IsNearlyZero()) { Me->SetWeaponSight(W->OpticMount + Optic->Eye - Optic->Mount, true, 0.0f); }   // the eye, with the optic's own mount point on the rail
+	// THE EYE FOLLOWS THE GLASS. This left Offset out, so nudging a sight along the rail moved the
+	// optic and left the eye line behind on the old spot -- you were aiming through where the scope
+	// used to be. The sight point is the optic position (rail, less its mount, plus its offset) and
+	// then the eye on top of that.
+	if (OpticMesh && !Optic->Eye.IsNearlyZero()) { Me->SetWeaponSight(W->OpticMount - Optic->Mount + Optic->Offset + Optic->Eye, true, 0.0f); }
 	else { Me->SetWeaponSight(W->Sight, W->bHasSight, W->SightPitch); }
+	Me->SetWeaponHandRotation(W->HandRot);   // this weapon's own turn of the hand on its grip (hand_rot), on top of the character's correction
+	Me->SetWeaponForeHandRotation(W->ForeHandRot);   // and the support hand's on the fore grip (fore_hand_rot)
+	Me->SetWeaponFingers(W->FingersR, W->FingersL);   // and how far each finger closes on it
+	Me->SetWeaponHunch(W->Hunch); Me->SetWeaponLean(W->LeanDeg); Me->SetWeaponCarryTune(W->PullCm, W->LateralCm); Me->SetWeaponShoulderPoint(W->Shoulder);   // and the posture it asks for
+	Me->SetWeaponLowReady(W->LowReadyPitch, W->LowReadyYaw); Me->SetWeaponElbowTwist(W->ElbowMain, W->ElbowSupport);
+	Me->SetWeaponElbowAim(W->ElbowMainAim, W->ElbowSupportAim);
 	Me->SetWeaponGrip(W->Grip + WeaponCatalog::StanceGripNudge(W->Stance));   // the stance may move the hand along the grip
+	Me->SetWeaponDrawScale(W->Scale);   // before the grip and sight are read off it
 	Me->SetWeaponRecoil(W->Recoil);
 	Me->SetWeaponMass(W->MassKg);
 	Me->SetWeaponMuzzle(W->Muzzle);
 	Me->SetWeaponForeGrip(W->ForeGrip, W->bHasForeGrip, W->ForeGripPitch);
 	Me->SetWeaponHipFire(W->bHipFire);
 	Me->SetWeaponMelee(!W->bRanged);
-	Me->SetWeaponOptic(OpticMesh, (OpticMesh && Optic) ? W->OpticMount - Optic->Mount : FVector::ZeroVector);
+	// The rail point and the optic own offset go over separately, so the page can move one of them
+	// without having to recompute the other.
+	Me->SetWeaponOptic(OpticMesh,
+		(OpticMesh && Optic) ? W->OpticMount - Optic->Mount : FVector::ZeroVector,
+		(OpticMesh && Optic) ? Optic->Rot : FRotator::ZeroRotator);
+	Me->SetWeaponOpticOffset((OpticMesh && Optic) ? Optic->Offset : FVector::ZeroVector);
+	Me->SetWeaponOpticOptics((OpticMesh && Optic) ? Optic->Zoom : 1.0f, OpticMesh && Optic && Optic->bSmart,
+		(OpticMesh && Optic) ? Optic->Reticle : FString(),
+		(OpticMesh && Optic) ? Optic->ReticleColour : FLinearColor(0.45f, 1.0f, 0.65f, 1.0f),
+		(OpticMesh && Optic) ? Optic->ZoomLevels : TArray<float>(),
+		OpticMesh && Optic && Optic->bOverlay);
+	// And the sight own paint, which is its property and not the gun it is bolted to.
+	// THE SIGHT WEARS THE GUN'S PAINT UNLESS IT HAS ITS OWN. A factory scope is geometry cut off this
+	// weapon and now shares its material family, so leaving it on the family's default while the gun
+	// wears its eighth colourway puts a differently coloured lump on top of the rifle. An optic that
+	// names a skin keeps it -- a bought sight is its own object and need not match anything.
+	if (OpticMesh && Optic && Me->OpticMeshComponent)
+	{
+		WeaponSkins::ApplyVariant(Me->OpticMeshComponent, Optic->Skin.IsEmpty() ? W->Skin : Optic->Skin);
+	}
 	// How the body holds it is the weapon's own business: it carries a stance name and the
 	// character composes clip paths from it. Nothing here decides what a rifle looks like.
 	Me->SetWeaponStance(W->Stance);
@@ -4089,6 +5319,16 @@ void ABasePlayerController::FireHeldWeapon()
 	// A laser is a beam, not a shot: TickLaser runs it for as long as the trigger stays held.
 	if (CurrentFireMode() == WeaponCatalog::EFireMode::Laser) { return; }
 
+	// ONE ROUND LEAVES. Counted here, where the shot is committed and once per trigger pull, rather
+	// than beside the trace -- a shotgun sends several pellets down that path and would otherwise
+	// empty the magazine in a single pull. The count stops at zero and does NOT stop the weapon
+	// firing: whether an empty gun should click instead is a gameplay decision, not a readout one.
+	if (W->Magazine > 0.0f)
+	{
+		int32& Left = MagRounds.FindOrAdd(Equipped[HeldSlot], FMath::Max(0, (int32)W->Magazine));
+		Left = FMath::Max(0, Left - 1);
+	}
+
 	// Hitscan down the CAMERA's line, not the muzzle's. The reticle is what the player aimed
 	// with, and a shot that leaves along the barrel instead lands somewhere else whenever the
 	// weapon is not perfectly aligned with the view -- which, held in a hand, it never is.
@@ -4122,8 +5362,28 @@ void ABasePlayerController::FireHeldWeapon()
 	Params.AddIgnoredActors(Attached);
 	FHitResult Hit;
 	const bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params);
+	// The round's streak, muzzle to mark, and the noise of it for anyone listening.
+	{
+		const FVector MuzzleWorld = Me->WeaponMeshComponent ? Me->WeaponMeshComponent->GetComponentTransform().TransformPosition(W->Muzzle) : Start;
+		SpawnTracer(MuzzleWorld, bHit ? Hit.ImpactPoint : End);
+		UAlertnessComponent::ReportNoise(GetWorld(), Start, 2600.0f, Me);
+	}
 
 	Me->OnWeaponFired(W->Muzzle);
+	// SPENT BRASS: a cartridge weapon throws its case out of the port -- right of the receiver,
+	// above the grip unless the catalogue says where -- to tumble, bounce once with a tink and lie
+	// there. Cells, rockets and beams leave nothing.
+	{
+		using WeaponCatalog::EAmmoKind;
+		const bool bCartridge = W->Ammo == EAmmoKind::Light || W->Ammo == EAmmoKind::Medium || W->Ammo == EAmmoKind::Heavy || W->Ammo == EAmmoKind::Shell;
+		if (bCartridge && Me->WeaponMeshComponent)
+		{
+			if (!Brass) { Brass = NewObject<UBrassFx>(this); }
+			const FTransform& WT = Me->WeaponMeshComponent->GetComponentTransform();
+			const FVector Port = W->Eject.IsNearlyZero() ? FVector(4.0f, 3.5f, 11.0f) : W->Eject;
+			Brass->Eject(Me, WT.TransformPosition(Port), WT.GetUnitAxis(EAxis::Y), WT.GetUnitAxis(EAxis::Z), WT.GetUnitAxis(EAxis::X), W->Ammo == EAmmoKind::Shell);
+		}
+	}
 	// The shot has to arrive somewhere. Without this the muzzle flashes and the world does not
 	// react at all, which reads as the gun not working rather than as a miss.
 	ImpactEffects::Play(GetWorld(), Hit, Me, Me->IsFirstPerson() ? ImpactScaleFirstPerson : 1.0f);
@@ -4256,7 +5516,7 @@ void ABasePlayerController::SetTriggerHeld(bool bHeld)
 void ABasePlayerController::TickAutoFire(float DeltaSeconds)
 {
 	using WeaponCatalog::EFireMode;
-	if (IsEditMode() || IsAnyScreenOpen() || !Equipped.IsValidIndex(HeldSlot)) { return; }
+	if (IsEditMode() || IsFiringBlocked() || !Equipped.IsValidIndex(HeldSlot)) { return; }
 	const EFireMode Mode = CurrentFireMode();
 	// Auto runs while the trigger is held; a burst finishes its rounds whether or not it still is.
 	if (!((Mode == EFireMode::Auto && bTriggerHeld) || (Mode == EFireMode::Burst && BurstLeft > 0))) { return; }
@@ -4278,9 +5538,26 @@ void ABasePlayerController::TickLaser(float DeltaSeconds)
 	using WeaponCatalog::EFireMode;
 	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
 	const WeaponCatalog::FWeapon* W = (Me && Equipped.IsValidIndex(HeldSlot)) ? WeaponCatalog::Find(Equipped[HeldSlot]) : nullptr;
-	const bool bWant = W && W->bRanged && bTriggerHeld && !bHolstered && !IsEditMode() && !IsAnyScreenOpen()
+	const bool bWant = W && W->bRanged && bTriggerHeld && !bHolstered && !IsEditMode() && !IsFiringBlocked()
 		&& CurrentFireMode() == EFireMode::Laser && Me->WeaponMeshComponent && Me->SecondsUntilReadyToFire() <= 0.0f;
 	if (!bWant) { StopLaser(); return; }
+	// THE BATTERY. A laser's magazine is seconds of beam; flat, it will not light again until a
+	// reload puts a fresh cell in (ReloadHeldWeapon).
+	const float Full = W->Magazine > 0.0f ? W->Magazine : 10.0f;
+	float& Charge = LaserCharge.FindOrAdd(W->Key, Full);
+	if (Charge <= 0.0f)
+	{
+		StopLaser();
+		LaserBuzzClock -= DeltaSeconds;
+		if (LaserBuzzClock <= 0.0f)
+		{
+			LaserBuzzClock = 0.7f;
+			UAmbientPlayer::PlayOneShot(this, GetWorld(), TEXT("laser_flat.wav"), 0.6f, 1.0f);
+			SetDiagNoteTimed(FString::Printf(TEXT("%s: battery flat -- reload"), *W->Name), 1.5f);
+		}
+		return;
+	}
+	Charge = FMath::Max(0.0f, Charge - DeltaSeconds);
 	// From the muzzle, down the aim -- the swaying aim, so the beam wanders as the arms do -- to
 	// whatever it meets. No cone: a beam is exactly as straight as its bearer is steady.
 	const FTransform& WT = Me->WeaponMeshComponent->GetComponentTransform();
@@ -4292,40 +5569,252 @@ void ABasePlayerController::TickLaser(float DeltaSeconds)
 	FHitResult Hit;
 	const bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, Start + Dir * 20000.0f, ECC_Visibility, Params);
 	const FVector End = bHit ? Hit.ImpactPoint : Start + Dir * 20000.0f;
-	if (!LaserBeam)
+	// THE BEAM'S PARTS belong to the character: a controller is a hidden actor, and nothing it owns
+	// is ever drawn (which is why the first beam was invisible). A hot core, a wide soft glow round
+	// it, and a red light where the spot is.
+	if (!LaserBeam || LaserBeam->GetOwner() != Me)
 	{
-		LaserBeam = NewObject<UStaticMeshComponent>(this, TEXT("LaserBeam"));
-		LaserBeam->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cylinder.Cylinder")));
-		if (UMaterialInterface* M = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/RepliCan/Materials/M_LaserBeam.M_LaserBeam"))) { LaserBeam->SetMaterial(0, M); }
-		LaserBeam->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		LaserBeam->SetCastShadow(false);
-		LaserBeam->SetAbsolute(true, true, true);
-		LaserBeam->RegisterComponent();
+		static UMaterialInterface* Hot = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/RepliCan/Materials/M_LaserBeam.M_LaserBeam"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+		UStaticMesh* Cylinder = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
+		auto MakeBeam = [&](const TCHAR* Name, float Heat, const FLinearColor& Colour) -> UStaticMeshComponent*
+		{
+			UStaticMeshComponent* C = NewObject<UStaticMeshComponent>(Me, Name);
+			C->SetStaticMesh(Cylinder);
+			if (Hot) { UMaterialInstanceDynamic* M = UMaterialInstanceDynamic::Create(Hot, C); M->SetVectorParameterValue(TEXT("Colour"), Colour); M->SetScalarParameterValue(TEXT("Heat"), Heat); C->SetMaterial(0, M); }
+			C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			C->SetCastShadow(false);
+			C->SetAbsolute(true, true, true);
+			C->RegisterComponent();
+			return C;
+		};
+		LaserBeam = MakeBeam(TEXT("LaserBeam"), 34.0f, FLinearColor(1.0f, 0.3f, 0.16f, 1.0f));   // the core: red pushed nearly to white
+		LaserGlow = MakeBeam(TEXT("LaserGlow"), 2.2f, FLinearColor(1.0f, 0.08f, 0.04f, 1.0f));   // the haze: deep red, soft-edged
+		LaserLight = NewObject<UPointLightComponent>(Me, TEXT("LaserLight"));
+		LaserLight->SetIntensityUnits(ELightUnits::Candelas);
+		LaserLight->SetIntensity(6.0f);
+		LaserLight->SetAttenuationRadius(280.0f);
+		LaserLight->SetLightColor(FLinearColor(1.0f, 0.18f, 0.1f));
+		LaserLight->SetCastShadows(false);
+		LaserLight->SetAbsolute(true, true, true);
+		LaserLight->RegisterComponent();
 	}
 	if (!bLaserOn)
 	{
-		bLaserOn = true; LaserFxClock = 1.0f; LaserReactClock = 1.0f;
-		const FString Wav = W->Sound.IsEmpty() ? TEXT("wep_pistol.wav") : (W->Sound.EndsWith(TEXT(".wav")) ? W->Sound : W->Sound + TEXT(".wav"));
-		UAmbientPlayer::PlayOneShot(this, GetWorld(), Wav, Me->IsFirstPerson() ? ReportVolumeFirstPerson : ReportVolumeThirdPerson, 0.9f, /*bIgnoreDuck=*/true);   // the beam lighting; a loop can replace it
+		bLaserOn = true; LaserFxClock = 1.0f; LaserReactClock = 1.0f; LaserBuzzClock = 0.0f; bLaserStroke = false;
+		UAlertnessComponent::ReportNoise(GetWorld(), Muzzle, 900.0f, Me);   // the beam lighting is heard, not far
 	}
-	// The engine cylinder stands 100 cm tall on Z with a 50 cm radius: laid along the beam, thinned to 1.5 cm.
+	// THE BUZZ: half a second of it, re-lit before it ends, so it reads as one continuous note.
+	LaserBuzzClock -= DeltaSeconds;
+	if (LaserBuzzClock <= 0.0f)
+	{
+		LaserBuzzClock = 0.42f;
+		// Kept in hand, not fired and forgotten: the release silences it THAT frame (StopLaser). A
+		// one-shot left to run on buzzed for up to half a second after the trigger came up.
+		LaserBuzzComps.RemoveAll([](const TWeakObjectPtr<UAudioComponent>& C) { return !C.IsValid() || !C->IsPlaying(); });
+		float Seconds = 0.0f;
+		if (USoundWave* Buzz = VoiceLines::LoadWav(this, FPaths::Combine(UAmbientPlayer::RawAudioDir(), TEXT("laser_buzz.wav")), Seconds))
+		{
+			const float Pitch = FMath::FRandRange(0.985f, 1.015f);
+			if (UAudioComponent* Comp = UGameplayStatics::SpawnSound2D(GetWorld(), Buzz, Me->IsFirstPerson() ? 0.55f : 0.42f, Pitch, 0.0f, nullptr, false, false))
+			{
+				LaserBuzzComps.Add(Comp);
+				TWeakObjectPtr<UAudioComponent> Weak = Comp; FTimerHandle H;   // a procedural wave never ends by itself
+				GetWorldTimerManager().SetTimer(H, FTimerDelegate::CreateLambda([Weak]() { if (UAudioComponent* C = Weak.Get()) { C->Stop(); C->DestroyComponent(); } }), Seconds / FMath::Max(0.1f, Pitch) + 0.15f, false);
+			}
+		}
+	}
+	SetDiagNoteTimed(FString::Printf(TEXT("%s: battery %.0f%%"), *W->Name, 100.0f * Charge / Full), 0.4f);
+	// The engine cylinder stands 100 cm tall on Z with a 50 cm radius, laid along the beam: the core
+	// two and a half centimetres across, the glow sixteen.
 	const float Len = FVector::Dist(Muzzle, End);
-	LaserBeam->SetWorldTransform(FTransform(FRotationMatrix::MakeFromZ((End - Muzzle).GetSafeNormal()).ToQuat(), (Muzzle + End) * 0.5f, FVector(0.03f, 0.03f, Len / 100.0f)));
+	const FQuat Along = FRotationMatrix::MakeFromZ((End - Muzzle).GetSafeNormal()).ToQuat();
+	LaserBeam->SetWorldTransform(FTransform(Along, (Muzzle + End) * 0.5f, FVector(0.05f, 0.05f, Len / 100.0f)));
 	LaserBeam->SetVisibility(true);
-	if (!bHit) { return; }
-	// Damage over time reads as sparks and scorching that keep coming while the beam rests on a
-	// thing, and a flinch every so often from a person under it. Nothing has health to drain yet;
-	// when it does, the beam's damage per second lands here.
+	if (LaserGlow) { LaserGlow->SetWorldTransform(FTransform(Along, (Muzzle + End) * 0.5f, FVector(0.16f, 0.16f, Len / 100.0f))); LaserGlow->SetVisibility(true); }
+	if (LaserLight) { LaserLight->SetWorldLocation(bHit ? Hit.ImpactPoint + Hit.ImpactNormal * 6.0f : End); LaserLight->SetVisibility(bHit); }
+	if (!bHit) { bLaserStroke = false; return; }
+	// THE SPOT. Smoke off whatever it rests on; on a surface, the heated LINE it leaves as it moves
+	// -- one stroke from where the last one ended to here, so the track is continuous, bright metal
+	// cooling to black (MarkScorchStroke, TickScorches); on a body, the catalogue's damage per
+	// second, landed twice a second.
 	LaserFxClock += DeltaSeconds; LaserReactClock += DeltaSeconds;
-	if (LaserFxClock >= 0.15f) { LaserFxClock = 0.0f; ImpactEffects::Play(GetWorld(), Hit, Me, 0.35f); }
-	if (LaserReactClock >= 0.5f && Hit.GetComponent() && Hit.GetComponent()->IsA<USkeletalMeshComponent>()) { LaserReactClock = 0.0f; ShotReactions::React(GetWorld(), Hit, Dir, Me, W->Damage * 0.5f); }   // twice a second: the catalogue damage per second
+	if (LaserFxClock >= 0.11f)
+	{
+		LaserFxClock = 0.0f;
+		// Small white puffs, a hand back along the beam so a wall does not swallow them, and a spit
+		// of red and yellow sparks off the spot.
+		ImpactEffects::SpawnBurst(GetWorld(), { TEXT("/Game/PolygonSciFiWorlds/FX/Niagara/NS_Smoke_Large_White_01"), 0.12f, 0.08f }, Hit.ImpactPoint - Dir * 9.0f + Hit.ImpactNormal * 2.0f, Hit.ImpactNormal.Rotation());
+		SparkFx::Burst(GetWorld(), Hit.ImpactPoint - Dir * 3.0f, Hit.ImpactNormal, 4, 0.7f, FLinearColor(1.0f, 0.12f, 0.05f, 1.0f), FLinearColor(1.0f, 0.8f, 0.2f, 1.0f));
+	}
+	const bool bBody = Hit.GetComponent() && Hit.GetComponent()->IsA<USkeletalMeshComponent>();
+	if (!bBody)
+	{
+		const float Moved = bLaserStroke ? (float)FVector::Dist(Hit.ImpactPoint, LaserStrokeFrom) : 0.0f;
+		if (bLaserStroke && Moved < 3.0f) { if (Scorches.Num() > 0) { Scorches.Last().Age = 0.0f; } }   // resting on one spot keeps it hot
+		else
+		{
+			// Along one surface the stroke joins the last point; a jump (off an edge, onto another
+			// thing) starts a new line from a dot.
+			const bool bJoin = bLaserStroke && Moved < 60.0f && FVector::DotProduct(Hit.ImpactNormal, LaserStrokeNormal) > 0.9f;
+			MarkScorchStroke(bJoin ? LaserStrokeFrom : Hit.ImpactPoint, Hit.ImpactPoint, Hit.ImpactNormal);
+			bLaserStroke = true; LaserStrokeFrom = Hit.ImpactPoint; LaserStrokeNormal = Hit.ImpactNormal;
+		}
+	}
+	else
+	{
+		bLaserStroke = false;
+		// The burn on a body: a scorch dot every few centimetres of travel (or every tenth of a
+		// second resting), attached to the bone under the spot so it rides the body -- a world
+		// decal would stay in the air where the pilot was standing. Same material and cooling as
+		// the surface track; robots and people alike.
+		const float MovedOnBody = bLaserBodyMark ? (float)FVector::Dist(Hit.ImpactPoint, LaserBodyMarkFrom) : 1000.0f;
+		if (MovedOnBody >= 4.0f || LaserBodyMarkClock >= 0.1f)
+		{
+			MarkScorchOnBody(Hit); LaserBodyMarkClock = 0.0f; bLaserBodyMark = true; LaserBodyMarkFrom = Hit.ImpactPoint;
+		}
+		else { LaserBodyMarkClock += DeltaSeconds; }
+		if (LaserReactClock >= 0.5f) { LaserReactClock = 0.0f; ShotReactions::React(GetWorld(), Hit, Dir, Me, W->Damage * 0.5f); }
+	}
+}
+
+void ABasePlayerController::MarkScorchOnBody(const FHitResult& Hit)
+{
+	static UMaterialInterface* Mat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/RepliCan/Materials/M_LaserScorch.M_LaserScorch"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+	UPrimitiveComponent* Comp = Hit.GetComponent();
+	if (!Mat || !Comp || !GetWorld()) { return; }
+	const FRotator Rot = FRotationMatrix::MakeFromX(-Hit.ImpactNormal).Rotator();
+	// A round dot (the stroke's mask, unstretched), a little larger than the beam so it reads on
+	// cloth and plate; pinned to the bone so it moves with the limb.
+	UDecalComponent* D = UGameplayStatics::SpawnDecalAttached(Mat, FVector(4.0f, 2.6f, 2.6f), Comp, Hit.BoneName, Hit.ImpactPoint, Rot, EAttachLocation::KeepWorldPosition, 140.0f);
+	if (!D) { return; }
+	D->SetFadeOut(120.0f, 20.0f, false);
+	D->SetFadeScreenSize(0.0003f);
+	UMaterialInstanceDynamic* MID = D->CreateDynamicMaterialInstance();
+	if (MID) { MID->SetScalarParameterValue(TEXT("Heat"), 1.0f); }
+	FScorch Sc; Sc.Decal = D; Sc.MID = MID; Scorches.Add(Sc);
+	ScorchRing.Add(D);
+	while (ScorchRing.Num() > 360) { if (ScorchRing[0].IsValid()) { ScorchRing[0]->DestroyComponent(); } ScorchRing.RemoveAt(0); }
+}
+
+void ABasePlayerController::MarkScorchStroke(const FVector& From, const FVector& To, const FVector& Normal)
+{
+	static UMaterialInterface* Mat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/RepliCan/Materials/M_LaserScorch.M_LaserScorch"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+	if (!Mat || !GetWorld()) { return; }
+	// A decal box: its X projects into the surface (the inverse normal, see ImpactEffects), its Y
+	// runs along the stroke, its Z is the line's width. The soft round mask stretched along Y is a
+	// soft bar, and consecutive bars overlap by the width, so the track reads as one line.
+	const float Len = (float)FVector::Dist(From, To);
+	FVector Dir = (To - From).GetSafeNormal();
+	if (Dir.IsNearlyZero()) { Dir = FVector::CrossProduct(Normal, FVector::UpVector).GetSafeNormal(); }
+	if (Dir.IsNearlyZero()) { Dir = FVector::RightVector; }
+	const FRotator Rot = FRotationMatrix::MakeFromXY(-Normal, Dir).Rotator();
+	const float HalfWidth = 2.1f;
+	UDecalComponent* D = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), Mat, FVector(3.0f, Len * 0.5f + HalfWidth, HalfWidth), (From + To) * 0.5f, Rot, 140.0f);
+	if (!D) { return; }
+	D->SetFadeOut(120.0f, 20.0f, false);
+	D->SetFadeScreenSize(0.0003f);
+	UMaterialInstanceDynamic* MID = D->CreateDynamicMaterialInstance();
+	if (MID) { MID->SetScalarParameterValue(TEXT("Heat"), 1.0f); }
+	FScorch Sc; Sc.Decal = D; Sc.MID = MID; Scorches.Add(Sc);
+	// A long sweep is a lot of decals: past a few hundred the oldest go.
+	ScorchRing.Add(D);
+	while (ScorchRing.Num() > 360) { if (ScorchRing[0].IsValid()) { ScorchRing[0]->DestroyComponent(); } ScorchRing.RemoveAt(0); }
+}
+
+void ABasePlayerController::TickScorches(float DeltaSeconds)
+{
+	for (int32 i = Scorches.Num() - 1; i >= 0; --i)
+	{
+		FScorch& S = Scorches[i];
+		S.Age += DeltaSeconds;
+		if (!S.Decal.IsValid() || !S.MID.IsValid() || S.Age > 4.0f) { if (S.MID.IsValid()) { S.MID->SetScalarParameterValue(TEXT("Heat"), 0.0f); } Scorches.RemoveAt(i); continue; }
+		S.MID->SetScalarParameterValue(TEXT("Heat"), FMath::Exp(-S.Age * 2.4f));   // white-hot to black in a second and a half
+	}
+}
+
+void ABasePlayerController::SpawnTracer(const FVector& From, const FVector& To)
+{
+	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	if (!Me || !GetWorld() || FVector::DistSquared(From, To) < 40.0f * 40.0f) { return; }   // nothing to see in under half a metre
+	// The streaks belong to the character: a controller is a hidden actor and nothing it owns is drawn.
+	if (TracerPool.Num() > 0 && TracerPool[0] && TracerPool[0]->GetOwner() != Me)
+	{
+		for (const TObjectPtr<UStaticMeshComponent>& C : TracerPool) { if (C) { C->DestroyComponent(); } }
+		TracerPool.Reset(); Tracers.Reset();
+	}
+	int32 Slot = -1;
+	for (int32 i = 0; i < TracerPool.Num() && Slot < 0; ++i)
+	{
+		bool bBusy = false;
+		for (const FTracer& T : Tracers) { if (T.Pool == i) { bBusy = true; break; } }
+		if (!bBusy) { Slot = i; }
+	}
+	if (Slot < 0)
+	{
+		if (TracerPool.Num() >= 24) { return; }
+		UStaticMeshComponent* C = NewObject<UStaticMeshComponent>(Me, *FString::Printf(TEXT("Tracer_%d"), TracerPool.Num()));
+		C->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cylinder.Cylinder")));
+		// A DARK GREY STREAK (user's call, 2026-09-17), not a hot one: M_TracerStreak is unlit and
+		// translucent, because the beam's additive material cannot draw anything darker than what
+		// is behind it. The beam material stays as the fallback if the streak one is missing.
+		static UMaterialInterface* Streak = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/RepliCan/Materials/M_TracerStreak.M_TracerStreak"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+		static UMaterialInterface* Hot = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/RepliCan/Materials/M_LaserBeam.M_LaserBeam"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+		if (Streak)
+		{
+			UMaterialInstanceDynamic* M = UMaterialInstanceDynamic::Create(Streak, this);
+			M->SetVectorParameterValue(TEXT("Colour"), FLinearColor(0.07f, 0.07f, 0.07f, 1.0f));
+			M->SetScalarParameterValue(TEXT("Opacity"), 0.8f);
+			C->SetMaterial(0, M);
+		}
+		else if (Hot)
+		{
+			UMaterialInstanceDynamic* M = UMaterialInstanceDynamic::Create(Hot, this);
+			M->SetVectorParameterValue(TEXT("Colour"), FLinearColor(0.25f, 0.22f, 0.2f, 1.0f));
+			M->SetScalarParameterValue(TEXT("Heat"), 1.0f);
+			C->SetMaterial(0, M);
+		}
+		C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		C->SetCastShadow(false);
+		C->SetAbsolute(true, true, true);
+		C->RegisterComponent();
+		C->SetVisibility(false);
+		Slot = TracerPool.Add(C);
+	}
+	FTracer T; T.Pool = Slot; T.From = From; T.To = To; T.Head = 0.0f;
+	Tracers.Add(T);
+}
+
+void ABasePlayerController::TickTracers(float DeltaSeconds)
+{
+	// A streak a metre long moving at ninety metres a second: a round crossing a room is seen for
+	// a tenth of a second, which is about what a real tracer gives the eye.
+	const float Speed = 9000.0f, Length = 110.0f;
+	for (int32 i = Tracers.Num() - 1; i >= 0; --i)
+	{
+		FTracer& T = Tracers[i];
+		UStaticMeshComponent* C = TracerPool.IsValidIndex(T.Pool) ? TracerPool[T.Pool].Get() : nullptr;
+		const float Total = FVector::Dist(T.From, T.To);
+		T.Head += Speed * DeltaSeconds;
+		const float Tail = T.Head - Length;
+		if (!C || Tail >= Total) { if (C) { C->SetVisibility(false); } Tracers.RemoveAt(i); continue; }
+		const float A = FMath::Max(0.0f, Tail), B = FMath::Min(Total, T.Head);
+		if (B - A < 1.0f) { continue; }
+		const FVector Dir = (T.To - T.From) / Total;
+		const FVector P0 = T.From + Dir * A, P1 = T.From + Dir * B;
+		C->SetWorldTransform(FTransform(FRotationMatrix::MakeFromZ(Dir).ToQuat(), (P0 + P1) * 0.5f, FVector(0.024f, 0.024f, (B - A) / 100.0f)));
+		C->SetVisibility(true);
+	}
 }
 
 void ABasePlayerController::StopLaser()
 {
 	if (!bLaserOn) { return; }
-	bLaserOn = false;
+	bLaserOn = false; bLaserStroke = false; bLaserBodyMark = false;
+	for (const TWeakObjectPtr<UAudioComponent>& C : LaserBuzzComps) { if (UAudioComponent* A = C.Get()) { A->Stop(); A->DestroyComponent(); } }   // silent the instant the click ends
+	LaserBuzzComps.Reset();
 	if (LaserBeam) { LaserBeam->SetVisibility(false); }
+	if (LaserGlow) { LaserGlow->SetVisibility(false); }
+	if (LaserLight) { LaserLight->SetVisibility(false); }
 }
 
 void ABasePlayerController::MeleeSwing()
@@ -4476,7 +5965,10 @@ void ABasePlayerController::TickPendingFire(float DeltaSeconds)
 	PendingFireLeft -= DeltaSeconds;
 	if (PendingFireLeft > 0.0f) { return; }
 	PendingFireLeft = 0.0f;
-	// The weapon is up now, so this call takes the normal path.
+	// The weapon is up now. Only if the finger is still on the trigger: a pull that was let go
+	// while the weapon came up was a change of mind, not a shot to deliver late (user's call,
+	// 2026-09-17). Auto and burst are served by the held trigger from here on anyway.
+	if (!bTriggerHeld && !IsInputKeyDown(InputBindings::KeyFor(TEXT("Fire")))) { return; }
 	FireHeldWeapon();
 }
 
@@ -4495,13 +5987,29 @@ void ABasePlayerController::TickFreelookSafety()
 
 bool ABasePlayerController::IsPageOpen() const
 {
-	return bPauseMenuOpen || bScenesOpen || bSettingsOpen || bReferenceOpen || bCharacterSheetOpen || bTransferOpen || bAppearanceOpen || bTerminalOpen
+	return bPauseMenuOpen || bScenesOpen || bSettingsOpen || bReferenceOpen || bCharacterSheetOpen || bTransferOpen || bAppearanceOpen || bTerminalOpen || bSaveLoadOpen || bHandTuneOpen
 		|| IsInCinematic() || IsInConversation() || IsBoothActive();
+}
+
+void ABasePlayerController::TickAmbientZone(float DeltaSeconds)
+{
+	// Twice a second: which bed this height wants, and a restart of the ambient player if it is
+	// not the one playing. A restart is a hard cut between two beds; the lift ride covers it.
+	AmbientZoneClock += DeltaSeconds;
+	if (AmbientZoneClock < 0.5f || !Ambient || !GetPawn() || AmbientProfile.IsEmpty()) { return; }
+	AmbientZoneClock = 0.0f;
+	const FString Want = GetPawn()->GetActorLocation().Z < DeckAmbientBelowZ ? FString(TEXT("deck")) : AmbientProfile;
+	if (Ambient->GetProfile() != Want) { Ambient->Start(GetWorld(), Want); }
+}
+
+bool ABasePlayerController::IsFiringBlocked() const
+{
+	return IsPageOpen() || IsRemoteViewOpen();
 }
 
 bool ABasePlayerController::IsAnyScreenOpen() const
 {
-	return bPauseMenuOpen || bScenesOpen || bSettingsOpen || bReferenceOpen || bCharacterSheetOpen || bTransferOpen || bAppearanceOpen || bTerminalOpen
+	return bPauseMenuOpen || bScenesOpen || bSettingsOpen || bReferenceOpen || bCharacterSheetOpen || bTransferOpen || bAppearanceOpen || bTerminalOpen || bSaveLoadOpen || bHandTuneOpen
 		|| IsInCinematic() || IsInConversation() || IsInspectMenuOpen() || IsRemoteViewOpen() || IsBoothActive();
 }
 
@@ -4517,6 +6025,72 @@ void ABasePlayerController::ToggleHolster()
 	SetDiagNoteTimed(bHolstered ? TEXT("Weapon stowed") : TEXT("Weapon drawn"), 2.0f);
 }
 
+int32 ABasePlayerController::RoundsLeft(const FString& Handle) const
+{
+	if (const int32* At = MagRounds.Find(Handle)) { return *At; }
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(Handle);
+	return W ? FMath::Max(0, (int32)W->Magazine) : 0;
+}
+
+bool ABasePlayerController::OpticOverlayInfo(float& OutRadius, float& OutAlpha, bool& bOutBlocked) const
+{
+	const ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	if (!Me || !Me->OpticUsesOverlay()) { return false; }
+	const float Up = FMath::Clamp(Me->AdsAlpha(), 0.0f, 1.0f);
+	if (Up <= 0.35f) { return false; }   // below this the weapon is still on its way up
+	// The mask arrives over the last part of the raise, so the picture opens rather than appearing.
+	OutAlpha = FMath::Clamp((Up - 0.35f) / 0.35f, 0.0f, 1.0f);
+	// THE OPENING CLOSES WHEN THE WEAPON IS NOT SETTLED -- see ABaseCharacter::OpticSettle. A strong
+	// scope has a tighter eyebox than a weak one, so its ring closes further for the same wobble.
+	const float Settle = Me->OpticSettle();
+	const float Tight = FMath::Clamp(0.38f - 0.02f * FMath::Max(0.0f, Me->GetWeaponOpticZoom() - 2.0f), 0.24f, 0.40f);
+	OutRadius = Tight * (0.62f + 0.38f * Settle);
+	bOutBlocked = Me->IsOpticBlocked();
+	return true;
+}
+
+bool ABasePlayerController::OpticReticleInfo(FString& OutKind, FLinearColor& OutColour, float& OutZoom, float& OutAlpha) const
+{
+	const ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	if (!Me) { return false; }
+	OutKind = Me->GetOpticReticle();
+	if (OutKind.IsEmpty()) { return false; }          // no sight fitted, or one with nothing to show
+	OutColour = Me->GetOpticReticleColour();
+	OutZoom = Me->GetWeaponOpticZoom();
+	// Fades with the weapon coming up rather than snapping on with the button: the glass is not in
+	// front of your eye until the weapon is.
+	OutAlpha = FMath::Clamp(Me->AdsAlpha(), 0.0f, 1.0f);
+	return OutAlpha > 0.02f;
+}
+
+bool ABasePlayerController::SmartOpticInfo(float& OutRangeM, int32& OutRounds, int32& OutMag) const
+{
+	const ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	if (!Me || !Me->HasSmartOptic() || Me->GetCarry() != EWeaponCarry::ADS) { return false; }
+	if (!Equipped.IsValidIndex(HeldSlot)) { return false; }
+	const FString Handle = Equipped[HeldSlot];
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(Handle);
+	if (!W) { return false; }
+	OutMag = FMath::Max(0, (int32)W->Magazine);
+	OutRounds = RoundsLeft(Handle);
+	// RANGE TO WHAT IS UNDER THE RETICLE, down the same line the shot will take. Nothing in front
+	// reads as no range rather than as the far end of the trace, which would be a lie dressed as a
+	// number.
+	OutRangeM = 0.0f;
+	if (const UWorld* World = GetWorld())
+	{
+		const FVector Start = Me->GetAimOrigin();
+		const FVector Along = Me->GetAimRotation().Vector();
+		FHitResult Hit;
+		FCollisionQueryParams Q(SCENE_QUERY_STAT(SmartOptic), true, Me);
+		if (World->LineTraceSingleByChannel(Hit, Start, Start + Along * 50000.0f, ECC_Visibility, Q))
+		{
+			OutRangeM = Hit.Distance * 0.01f;
+		}
+	}
+	return true;
+}
+
 void ABasePlayerController::ReloadHeldWeapon()
 {
 	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
@@ -4524,6 +6098,9 @@ void ABasePlayerController::ReloadHeldWeapon()
 	if (Me->IsWeaponBusy()) { return; }
 	const WeaponCatalog::FWeapon* W = Equipped.IsValidIndex(HeldSlot) ? WeaponCatalog::Find(Equipped[HeldSlot]) : nullptr;
 	if (!W || !W->bRanged) { return; }
+	// A laser: a fresh cell, whatever was left in the old one.
+	if (W->FireModes.Contains(WeaponCatalog::EFireMode::Laser)) { LaserCharge.FindOrAdd(W->Key) = W->Magazine > 0.0f ? W->Magazine : 10.0f; StopLaser(); }
+	if (W->Magazine > 0.0f) { MagRounds.FindOrAdd(Equipped[HeldSlot]) = (int32)W->Magazine; }   // a fresh magazine
 	if (!Me->PlayWeaponAction(TEXT("Reload")))
 	{
 		SetDiagNoteTimed(FString::Printf(TEXT("No reload animation for a %s"), *W->Stance), 3.0f);
@@ -4542,6 +6119,99 @@ void ABasePlayerController::MeleeHeldWeapon()
 	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
 	if (!Me || HeldSlot < 0 || Me->IsWeaponBusy()) { return; }
 	Me->PlayWeaponAction(TEXT("Melee"));
+}
+
+void ABasePlayerController::AutoEquipPickup(const FString& Name)
+{
+	// A weapon picked up goes straight to an empty weapon slot rather than the bag, and if the
+	// hands were empty -- nothing held, nothing stowed -- it is drawn.
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(Name);
+	if (!W || W->Kind == TEXT("Shield")) { return; }
+	const FSheetSpec& Spec = FSheetSpec::Get();
+	if (Equipped.Num() != Spec.Slots.Num()) { Equipped.SetNum(Spec.Slots.Num()); }
+	int32 Slot = -1;
+	for (int32 i = 0; i < Spec.Slots.Num() && i < Equipped.Num(); ++i)
+	{
+		if (Spec.Slots[i].Name.StartsWith(TEXT("Slot ")) && Spec.Slots[i].bEnabled && Equipped[i].IsEmpty()) { Slot = i; break; }
+	}
+	if (Slot < 0) { return; }
+	const int32 At = Inventory.FindLast(Name);
+	if (At == INDEX_NONE) { return; }
+	if (At == Inventory.Num() - 1) { Inventory.RemoveAt(At); } else { Inventory[At].Empty(); }
+	Equipped[Slot] = Name;
+	const bool bHandsEmpty = HeldSlot < 0 && StowedSlot < 0;
+	if (bHandsEmpty) { EquipWeaponSlot(FCString::Atoi(*Spec.Slots[Slot].Name.Mid(5))); }   // drawn, with the draw
+	else { RefreshHeldWeapon(); }
+	ShowCallout(GetPawn(), FString::Printf(TEXT("%s to %s%s"), *WeaponCatalog::DisplayName(Name), *Spec.Slots[Slot].Name, bHandsEmpty ? TEXT(", in hand") : TEXT("")), 2.5f, false);
+}
+
+// ONE GARMENT FOR EITHER BODY (2026-09-17): a jacket is "Junker jacket", not a men's and a
+// women's; its entry carries the cut-library part for each body (wear_torso_male,
+// wear_torso_female, ...) and the wearer's sex picks. A plain wear_torso still works for a
+// garment cut for one body only, with wear_sex saying which.
+static FString WearFieldFor(const ItemCatalog::FRecord* R, const TCHAR* Base, const FString& Sex)
+{
+	if (!R) { return FString(); }
+	if (!Sex.IsEmpty())
+	{
+		const FString Sexed = R->Get(*(FString(Base) + TEXT("_") + Sex.ToLower()));
+		if (!Sexed.IsEmpty()) { return Sexed; }
+	}
+	return R->Get(Base);
+}
+static bool IsWearable(const ItemCatalog::FRecord* R)
+{
+	static const TCHAR* Keys[] = { TEXT("wear_torso"), TEXT("wear_arms"), TEXT("wear_legs"), TEXT("wear_torso_male"), TEXT("wear_torso_female"), TEXT("wear_arms_male"), TEXT("wear_arms_female"), TEXT("wear_legs_male"), TEXT("wear_legs_female") };
+	for (const TCHAR* K : Keys) { if (R && !R->Get(K).IsEmpty()) { return true; } }
+	return false;
+}
+
+bool ABasePlayerController::ClothingFits(const FString& Item, FString& OutWhy) const
+{
+	const ItemCatalog::FRecord* R = ItemCatalog::FindRecord(Item);
+	if (!R || !IsWearable(R)) { return true; }
+	const ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	if (!Me || !Me->GetCharacterConfig().WearsCutParts()) { OutWhy = TEXT("Nothing to put it on."); return false; }
+	const FString Sex = Me->GetCharacterConfig().Gender;
+	// A garment cut for one body only: wear_sex names it and there is no part for the other.
+	const FString Only = R->Get(TEXT("wear_sex"));
+	const bool bHasMine = !WearFieldFor(R, TEXT("wear_torso"), Sex).IsEmpty() || !WearFieldFor(R, TEXT("wear_arms"), Sex).IsEmpty() || !WearFieldFor(R, TEXT("wear_legs"), Sex).IsEmpty();
+	if (!Only.IsEmpty() && !Only.Equals(Sex, ESearchCase::IgnoreCase) && !bHasMine) { OutWhy = TEXT("It would not fit you."); return false; }
+	return true;
+}
+
+void ABasePlayerController::RefreshWornClothing()
+{
+	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	if (!Me || !Me->GetCharacterConfig().WearsCutParts()) { return; }
+	// What the slots say the body wears, part by part; a part no garment covers goes back to the
+	// body's own, remembered the first time something covered it. The wearer's sex picks the
+	// part where a garment carries one per body.
+	static const TCHAR* Slots[] = { TEXT("CutTorso"), TEXT("CutArms"), TEXT("CutLegs") };
+	static const TCHAR* Fields[] = { TEXT("wear_torso"), TEXT("wear_arms"), TEXT("wear_legs") };
+	const FString Sex = Me->GetCharacterConfig().Gender;
+	for (int32 k = 0; k < 3; ++k)
+	{
+		FString Want;
+		for (const FString& Item : Equipped)
+		{
+			if (Item.IsEmpty()) { continue; }
+			const ItemCatalog::FRecord* R = ItemCatalog::FindRecord(Item);
+			const FString P = WearFieldFor(R, Fields[k], Sex);
+			if (!P.IsEmpty()) { Want = P; }
+		}
+		const FString Now = Me->GetCharacterConfig().Parts.FindRef(Slots[k]);
+		if (!Want.IsEmpty())
+		{
+			if (!WornBase.Contains(Slots[k])) { WornBase.Add(Slots[k], Now); }
+			if (Now != Want) { Me->SetPart(Slots[k], Want); }
+		}
+		else if (const FString* Base = WornBase.Find(Slots[k]))
+		{
+			if (!Base->IsEmpty() && Now != *Base) { Me->SetPart(Slots[k], *Base); }
+			WornBase.Remove(Slots[k]);
+		}
+	}
 }
 
 int32 ABasePlayerController::InventoryFree() const
@@ -4601,8 +6271,15 @@ AActor* ABasePlayerController::DropToWorld(const FString& Name)
 			C->SetCollisionProfileName(TEXT("PhysicsActor"));
 			C->SetSimulatePhysics(true);
 			C->WakeAllRigidBodies();
-			C->AddImpulse(Fwd * 160.0f + FVector(0.0f, 0.0f, 60.0f), NAME_None, true);
-			C->AddAngularImpulseInDegrees(FVector(FMath::FRandRange(-200.f, 200.f), FMath::FRandRange(-200.f, 200.f), FMath::FRandRange(-200.f, 200.f)), NAME_None, true);
+			// IT HAS TO COME TO REST. Dropped with a couple of hundred degrees of spin on every axis
+			// and no damping at all, a rifle skates and pirouettes on the floor for as long as you
+			// watch it -- and a thin, flat shape whose collision is a handful of boxes grinds its way
+			// part into the floor while it does. A gentler tumble plus damping lets it turn over once
+			// or twice and stop, which is what dropping something looks like.
+			C->SetLinearDamping(1.2f);
+			C->SetAngularDamping(4.5f);
+			C->AddImpulse(Fwd * 150.0f + FVector(0.0f, 0.0f, 55.0f), NAME_None, true);
+			C->AddAngularImpulseInDegrees(FVector(FMath::FRandRange(-70.f, 70.f), FMath::FRandRange(-70.f, 70.f), FMath::FRandRange(-70.f, 70.f)), NAME_None, true);
 			Prop->Tags.AddUnique(TEXT("loose"));
 		}
 		else
@@ -4628,6 +6305,23 @@ bool ABasePlayerController::DropInventory(int32 InventoryIndex)
 	return true;
 }
 
+bool ABasePlayerController::DeleteInventory(int32 InventoryIndex)
+{
+	if (!Inventory.IsValidIndex(InventoryIndex) || Inventory[InventoryIndex].IsEmpty()) { return false; }
+	SetDiagNoteTimed(FString::Printf(TEXT("Discarded %s"), *Inventory[InventoryIndex]), 2.5f);
+	Inventory[InventoryIndex].Empty();
+	return true;
+}
+
+bool ABasePlayerController::DeleteGear(int32 Slot)
+{
+	if (!Equipped.IsValidIndex(Slot) || Equipped[Slot].IsEmpty()) { return false; }
+	SetDiagNoteTimed(FString::Printf(TEXT("Discarded %s"), *Equipped[Slot]), 2.5f);
+	Equipped[Slot].Empty();
+	RefreshHeldWeapon();   // it may have been what was in the hands
+	return true;
+}
+
 bool ABasePlayerController::DropGear(int32 Slot)
 {
 	if (!Equipped.IsValidIndex(Slot) || Equipped[Slot].IsEmpty()) { return false; }
@@ -4637,11 +6331,13 @@ bool ABasePlayerController::DropGear(int32 Slot)
 	return true;
 }
 
-bool ABasePlayerController::AddToInventory(const FString& Name)
+bool ABasePlayerController::AddToInventory(const FString& Name, bool bPickup)
 {
 	for (FString& It : Inventory) { if (It.IsEmpty()) { It = Name; return true; } }
 	if (Inventory.Num() >= InventoryCapacity) { return false; }
-	Inventory.Add(Name);
+	// A weapon picked up becomes a particular one, with somewhere to keep what is done to it.
+	Inventory.Add(WantsInstance(Name) ? NewItemInstance(Name) : Name);
+	if (bPickup) { AutoEquipPickup(Name); }
 	return true;
 }
 
@@ -4668,6 +6364,7 @@ bool ABasePlayerController::EquipFromInventoryToSlot(int32 InventoryIndex, int32
 	const FSheetSpec& Spec = FSheetSpec::Get();
 	if (Equipped.Num() != Spec.Slots.Num()) { Equipped.SetNum(Spec.Slots.Num()); }
 	if (!KindFitsSlot(Inventory[InventoryIndex], Slot)) { return false; }
+	{ FString Why; if (!ClothingFits(Inventory[InventoryIndex], Why)) { ShowCallout(GetPawn(), Why, 2.5f, false); return false; } }
 	const FString Old = Equipped[Slot];
 	Equipped[Slot] = Inventory[InventoryIndex];
 	Inventory[InventoryIndex] = Old;
@@ -4756,7 +6453,7 @@ void ABasePlayerController::BeginAppearance()
 	RemoteViewResolution = 1024;          // the mirror is large here; a sharp capture
 	ShowRemoteView(Preview, false);       // the feed lives inside the page, not the square
 	// The same portrait target the character sheet uses: both pages frame the figure 5:8.
-	if (!SheetTarget) { SheetTarget = UKismetRenderingLibrary::CreateRenderTarget2D(this, 640, 1024, ETextureRenderTargetFormat::RTF_RGBA8_SRGB, FLinearColor::Black, false); }
+	if (!SheetTarget) { SheetTarget = UKismetRenderingLibrary::CreateRenderTarget2D(this, 640, PaneShape::TargetHeight(PaneShape::Mirror, 640), ETextureRenderTargetFormat::RTF_RGBA8_SRGB, FLinearColor::Black, false); }
 	if (USceneCaptureComponent2D* Cap = RemoteCapture ? RemoteCapture->GetCaptureComponent2D() : nullptr) { Cap->TextureTarget = SheetTarget; }
 	if (!AppearanceWidget)
 	{
@@ -5052,6 +6749,148 @@ void ABasePlayerController::HandRot(float Pitch, float Yaw, float Roll)
 	if (Pitch < 999.0f) { Me->SetTriggerHandRotation(FRotator(Pitch, Yaw, Roll)); }
 	const FRotator R = Me->GetTriggerHandRotation();
 	SetDiagNoteTimed(FString::Printf(TEXT("HandRot pitch %.1f yaw %.1f roll %.1f (weapon space)"), R.Pitch, R.Yaw, R.Roll), 8.0f);
+}
+
+bool ABasePlayerController::SaveHeldWeaponRotField(const TCHAR* Field, const FRotator& R)
+{
+	const WeaponCatalog::FWeapon* W = Equipped.IsValidIndex(HeldSlot) ? WeaponCatalog::Find(Equipped[HeldSlot]) : nullptr;
+	return W && SaveWeaponField(W->Key, Field, { R.Pitch, R.Yaw, R.Roll });
+}
+
+bool ABasePlayerController::SaveWeaponField(const FString& Key, const TCHAR* Field, const TArray<double>& Values, bool bScalar)
+{
+	// Saved on the entry, so the tune outlives the session and every hold of this weapon gets it.
+	FString Json;
+	const FString File = FPaths::Combine(FPaths::ProjectDir(), TEXT("UI"), TEXT("Weapons.json"));
+	TSharedPtr<FJsonObject> Root;
+	if (!FFileHelper::LoadFileToString(Json, *File)) { return false; }
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
+	const TSharedPtr<FJsonObject>* Weapons = nullptr; const TSharedPtr<FJsonObject>* Entry = nullptr;
+	if (!(FJsonSerializer::Deserialize(Reader, Root) && Root.IsValid() && Root->TryGetObjectField(TEXT("weapons"), Weapons) && Weapons && (*Weapons)->TryGetObjectField(Key, Entry) && Entry)) { return false; }
+	if (bScalar && Values.Num() == 1) { (*Entry)->SetNumberField(Field, FMath::RoundToDouble(Values[0] * 100.0) / 100.0); }
+	else
+	{
+		TArray<TSharedPtr<FJsonValue>> Arr;
+		for (double V : Values) { Arr.Add(MakeShared<FJsonValueNumber>(FMath::RoundToDouble(V * 100.0) / 100.0)); }
+		(*Entry)->SetArrayField(Field, Arr);
+	}
+	FString Out;
+	TSharedRef<TJsonWriter<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>> Writer = TJsonWriterFactory<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>::Create(&Out);
+	if (!(FJsonSerializer::Serialize(Root.ToSharedRef(), Writer) && FFileHelper::SaveStringToFile(Out, *File, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM))) { return false; }
+	WeaponCatalog::Reload();
+	return true;
+}
+
+void ABasePlayerController::HandRotWeapon(float Pitch, float Yaw, float Roll)
+{
+	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	if (!Me) { return; }
+	const WeaponCatalog::FWeapon* W = Equipped.IsValidIndex(HeldSlot) ? WeaponCatalog::Find(Equipped[HeldSlot]) : nullptr;
+	if (!W) { SetDiagNoteTimed(TEXT("HandRotWeapon: nothing in hand"), 4.0f); return; }
+	if (Pitch < 999.0f) { Me->SetWeaponHandRotation(FRotator(Pitch, Yaw, Roll)); SaveHeldWeaponRotField(TEXT("hand_rot"), FRotator(Pitch, Yaw, Roll)); }
+	const FRotator R = Me->GetWeaponHandRotation();
+	SetDiagNoteTimed(FString::Printf(TEXT("%s hand_rot pitch %.1f yaw %.1f roll %.1f (on top of HandRot)"), *W->Name, R.Pitch, R.Yaw, R.Roll), 8.0f);
+}
+
+void ABasePlayerController::HandRotL(float Pitch, float Yaw, float Roll)
+{
+	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	if (!Me) { return; }
+	if (Pitch < 999.0f) { Me->SetSupportHandRotation(FRotator(Pitch, Yaw, Roll)); }
+	const FRotator R = Me->GetSupportHandRotation();
+	SetDiagNoteTimed(FString::Printf(TEXT("HandRotL pitch %.1f yaw %.1f roll %.1f (the support hand's wrap, weapon space)"), R.Pitch, R.Yaw, R.Roll), 8.0f);
+}
+
+void ABasePlayerController::HandRotLWeapon(float Pitch, float Yaw, float Roll)
+{
+	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	if (!Me) { return; }
+	const WeaponCatalog::FWeapon* W = Equipped.IsValidIndex(HeldSlot) ? WeaponCatalog::Find(Equipped[HeldSlot]) : nullptr;
+	if (!W) { SetDiagNoteTimed(TEXT("HandRotLWeapon: nothing in hand"), 4.0f); return; }
+	if (Pitch < 999.0f) { Me->SetWeaponForeHandRotation(FRotator(Pitch, Yaw, Roll)); SaveHeldWeaponRotField(TEXT("fore_hand_rot"), FRotator(Pitch, Yaw, Roll)); }
+	const FRotator R = Me->GetWeaponForeHandRotation();
+	SetDiagNoteTimed(FString::Printf(TEXT("%s fore_hand_rot pitch %.1f yaw %.1f roll %.1f (on top of HandRotL)"), *W->Name, R.Pitch, R.Yaw, R.Roll), 8.0f);
+}
+
+// The one table both reading and writing go through, so a name can never mean two different things
+// and a field cannot be listed but not settable.
+static bool ForEachViewField(ABaseCharacter* C, const FString& Want, float* Set, FString* Report)
+{
+	if (!C) { return false; }
+	bool bHit = false;
+	auto Field = [&](const TCHAR* Name, float& Ref, const TCHAR* What)
+	{
+		if (Report) { Report->Append(FString::Printf(TEXT("  %-10s %8.3f   %s\n"), Name, Ref, What)); }
+		if (Set && Want.Equals(Name, ESearchCase::IgnoreCase)) { Ref = *Set; bHit = true; }
+	};
+	float Lead = C->bViewLeadFromSolve ? 1.0f : 0.0f;
+	Field(TEXT("lead"), Lead, TEXT("1 = the weapon follows the SOLVE (smooth), 0 = it rides the animated hand"));
+	C->bViewLeadFromSolve = Lead > 0.5f;
+	Field(TEXT("spring"),    C->ViewSpringRate,    TEXT("rad/s, how hard position follows"));
+	Field(TEXT("springrot"), C->ViewSpringRateRot, TEXT("rad/s, how hard rotation follows"));
+	Field(TEXT("maxcm"),     C->ViewMaxOffsetCm,   TEXT("cm, the net: furthest the weapon may lag"));
+	Field(TEXT("maxdeg"),    C->ViewMaxOffsetDeg,  TEXT("deg, the same for rotation"));
+	Field(TEXT("sway"),      C->ViewSwayScale,     TEXT("deg of lag per deg/s of turn"));
+	Field(TEXT("swaymax"),   C->ViewSwayMaxDeg,    TEXT("deg, the most sway allowed"));
+	Field(TEXT("swayshift"), C->ViewSwayShiftCm,   TEXT("cm sideways at full sway"));
+	Field(TEXT("bob"),       C->ViewBobCm,         TEXT("cm, stride bob at full speed"));
+	Field(TEXT("bobhz"),     C->ViewBobHz,         TEXT("strides a second"));
+	Field(TEXT("bobref"),    C->ViewBobSpeedRef,   TEXT("cm/s that counts as a full stride"));
+	return bHit;
+}
+
+void ABasePlayerController::ViewTune(const FString& Field, float Value)
+{
+	ABaseCharacter* C = Cast<ABaseCharacter>(GetPawn());
+	if (!C) { return; }
+	if (Field.IsEmpty())
+	{
+		FString Report = TEXT("ViewTune -- first person view:\n");
+		ForEachViewField(C, FString(), nullptr, &Report);
+		Report.Append(TEXT("  usage: ViewTune <name> <value>"));
+		UE_LOG(LogTemp, Log, TEXT("%s"), *Report);
+		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 14.0f, FColor::Green, Report); }
+		return;
+	}
+	float V = Value;
+	if (!ForEachViewField(C, Field, &V, nullptr))
+	{
+		if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("ViewTune: no field '%s' -- run ViewTune with no arguments for the list"), *Field)); }
+		return;
+	}
+	if (GEngine) { GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Green, FString::Printf(TEXT("ViewTune %s = %.3f"), *Field, V)); }
+}
+
+void ABasePlayerController::ForceCarry(int32 Carry)
+{
+	if (ABaseCharacter* C = Cast<ABaseCharacter>(GetPawn()))
+	{
+		C->SetCarryOverride(Carry);
+		UE_LOG(LogTemp, Log, TEXT("ForceCarry: %d"), Carry);
+	}
+}
+
+void ABasePlayerController::HandDump()
+{
+	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	if (!Me) { SetDiagNoteTimed(TEXT("HandDump: no pawn"), 3.0f); return; }
+	const FString Path = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("ClaudeAssist"), TEXT("hand_dump.json"));
+	if (FFileHelper::SaveStringToFile(Me->DumpHold(), *Path))
+	{
+		SetDiagNoteTimed(TEXT("HandDump written to Saved/ClaudeAssist/hand_dump.json"), 4.0f);
+	}
+	else
+	{
+		SetDiagNoteTimed(TEXT("HandDump: could not write the file"), 4.0f);
+	}
+}
+
+void ABasePlayerController::HandDiag()
+{
+	ABaseCharacter* Me = Cast<ABaseCharacter>(GetPawn());
+	if (!Me) { return; }
+	Me->bHandDiag = !Me->bHandDiag;
+	SetDiagNoteTimed(Me->bHandDiag ? TEXT("HandDiag on: reach, carry pull-in, hand gap, sight off the eye line") : TEXT("HandDiag off"), 4.0f);
 }
 
 void ABasePlayerController::Unstuck()

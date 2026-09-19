@@ -27,7 +27,18 @@ namespace ItemFields
 	inline const FField Table[] = {
 		// the weapon's points, in HAC1 space (cm from the grip): the ones the Reference viewer draws
 		// and lets you drag. Listed first: they are what gets tuned most.
-		{ TEXT("grip"),          TEXT("GRIP"),          TEXT("POINTS"),   EType::List,     EScope::Weapons, TEXT("x, y, z: where the trigger hand closes (red); drag it to move the hold") },
+		{ TEXT("grip"),          TEXT("GRIP"),          TEXT("POINTS"),   EType::List,     EScope::Weapons, TEXT("x, y, z: where the main hand closes (red); drag it to move the hold") },
+		{ TEXT("hand_rot"),      TEXT("HAND ROT"),      TEXT("POINTS"),   EType::List,     EScope::Weapons, TEXT("pitch, yaw, roll: the main hand's turn on this grip, degrees, on top of the console's HandRot (HandRotWeapon saves it)") },
+		{ TEXT("fore_hand_rot"), TEXT("FORE HAND ROT"), TEXT("POINTS"),   EType::List,     EScope::Weapons, TEXT("pitch, yaw, roll: the support hand's turn on the fore grip, degrees, on top of the console's HandRotL (HandRotLWeapon saves it)") },
+		{ TEXT("fingers_r"),     TEXT("FINGERS R"),     TEXT("HANDS"),    EType::List,     EScope::Weapons, TEXT("thumb, index, middle, ring, pinky: degrees each phalanx of the main hand closes on top of the clip (+ closes; TUNE HANDS sets it)") },
+		{ TEXT("fingers_l"),     TEXT("FINGERS L"),     TEXT("HANDS"),    EType::List,     EScope::Weapons, TEXT("the same for the support hand") },
+		{ TEXT("hunch"),         TEXT("HUNCH"),         TEXT("HANDS"),    EType::Number,   EScope::Weapons, TEXT("cm of shrug AT THE SIGHTS: shoulders up, head down between them (TUNE HANDS sets it)") },
+		{ TEXT("pull"),          TEXT("PULL"),          TEXT("HANDS"),    EType::List,     EScope::Weapons, TEXT("cm along the aim in each carry [low ready, shouldered, sights]; - brings it in towards the shoulder (TUNE HANDS sets it)") },
+		{ TEXT("lateral"),       TEXT("LATERAL"),       TEXT("HANDS"),    EType::List,     EScope::Weapons, TEXT("cm off to the main-hand side in each carry [low ready, shouldered, sights]; at the sights it is normally 0 (TUNE HANDS sets it)") },
+		{ TEXT("low_ready"),     TEXT("LOW READY"),     TEXT("HANDS"),    EType::List,     EScope::Weapons, TEXT("degrees off the aim at low ready [pitch, yaw]: muzzle down and across (TUNE HANDS sets it)") },
+		{ TEXT("elbow_main"),    TEXT("ELBOW MAIN"),    TEXT("HANDS"),    EType::List,     EScope::Weapons, TEXT("degrees the main elbow swings about its reach line in each carry [low ready, shouldered, sights]; - takes it back behind the ribs (TUNE HANDS sets it)") },
+		{ TEXT("elbow_support"), TEXT("ELBOW SUPPORT"), TEXT("HANDS"),    EType::List,     EScope::Weapons, TEXT("the same for the support elbow") },
+		{ TEXT("lean"),          TEXT("LEAN"),          TEXT("HANDS"),    EType::Number,   EScope::Weapons, TEXT("degrees the torso leans forward at the waist AT THE SIGHTS (TUNE HANDS sets it)") },
 		{ TEXT("sight"),         TEXT("SIGHT"),         TEXT("POINTS"),   EType::List,     EScope::Weapons, TEXT("x, y, z: the rear sight the eye lines up (yellow)") },
 		{ TEXT("fore_grip"),     TEXT("FORE GRIP"),     TEXT("POINTS"),   EType::List,     EScope::Weapons, TEXT("x, y, z: where the support hand closes (green)") },
 		{ TEXT("muzzle"),        TEXT("MUZZLE"),        TEXT("POINTS"),   EType::List,     EScope::Weapons, TEXT("x, y, z: where the shot leaves (white)") },
@@ -92,10 +103,22 @@ namespace ItemFields
 		{ TEXT("range_m"),       TEXT("RANGE M"),       TEXT("WEAPON"),   EType::Number,   EScope::Weapons, TEXT("") },
 		{ TEXT("skin"),          TEXT("SKIN"),          TEXT("WEAPON"),   EType::Text,     EScope::Weapons, TEXT("the material variant it wears, e.g. M_PolygonSciFiSpace_02_C (the sheet's SKIN button cycles the pack's lettered paints); empty = the mesh's own") },
 		{ TEXT("optic"),         TEXT("OPTIC"),         TEXT("WEAPON"),   EType::Text,     EScope::Weapons, TEXT("an optics key from Weapons.json (the OPTIC cycle above lists them), or empty for irons") },
+		{ TEXT("optic_fixed"),   TEXT("OPTIC FIXED"),   TEXT("WEAPON"),   EType::Bool,     EScope::Weapons, TEXT("the sight is built into the weapon and cannot be swapped -- the BugBuster's red dot is its own geometry, so there is nothing to unclip; anything offering a CHOICE of optic must refuse when this is set") },
 		// armour
 		{ TEXT("armor_value"),   TEXT("ARMOR"),         TEXT("ARMOUR"),   EType::Number,   EScope::Armor,   TEXT("") },
 		{ TEXT("body_slot"),     TEXT("BODY SLOT"),     TEXT("ARMOUR"),   EType::Text,     EScope::Armor,   TEXT("Head Chest Arms Hands Legs Feet Back") },
 		{ TEXT("hides_hair"),    TEXT("HIDES HAIR"),    TEXT("ARMOUR"),   EType::Bool,     EScope::Armor,   TEXT("") },
+		// clothing: cut-library parts the wearer's body takes on while it is in a body slot (ABasePlayerController::RefreshWornClothing)
+		{ TEXT("wear_sex"),      TEXT("WEAR SEX"),      TEXT("CLOTHING"), EType::Text,     EScope::Armor,   TEXT("Male or Female: the body it was cut for; anyone else finds it does not fit") },
+		{ TEXT("wear_torso"),    TEXT("WEAR TORSO"),    TEXT("CLOTHING"), EType::Text,     EScope::Armor,   TEXT("the cut-library torso part worn with it") },
+		{ TEXT("wear_arms"),     TEXT("WEAR ARMS"),     TEXT("CLOTHING"), EType::Text,     EScope::Armor,   TEXT("the cut-library arms part worn with it") },
+		{ TEXT("wear_legs"),     TEXT("WEAR LEGS"),     TEXT("CLOTHING"), EType::Text,     EScope::Armor,   TEXT("the cut-library legs part worn with it") },
+		{ TEXT("wear_torso_male"),   TEXT("TORSO (M)"),  TEXT("CLOTHING"), EType::Text,   EScope::Armor,   TEXT("the torso part a male body wears with it (a garment for either body carries one per sex)") },
+		{ TEXT("wear_torso_female"), TEXT("TORSO (F)"),  TEXT("CLOTHING"), EType::Text,   EScope::Armor,   TEXT("the torso part a female body wears with it") },
+		{ TEXT("wear_arms_male"),    TEXT("ARMS (M)"),   TEXT("CLOTHING"), EType::Text,   EScope::Armor,   TEXT("the arms part a male body wears with it") },
+		{ TEXT("wear_arms_female"),  TEXT("ARMS (F)"),   TEXT("CLOTHING"), EType::Text,   EScope::Armor,   TEXT("the arms part a female body wears with it") },
+		{ TEXT("wear_legs_male"),    TEXT("LEGS (M)"),   TEXT("CLOTHING"), EType::Text,   EScope::Armor,   TEXT("the legs part a male body wears with it") },
+		{ TEXT("wear_legs_female"),  TEXT("LEGS (F)"),   TEXT("CLOTHING"), EType::Text,   EScope::Armor,   TEXT("the legs part a female body wears with it") },
 		// audio and presentation
 		{ TEXT("sound_drop"),    TEXT("SOUND DROP"),    TEXT("AUDIO"),    EType::Text,     EScope::All,     TEXT("a cue name; defaults from material") },
 		{ TEXT("sound_pickup"),  TEXT("SOUND PICKUP"),  TEXT("AUDIO"),    EType::Text,     EScope::All,     TEXT("") },
@@ -108,7 +131,7 @@ namespace ItemFields
 
 	// The groups in the order a person tunes them: what is dragged in the viewer first, then
 	// the numbers that make a weapon a weapon, then how it is used, then everything else.
-	inline const TCHAR* GroupOrder[] = { TEXT("POINTS"), TEXT("WEAPON"), TEXT("MELEE"), TEXT("OPTIC"), TEXT("USE"), TEXT("INVENTORY"), TEXT("PHYSICAL"), TEXT("ARMOUR"), TEXT("AUDIO"), TEXT("IDENTITY"), TEXT("REVIEW") };
+	inline const TCHAR* GroupOrder[] = { TEXT("POINTS"), TEXT("WEAPON"), TEXT("MELEE"), TEXT("OPTIC"), TEXT("USE"), TEXT("INVENTORY"), TEXT("PHYSICAL"), TEXT("ARMOUR"), TEXT("CLOTHING"), TEXT("AUDIO"), TEXT("IDENTITY"), TEXT("REVIEW") };
 
 	inline bool Applies(const FField& F, const FString& Category)
 	{

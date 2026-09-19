@@ -1,9 +1,9 @@
-#include "SlidingDoorActor.h"
+#include "World/SlidingDoorActor.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/Pawn.h"
 #include "EngineUtils.h"
-#include "AmbientPlayer.h"
+#include "World/AmbientPlayer.h"
 
 ASlidingDoorActor::ASlidingDoorActor()
 {

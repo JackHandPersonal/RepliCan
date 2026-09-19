@@ -1,5 +1,5 @@
-#include "SequenceData.h"
-#include "ConversationData.h"
+#include "Narrative/SequenceData.h"
+#include "Narrative/ConversationData.h"
 #include "Dom/JsonObject.h"
 #include "HAL/FileManager.h"
 #include "Misc/FileHelper.h"

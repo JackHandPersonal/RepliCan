@@ -7,7 +7,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CharacterBuilderWidget.h"
+#include "UI/CharacterBuilderWidget.h"
 #include "AnimationBrowserWidget.generated.h"
 
 UCLASS()

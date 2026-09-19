@@ -1,4 +1,4 @@
-#include "AnimationBrowserWidget.h"
+#include "UI/AnimationBrowserWidget.h"
 
 UAnimationBrowserWidget::UAnimationBrowserWidget(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)

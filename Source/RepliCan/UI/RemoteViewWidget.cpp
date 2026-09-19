@@ -1,10 +1,11 @@
-#include "RemoteViewWidget.h"
-#include "CrtStyle.h"
+#include "UI/RemoteViewWidget.h"
+#include "UI/CrtStyle.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/Image.h"
+#include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
@@ -31,9 +32,15 @@ void URemoteViewWidget::NativeOnInitialized()
 	// The feed itself, tinted toward phosphor green; the frame is painted over it.
 	Feed = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("Feed"));
 	Feed->SetColorAndOpacity(FLinearColor(0.62f, 1.0f, 0.72f, 1.0f));
-	UVerticalBoxSlot* FeedSlot = Column->AddChildToVerticalBox(Feed);
+	// FILLING IS NOT FITTING. The slot gives the feed whatever space is left, and an image told to
+	// fill a space of a different shape than its texture is stretched: the camera is square, the
+	// column is not. A size box with its minimum and maximum aspect pinned to the target's own shape
+	// lets it grow to fit while keeping its proportions.
+	FeedFit = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("FeedFit"));
+	FeedFit->AddChild(Feed);
+	UVerticalBoxSlot* FeedSlot = Column->AddChildToVerticalBox(FeedFit);
 	FeedSlot->SetSize(ESlateSizeRule::Fill);
-	FeedSlot->SetHorizontalAlignment(HAlign_Fill);
+	FeedSlot->SetHorizontalAlignment(HAlign_Center);
 	FeedSlot->SetVerticalAlignment(VAlign_Fill);
 
 	CaptionText = Crt::Text(WidgetTree, TEXT(""), 12, Crt::DimGreen);
@@ -49,6 +56,13 @@ void URemoteViewWidget::SetFeed(UTextureRenderTarget2D* Target, const FString& C
 		Brush.ImageSize = FVector2D(Target->SizeX, Target->SizeY);
 		Brush.DrawAs = ESlateBrushDrawType::Image;
 		Feed->SetBrush(Brush);
+		// The holder takes the target's own shape, at whatever resolution it was made.
+		if (FeedFit && Target->SizeY > 0)
+		{
+			const float Aspect = float(Target->SizeX) / float(Target->SizeY);
+			FeedFit->SetMinAspectRatio(Aspect);
+			FeedFit->SetMaxAspectRatio(Aspect);
+		}
 	}
 	if (CaptionText) { CaptionText->SetText(FText::FromString(Caption)); }
 }

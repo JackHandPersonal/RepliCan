@@ -1,13 +1,15 @@
-#include "ReferenceWidget.h"
-#include "CrtStyle.h"
-#include "CrtRuleWidget.h"
-#include "CrtTabsWidget.h"
-#include "BasePlayerController.h"
-#include "InventoryGridWidget.h"
-#include "SheetSpec.h"
-#include "WeaponCatalog.h"
-#include "ItemCatalog.h"
-#include "ItemFields.h"
+#include "UI/ReferenceWidget.h"
+#include "UI/PaneShape.h"
+#include "Weapons/WeaponSkins.h"
+#include "UI/CrtStyle.h"
+#include "UI/CrtRuleWidget.h"
+#include "UI/CrtTabsWidget.h"
+#include "Core/BasePlayerController.h"
+#include "UI/InventoryGridWidget.h"
+#include "UI/SheetSpec.h"
+#include "Weapons/WeaponCatalog.h"
+#include "Items/ItemCatalog.h"
+#include "Items/ItemFields.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
@@ -41,7 +43,7 @@ static bool ParseVector(const FString& Text, FVector& Out);   // defined with th
 
 static const float CardIcon = 160.0f;     // the card's render square
 static const float DetailWidth = 980.0f;  // the detail column
-static const float ViewerWidth = 620.0f;  // the render in it: smaller than the column, the rest is air
+static const float ViewerWidth = 700.0f;  // the render in it: smaller than the column, the rest is air
 
 void UReferenceCardBinding::OnClicked()
 {
@@ -66,7 +68,11 @@ void UReferenceWidget::NativeOnInitialized()
 	SetIsFocusable(true);   // keys (X, Y, Z during a point drag) come to this widget when it holds focus
 	Super::NativeOnInitialized();
 	UBorder* Root = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("Root"));
-	Root->SetBrushColor(Crt::Panel);
+	// OPAQUE, not a tint. This ground covers the whole screen, and at the panel colour's 93% it let
+	// the level show faintly through -- which reads as a green wash laid over the game rather than
+	// as a screen you have opened, and was reported three times as exactly that. Solid, it is a
+	// screen. (Crt::Panel is the see-through one, if the world behind is ever wanted back.)
+	Root->SetBrushColor(Crt::PanelSolid);
 	Root->SetPadding(FMargin(34.0f, 26.0f));
 	WidgetTree->RootWidget = Root;
 	Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("Column"));
@@ -100,6 +106,7 @@ void UReferenceWidget::LoadCatalogue()
 	if (!Root->TryGetObjectField(TEXT("weapons"), Weapons) || !Weapons) { return; }
 	for (const TPair<FString, TSharedPtr<FJsonValue>>& Pair : (*Weapons)->Values)
 	{
+		if (Pair.Key.StartsWith(TEXT("_"))) { continue; }   // a documentation key, not an entry
 		const TSharedPtr<FJsonObject>* O = nullptr;
 		if (!Pair.Value->TryGetObject(O) || !O) { continue; }
 		FReferenceEntry E; E.Key = Pair.Key;
@@ -121,6 +128,7 @@ void UReferenceWidget::LoadCatalogue()
 	{
 		for (const TPair<FString, TSharedPtr<FJsonValue>>& Pair : (*OpticsObj)->Values)
 		{
+			if (Pair.Key.StartsWith(TEXT("_"))) { continue; }   // a documentation key, not an entry
 			const TSharedPtr<FJsonObject>* O = nullptr;
 			if (!Pair.Value->TryGetObject(O) || !O) { continue; }
 			FReferenceEntry E; E.Key = Pair.Key;
@@ -145,6 +153,7 @@ void UReferenceWidget::LoadCatalogue()
 		{
 			for (const TPair<FString, TSharedPtr<FJsonValue>>& Pair : (*Items)->Values)
 			{
+				if (Pair.Key.StartsWith(TEXT("_"))) { continue; }   // a documentation key, not an entry
 				const TSharedPtr<FJsonObject>* O = nullptr;
 				if (!Pair.Value->TryGetObject(O) || !O) { continue; }
 				FReferenceEntry E; E.Key = Pair.Key;
@@ -159,7 +168,13 @@ void UReferenceWidget::LoadCatalogue()
 			}
 		}
 	}
-	Entries.Sort([](const FReferenceEntry& A, const FReferenceEntry& B) { return A.Kind == B.Kind ? A.Name < B.Name : A.Kind < B.Kind; });
+	// Weapons by name, one list regardless of kind (the tabs do the grouping); everything else by kind, then name.
+	Entries.Sort([](const FReferenceEntry& A, const FReferenceEntry& B)
+	{
+		if (A.bWeaponsFile != B.bWeaponsFile) { return A.bWeaponsFile; }
+		if (A.bWeaponsFile) { return A.Name < B.Name; }
+		return A.Kind == B.Kind ? A.Name < B.Name : A.Kind < B.Kind;
+	});
 }
 
 // Writes one entry's name and description back, marking it kept so the generator leaves it alone.
@@ -394,10 +409,19 @@ void UReferenceWidget::BuildDetailHeader(UVerticalBox* Into)
 	DetailTitle = Crt::FixedText(WidgetTree, TEXT(""), S.InfoNameSize, Crt::Green);   // the same face and size as a card's name in the list
 	UHorizontalBoxSlot* TitleSlot = Head->AddChildToHorizontalBox(DetailTitle);
 	TitleSlot->SetSize(ESlateSizeRule::Fill); TitleSlot->SetVerticalAlignment(VAlign_Bottom);
+	Head->SetClipping(EWidgetClipping::ClipToBounds);   // nothing on this line may paint over its neighbour
 	ReviewLabel = Crt::FixedText(WidgetTree, TEXT("REVIEWED: never"), S.RowSize, Crt::DimGreen);
 	UHorizontalBoxSlot* RL = Head->AddChildToHorizontalBox(ReviewLabel); RL->SetVerticalAlignment(VAlign_Bottom); RL->SetPadding(FMargin(16, 0, 16, 3));
-	DetailMesh = Crt::FixedText(WidgetTree, TEXT(""), S.RowSize, Crt::DimGreen, ETextJustify::Right);
-	UHorizontalBoxSlot* MeshSlot = Head->AddChildToHorizontalBox(DetailMesh);
+	// THE PATH LIVES IN A FIXED CORNER AND IS CLIPPED TO IT. A text block does not clip itself: a
+	// long one simply paints outside its slot and over whatever is next to it, which is how the name
+	// and the path ended up on top of each other. The box gives it a width it cannot exceed, and
+	// NativeTick slides the text inside when it is longer than that.
+	MeshMarquee = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
+	MeshMarquee->SetWidthOverride(430.0f);
+	MeshMarquee->SetClipping(EWidgetClipping::ClipToBounds);
+	DetailMesh = Crt::FixedText(WidgetTree, TEXT(""), S.RowSize, Crt::DimGreen, ETextJustify::Left);
+	MeshMarquee->AddChild(DetailMesh);
+	UHorizontalBoxSlot* MeshSlot = Head->AddChildToHorizontalBox(MeshMarquee);
 	MeshSlot->SetVerticalAlignment(VAlign_Bottom); MeshSlot->SetPadding(FMargin(0, 0, 28, 3));   // in from the edge
 	Into->AddChildToVerticalBox(Head)->SetPadding(FMargin(0, 0, 0, 6));
 	// Line two: what you can do to the entry. SAVE writes everything on the page -- the dragged
@@ -420,7 +444,7 @@ void UReferenceWidget::BuildDetailHeader(UVerticalBox* Into)
 	Bar->AddChildToHorizontalBox(WidgetTree->ConstructWidget<USpacer>(USpacer::StaticClass()))->SetSize(ESlateSizeRule::Fill);
 	UButton* CloseDetail = Crt::Button(WidgetTree, TEXT("[ CLOSE ]"), S.CaptionSize, Crt::DimGreen);
 	CloseDetail->OnClicked.AddDynamic(this, &UReferenceWidget::OnCloseDetail); Add(CloseDetail);
-	Into->AddChildToVerticalBox(Bar)->SetPadding(FMargin(0, 0, 0, 8));
+	Into->AddChildToVerticalBox(Bar)->SetPadding(FMargin(0, 0, 0, 0));   // straight onto the render: the gap under it was air
 	DetailNote = Crt::FixedText(WidgetTree, TEXT(""), S.RowSize, Crt::DimGreen);
 	Into->AddChildToVerticalBox(DetailNote)->SetPadding(FMargin(0, 0, 0, 6));
 }
@@ -434,7 +458,7 @@ void UReferenceWidget::BuildDetail(UVerticalBox* Into)
 	USizeBox* FeedBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
 	FeedBox->SetMinAspectRatio(1.618f); FeedBox->SetMaxAspectRatio(1.618f);   // golden ratio, landscape: weapons are long
 	FeedBox->SetWidthOverride(ViewerWidth);
-	FeedBox->SetHeightOverride(FMath::RoundToFloat(ViewerWidth / 1.618f));
+	FeedBox->SetHeightOverride(FMath::RoundToFloat(PaneShape::HeightFor(PaneShape::WeaponPreview, ViewerWidth)));
 	UOverlay* FeedStack = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass());
 	WeaponFeed = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass());
 	WeaponFeed->SetColorAndOpacity(FLinearColor::White);
@@ -486,8 +510,76 @@ void UReferenceWidget::BuildDetail(UVerticalBox* Into)
 		GiveBtn->AddChild(GiveText);
 		if (UButtonSlot* GS = Cast<UButtonSlot>(GiveText->Slot)) { GS->SetPadding(FMargin(10.0f, 4.0f)); }
 		GiveBtn->OnClicked.AddDynamic(this, &UReferenceWidget::OnGive);
-		Side->AddChildToVerticalBox(GiveBtn);
-		UHorizontalBoxSlot* SideSlot = FeedRow->AddChildToHorizontalBox(Side); SideSlot->SetPadding(FMargin(10, 0, 0, 0)); SideSlot->SetVerticalAlignment(VAlign_Top);
+		Side->AddChildToVerticalBox(GiveBtn)->SetHorizontalAlignment(HAlign_Left);
+		// TUNE HANDS under it: the hand-tuning page for this weapon (the column hides with GIVE for anything that is not a weapon).
+		UButton* TuneBtn = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
+		TuneBtn->SetStyle(Crt::ButtonStyle());
+		UTextBlock* TuneText = Crt::FixedText(WidgetTree, TEXT("[ TUNE HANDS ]"), S.CaptionSize, Crt::Green);
+		TuneBtn->AddChild(TuneText);
+		if (UButtonSlot* TS = Cast<UButtonSlot>(TuneText->Slot)) { TS->SetPadding(FMargin(10.0f, 4.0f)); }
+		TuneBtn->OnClicked.AddDynamic(this, &UReferenceWidget::OnTuneHands);
+		// THE PAINT, under the render. A Synty pack ships each atlas in lettered variants -- the same
+		// mesh, a different colourway -- and until now the only way to choose one here was to type
+		// the variant's name into the skin field. It steps on a click and says where it is.
+		UButton* SkinBtn = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
+		SkinBtn->SetStyle(Crt::ButtonStyle());
+		SkinLabel = Crt::FixedText(WidgetTree, TEXT("[ SKIN ]"), S.CaptionSize, Crt::Green);
+		SkinBtn->AddChild(SkinLabel);
+		if (UButtonSlot* KS = Cast<UButtonSlot>(SkinLabel->Slot)) { KS->SetPadding(FMargin(10.0f, 4.0f)); }
+		SkinBtn->OnClicked.AddDynamic(this, &UReferenceWidget::OnCycleSkin);
+		SkinButton = SkinBtn;
+		{ UVerticalBoxSlot* KS2 = Side->AddChildToVerticalBox(SkinBtn); KS2->SetPadding(FMargin(0, 8, 0, 0)); KS2->SetHorizontalAlignment(HAlign_Left); }
+		// The same pair as the tuning page: the cycler is a fitting on the RENDER, and this is what
+		// makes it the paint the weapon wears in the world and in its icon. Cycling used to write the
+		// catalogue on every press, so flicking through to look repainted every copy in the level.
+		UButton* DefBtn = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
+		DefBtn->SetStyle(Crt::ButtonStyle());
+		SkinDefaultLabel = Crt::FixedText(WidgetTree, TEXT("[ SET DEFAULT ]"), S.CaptionSize, Crt::DimGreen);
+		DefBtn->AddChild(SkinDefaultLabel);
+		if (UButtonSlot* DS = Cast<UButtonSlot>(SkinDefaultLabel->Slot)) { DS->SetPadding(FMargin(10.0f, 4.0f)); }
+		DefBtn->OnClicked.AddDynamic(this, &UReferenceWidget::OnSetDefaultSkin);
+		SkinDefaultButton = DefBtn;
+		{ UVerticalBoxSlot* DS2 = Side->AddChildToVerticalBox(DefBtn); DS2->SetPadding(FMargin(0, 4, 0, 0)); DS2->SetHorizontalAlignment(HAlign_Left); }
+		{ UVerticalBoxSlot* TS = Side->AddChildToVerticalBox(TuneBtn); TS->SetPadding(FMargin(0, 8, 0, 0)); TS->SetHorizontalAlignment(HAlign_Left); }
+		// MOVE TO: one button per OTHER category, in the space under the side column. A button each
+		// rather than a dropdown because recategorising is a rare, deliberate act and the whole point
+		// is to see at a glance where a thing could go. Refresh hides the one you are already in.
+		MoveBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
+		MoveBox->AddChildToVerticalBox(Crt::FixedText(WidgetTree, TEXT("MOVE TO"), S.CaptionSize, Crt::Faint))->SetPadding(FMargin(0, 0, 0, 4));
+		{
+			auto AddMove = [&](const TCHAR* Label) -> UButton*
+			{
+				UButton* B = Crt::Button(WidgetTree, Label, S.CaptionSize, Crt::DimGreen);
+				MoveButtons.Add(B);
+				UVerticalBoxSlot* MS = MoveBox->AddChildToVerticalBox(B);
+				MS->SetPadding(FMargin(0, 0, 0, 4)); MS->SetHorizontalAlignment(HAlign_Left);
+				return B;
+			};
+			// In the same order as Categories, which is what Refresh indexes by when it hides the
+			// button for the tab this entry is already on.
+			AddMove(TEXT("[ WEAPONS => ]"))->OnClicked.AddDynamic(this, &UReferenceWidget::OnMoveToWeapons);
+			AddMove(TEXT("[ OPTICS => ]"))->OnClicked.AddDynamic(this, &UReferenceWidget::OnMoveToOptics);
+			AddMove(TEXT("[ ARMOR => ]"))->OnClicked.AddDynamic(this, &UReferenceWidget::OnMoveToArmor);
+			AddMove(TEXT("[ EQUIPMENT => ]"))->OnClicked.AddDynamic(this, &UReferenceWidget::OnMoveToEquipment);
+			AddMove(TEXT("[ CONSUMABLES => ]"))->OnClicked.AddDynamic(this, &UReferenceWidget::OnMoveToConsumables);
+			AddMove(TEXT("[ OTHER => ]"))->OnClicked.AddDynamic(this, &UReferenceWidget::OnMoveToOther);
+		}
+		// NOT IN Side. That column is what GiveWidget points at -- the name is misleading, it is the
+		// whole column, not the button -- and the refresh collapses it outright for anything that is
+		// not a weapon. Recategorising is for every tab, and armour and consumables are exactly the
+		// entries most likely to be in the wrong one, so MOVE TO hangs off the row instead and is
+		// never hidden with the weapon-only controls.
+		// ONE COLUMN, NOT TWO. These were added to the row side by side, MOVE TO first, and on a panel
+		// this narrow the second column -- GIVE, SKIN, SET DEFAULT and TUNE HANDS -- was pushed clean
+		// off the right edge. Nothing had been removed and nothing was hidden; the buttons were simply
+		// outside the picture, which from the other side of the screen is indistinguishable from having
+		// deleted them. Stacked instead: the weapon controls on top, MOVE TO beneath, one column wide.
+		// Side keeps its own collapse (GiveWidget) without taking MOVE TO down with it.
+		UVerticalBox* RightCol = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
+		RightCol->AddChildToVerticalBox(Side)->SetHorizontalAlignment(HAlign_Left);
+		{ UVerticalBoxSlot* MB = RightCol->AddChildToVerticalBox(MoveBox); MB->SetPadding(FMargin(0, 22, 0, 0)); MB->SetHorizontalAlignment(HAlign_Left); }
+		UHorizontalBoxSlot* ColSlot = FeedRow->AddChildToHorizontalBox(RightCol);
+		ColSlot->SetPadding(FMargin(18, 0, 0, 0)); ColSlot->SetVerticalAlignment(VAlign_Top); ColSlot->SetHorizontalAlignment(HAlign_Left);
 	}
 	UVerticalBoxSlot* FeedSlot = Into->AddChildToVerticalBox(FeedRow);
 	FeedSlot->SetHorizontalAlignment(HAlign_Left);
@@ -641,7 +733,16 @@ void UReferenceWidget::SelectEntry(int32 Index)
 	SelectedIndex = Index;
 	const FReferenceEntry& E = Entries[Index];
 	if (DetailTitle) { DetailTitle->SetText(FText::FromString(TitleOf(E))); }
-	if (DetailMesh) { FString Shown = E.Mesh; Shown.RemoveFromStart(TEXT("/Game/RepliCan/")); Shown.RemoveFromStart(TEXT("/Game/")); DetailMesh->SetText(FText::FromString(Shown)); }
+	if (DetailMesh)
+	{
+		FString Shown = E.Mesh;
+		Shown.RemoveFromStart(TEXT("/Game/RepliCan/"));
+		Shown.RemoveFromStart(TEXT("/Game/"));
+		DetailMesh->SetText(FText::FromString(Shown));
+		DetailMesh->SetRenderTranslation(FVector2D::ZeroVector);   // a new entry reads from the start
+		MeshScroll = 0.0f;
+		MeshScrollWait = MeshScrollHoldSeconds;
+	}
 	if (HiddenLabel) { const bool bHid = E.Fields.FindRef(TEXT("hidden")) == TEXT("true"); HiddenLabel->SetText(FText::FromString(FixedLabel(bHid ? TEXT("SHOW") : TEXT("HIDE"), 4))); HiddenLabel->SetColorAndOpacity(FSlateColor(bHid ? Crt::Green : Crt::DimGreen)); }
 	if (NameBox) { NameBox->SetText(FText::FromString(E.Name)); }
 	{
@@ -662,6 +763,17 @@ void UReferenceWidget::SelectEntry(int32 Index)
 	if (ResetPointsWidget) { ResetPointsWidget->SetVisibility((bWeapon || bOpticEntry) ? ESlateVisibility::Visible : ESlateVisibility::Collapsed); }   // nothing to reset on an item without points
 	for (UWidget* W : { FireWidget.Get(), HipWidget.Get(), StanceWidget.Get(), OpticWidget.Get() }) { if (W) { W->SetVisibility(bWeapon ? ESlateVisibility::Visible : ESlateVisibility::Collapsed); } }
 	if (GiveWidget) { GiveWidget->SetVisibility(E.bWeaponsFile ? ESlateVisibility::Visible : ESlateVisibility::Collapsed); }   // a shield can be given too
+	// The MOVE TO list, less wherever this entry already is -- there is no sense offering to move a
+	// rifle to WEAPONS. Set here, beside the other per-entry visibility, rather than in the skin
+	// refresh where it used to sit: that one is about paint, and a reader fixing it would have no
+	// reason to look there.
+	{
+		for (int32 i = 0; i < MoveButtons.Num() && i < UE_ARRAY_COUNT(Categories); ++i)
+		{
+			if (MoveButtons[i]) { MoveButtons[i]->SetVisibility(E.Category == Categories[i] ? ESlateVisibility::Collapsed : ESlateVisibility::Visible); }
+		}
+	}
+	RefreshSkinLabel();
 	if (MetaWidget) { MetaWidget->SetVisibility((bWeapon || bOpticEntry) ? ESlateVisibility::Visible : ESlateVisibility::Collapsed); }
 	FillMetaTable(bWeapon ? WeaponCatalog::Find(E.Name) : nullptr);
 	if (SoundBox) { SoundBox->SetText(FText::FromString(E.Sound)); }
@@ -697,11 +809,163 @@ void UReferenceWidget::OnGive()
 {
 	if (!OwnerController || !Entries.IsValidIndex(SelectedIndex) || !Entries[SelectedIndex].bWeaponsFile) { return; }
 	const FString& Name = Entries[SelectedIndex].Name;
-	const bool bOk = OwnerController->AddToInventory(Name);
+	const bool bOk = OwnerController->AddToInventory(Name, true);
 	if (DetailNote) { DetailNote->SetText(FText::FromString(bOk ? FString::Printf(TEXT("GIVEN: %s IS IN THE BAG"), *WeaponCatalog::DisplayName(Name).ToUpper()) : TEXT("NO ROOM IN THE BAG"))); }
 }
 
 void UReferenceWidget::OnResetView() { if (OwnerController) { OwnerController->ResetWeaponPreviewView(); } }
+
+void UReferenceWidget::RefreshSkinLabel()
+{
+	const FReferenceEntry* E = Entries.IsValidIndex(SelectedIndex) ? &Entries[SelectedIndex] : nullptr;
+	const WeaponCatalog::FWeapon* W = (E && E->bWeaponsFile) ? WeaponCatalog::Find(E->Name) : nullptr;
+	const TArray<FString> V = W ? WeaponSkins::Variants(*W) : TArray<FString>();
+	// Nothing to choose between is not a control: a weapon whose atlas ships in one colourway hides it.
+	if (SkinButton) { SkinButton->SetVisibility(V.Num() >= 2 ? ESlateVisibility::Visible : ESlateVisibility::Collapsed); }
+	if (SkinDefaultButton) { SkinDefaultButton->SetVisibility(V.Num() >= 2 ? ESlateVisibility::Visible : ESlateVisibility::Collapsed); }
+	if (SkinDefaultLabel) { SkinDefaultLabel->SetColorAndOpacity(FSlateColor(TriedSkin.IsEmpty() ? Crt::Faint : Crt::Green)); }
+	if (SkinLabel && V.Num() >= 2)
+	{
+		const FString Wearing = TriedSkin.IsEmpty() ? WeaponSkins::Current(*W) : TriedSkin;
+		SkinLabel->SetText(FText::FromString(FString::Printf(TEXT("[ SKIN %d/%d ]"), V.IndexOfByKey(Wearing) + 1, V.Num())));
+	}
+}
+
+void UReferenceWidget::OnSetDefaultSkin()
+{
+	if (!OwnerController || TriedSkin.IsEmpty() || !Entries.IsValidIndex(SelectedIndex)) { return; }
+	const FString Name = Entries[SelectedIndex].Name;
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(Name);
+	if (!W) { return; }
+	const FString Key = W->Key;   // the write re-reads the catalogue, so W is stale after it
+	if (!WeaponCatalog::WriteStringField(Key, TEXT("skin"), TriedSkin)) { return; }
+	TriedSkin.Empty();
+	OwnerController->SetWeaponPreviewSkin(Name, FString());   // the render is showing the catalogue again
+	OwnerController->RefreshHeldWeapon();
+	OwnerController->RefreshTunedWeapon(Name);          // and everyone carrying one
+	RefreshSkinLabel();
+}
+
+void UReferenceWidget::OnCycleSkin()
+{
+	if (!OwnerController || !Entries.IsValidIndex(SelectedIndex) || !Entries[SelectedIndex].bWeaponsFile) { return; }
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(Entries[SelectedIndex].Name);
+	if (!W) { return; }
+	const TArray<FString> V = WeaponSkins::Variants(*W);
+	if (V.Num() < 2) { return; }
+	const FString Wearing = TriedSkin.IsEmpty() ? WeaponSkins::Current(*W) : TriedSkin;
+	TriedSkin = V[(FMath::Max(0, V.IndexOfByKey(Wearing)) + 1) % V.Num()];
+	OwnerController->SetWeaponPreviewSkin(Entries[SelectedIndex].Name, TriedSkin);
+	// E.Mesh, the same field the selection path renders from. Looking it up in Fields instead
+	// returned an empty string -- the entry keeps its mesh in its own member, not in the generic
+	// map -- and an empty path is a preview with nothing in it, which is why cycling the paint
+	// made the render disappear.
+	RefreshSkinLabel();
+}
+
+void UReferenceWidget::OnTuneHands()
+{
+	if (!OwnerController || !Entries.IsValidIndex(SelectedIndex)) { return; }
+	const FReferenceEntry& E = Entries[SelectedIndex];
+	if (!E.bWeaponsFile) { if (DetailNote) { DetailNote->SetText(FText::FromString(TEXT("HANDS ARE TUNED ON WEAPONS"))); } return; }
+	OwnerController->ShowHandTune(E.Name);   // the catalogue is looked up by item name, as GIVE does
+}
+
+void UReferenceWidget::OnMoveToWeapons()     { MoveSelectedTo(TEXT("weapons")); }
+void UReferenceWidget::OnMoveToOptics()      { MoveSelectedTo(TEXT("optics")); }
+void UReferenceWidget::OnMoveToArmor()       { MoveSelectedTo(TEXT("armor")); }
+void UReferenceWidget::OnMoveToEquipment()   { MoveSelectedTo(TEXT("equipment")); }
+void UReferenceWidget::OnMoveToConsumables() { MoveSelectedTo(TEXT("consumables")); }
+void UReferenceWidget::OnMoveToOther()       { MoveSelectedTo(TEXT("other")); }
+
+void UReferenceWidget::MoveSelectedTo(const FString& NewCategory)
+{
+	if (!Entries.IsValidIndex(SelectedIndex)) { return; }
+	const FString Note = MoveEntryTo(Entries[SelectedIndex], NewCategory);
+	if (DetailNote) { DetailNote->SetText(FText::FromString(Note)); }
+}
+
+// Where a category's records live: the weapons file keeps "weapons" and "optics" in two blocks of
+// its own; the other four are one field inside the items file.
+static bool InWeaponsFile(const FString& Cat) { return Cat == TEXT("weapons") || Cat == TEXT("optics"); }
+
+FString UReferenceWidget::MoveEntryTo(FReferenceEntry& E, const FString& NewCategory)
+{
+	if (NewCategory == E.Category) { return TEXT("ALREADY THERE"); }
+	const bool bFromWeapons = InWeaponsFile(E.Category);
+	const bool bToWeapons = InWeaponsFile(NewCategory);
+
+	// The easy case: both homes are the items file, where the category is only a field.
+	if (!bFromWeapons && !bToWeapons)
+	{
+		const FString Was = E.Category;
+		E.Category = NewCategory;
+		E.Fields.Add(TEXT("category"), NewCategory);
+		if (!SaveItemEntry(E)) { E.Category = Was; return TEXT("MOVE FAILED"); }
+		Rebuild();
+		return FString::Printf(TEXT("MOVED TO %s"), *NewCategory.ToUpper());
+	}
+
+	// Otherwise the record itself has to change container. Read both sides first.
+	auto Load = [](const FString& Path, TSharedPtr<FJsonObject>& Out) -> bool
+	{
+		FString Json;
+		if (!FFileHelper::LoadFileToString(Json, *Path)) { return false; }
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
+		return FJsonSerializer::Deserialize(Reader, Out) && Out.IsValid();
+	};
+	auto Save = [](const FString& Path, const TSharedPtr<FJsonObject>& Root) -> bool
+	{
+		FString Out;
+		TSharedRef<TJsonWriter<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>> Writer = TJsonWriterFactory<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>::Create(&Out);
+		if (!FJsonSerializer::Serialize(Root.ToSharedRef(), Writer)) { return false; }
+		return FFileHelper::SaveStringToFile(Out, *Path, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
+	};
+	const FString FromPath = bFromWeapons ? CatalogueFile() : RefItemsFile();
+	const FString ToPath = bToWeapons ? CatalogueFile() : RefItemsFile();
+	TSharedPtr<FJsonObject> FromRoot, ToRoot;
+	if (!Load(FromPath, FromRoot)) { return TEXT("COULD NOT READ THE SOURCE FILE"); }
+	const bool bSameFile = FromPath == ToPath;
+	if (bSameFile) { ToRoot = FromRoot; }
+	else if (!Load(ToPath, ToRoot)) { return TEXT("COULD NOT READ THE DESTINATION FILE"); }
+
+	// The block each side lives in. In the items file every record sits in one "items" object and
+	// the category is a field on it; in the weapons file the block IS the category.
+	auto BlockName = [](const FString& Cat) { return InWeaponsFile(Cat) ? Cat : FString(TEXT("items")); };
+	const TSharedPtr<FJsonObject>* FromBlock = nullptr;
+	if (!FromRoot->TryGetObjectField(BlockName(E.Category), FromBlock) || !FromBlock) { return TEXT("THE SOURCE BLOCK IS MISSING"); }
+	const TSharedPtr<FJsonObject>* Record = nullptr;
+	if (!(*FromBlock)->TryGetObjectField(E.Key, Record) || !Record) { return TEXT("THE RECORD IS NOT WHERE IT SHOULD BE"); }
+	TSharedPtr<FJsonObject> Copy = MakeShared<FJsonObject>(**Record);
+	if (!bToWeapons) { Copy->SetStringField(TEXT("category"), NewCategory); }
+	else { Copy->RemoveField(TEXT("category")); }
+
+	const TSharedPtr<FJsonObject>* ToBlock = nullptr;
+	if (!ToRoot->TryGetObjectField(BlockName(NewCategory), ToBlock) || !ToBlock)
+	{
+		ToRoot->SetObjectField(BlockName(NewCategory), MakeShared<FJsonObject>());
+		ToRoot->TryGetObjectField(BlockName(NewCategory), ToBlock);
+		if (!ToBlock) { return TEXT("COULD NOT MAKE THE DESTINATION BLOCK"); }
+	}
+	(*ToBlock)->SetObjectField(E.Key, Copy);
+
+	// DESTINATION FIRST. If this fails nothing has been taken away yet; if the removal below fails
+	// the record exists twice, which is a tidy-up rather than a loss.
+	if (!bSameFile && !Save(ToPath, ToRoot)) { return TEXT("COULD NOT WRITE THE DESTINATION"); }
+	(*FromBlock)->RemoveField(E.Key);
+	if (!Save(FromPath, FromRoot))
+	{
+		return TEXT("WRITTEN TO THE NEW TAB BUT NOT REMOVED FROM THE OLD -- IT IS IN BOTH");
+	}
+	if (bSameFile && !Save(ToPath, ToRoot)) { return TEXT("COULD NOT WRITE THE FILE"); }
+
+	WeaponCatalog::Reload();
+	ItemCatalog::Reload(true);
+	const FString Name = E.Name;
+	Rebuild();
+	OpenEntryByName(Name);   // the card has moved tabs; find it again and show it there
+	return FString::Printf(TEXT("MOVED TO %s -- CHECK ITS FIELDS"), *NewCategory.ToUpper());
+}
 
 void UReferenceWidget::OnSaveDetail()
 {
@@ -751,8 +1015,29 @@ void UReferenceWidget::ShowHipFire()
 	HipFireLabel->SetColorAndOpacity(FSlateColor(bHipFireValue ? Crt::Green : Crt::DimGreen));
 }
 
+// SOME SIGHTS ARE PART OF THE GUN. The live edit wins over the saved catalogue, so clearing
+// OPTIC FIXED and cycling the sight in one visit works, and setting it bites before the save.
+bool UReferenceWidget::SelectedOpticFixed() const
+{
+	if (const bool* Live = FieldBoolValues.Find(TEXT("optic_fixed"))) { return *Live; }
+	if (Entries.IsValidIndex(SelectedIndex))
+	{
+		if (const FString* F = Entries[SelectedIndex].Fields.Find(TEXT("optic_fixed"))) { return *F == TEXT("true"); }
+		if (const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(Entries[SelectedIndex].Name)) { return W->bOpticFixed; }
+	}
+	return false;
+}
+
 void UReferenceWidget::OnCycleOptic()
 {
+	// A BUILT-IN SIGHT IS NOT A CHOICE. Refuse rather than write a fitting the game will not
+	// honour -- and say why, because a control that does nothing reads as a fault. Reading the
+	// optic stays normal: it keeps its kind, zoom and eye point, and the weapon still aims through it.
+	if (SelectedOpticFixed())
+	{
+		if (DetailNote) { DetailNote->SetText(FText::FromString(TEXT("OPTIC IS BUILT INTO THIS WEAPON -- CLEAR OPTIC FIXED TO CHANGE IT"))); }
+		return;
+	}
 	OpticNames = WeaponCatalog::OpticNames();
 	OpticNames.Insert(FString(), 0);   // none first
 	const int32 At = OpticNames.IndexOfByKey(OpticValue);
@@ -770,7 +1055,15 @@ void UReferenceWidget::ShowOptic()
 {
 	int32 Widest = 4;
 	for (const FString& N : WeaponCatalog::OpticNames()) { Widest = FMath::Max(Widest, N.Len()); }
-	if (OpticLabel) { OpticLabel->SetText(FText::FromString(FixedLabel(OpticValue.IsEmpty() ? TEXT("NONE") : OpticValue, Widest))); }
+	// Shown either way -- a fixed sight is still a sight and its name is worth reading. Dimmed and
+	// marked so it reads as not-editable rather than as broken; the button stays live so clicking
+	// it can say why. The blanks keep the field one width in a fixed-pitch face.
+	const bool bFixed = SelectedOpticFixed();
+	if (OpticLabel)
+	{
+		OpticLabel->SetText(FText::FromString(FixedLabel(OpticValue.IsEmpty() ? TEXT("NONE") : OpticValue, Widest) + (bFixed ? TEXT(" FIXED") : TEXT("      "))));
+		OpticLabel->SetColorAndOpacity(FSlateColor(bFixed ? Crt::DimGreen : Crt::Green));
+	}
 }
 
 void UReferenceWidget::OnCycleStance()
@@ -1106,8 +1399,11 @@ bool UReferenceWidget::FeedShown() const
 
 FString UReferenceWidget::TitleOf(const FReferenceEntry& E)
 {
-	const FString Make = E.Fields.FindRef(TEXT("make")), Model = E.Fields.FindRef(TEXT("model"));
-	if (!Make.IsEmpty() && !Model.IsEmpty()) { return Make + TEXT("  ") + Model; }
+	// THE MODEL ALONE. The maker used to be prepended, which made the longest titles on the page
+	// ("Vestergaard Precision  Scope Sniper 03") long enough to run under the review date and the
+	// asset path sharing that line. The maker is on the page anyway, in its own MAKE field a few
+	// rows down, so the header was saying it twice and paying for it in width.
+	const FString Model = E.Fields.FindRef(TEXT("model"));
 	return Model.IsEmpty() ? E.Name : Model;
 }
 
@@ -1227,6 +1523,40 @@ FReply UReferenceWidget::NativeOnMouseMove(const FGeometry& InGeometry, const FP
 void UReferenceWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
+	// THE PATH, SLIDING, only when it does not fit. It holds at the start for a moment so it can be
+	// read, slides until its end is in view, holds again, then jumps back -- which is easier to read
+	// than a continuous loop, where the one thing you want (the file name at the end) is never still.
+	if (DetailMesh && MeshMarquee)
+	{
+		const float Width = MeshMarquee->GetCachedGeometry().GetLocalSize().X;
+		const float Text = DetailMesh->GetDesiredSize().X;
+		const float Over = Text - Width;
+		if (Over > 1.0f && Width > 1.0f)
+		{
+			// Three states, no flags: holding (wait counts down), sliding, or parked at the far end
+			// waiting to snap back. Whichever it is, MeshScroll is the offset to draw at.
+			if (MeshScrollWait > 0.0f)
+			{
+				MeshScrollWait -= InDeltaTime;
+			}
+			else if (MeshScroll >= Over)
+			{
+				MeshScroll = 0.0f;                          // the hold at the end is over: back to the start
+				MeshScrollWait = MeshScrollHoldSeconds;
+			}
+			else
+			{
+				MeshScroll = FMath::Min(Over, MeshScroll + InDeltaTime * MeshScrollSpeed);
+				if (MeshScroll >= Over) { MeshScrollWait = MeshScrollHoldSeconds; }   // hold with the end in view
+			}
+			DetailMesh->SetRenderTranslation(FVector2D(-MeshScroll, 0.0f));
+		}
+		else if (MeshScroll != 0.0f)
+		{
+			MeshScroll = 0.0f;
+			DetailMesh->SetRenderTranslation(FVector2D::ZeroVector);
+		}
+	}
 	Clock += InDeltaTime;
 	if (SettleTicks > 0) { if (--SettleTicks == 0) { SetRenderOpacity(1.0f); if (OwnerController) { OwnerController->PageSettled(this); } } }
 	// The booth is driven from here: the game is paused under the screen, Slate is not.

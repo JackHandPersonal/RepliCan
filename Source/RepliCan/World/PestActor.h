@@ -52,9 +52,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Pest") float ArriveRadiusCm = 30.0f;
 	// Claws on plate, at the start of a burst. Audible only when it is close: something you
 	// hear but cannot place is far more unsettling than something you hear and can.
-	UPROPERTY(EditAnywhere, Category = "Pest") float SkitterAudibleCm = 700.0f;
-	UPROPERTY(EditAnywhere, Category = "Pest") float SkitterVolume = 0.22f;
-	UPROPERTY(EditAnywhere, Category = "Pest") int32 SkitterVariants = 3;
+	// (There were five Skitter* settings here. The pests are silent now -- see PickNextBurst for
+	// why -- so they are gone rather than left as knobs that do nothing.)
 
 	UPROPERTY(VisibleAnywhere, Category = "Pest") TObjectPtr<UStaticMeshComponent> Body;
 

@@ -1,5 +1,5 @@
-#include "InputBindings.h"
-#include "RepliCanUserSettings.h"
+#include "Core/InputBindings.h"
+#include "Core/RepliCanUserSettings.h"
 
 namespace
 {

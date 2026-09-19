@@ -36,7 +36,7 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimInstanceProxy.h"
-#include "GaitAdjustments.h"
+#include "Characters/GaitAdjustments.h"
 #include "CharacterAnimInstance.generated.h"
 
 class UAnimSequence;
@@ -559,7 +559,7 @@ private:
 	// so the pose keeps its character and the IK only corrects the hand -- inventing a pole
 	// vector is where two-bone IK usually starts flipping elbows.
 	void SolveTwoBone(FCSPose<FCompactPose>& CS, FName UpperName, FName LowerName, FName EndName,
-	                  const FTransform& TargetCS, float Weight, float ElbowDownBias = 0.0f);
+	                  const FTransform& TargetCS, float Weight, float ElbowDownBias = 0.0f, float ElbowTwist = 0.0f);
 
 	// ---- Orientation retarget --------------------------------------------
 	//
@@ -698,8 +698,13 @@ private:
 	// Hand IK, copied on the game thread in PreUpdate: Evaluate never reads Owner-> itself.
 	FTransform CachedIKTargetR = FTransform::Identity;
 	FTransform CachedIKTargetL = FTransform::Identity;
+	FTransform CachedIKTargetLInR = FTransform::Identity; bool bCachedLFollowsR = false;
+	FRotator CachedForeDelta = FRotator::ZeroRotator; FTransform CachedWeaponInHandR = FTransform::Identity;
+	TArray<float> CachedFingerR, CachedFingerL;
+	float CachedHunch = 0.0f, CachedLean = 0.0f; FQuat CachedActorQuat = FQuat::Identity;   // hunch and lean are stated in the actor's frame
 	float CachedIKWeightR = 0.0f;
 	float CachedElbowBiasR = 0.0f, CachedElbowBiasL = 0.0f;
+	float CachedElbowTwistR = 0.0f, CachedElbowTwistL = 0.0f;
 	bool bCachedFullBody = false;
 	float CachedIKWeightL = 0.0f;
 	float CachedIKMaxReach = 0.985f;
@@ -1125,12 +1130,34 @@ public:
 	// the weapon's own component; the proxy converts them once per evaluation.
 	UPROPERTY(Transient) FTransform HandIKTargetR = FTransform::Identity;
 	UPROPERTY(Transient) FTransform HandIKTargetL = FTransform::Identity;
+	// The support hand's target RELATIVE TO THE hand_r BONE, used when the weapon rides that hand:
+	// the left hand then goes to the weapon wherever the right arm actually put it this frame,
+	// not where the solve asked -- the two differ whenever the right arm did not reach (pointed
+	// sharply down, mid-blend), and the fore grip drifted off the guard (2026-09-17).
+	UPROPERTY(Transient) FTransform HandIKTargetLInHandR = FTransform::Identity;
+	UPROPERTY(Transient) bool bHandIKTargetLFollowsR = false;
+	// The weapon's own turn of the support hand (fore_hand_rot), about the WEAPON's axes, on top of the clip's hold; and the weapon on the hand_r bone, to know those axes.
+	UPROPERTY(Transient) FRotator HandIKForeDeltaWeapon = FRotator::ZeroRotator;
+	// Degrees each phalanx closes, thumb..pinky, per hand (the weapon's fingers_r / fingers_l); empty = none.
+	UPROPERTY(Transient) TArray<float> FingerCurlR;
+	UPROPERTY(Transient) TArray<float> FingerCurlL;
+	// Degrees of hunch (head down, shoulders up) the held weapon asks for; 0 = the clip as it is.
+	UPROPERTY(Transient) float WeaponHunchDegrees = 0.0f;
+	// Degrees the torso leans forward at the waist for the held weapon.
+	UPROPERTY(Transient) float WeaponLeanDegrees = 0.0f;
+	UPROPERTY(Transient) FTransform WeaponInHandR = FTransform::Identity;
 	UPROPERTY(Transient) float HandIKWeightR = 0.0f;
 	// How far the elbow is pulled toward "down and a little out" from the pose's own bend plane (0 = the pose's elbow): a pistol's arms out in front want it.
 	// A FULL-BODY ACTION (a sword swing from the root): the layers that shape the pose for play --
 	// gait, spine lean, look-at, the grip correction, the hand IK -- stand aside so the clip is
 	// seen as authored. The character sets it with the clip and clears it when the clip ends.
 	UPROPERTY(Transient) bool bFullBodyAction = false;
+	// THE ELBOW'S PLACE ON ITS CIRCLE. Two-bone IK fixes the hand; the elbow is free to swing
+	// anywhere on a circle about the shoulder-to-hand line, and the clip decides where. Degrees of
+	// twist about that line, so an elbow that wants to go BACK behind the ribs instead of flaring
+	// out sideways is one number (the held weapon's "elbow", tuned on the hand page).
+	UPROPERTY(Transient) float ElbowTwistR = 0.0f;
+	UPROPERTY(Transient) float ElbowTwistL = 0.0f;
 	UPROPERTY(Transient) float ElbowDownBiasR = 0.0f;
 	UPROPERTY(Transient) float ElbowDownBiasL = 0.0f;
 	UPROPERTY(Transient) float HandIKWeightL = 0.0f;

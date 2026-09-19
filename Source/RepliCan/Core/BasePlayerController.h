@@ -20,8 +20,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "ConversationData.h"
-#include "WeaponCatalog.h"
+#include "Narrative/ConversationData.h"
+#include "Weapons/WeaponCatalog.h"
+#include "Items/ItemInstance.h"
 #include "BasePlayerController.generated.h"
 
 class ABaseCharacter;
@@ -117,16 +118,47 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Inspect") TArray<FString> Inventory;   // what "Take" collected (friendly names)
 	// Equipped gear, one string per ItemCatalog::GearSlots entry (empty = nothing there).
 	UPROPERTY(BlueprintReadOnly, Category = "Inspect") TArray<FString> Equipped;
+
+	// ---- ITEM INSTANCES ----------------------------------------------------------------------
+	// See ItemInstance.h. Inventory and Equipped still hold strings; an instanced item stores a
+	// handle that names a row in this registry. Nothing else changed shape, which is why this did
+	// not have to touch the 55 places that look an item up.
+	// BlueprintReadOnly so the registry can be READ from outside -- a plain UPROPERTY is reflected
+	// for saving but invisible to script, which made it impossible to check what instances exist.
+	UPROPERTY(BlueprintReadOnly, Category = "Inspect") TArray<FItemInstance> ItemInstances;
+	UPROPERTY(BlueprintReadOnly, Category = "Inspect") int32 NextItemInstanceId = 1;
+
+	/** Does a copy of this deserve its own identity? Things you modify do; ammunition does not. */
+	static bool WantsInstance(const FString& Name);
+	/** Registers a fresh copy and returns the handle to put in Inventory. */
+	FString NewItemInstance(const FString& Name);
+	FItemInstance* FindItemInstance(const FString& Handle);
+	const FItemInstance* FindItemInstance(const FString& Handle) const;
+	/** This copy value for Key, or Fallback when it has no opinion -- which is what makes an
+	 *  unmodified item behave exactly as it did before instances existed. */
+	FString ItemProp(const FString& Handle, const FString& Key, const FString& Fallback = FString()) const;
+	void SetItemProp(const FString& Handle, const FString& Key, const FString& Value);
+	/** Forgets a copy, so the registry does not grow forever. */
+	void ReleaseItemInstance(const FString& Handle);
+	/** What is fitted to this copy, ready to print. */
+	FString AccessorySummary(const FString& Handle) const;
 	UFUNCTION(BlueprintCallable, Category = "Inspect") bool EquipFromInventory(int32 InventoryIndex);
 	// The bag keeps its squares: an item taken out leaves an empty square behind, a new one takes
 	// the first empty square. These are what the sheet's drag and drop calls.
-	UFUNCTION(BlueprintCallable, Category = "Inspect") bool AddToInventory(const FString& Name);
+	// bPickup: it came from the world (a Take, a loot box, a GIVE), so a weapon goes straight to an
+	// empty weapon slot, and into the hand if the hands were empty.
+	UFUNCTION(BlueprintCallable, Category = "Inspect") bool AddToInventory(const FString& Name, bool bPickup = false);
+	void AutoEquipPickup(const FString& Name);
 	// DROPPING. A square's item goes out into the world in front of the character, as if let go:
 	// the actor Take hid if there is one (its tags and paint intact), else a fresh prop from the
 	// catalogue's mesh, tagged so it can be taken again. Tossed if its mesh can simulate, set on
 	// the floor if it cannot.
 	UFUNCTION(BlueprintCallable, Category = "Inspect") bool DropInventory(int32 InventoryIndex);
 	UFUNCTION(BlueprintCallable, Category = "Inspect") bool DropGear(int32 Slot);
+	// Gone, not dropped: no mesh left on the floor to pick up again. Drop is for putting something
+	// down; this is for getting rid of it. Anything with no mesh can only leave this way.
+	UFUNCTION(BlueprintCallable, Category = "Inspect") bool DeleteInventory(int32 InventoryIndex);
+	UFUNCTION(BlueprintCallable, Category = "Inspect") bool DeleteGear(int32 Slot);
 	AActor* DropToWorld(const FString& Name);
 	UFUNCTION(BlueprintPure, Category = "Inspect") int32 InventoryFree() const;
 	UFUNCTION(BlueprintCallable, Category = "Inspect") bool MoveInventory(int32 From, int32 To);                       // swap two bag squares
@@ -134,6 +166,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inspect") bool UnequipToInventory(int32 Slot, int32 InventoryIndex);       // into a bag square; a filled square swaps if its item fits the slot
 	UFUNCTION(BlueprintCallable, Category = "Inspect") bool SwapGear(int32 A, int32 B);                                 // two gear slots, each item fitting the other's slot
 	UFUNCTION(BlueprintPure, Category = "Inspect") bool KindFitsSlot(const FString& Item, int32 Slot) const;
+	// CLOTHING. An item with wear_* fields (ItemFields) puts cut-library parts on the wearer while it
+	// sits in a body slot; refreshed with the held weapon, since the slots are the only truth.
+	bool ClothingFits(const FString& Item, FString& OutWhy) const;
+	void RefreshWornClothing();
+	TMap<FString, FString> WornBase;   // the body's own parts, remembered the first time clothing covers them
 	// Drops the cached UI widgets so the next open rebuilds them (after a Live Coding patch or a spec edit).
 	UFUNCTION(Exec, BlueprintCallable, Category = "Debug") void ReloadUI();
 	// Every widget on the open console page that wants more room than it was given, or that
@@ -144,6 +181,26 @@ public:
 	UFUNCTION(Exec, BlueprintCallable, Category = "Player") void Unstuck();
 	// The trigger hand's correction on the weapon, live: HandRot pitch yaw roll (weapon space). HandRot alone prints it.
 	UFUNCTION(Exec) void HandRot(float Pitch = 1000.0f, float Yaw = 0.0f, float Roll = 0.0f);
+	// The HELD weapon's own turn on top of that, saved to its catalogue entry as hand_rot: HandRotWeapon pitch yaw roll. Alone prints it.
+	UFUNCTION(Exec) void HandRotWeapon(float Pitch = 1000.0f, float Yaw = 0.0f, float Roll = 0.0f);
+	// The hold's numbers on screen (reach, carry pull-in, hand gap, sight off the eye line): toggles.
+	UFUNCTION(Exec) void HandDiag();
+	// Writes the held weapon's whole state to Saved/ClaudeAssist/hand_dump.json, once, now.
+	UFUNCTION(Exec) void HandDump();
+	// Pins the carry so a hold can be MEASURED in a state the mouse would otherwise have to
+	// hold down: 0 low ready, 1 hip fire, 2 shouldered, 3 ADS, -1 to hand it back to the input.
+	UFUNCTION(Exec) void ForceCarry(int32 Carry);
+	// FIRST PERSON VIEW TUNING, live. These are the numbers that decide how the weapon follows the
+	// eye, and they are the sort you only get right by moving around while you change them -- so
+	// they are set from the console and take effect on the next frame. `ViewTune` with no arguments
+	// lists them with their current values.
+	UFUNCTION(Exec) void ViewTune(const FString& Field, float Value);
+	// The SUPPORT hand's wrap on the fore grip, live: HandRotL pitch yaw roll (weapon space; alone prints it), and
+	// the held weapon's own turn on top of that, saved as fore_hand_rot: HandRotLWeapon pitch yaw roll.
+	UFUNCTION(Exec) void HandRotL(float Pitch = 1000.0f, float Yaw = 0.0f, float Roll = 0.0f);
+	UFUNCTION(Exec) void HandRotLWeapon(float Pitch = 1000.0f, float Yaw = 0.0f, float Roll = 0.0f);
+	// Writes [pitch, yaw, roll] into one field of the held weapon's catalogue entry and reloads the catalogue.
+	bool SaveHeldWeaponRotField(const TCHAR* Field, const FRotator& R);
 	// Turns and walks for N seconds measuring the weapon's per-frame jump in camera space (the
 	// judder) and the predicted-vs-final camera error; WeaponLagReport reads the result back.
 	UFUNCTION(Exec, BlueprintCallable, Category = "Debug") void WeaponLagTest(float Seconds = 4.0f);
@@ -151,6 +208,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inspect") bool UnequipSlot(int32 Slot);
 	// The character sheet's mirror: the player's saved likeness in the booth, orbited by dragging.
 	UFUNCTION(BlueprintCallable, Category = "Sheet") void OrbitSheetMirror(float DeltaYaw, float DeltaPitch);
+	// The sheet's booth with any character file in it (the narrative page's viewer); the sheet's own is "Player".
+	UFUNCTION(BlueprintCallable, Category = "Sheet") bool ShowSheetMirrorFor(const FString& ConfigName);
+	UFUNCTION(BlueprintCallable, Category = "Sheet") void HideCharacterPreview();
 	UFUNCTION(BlueprintPure, Category = "Sheet") class UTextureRenderTarget2D* GetSheetFeed() const { return bSheetMirror ? SheetTarget : nullptr; }
 	// A click on the mirror's face zooms to the head; a click while zoomed goes back to the figure.
 	UFUNCTION(BlueprintCallable, Category = "Sheet") void SetSheetMirrorZoom(bool bHead);
@@ -196,6 +256,12 @@ public:
 	bool ScreenQuadFor(const AActor* Target, FVector& OutCentre, FVector& OutNormal, FVector& OutRight, FVector& OutUp, float& OutW, float& OutH) const;
 	void PlaceTerminalCamera();   // from the seated eye, once the sit has settled
 	class UWidgetInteractionComponent* GetTerminalPointer() const { return TerminalPointer; }
+	bool TerminalKeysDirect() const { return bTerminalKeysDirect; }   // the real keyboard is focused on the prompt: the processor lets keys through
+	// The screen's own polygons out of the monitor mesh (world space), with the frame they lie in.
+	bool ScreenShapeFor(const AActor* Target, TArray<FVector>& OutVerts, TArray<int32>& OutTris, FVector& OutCentre, FVector& OutNormal, FVector& OutRight, FVector& OutUp, float& OutW, float& OutH) const;
+	void BindTerminalGlass();      // once the screen has drawn: its picture onto the glass mesh
+	void ClickTerminalPrompt();    // the pointer's user clicks the prompt (focus for carried keys)
+	void RefocusTerminalPrompt();  // after a link click: the prompt takes the keyboard again
 	void SitOnTagged(class ABaseCharacter* Me, AActor* Seat);
 	UFUNCTION(BlueprintPure, Category = "Conversation") bool IsRemoteViewOpen() const { return RemoteSubject.IsValid(); }
 	void UpdateRemoteView();
@@ -285,6 +351,9 @@ public:
 	UFUNCTION(Exec, BlueprintCallable, Category = "Debug") void DebugKey(const FString& KeyName, bool bDown);
 	// A note in the top-left corner: who is driving the game right now (Claude's scripts or the player) and what is expected.
 	UFUNCTION(Exec, BlueprintCallable, Category = "Debug") void SetDiagNote(const FString& Text);
+	// Names every widget alive in this world and says which are in the viewport and how they
+	// hit-test -- for finding whatever is tinting the screen or eating the mouse.
+	UFUNCTION(Exec, BlueprintCallable, Category = "Debug") void UIDump();
 	// A note that clears itself after Seconds unless replaced.
 	UFUNCTION(BlueprintCallable, Category = "Debug") void SetDiagNoteTimed(const FString& Text, float Seconds);
 	// T: what is under the reticle: actor, mesh, material and its textures, noted for ten seconds.
@@ -294,11 +363,15 @@ public:
 	UFUNCTION(Exec, BlueprintCallable, Category = "Debug") void CycleMaterialUnderReticle();
 
 	// ---- Held weapon -----------------------------------------------------
-	// Slot 1 is the primary and Slot 2 the sidearm; whichever is filled goes into the hand,
-	// primary first. Called whenever the equipment changes.
+	// Whichever enabled weapon slot is filled goes into the hand, in slot order. The slots carry no
+	// roles -- any weapon fits any enabled one. Called whenever the equipment changes.
 	UFUNCTION(BlueprintCallable, Category = "Weapon") void RefreshHeldWeapon();
 	// Steps the named weapon to its next texture variant (WeaponSkins), writes it to the catalogue and re-dresses the one in hand.
 	UFUNCTION(BlueprintCallable, Category = "Weapon") void CycleWeaponSkin(const FString& ItemName);
+	// The paint the preview booth wears instead of the catalogue's. Empty means the catalogue's own,
+	// which is what everything outside the Reference page always sees.
+	void SetWeaponPreviewSkin(const FString& WeaponName, const FString& Variant);
+	const FString& WeaponPreviewSkin() const { return PreviewSkinOverride; }
 	// Swaps which of the two filled slots is being carried.
 	UFUNCTION(Exec, BlueprintCallable, Category = "Weapon") void SwapWeaponSlot(int32 Direction = 1);
 	// Draws the weapon in the Nth weapon slot (1-based, the sheet's "Slot 1", "Slot 2" ...); the keys 1 and 2 for now.
@@ -331,8 +404,19 @@ public:
 	// What the player starts holding while the game is being built, by catalogue name. Empty
 	// strings mean start empty handed. These are placeholders: once there is a real loadout or
 	// a save to restore from, that should win and this should go.
-	UPROPERTY(EditAnywhere, Category = "Weapon") FString StartingPrimary = TEXT("Frontier Assault Rifle 01");
-	UPROPERTY(EditAnywhere, Category = "Weapon") FString StartingSidearm = TEXT("Street Pistol 01");
+	// THERE IS NO PRIMARY AND NO SIDEARM. There are four weapon slots, two of them enabled for now
+	// (FSheetSpec: Slot 3 and Slot 4 are bEnabled = false), and ANY weapon fits ANY enabled slot --
+	// the sheet gives the enabled ones identical kind lists. So this is an ordered list, not a pair
+	// of roles: each entry goes into the next enabled slot that will take it. Naming one of them
+	// the sidearm implied a role the game does not have, and implied a second slot that only
+	// accepted small arms, which was never true.
+	//
+	// SET FOR TESTING THE THREE OPTIC KINDS (2026-09-19), not a considered loadout -- the SMG wears
+	// the only ZOOMED sight in the catalogue (1.5x, no overlay, weapon stays in view) and the pistol
+	// a RED DOT, so one spawn covers both. Previously "Frontier Assault Rifle 01" and "Street
+	// Pistol 01"; put those back when the testing is done.
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	TArray<FString> StartingWeapons = { TEXT("Frontier SMG 03"), TEXT("Frontier Pistol 05") };
 	void GiveStartingWeapons();
 	FTimerHandle DiagNoteFadeTimer;
 	UFUNCTION(BlueprintPure, Category = "Debug") FString GetDiagNote() const { return DiagNote; }
@@ -399,12 +483,103 @@ public:
 	// the menu buttons and F5 / F9).
 	UFUNCTION(BlueprintCallable, Category = "Menu") void QuickSave();
 	UFUNCTION(BlueprintCallable, Category = "Menu") void QuickLoad();
+	// The save / load page (USaveLoadWidget): slots by name, over the pause menu.
+	// HAND TUNING (UHandTuneWidget): one catalogue weapon put on the pawn, two orthographic captures
+	// of the pawn holding it as the game holds it, the hand numbers edited live and written back.
+	UFUNCTION(BlueprintCallable, Category = "Reference") void ShowHandTune(const FString& WeaponName);
+	UFUNCTION(BlueprintCallable, Category = "Reference") void HideHandTune();
+	UFUNCTION(BlueprintPure, Category = "Reference") bool IsHandTuneOpen() const { return bHandTuneOpen; }
+	void HandTuneSetCarry(int32 Idx); void HandTuneSetAim(int32 Idx); void HandTuneReset(); bool HandTuneSave();
+	// The optic fitted to the weapon being tuned, and where it sits on the rail. The offset belongs
+	// to the OPTIC, so it is saved into the optics block and every gun that takes that optic moves
+	// with it -- which is the point: you are placing the sight on its mount, once.
+	FString HT_OpticKey;
+	FVector HT_OpticOff = FVector::ZeroVector, HT_OpticOff0 = FVector::ZeroVector;
+	// The paint being TRIED on the optic. Like the weapon own skin cycler this is a fitting, not a
+	// decision: it lives on the page until SAVE writes it to the optic entry, so flicking through
+	// the colours does not repaint every sight in the level one after another.
+	FString HT_OpticSkin, HT_OpticSkin0;
+	// The optic being TRIED. Stepping it used to write the catalogue on the spot, so every copy of
+	// that weapon in the world changed sight the instant you looked at the next one -- the same
+	// fault the paint cycler had, and the same rule broken: the world changes on SAVE and at no
+	// other moment. Now the page holds the choice and only SAVE puts it in the file.
+	FString HT_Optic, HT_Optic0;
+	// HOW BIG THE WEAPON IS DRAWN, as a PERCENTAGE. Held as a percent so the table's existing half
+	// step is half a percent -- a useful nudge -- where half a UNIT of scale would be absurd.
+	float HT_ScalePct = 100.0f, HT_ScalePct0 = 100.0f;
+	void HandTuneFitOptic();   // dresses the stand-in with the tried optic, offset and paint
+	void HandTuneStepOpticSkin(int32 Dir);
+	FString HandTuneOpticSkinLabel() const;
+	// The tuning table's rows: 0 grip (cm), 1 hand_rot (deg), 2 fingers_r (deg: thumb, index, middle,
+	// ring, pinky), 3 fore_grip, 4 fore_hand_rot, 5 fingers_l, 6 hunch (cm, at the sights), 7 pull
+	// (cm per carry), 8 lean (deg, at the sights), 9 lateral (cm per carry), 10 eyeline (side, forward
+	// -- the character's, not the weapon's). A change shows on the stand-in at once.
+	float HandTuneValue(int32 Row, int32 Col) const;
+	// A picture can be dragged round while a pointer holds it, and snaps back the moment it lets
+	// go: a look from another angle, not a camera to get lost in. The drag ORBITS ABOUT THE WEAPON,
+	// so the thing being tuned stays put in the middle of the frame and only the view moves.
+	void HandTuneOrbit(float DYaw, float DPitch);
+	// ONE PICTURE, SEEN FROM A CHOSEN SIDE. Two fixed views cost half the panel and still could not
+	// show the one angle a hold needed; a single picture with the sides on call shows more of them.
+	// 0 left, 1 right, 2 top, 3 front, 4 three-quarter.
+	void HandTuneSetPresetView(int32 Index);
+	int32 HandTunePresetView() const { return HT_ViewIdx; }
+	// The paint, on the weapon being tuned: stepped and shown without leaving the page.
+	// Anything edited and not yet saved. Compared field by field against the values the page opened
+	// with, which are also what SAVE writes and RESET restores.
+	bool HandTuneDirty() const;
+	// Asks before a dirty page changes weapon: save, discard, or stay. Steps by Dir on the first two.
+	void ConfirmHandTuneLeave(int32 Dir);
+	// The paint, stepped either way. A fitting on the stand-in until SET DEFAULT adopts it.
+	void HandTuneStepSkin(int32 Dir);
+	void HandTuneCycleSkin() { HandTuneStepSkin(1); }
+	// The optic. Unlike the paint this is EQUIPMENT, not a colourway: fitting one moves the sight
+	// point to the optic's own eye and changes the whole hold, so it is written straight to the
+	// catalogue and pushed out, the way fitting a scope to a real rifle is not a preview.
+	void HandTuneStepOptic(int32 Dir);
+	FString HandTuneOpticLabel() const;
+	bool HandTuneTakesOptic() const;
+	// Writes the previewed paint to the catalogue as this weapon's default: what it wears wherever
+	// it appears in the world, and what the preview booth renders for its inventory icon. Until
+	// this is pressed the cycler is only a fitting, on the stand-in and nowhere else.
+	void HandTuneSetDefaultSkin();
+	bool HandTuneSkinIsDefault() const;
+	// The header's arrows: the previous or next tunable weapon, loaded onto the stand-in without
+	// leaving the page. Dir is -1 or +1.
+	void HandTuneStepWeapon(int32 Dir);
+	// Pushes a weapon's freshly saved numbers onto EVERY character in the world holding one, the
+	// player included. Returns how many were re-dressed.
+	int32 RefreshTunedWeapon(const FString& WeaponName);
+	// What the header shows between them.
+	FString HandTuneWeaponLabel() const;
+	FString HandTuneSkinLabel() const;
+	// A step in or out on one picture. Unlike the drag, a zoom is a decision and stays put until
+	// the page is opened again.
+	void HandTuneZoomStep(int32 Direction);
+	// Named hand shapes from the catalogue, applied to one hand.
+	int32 HandTunePresetCount() const;
+	FString HandTunePresetName(int32 Index) const;
+	void HandTuneApplyPreset(bool bSupport, int32 Index);
+	void HandTuneResetView();
+	void HandTuneAdjust(int32 Row, int32 Col, float Delta);
+	int32 HandTuneCarry() const { return HandTuneCarryIdx; }
+	int32 HandTuneAim() const { return HandTuneAimIdx; }
+	// Writes a list of numbers into one field of a weapon's catalogue entry and reloads the catalogue.
+	bool SaveWeaponField(const FString& Key, const TCHAR* Field, const TArray<double>& Values, bool bScalar = false);   // bScalar: one number, written as a number, not a list
+	UFUNCTION(BlueprintCallable, Category = "Menu") void ShowSaveLoad(bool bLoad);
+	UFUNCTION(BlueprintCallable, Category = "Menu") void HideSaveLoad();
+	UFUNCTION(BlueprintPure, Category = "Menu") bool IsSaveLoadOpen() const { return bSaveLoadOpen; }
+	void SaveToSlot(const FString& Slot);
+	void LoadFromSlot(const FString& Slot);
 	UFUNCTION(BlueprintPure, Category = "Menu") bool IsPauseMenuOpen() const { return bPauseMenuOpen; }
 
 	// Is ANY screen up. Firing a weapon because a click landed on a menu button is the kind of
 	// bug that only shows up as "I shot my own foot in the inventory", so the trigger asks this
 	// one question rather than each caller remembering the current list of panels.
 	UFUNCTION(BlueprintPure, Category = "Menu") bool IsAnyScreenOpen() const;
+	// What stops a shot: a real page, a cinematic, a conversation, the booth, the remote view. NOT the
+	// reticle menu -- a person or a crate under the reticle used to make the trigger dead (2026-09-17).
+	bool IsFiringBlocked() const;
 	// A page covering the world (a menu, the Reference, the sheet, a transfer, a cinematic, a conversation): the aim mark has nothing to mark. The inspect menu beside the reticle is not one.
 	UFUNCTION(BlueprintPure, Category = "Menu") bool IsPageOpen() const;
 	void DismissInspectMenu() { HideInspectMenu(); }   // for the input processor: aiming closes the reticle menu
@@ -463,8 +638,47 @@ public:
 	TArray<FVector> MeleeLastEdge;
 	void StopLaser();
 	UPROPERTY() TObjectPtr<class UStaticMeshComponent> LaserBeam;
+	UPROPERTY() TObjectPtr<class UStaticMeshComponent> LaserGlow;    // the haze round the core
+	UPROPERTY() TObjectPtr<class UPointLightComponent> LaserLight;   // the red on whatever the spot is on
 	bool bLaserOn = false;
+	TArray<TWeakObjectPtr<class UAudioComponent>> LaserBuzzComps;   // the buzz clips in flight, stopped dead the frame the trigger comes up
 	float LaserFxClock = 0.0f, LaserReactClock = 0.0f;
+	// THE BATTERY: seconds of beam left per weapon key (a laser's magazine is seconds); a reload
+	// puts a fresh cell in. The buzz is a short loop re-lit before it ends.
+	TMap<FString, float> LaserCharge;
+	// ROUNDS IN THE MAGAZINE, keyed by the equipped HANDLE -- so once weapons carry instances, two
+	// rifles in the same bag each keep their own count, and a bare name keeps one, which is all an
+	// item with no identity can have. Absent means "full": a weapon is not asked to remember a
+	// magazine it has never fired.
+	TMap<FString, int32> MagRounds;
+	int32 RoundsLeft(const FString& Handle) const;
+	/** Range under the reticle in metres, rounds and magazine size. True only while a SMART sight
+	 *  is actually up -- the figures belong on the glass, not on the screen. */
+	bool SmartOpticInfo(float& OutRangeM, int32& OutRounds, int32& OutMag) const;
+	/** The sight being looked through: its reticle kind, colour, magnification, and how far the
+	 *  weapon has actually come up (0 off the sights, 1 fully at them) so the mark can fade in with
+	 *  the weapon instead of appearing the instant the button goes down. False when none is up. */
+	bool OpticReticleInfo(FString& OutKind, FLinearColor& OutColour, float& OutZoom, float& OutAlpha) const;
+	/** The scope overlay: how wide the opening is (as a fraction of screen height), how far the mask
+	 *  has come in, and whether the sight is jammed against something. False when no tube is up. */
+	bool OpticOverlayInfo(float& OutRadius, float& OutAlpha, bool& bOutBlocked) const;
+	float LaserBuzzClock = 0.0f;
+	bool bLaserStroke = false; FVector LaserStrokeFrom = FVector::ZeroVector, LaserStrokeNormal = FVector::UpVector;   // the heated line: where its last stroke ended, on what
+	// The burn on a body: dots pinned to the bone under the spot (MarkScorchOnBody), spaced by travel or time.
+	bool bLaserBodyMark = false; FVector LaserBodyMarkFrom = FVector::ZeroVector; float LaserBodyMarkClock = 0.0f;
+	void MarkScorchOnBody(const FHitResult& Hit);
+	// THE SCORCH: the heated line the beam leaves on a surface, bright metal cooling to black.
+	struct FScorch { TWeakObjectPtr<class UDecalComponent> Decal; TWeakObjectPtr<class UMaterialInstanceDynamic> MID; float Age = 0.0f; };
+	TArray<FScorch> Scorches;
+	void MarkScorchStroke(const FVector& From, const FVector& To, const FVector& Normal);   // one stroke of the line, From to To, laid on a surface facing Normal
+	TArray<TWeakObjectPtr<class UDecalComponent>> ScorchRing;   // every scorch alive, oldest first, capped
+	void TickScorches(float DeltaSeconds);
+	// TRACERS: a streak of light down each shot's line, muzzle to mark, at a speed the eye can follow.
+	struct FTracer { int32 Pool = -1; FVector From = FVector::ZeroVector, To = FVector::ZeroVector; float Head = 0.0f; };
+	TArray<FTracer> Tracers;
+	UPROPERTY() TArray<TObjectPtr<class UStaticMeshComponent>> TracerPool;
+	void SpawnTracer(const FVector& From, const FVector& To);
+	void TickTracers(float DeltaSeconds);
 	bool bTriggerHeld = false;
 	float AutoFireClock = 0.0f;
 	// The player's own shot in first person, and the impacts it makes: the report should be the
@@ -497,6 +711,48 @@ public:
 	bool bScenesOpen = false;
 	bool bSettingsOpen = false;
 	bool bTerminalOpen = false;
+	bool bSaveLoadOpen = false;
+	UPROPERTY() TObjectPtr<class USaveLoadWidget> SaveLoadWidget;
+	UPROPERTY() TObjectPtr<class UHandTuneWidget> HandTuneWidget;
+	UPROPERTY() TObjectPtr<class ASceneCapture2D> HandTuneCap;
+	UPROPERTY() TObjectPtr<class UTextureRenderTarget2D> HandTuneRT;
+	UPROPERTY() TArray<TObjectPtr<class APointLight>> HandTuneLights;
+	// The stand-in: a copy of the player in a booth off the map, holding the weapon being tuned, with
+	// its own controller for the aim. The player and the world are untouched until SAVE.
+	UPROPERTY() TObjectPtr<class ABaseCharacter> HandTunePawn;
+	UPROPERTY() TObjectPtr<class AHandTuneController> HandTuneController;
+	// A rod from the stand-in's aiming eye along the aim: it shows which eye the sight comes to.
+	UPROPERTY() TObjectPtr<class UStaticMeshComponent> HandTuneAimLine;
+	void TickHandTune();   // the captures re-aimed at the trigger hand
+	bool bHandTuneOpen = false, bHandTuneReturnToReference = false;
+	TArray<float> HT_FingersR, HT_FingersR0, HT_FingersL, HT_FingersL0;
+	float HT_Hunch = 0.0f, HT_Hunch0 = 0.0f, HT_Lean = 0.0f, HT_Lean0 = 0.0f;
+	// Pull and lateral, one per carry: low ready, shouldered, sights.
+	float HT_Pull3[3] = { 0.0f, 0.0f, 0.0f }, HT_Pull3_0[3] = { 0.0f, 0.0f, 0.0f };
+	float HT_Lat3[3] = { 12.0f, 11.0f, 0.0f }, HT_Lat3_0[3] = { 12.0f, 11.0f, 0.0f };
+	// The eyeline: the body's, not the weapon's, so SAVE writes it to the character file.
+	float HT_EyeSide = 4.25f, HT_EyeSide0 = 4.25f, HT_EyeUp = 0.0f, HT_EyeUp0 = 0.0f, HT_EyeFwd = 0.0f, HT_EyeFwd0 = 0.0f;
+	// Low ready's own angles off the aim, and each elbow's swing about its reach line.
+	float HT_LowReady[2] = { -30.0f, -30.0f }, HT_LowReady0[2] = { -30.0f, -30.0f };
+	float HT_ElbowMainAim[3] = { 0.0f, 0.0f, 0.0f }, HT_ElbowMainAim0[3] = { 0.0f, 0.0f, 0.0f };
+	float HT_ElbowSupAim[3] = { 0.0f, 0.0f, 0.0f }, HT_ElbowSupAim0[3] = { 0.0f, 0.0f, 0.0f };
+	float HT_ElbowMain[3] = { 0.0f, 0.0f, 0.0f }, HT_ElbowMain0[3] = { 0.0f, 0.0f, 0.0f };
+	float HT_ElbowSup[3] = { 0.0f, 0.0f, 0.0f }, HT_ElbowSup0[3] = { 0.0f, 0.0f, 0.0f };
+	FVector2D HT_Orbit = FVector2D::ZeroVector;   // yaw, pitch in degrees off the chosen view
+	float HT_Zoom = 1.0f;                          // frame width as a fraction of the standard one
+	int32 HT_ViewIdx = 1;                          // which side it is seen from; right by default
+	int32 HandTuneCarryIdx = 1, HandTuneAimIdx = 1, HandTunePrevZoom = -1;
+	FString HandTuneKey, HandTuneName, HT_Stance;
+	FString HT_Skin;   // the paint being tried; empty until the cycler is touched
+	// Loads one weapon's numbers into the page and onto the stand-in. Shared by opening the page
+	// and by the header's arrows, so the two can never drift apart.
+	void HandTuneLoadWeapon(const WeaponCatalog::FWeapon* W);
+	FVector HT_Grip = FVector::ZeroVector, HT_Grip0 = FVector::ZeroVector, HT_Fore = FVector::ZeroVector, HT_Fore0 = FVector::ZeroVector;
+	FRotator HT_HandRot = FRotator::ZeroRotator, HT_HandRot0 = FRotator::ZeroRotator, HT_ForeRot = FRotator::ZeroRotator, HT_ForeRot0 = FRotator::ZeroRotator;
+	bool HT_HasFore = false; float HT_ForePitch = 0.0f;
+	void HandTuneApply();
+	// The hold as RefreshHeldWeapon makes it, for any catalogue entry (the tuning page's way of putting a weapon in the hand).
+	void ApplyWeaponToPawn(class ABaseCharacter* Me, const WeaponCatalog::FWeapon* W, const FString& Handle = FString());
 	bool bTerminalSeated = false;
 	UPROPERTY() TObjectPtr<class UTerminalWidget> TerminalWidget;
 	UPROPERTY() TObjectPtr<class ACameraActor> TerminalCamera;
@@ -506,6 +762,13 @@ public:
 	UPROPERTY() TObjectPtr<class UWidgetInteractionComponent> TerminalPointer;
 	TWeakObjectPtr<AActor> TerminalTarget;
 	FTimerHandle TerminalPlaceTimer;
+	// The glass: a mesh cut from the monitor's own screen polygons wearing the widget's picture,
+	// so the console has exactly the screen's outline. The widget component itself is not drawn.
+	UPROPERTY() TObjectPtr<class UProceduralMeshComponent> TerminalGlass;
+	UPROPERTY() TObjectPtr<class UMaterialInstanceDynamic> TerminalGlassMID;
+	FTimerHandle TerminalBindTimer;
+	bool bTerminalKeysDirect = false;
+	bool bTerminalHolstered = false;   // the weapon went away for the terminal; it comes back on leaving
 
 	UFUNCTION(BlueprintCallable, Category = "Menu") void ShowConsolePage(int32 Tab);
 	// Where a console page sits: the screen less the spec's margins, never smaller than the
@@ -595,6 +858,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Edit Mode") void BeginClaudeAssist();
 	UFUNCTION(BlueprintCallable, Category = "Edit Mode") void CancelClaudeAssist();
 	UFUNCTION(BlueprintPure, Category = "Edit Mode") bool IsClaudeAssistActive() const { return bAssistMode; }
+	// One-shot F12 capture: traces from the eye along the aim and records whatever the reticle is
+	// on. Needs no arming and no edit mode; the armed mode above is the old, UI-driven path.
+	UFUNCTION(BlueprintCallable, Category = "Edit Mode") void CaptureAssistUnderReticle();
 	// What a click does, for a given ray (also lets the harness "click").
 	UFUNCTION(BlueprintCallable, Category = "Edit Mode") bool RecordAssistRay(const FVector& Start, const FVector& End);
 
@@ -666,6 +932,7 @@ private:
 	UPROPERTY() TObjectPtr<class UPauseMenuWidget> PauseMenuWidget;
 	UPROPERTY() TObjectPtr<class UReferenceWidget> ReferenceWidget;
 	UPROPERTY() TObjectPtr<class AStaticMeshActor> WeaponBoothActor;
+	FString PreviewSkinOverride;
 	UPROPERTY() TObjectPtr<class ASceneCapture2D> WeaponCapture;
 	UPROPERTY() TObjectPtr<class UTextureRenderTarget2D> WeaponTarget;
 	UPROPERTY() TArray<TObjectPtr<class APointLight>> WeaponLights;
@@ -793,6 +1060,12 @@ private:
 	UPROPERTY() TObjectPtr<class UBlinkOverlayWidget> BlinkOverlay;
 	// Background sound bed started on arrival (AmbientPlayer.h); empty = none.
 	UPROPERTY(EditAnywhere, Category = "Audio") FString AmbientProfile = TEXT("facility");
+	// Below this height the deck's own bed plays instead (UAmbientPlayer "deck"); the lift's lowest stop is at -5000.
+	UPROPERTY(EditAnywhere, Category = "Audio") float DeckAmbientBelowZ = -4000.0f;
+	void TickAmbientZone(float DeltaSeconds);
+	// Spent casings (BrassFx): thrown on every shot of a cartridge weapon.
+	UPROPERTY() TObjectPtr<class UBrassFx> Brass;
+	float AmbientZoneClock = 0.0f;
 	UPROPERTY() TObjectPtr<class UAmbientPlayer> Ambient;
 public:
 	UFUNCTION(BlueprintPure, Category = "Audio") FString GetAmbientState() const;

@@ -28,9 +28,11 @@ class REPLICAN_API UTerminalWidget : public UUserWidget
 public:
 	void Open(class ABasePlayerController* InController, const FString& TerminalId);
 	void FocusPrompt();
-	void FocusPromptFor(int32 SlateUserIndex);   // the in-world screen is driven by a virtual user (the widget interaction pointer)
+	bool FocusPromptFor(int32 SlateUserIndex);   // Slate user (0 = the real keyboard, or the pointer's virtual user) onto the prompt; false if the widget could not be found
+	bool PromptCentrePx(FVector2D& Out) const;   // the prompt's centre in the picture's pixels, once laid out
 	void Run(const FString& Line);
 	FSimpleDelegate OnExit;
+	FSimpleDelegate OnNeedFocus;   // a link was clicked (the pointer's user took the focus): the prompt wants the keyboard back
 
 protected:
 	virtual void NativeOnInitialized() override;
@@ -46,7 +48,7 @@ private:
 	UPROPERTY() TObjectPtr<class UScrollBox> Scroll;
 	UPROPERTY() TObjectPtr<class UVerticalBox> Lines;
 	UPROPERTY() TObjectPtr<class UEditableTextBox> Prompt;
-	UPROPERTY() TObjectPtr<class UTextBlock> Footer;
+	UPROPERTY() TObjectPtr<class UTextBlock> Hints;
 	UPROPERTY() TArray<TObjectPtr<UTerminalLinkBinding>> Bindings;
 	TArray<FString> Banner;
 	TMap<FString, FString> Files;

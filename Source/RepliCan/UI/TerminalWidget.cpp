@@ -1,6 +1,6 @@
-#include "TerminalWidget.h"
-#include "BasePlayerController.h"
-#include "CrtStyle.h"
+#include "UI/TerminalWidget.h"
+#include "Core/BasePlayerController.h"
+#include "UI/CrtStyle.h"
 #include "Blueprint/WidgetTree.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Components/Border.h"
@@ -10,6 +10,7 @@
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/ScrollBox.h"
+#include "Components/ScrollBoxSlot.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
@@ -19,35 +20,35 @@
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 
-static const int32 TermFontSize = 18;   // on a 1024-wide screen texture: about 85 columns
+static const int32 TermFontSize = 26;   // on a 1280-wide screen texture, inside the margins: about 70 columns
 static const FLinearColor TermGlass(0.008f, 0.026f, 0.012f, 0.97f);
 
-void UTerminalLinkBinding::OnClicked() { if (Term) { Term->Run(Command); } }
+void UTerminalLinkBinding::OnClicked() { if (Term) { Term->Run(Command); Term->OnNeedFocus.ExecuteIfBound(); } }
 
 void UTerminalWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 	SetIsFocusable(true);
+	// The glass it is drawn on has the screen's own outline (the controller cuts that mesh from the
+	// monitor), so the page is a plain box. Everything sits at the TOP and grows downward, the
+	// prompt right under the last line: nothing along the bottom edge, where the chamfers are.
 	UBorder* Root = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("Glass"));
-	// Rounded, so the quad can be sized to cover a chamfered glass and its corners stay clear.
-	FSlateBrush Glass;
-	Glass.DrawAs = ESlateBrushDrawType::RoundedBox;
-	Glass.OutlineSettings.CornerRadii = FVector4(90.0f, 90.0f, 90.0f, 90.0f);
-	Glass.OutlineSettings.RoundingType = ESlateBrushRoundingType::FixedRadius;
-	Glass.TintColor = FSlateColor(TermGlass);
-	Root->SetBrush(Glass);
+	Root->SetBrush(FSlateColorBrush(FLinearColor::White));
 	Root->SetBrushColor(TermGlass);
-	Root->SetPadding(FMargin(40.0f, 22.0f));
+	Root->SetPadding(FMargin(72.0f, 60.0f, 72.0f, 40.0f));   // margins clear of the bezel's corners
 	WidgetTree->RootWidget = Root;
 	UVerticalBox* Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("Column"));
 	Root->SetContent(Column);
+	Hints = Crt::FixedText(WidgetTree, TEXT("ESC leaves   TAB completes   ENTER runs   HELP lists commands"), 18, Crt::DimGreen);
+	Column->AddChildToVerticalBox(Hints)->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 14.0f));
 	Scroll = WidgetTree->ConstructWidget<UScrollBox>(UScrollBox::StaticClass(), TEXT("Scroll"));
 	Scroll->SetScrollBarVisibility(ESlateVisibility::Collapsed);
 	UVerticalBoxSlot* SS = Column->AddChildToVerticalBox(Scroll);
 	SS->SetSize(ESlateSizeRule::Fill);
 	Lines = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("Lines"));
 	Scroll->AddChild(Lines);
-	// The prompt: a marker and a box in the same face.
+	// The prompt: a marker and a box in the same face, inside the scrolling part right after the
+	// last line, so it is always the next line and scrolls up with the rest.
 	UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("PromptRow"));
 	Row->AddChildToHorizontalBox(Crt::FixedText(WidgetTree, TEXT("> "), TermFontSize, Crt::Green))->SetVerticalAlignment(VAlign_Center);
 	Prompt = WidgetTree->ConstructWidget<UEditableTextBox>(UEditableTextBox::StaticClass(), TEXT("Prompt"));
@@ -64,9 +65,7 @@ void UTerminalWidget::NativeOnInitialized()
 	Prompt->OnTextCommitted.AddDynamic(this, &UTerminalWidget::OnPromptCommitted);
 	UHorizontalBoxSlot* PS = Row->AddChildToHorizontalBox(Prompt);
 	PS->SetSize(ESlateSizeRule::Fill); PS->SetVerticalAlignment(VAlign_Center);
-	Column->AddChildToVerticalBox(Row)->SetPadding(FMargin(0.0f, 4.0f, 0.0f, 0.0f));
-	Footer = Crt::FixedText(WidgetTree, TEXT("ESC leaves the terminal   TAB completes   ENTER runs   HELP lists commands"), 11, Crt::DimGreen);
-	Column->AddChildToVerticalBox(Footer)->SetPadding(FMargin(0.0f, 6.0f, 0.0f, 0.0f));
+	if (UScrollBoxSlot* RS = Cast<UScrollBoxSlot>(Scroll->AddChild(Row))) { RS->SetPadding(FMargin(0.0f, 4.0f, 0.0f, 0.0f)); }
 }
 
 void UTerminalWidget::LoadEntry(const FString& TerminalId)
@@ -98,10 +97,21 @@ void UTerminalWidget::Open(ABasePlayerController* InController, const FString& T
 
 void UTerminalWidget::FocusPrompt() { if (Prompt) { Prompt->SetKeyboardFocus(); } }
 
-void UTerminalWidget::FocusPromptFor(int32 SlateUserIndex)
+bool UTerminalWidget::FocusPromptFor(int32 SlateUserIndex)
 {
-	if (!Prompt) { return; }
-	FSlateApplication::Get().SetUserFocus(SlateUserIndex, Prompt->TakeWidget(), EFocusCause::SetDirectly);
+	if (!Prompt || !FSlateApplication::IsInitialized()) { return false; }
+	// Slate looks through its virtual windows too (a world widget's window is one), so this
+	// reaches the prompt once the screen has been laid out; before that it says no.
+	return FSlateApplication::Get().SetUserFocus(SlateUserIndex, Prompt->TakeWidget(), EFocusCause::SetDirectly);
+}
+
+bool UTerminalWidget::PromptCentrePx(FVector2D& Out) const
+{
+	if (!Prompt) { return false; }
+	const FGeometry& G = Prompt->GetCachedGeometry();
+	if (G.GetLocalSize().X < 1.0f || G.GetLocalSize().Y < 1.0f) { return false; }   // not laid out yet
+	Out = FVector2D(G.GetAbsolutePositionAtCoordinates(FVector2f(0.5f, 0.5f)));
+	return true;
 }
 
 void UTerminalWidget::Print(const FString& Text, const FLinearColor& Colour)

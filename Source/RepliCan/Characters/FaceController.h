@@ -19,8 +19,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "FacialExpressionInterface.h"
-#include "FacialExpressionPose.h"
+#include "Characters/FacialExpressionInterface.h"
+#include "Characters/FacialExpressionPose.h"
 #include "FaceController.generated.h"
 
 class UDecalComponent;

@@ -1,6 +1,6 @@
-#include "PulsedFXActor.h"
-#include "AmbientPlayer.h"
-#include "VoiceLines.h"
+#include "World/PulsedFXActor.h"
+#include "World/AmbientPlayer.h"
+#include "Narrative/VoiceLines.h"
 #include "NiagaraComponent.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
@@ -45,17 +45,14 @@ void APulsedFXActor::Fire()
 	if (FX) { FX->Activate(true); }
 	if (BurstSound.IsEmpty() || BurstVolume <= 0.0f || !GetWorld()) { return; }
 
-	float Seconds = 0.0f;
-	USoundWave* Wave = VoiceLines::LoadWav(this, FPaths::Combine(UAmbientPlayer::RawAudioDir(), BurstSound), Seconds);
-	if (!Wave) { return; }
-
 	USoundAttenuation* Att = NewObject<USoundAttenuation>(this);
 	Att->Attenuation.bAttenuate = true;
 	Att->Attenuation.AttenuationShapeExtents = FVector(FMath::Max(1.0f, SoundInnerCm), 0.0f, 0.0f);
 	Att->Attenuation.FalloffDistance = FMath::Max(1.0f, SoundFalloffCm);
-	// Slight pitch scatter so repeated bursts from one vent are not the same sound file twice.
-	UGameplayStatics::SpawnSoundAtLocation(GetWorld(), Wave, GetActorLocation(), FRotator::ZeroRotator,
-	                                       BurstVolume, FMath::FRandRange(0.92f, 1.08f), 0.0f, Att);
+	// Slight pitch scatter so repeated bursts from one vent are not the same sound file twice. Every
+	// burst used to leave its wave behind: one vent every twenty seconds is a hundred of them in an
+	// hour, all of them ticking.
+	UAmbientPlayer::PlayFileAt(this, GetWorld(), BurstSound, GetActorLocation(), BurstVolume, FMath::FRandRange(0.92f, 1.08f), Att);
 }
 
 void APulsedFXActor::Tick(float DeltaSeconds)

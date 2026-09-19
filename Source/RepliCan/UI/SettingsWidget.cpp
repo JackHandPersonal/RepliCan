@@ -1,14 +1,14 @@
-#include "SettingsWidget.h"
-#include "CrtStyle.h"
-#include "CrtRuleWidget.h"
-#include "SheetSpec.h"
+#include "UI/SettingsWidget.h"
+#include "UI/CrtStyle.h"
+#include "UI/CrtRuleWidget.h"
+#include "UI/SheetSpec.h"
 #include "Components/Border.h"
 #include "Components/ScrollBox.h"
 #include "Components/ScrollBoxSlot.h"
 #include "Components/SizeBox.h"
-#include "RepliCanUserSettings.h"
-#include "EnvironmentDirector.h"
-#include "InputBindings.h"
+#include "Core/RepliCanUserSettings.h"
+#include "World/EnvironmentDirector.h"
+#include "Core/InputBindings.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
@@ -19,27 +19,45 @@
 #include "EngineUtils.h"
 #include "Engine/World.h"
 
+static const int32 SettingsRowSize = 15;   // dense: this game is not afraid of a full page
+
 void USettingsWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 	// The same box the character sheet sits in -- the panel colour and inset, a header rule with
-	// the title set into it and the [ X ] at its end -- with the rows in a column down the middle
-	// that scrolls if it ever outgrows the box. Rebuild dresses or undresses it for the context.
+	// the title set into it and the [ X ] at its end -- with the rows in THREE COLUMNS across the
+	// whole width, and a scroll only if a column ever outgrows the box. Rebuild dresses or
+	// undresses it for the context.
 	Root = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("SettingsRoot"));
 	WidgetTree->RootWidget = Root;
 	UVerticalBox* Outer = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SettingsOuter"));
 	Root->SetContent(Outer);
 	HeaderBox = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SettingsHeader"));
-	Outer->AddChildToVerticalBox(HeaderBox)->SetPadding(FMargin(0, 0, 0, 12));
+	Outer->AddChildToVerticalBox(HeaderBox)->SetPadding(FMargin(0, 0, 0, 10));
+	TitleBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SettingsTitle"));
+	Outer->AddChildToVerticalBox(TitleBox);
 	UScrollBox* Scroll = WidgetTree->ConstructWidget<UScrollBox>(UScrollBox::StaticClass(), TEXT("SettingsScroll"));
 	Scroll->SetScrollBarVisibility(ESlateVisibility::Collapsed);
 	UVerticalBoxSlot* ScrollSlot = Outer->AddChildToVerticalBox(Scroll);
 	ScrollSlot->SetSize(ESlateSizeRule::Fill);
-	ColumnFit = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SettingsFit"));
-	Scroll->AddChild(ColumnFit);
-	if (UScrollBoxSlot* FitSlot = Cast<UScrollBoxSlot>(ColumnFit->Slot)) { FitSlot->SetHorizontalAlignment(HAlign_Center); }
-	Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SettingsColumn"));
-	ColumnFit->AddChild(Column);
+	Columns = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SettingsColumns"));
+	Scroll->AddChild(Columns);
+	if (UScrollBoxSlot* CS = Cast<UScrollBoxSlot>(Columns->Slot)) { CS->SetHorizontalAlignment(HAlign_Fill); }
+	for (int32 i = 0; i < 3; ++i)
+	{
+		UVerticalBox* C = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), *FString::Printf(TEXT("SettingsColumn%d"), i));
+		UHorizontalBoxSlot* S = Columns->AddChildToHorizontalBox(C);
+		S->SetSize(ESlateSizeRule::Fill);
+		S->SetPadding(FMargin(i == 0 ? 0.0f : 22.0f, 0, 0, 0));
+		S->SetVerticalAlignment(VAlign_Top);
+		Cols.Add(C);
+	}
+	Column = Cols[0];
+}
+
+UVerticalBox* USettingsWidget::Col(int32 Index) const
+{
+	return Cols.IsValidIndex(Index) ? Cols[Index].Get() : Column.Get();
 }
 
 UWidget* USettingsWidget::Heading(UVerticalBox* Into, const FString& Title)
@@ -47,8 +65,8 @@ UWidget* USettingsWidget::Heading(UVerticalBox* Into, const FString& Title)
 	// "-- Display --" in false caps: the section name capitalised, the rest small.
 	FString Cased = Title;
 	if (Cased.Len() > 0) { Cased[0] = FChar::ToUpper(Cased[0]); }
-	UHorizontalBox* T = Crt::SmallCaps(WidgetTree, FString::Printf(TEXT("-- %s --"), *Cased), 15, Crt::DimGreen);
-	Into->AddChildToVerticalBox(T)->SetPadding(FMargin(0, 18, 0, 6));
+	UHorizontalBox* T = Crt::SmallCaps(WidgetTree, FString::Printf(TEXT("-- %s --"), *Cased), 14, Crt::DimGreen);
+	Into->AddChildToVerticalBox(T)->SetPadding(FMargin(0, Into->GetChildrenCount() == 0 ? 0 : 9, 0, 3));
 	return T;
 }
 
@@ -57,31 +75,31 @@ UWidget* USettingsWidget::Heading(UVerticalBox* Into, const FString& Title)
 UWidget* USettingsWidget::Row(UVerticalBox* Into, const FString& Label, UWidget* Value, bool bWired)
 {
 	UHorizontalBox* R = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
-	UTextBlock* L = Crt::Text(WidgetTree, TEXT("  ") + Label, 17, bWired ? Crt::Green : Crt::DimGreen);
+	UTextBlock* L = Crt::Text(WidgetTree, Label, SettingsRowSize, bWired ? Crt::Green : Crt::DimGreen);
 	UHorizontalBoxSlot* LS = R->AddChildToHorizontalBox(L);
 	LS->SetSize(ESlateSizeRule::Fill);
 	LS->SetVerticalAlignment(VAlign_Center);
 	UHorizontalBoxSlot* VS = R->AddChildToHorizontalBox(Value);
 	VS->SetHorizontalAlignment(HAlign_Right);
 	VS->SetVerticalAlignment(VAlign_Center);
-	Into->AddChildToVerticalBox(R)->SetPadding(FMargin(0, 2));
+	Into->AddChildToVerticalBox(R)->SetPadding(FMargin(0, 1));
 	return R;
 }
 
 UTextBlock* USettingsWidget::Stub(const TCHAR* Value)
 {
-	return Crt::Text(WidgetTree, Value, 17, Crt::DimGreen);
+	return Crt::Text(WidgetTree, Value, SettingsRowSize, Crt::DimGreen);
 }
 
 void USettingsWidget::Rebuild(bool bTitleContext)
 {
-	if (!Column) { return; }
+	if (Cols.Num() == 0) { return; }
 	bTitle = bTitleContext;
-	Column->ClearChildren();
+	for (const TObjectPtr<UVerticalBox>& C : Cols) { if (C) { C->ClearChildren(); } }
+	if (TitleBox) { TitleBox->ClearChildren(); }
 	KeyRowLabels.Reset(); ButtonActions.Reset(); KeyHint = nullptr; CapturingAction = NAME_None;
 	// Dressed as the character sheet's dialog in the pause context; bare inside the title screen's own frame.
 	if (Root) { Root->SetBrushColor(bShowBack ? Crt::Panel : FLinearColor::Transparent); Root->SetPadding(bShowBack ? FMargin(34.0f, 26.0f) : FMargin(0.0f)); }
-	if (ColumnFit) { if (bShowBack) { ColumnFit->SetWidthOverride(760.0f); } else { ColumnFit->ClearWidthOverride(); } }
 	if (HeaderBox)
 	{
 		HeaderBox->ClearChildren();
@@ -111,130 +129,82 @@ void USettingsWidget::BuildMainPage()
 	PestsLabel = nullptr; PestRateLabel = nullptr; AOStrengthLabel = nullptr;
 	EnvExposureLabel = nullptr; EnvFogDensityLabel = nullptr; EnvDustDensityLabel = nullptr;
 
-	if (!bShowBack) { Column->AddChildToVerticalBox(Crt::Text(WidgetTree, TEXT("SETTINGS"), 34, Crt::Green, ETextJustify::Center))->SetPadding(FMargin(0, 0, 0, 8)); }   // in the pause context the header rule carries the title
+	if (!bShowBack && TitleBox) { TitleBox->AddChildToVerticalBox(Crt::Text(WidgetTree, TEXT("SETTINGS"), 30, Crt::Green, ETextJustify::Center))->SetPadding(FMargin(0, 0, 0, 6)); }   // in the pause context the header rule carries the title
 
-	Heading(Column, TEXT("display"));
-	UButton* Fullscreen = Crt::Button(WidgetTree, TEXT("< WINDOWED >"), 17);
-	Fullscreen->OnClicked.AddDynamic(this, &USettingsWidget::OnToggleFullscreen);
-	FullscreenLabel = Crt::ButtonLabel(Fullscreen);
-	Row(Column, TEXT("DISPLAY MODE"), Fullscreen, true);
-	Row(Column, TEXT("RESOLUTION"), Stub(TEXT("< 1920 x 1080 >")), false);
-	Row(Column, TEXT("VSYNC"), Stub(TEXT("ON")), false);
-	Row(Column, TEXT("CRT SCANLINES"), Stub(TEXT("ON")), false);
+	// Column one: the machine and the hands. Column two: the environment's switches. Column three: its levels.
+	UVerticalBox* A = Col(0); UVerticalBox* B = Col(1); UVerticalBox* C = Col(2);
+	auto Toggle = [&](UVerticalBox* Into, const TCHAR* Label, const TCHAR* Initial, void (USettingsWidget::*Fn)(), TObjectPtr<UTextBlock>& Out)
+	{
+		UButton* Btn = Crt::Button(WidgetTree, Initial, SettingsRowSize);
+		FScriptDelegate D; D.BindUFunction(this, *FString());   // placeholder, replaced below
+		(void)D;
+		Out = Crt::ButtonLabel(Btn);
+		Row(Into, Label, Btn, true);
+		return Btn;
+	};
+	(void)Toggle;
 
-	Heading(Column, TEXT("audio"));
-	Row(Column, TEXT("MASTER VOLUME"), Stub(TEXT("[========  ]  80%")), false);
-	Row(Column, TEXT("VOICE VOLUME"), Stub(TEXT("[==========] 100%")), false);
-	Row(Column, TEXT("EFFECTS VOLUME"), Stub(TEXT("[========  ]  80%")), false);
-	Row(Column, TEXT("MUSIC VOLUME"), Stub(TEXT("[======    ]  60%")), false);
+	Heading(A, TEXT("display"));
 	{
-		UButton* B = Crt::Button(WidgetTree, TEXT("< [==  ] >"), 17);
-		B->OnClicked.AddDynamic(this, &USettingsWidget::OnStepFootstepVolume);
-		FootstepVolumeLabel = Crt::ButtonLabel(B);
-		Row(Column, TEXT("FOOTSTEP VOLUME"), B, true);
+		UButton* Fullscreen = Crt::Button(WidgetTree, TEXT("< WINDOWED >"), SettingsRowSize);
+		Fullscreen->OnClicked.AddDynamic(this, &USettingsWidget::OnToggleFullscreen);
+		FullscreenLabel = Crt::ButtonLabel(Fullscreen);
+		Row(A, TEXT("DISPLAY MODE"), Fullscreen, true);
 	}
+	Row(A, TEXT("RESOLUTION"), Stub(TEXT("< 1920 x 1080 >")), false);
+	Row(A, TEXT("VSYNC"), Stub(TEXT("ON")), false);
+	Row(A, TEXT("CRT SCANLINES"), Stub(TEXT("ON")), false);
 
-	Heading(Column, TEXT("controls"));
-	Row(Column, TEXT("MOUSE SENSITIVITY"), Stub(TEXT("< 1.0 >")), false);
-	Row(Column, TEXT("INVERT LOOK"), Stub(TEXT("OFF")), false);
+	Heading(A, TEXT("audio"));
+	Row(A, TEXT("MASTER VOLUME"), Stub(TEXT("[========  ]  80%")), false);
+	Row(A, TEXT("VOICE VOLUME"), Stub(TEXT("[==========] 100%")), false);
+	Row(A, TEXT("EFFECTS VOLUME"), Stub(TEXT("[========  ]  80%")), false);
+	Row(A, TEXT("MUSIC VOLUME"), Stub(TEXT("[======    ]  60%")), false);
 	{
-		UButton* B = Crt::Button(WidgetTree, TEXT("[ EDIT ]"), 17);
-		B->OnClicked.AddDynamic(this, &USettingsWidget::OnOpenKeys);
-		Row(Column, TEXT("KEY BINDINGS"), B, true);
-	}
-
-	Heading(Column, TEXT("environment"));
-	{
-		UButton* B = Crt::Button(WidgetTree, TEXT("ON"), 17);
-		B->OnClicked.AddDynamic(this, &USettingsWidget::OnToggleEnvGrade);
-		EnvGradeLabel = Crt::ButtonLabel(B);
-		Row(Column, TEXT("COLOUR GRADE"), B, true);
-	}
-	{
-		UButton* B = Crt::Button(WidgetTree, TEXT("ON"), 17);
-		B->OnClicked.AddDynamic(this, &USettingsWidget::OnToggleEnvAO);
-		EnvAOLabel = Crt::ButtonLabel(B);
-		Row(Column, TEXT("AMBIENT OCCLUSION"), B, true);
-	}
-	{
-		UButton* B = Crt::Button(WidgetTree, TEXT("ON"), 17);
-		B->OnClicked.AddDynamic(this, &USettingsWidget::OnToggleEnvFog);
-		EnvFogLabel = Crt::ButtonLabel(B);
-		Row(Column, TEXT("ATMOSPHERE"), B, true);
-	}
-	{
-		UButton* B = Crt::Button(WidgetTree, TEXT("ON"), 17);
-		B->OnClicked.AddDynamic(this, &USettingsWidget::OnToggleEnvVolumetric);
-		EnvVolumetricLabel = Crt::ButtonLabel(B);
-		Row(Column, TEXT("LIGHT SHAFTS"), B, true);
-	}
-	{
-		UButton* B = Crt::Button(WidgetTree, TEXT("ON"), 17);
-		B->OnClicked.AddDynamic(this, &USettingsWidget::OnToggleEnvDust);
-		EnvDustLabel = Crt::ButtonLabel(B);
-		Row(Column, TEXT("DUST IN THE AIR"), B, true);
-	}
-	{
-		UButton* B = Crt::Button(WidgetTree, TEXT("ON"), 17);
-		B->OnClicked.AddDynamic(this, &USettingsWidget::OnToggleEnvFlicker);
-		EnvFlickerLabel = Crt::ButtonLabel(B);
-		Row(Column, TEXT("LAMP FLICKER"), B, true);
+		UButton* Btn = Crt::Button(WidgetTree, TEXT("< [==  ] >"), SettingsRowSize);
+		Btn->OnClicked.AddDynamic(this, &USettingsWidget::OnStepFootstepVolume);
+		FootstepVolumeLabel = Crt::ButtonLabel(Btn);
+		Row(A, TEXT("FOOTSTEP VOLUME"), Btn, true);
 	}
 
+	Heading(A, TEXT("controls"));
+	Row(A, TEXT("MOUSE SENSITIVITY"), Stub(TEXT("< 1.0 >")), false);
+	Row(A, TEXT("INVERT LOOK"), Stub(TEXT("OFF")), false);
 	{
-		UButton* B = Crt::Button(WidgetTree, TEXT("< [====   ] >"), 17);
-		B->OnClicked.AddDynamic(this, &USettingsWidget::OnStepAOStrength);
-		AOStrengthLabel = Crt::ButtonLabel(B);
-		Row(Column, TEXT("CORNER SHADING"), B, true);
+		UButton* Btn = Crt::Button(WidgetTree, TEXT("[ EDIT ]"), SettingsRowSize);
+		Btn->OnClicked.AddDynamic(this, &USettingsWidget::OnOpenKeys);
+		Row(A, TEXT("KEY BINDINGS"), Btn, true);
 	}
-	{
-		UButton* B = Crt::Button(WidgetTree, TEXT("ON"), 17);
-		B->OnClicked.AddDynamic(this, &USettingsWidget::OnTogglePests);
-		PestsLabel = Crt::ButtonLabel(B);
-		Row(Column, TEXT("VERMIN"), B, true);
-	}
-	{
-		UButton* B = Crt::Button(WidgetTree, TEXT("< [==  ] >"), 17);
-		B->OnClicked.AddDynamic(this, &USettingsWidget::OnStepPestRate);
-		PestRateLabel = Crt::ButtonLabel(B);
-		Row(Column, TEXT("VERMIN FREQUENCY"), B, true);
-	}
-	{
-		UButton* B = Crt::Button(WidgetTree, TEXT("OFF"), 17);
-		B->OnClicked.AddDynamic(this, &USettingsWidget::OnToggleEnvFixedExposure);
-		EnvFixedExposureLabel = Crt::ButtonLabel(B);
-		Row(Column, TEXT("FIXED EXPOSURE"), B, true);
-	}
-	{
-		UButton* B = Crt::Button(WidgetTree, TEXT("< [==  ] >"), 17);
-		B->OnClicked.AddDynamic(this, &USettingsWidget::OnStepEnvExposure);
-		EnvExposureLabel = Crt::ButtonLabel(B);
-		Row(Column, TEXT("EXPOSURE LEVEL"), B, true);
-	}
-	{
-		UButton* B = Crt::Button(WidgetTree, TEXT("< [==  ] >"), 17);
-		B->OnClicked.AddDynamic(this, &USettingsWidget::OnStepFogDensity);
-		EnvFogDensityLabel = Crt::ButtonLabel(B);
-		Row(Column, TEXT("ATMOSPHERE DENSITY"), B, true);
-	}
-	{
-		UButton* B = Crt::Button(WidgetTree, TEXT("< [==  ] >"), 17);
-		B->OnClicked.AddDynamic(this, &USettingsWidget::OnStepDustDensity);
-		EnvDustDensityLabel = Crt::ButtonLabel(B);
-		Row(Column, TEXT("DUST DENSITY"), B, true);
-	}
-
 	if (bTitle)
 	{
 		// Only meaningful before a game is running.
-		Heading(Column, TEXT("game"));
-		UButton* AlwaysIntro = Crt::Button(WidgetTree, TEXT("OFF"), 17);
+		Heading(A, TEXT("game"));
+		UButton* AlwaysIntro = Crt::Button(WidgetTree, TEXT("OFF"), SettingsRowSize);
 		AlwaysIntro->OnClicked.AddDynamic(this, &USettingsWidget::OnToggleAlwaysIntro);
 		AlwaysIntroLabel = Crt::ButtonLabel(AlwaysIntro);
-		Row(Column, TEXT("INTRO ON EVERY START"), AlwaysIntro, true);
+		Row(A, TEXT("INTRO ON EVERY START"), AlwaysIntro, true);
 	}
+	A->AddChildToVerticalBox(Crt::Text(WidgetTree, TEXT("dim entries are not wired yet"), 12, Crt::Faint))->SetPadding(FMargin(0, 12, 0, 0));
 
-	Column->AddChildToVerticalBox(Crt::Text(WidgetTree, TEXT("dim entries are not wired yet"), 12, Crt::Faint))->SetPadding(FMargin(0, 16, 0, 0));
+	Heading(B, TEXT("environment"));
+#define SETTINGS_ROW_TOGGLE(Into, Label, Initial, Fn, Out) { UButton* Btn = Crt::Button(WidgetTree, TEXT(Initial), SettingsRowSize); Btn->OnClicked.AddDynamic(this, &USettingsWidget::Fn); Out = Crt::ButtonLabel(Btn); Row(Into, TEXT(Label), Btn, true); }
+	SETTINGS_ROW_TOGGLE(B, "COLOUR GRADE", "ON", OnToggleEnvGrade, EnvGradeLabel)
+	SETTINGS_ROW_TOGGLE(B, "AMBIENT OCCLUSION", "ON", OnToggleEnvAO, EnvAOLabel)
+	SETTINGS_ROW_TOGGLE(B, "ATMOSPHERE", "ON", OnToggleEnvFog, EnvFogLabel)
+	SETTINGS_ROW_TOGGLE(B, "LIGHT SHAFTS", "ON", OnToggleEnvVolumetric, EnvVolumetricLabel)
+	SETTINGS_ROW_TOGGLE(B, "DUST IN THE AIR", "ON", OnToggleEnvDust, EnvDustLabel)
+	SETTINGS_ROW_TOGGLE(B, "LAMP FLICKER", "ON", OnToggleEnvFlicker, EnvFlickerLabel)
+	SETTINGS_ROW_TOGGLE(B, "VERMIN", "ON", OnTogglePests, PestsLabel)
+	SETTINGS_ROW_TOGGLE(B, "FIXED EXPOSURE", "OFF", OnToggleEnvFixedExposure, EnvFixedExposureLabel)
+
+	Heading(C, TEXT("levels"));
+	SETTINGS_ROW_TOGGLE(C, "CORNER SHADING", "< [====   ] >", OnStepAOStrength, AOStrengthLabel)
+	SETTINGS_ROW_TOGGLE(C, "VERMIN FREQUENCY", "< [==  ] >", OnStepPestRate, PestRateLabel)
+	SETTINGS_ROW_TOGGLE(C, "EXPOSURE LEVEL", "< [==  ] >", OnStepEnvExposure, EnvExposureLabel)
+	SETTINGS_ROW_TOGGLE(C, "ATMOSPHERE DENSITY", "< [==  ] >", OnStepFogDensity, EnvFogDensityLabel)
+	SETTINGS_ROW_TOGGLE(C, "DUST DENSITY", "< [==  ] >", OnStepDustDensity, EnvDustDensityLabel)
+#undef SETTINGS_ROW_TOGGLE
+
 	// The way out is the [ X ] in the header rule, as on the character sheet.
 	RefreshRows();
 }
@@ -282,7 +252,6 @@ void USettingsWidget::RefreshRows()
 	}
 	if (EnvFixedExposureLabel) { EnvFixedExposureLabel->SetText(OnOff(S && S->bEnvFixedExposure)); }
 	if (EnvExposureLabel) { EnvExposureLabel->SetText(Bar(S ? S->EnvExposure : 2)); }
-	if (EnvFogDensityLabel) { EnvFogDensityLabel->SetText(Bar(S ? S->EnvFogDensity : 2)); }
 	if (EnvDustDensityLabel) { EnvDustDensityLabel->SetText(Bar(S ? S->EnvDustDensity : 2)); }
 }
 
@@ -295,34 +264,42 @@ void USettingsWidget::PokeDirector()
 
 void USettingsWidget::BuildKeysPage()
 {
-	Column->AddChildToVerticalBox(Crt::Text(WidgetTree, TEXT("KEY BINDINGS"), 34, Crt::Green, ETextJustify::Center))->SetPadding(FMargin(0, 0, 0, 4));
-	const FString Hint = PendingHint.IsEmpty() ? FString(TEXT("Click a binding, then press the key you want. Esc cancels.")) : PendingHint;
-	PendingHint.Reset();
-	KeyHint = Crt::Text(WidgetTree, Hint, 15, Crt::DimGreen, ETextJustify::Center);
-	Column->AddChildToVerticalBox(KeyHint)->SetPadding(FMargin(0, 0, 0, 8));
-
-	FString LastCategory;
-	for (const InputBindings::FAction& Action : InputBindings::All())
+	if (TitleBox)
 	{
-		if (Action.Category != LastCategory)
+		if (!bShowBack) { TitleBox->AddChildToVerticalBox(Crt::Text(WidgetTree, TEXT("KEY BINDINGS"), 30, Crt::Green, ETextJustify::Center))->SetPadding(FMargin(0, 0, 0, 2)); }
+		const FString Hint = PendingHint.IsEmpty() ? FString(TEXT("Click a binding, then press the key you want. Esc cancels.")) : PendingHint;
+		PendingHint.Reset();
+		KeyHint = Crt::Text(WidgetTree, Hint, 14, Crt::DimGreen, ETextJustify::Center);
+		TitleBox->AddChildToVerticalBox(KeyHint)->SetPadding(FMargin(0, 0, 0, 6));
+	}
+	// The bindings in three columns of about equal length, each column re-saying the category it
+	// starts in the middle of, so nothing is read out of context.
+	const TArray<InputBindings::FAction>& All = InputBindings::All();
+	const int32 PerColumn = FMath::Max(1, (All.Num() + 2) / 3);
+	FString LastCategory;
+	for (int32 i = 0; i < All.Num(); ++i)
+	{
+		const InputBindings::FAction& Action = All[i];
+		UVerticalBox* Into = Col(FMath::Min(2, i / PerColumn));
+		if (Action.Category != LastCategory || i % PerColumn == 0)
 		{
 			LastCategory = Action.Category;
-			Heading(Column, LastCategory.ToLower());
+			Heading(Into, LastCategory.ToLower());
 		}
-		UButton* B = Crt::Button(WidgetTree, InputBindings::Describe(Action.Id), 17);
-		B->OnClicked.AddDynamic(this, &USettingsWidget::OnKeyRowClicked);
-		KeyRowLabels.Add(Action.Id, Crt::ButtonLabel(B));
-		ButtonActions.Add(B, Action.Id);
-		Row(Column, Action.Label, B, true);
+		UButton* Btn = Crt::Button(WidgetTree, InputBindings::Describe(Action.Id), SettingsRowSize);
+		Btn->OnClicked.AddDynamic(this, &USettingsWidget::OnKeyRowClicked);
+		KeyRowLabels.Add(Action.Id, Crt::ButtonLabel(Btn));
+		ButtonActions.Add(Btn, Action.Id);
+		Row(Into, Action.Label, Btn, true);
 	}
-
-	UButton* Reset = Crt::Button(WidgetTree, TEXT("[ RESET ALL ]"), 17);
+	UVerticalBox* Last = Col(2);
+	Heading(Last, TEXT("keys page"));
+	UButton* Reset = Crt::Button(WidgetTree, TEXT("[ RESET ALL ]"), SettingsRowSize);
 	Reset->OnClicked.AddDynamic(this, &USettingsWidget::OnResetKeys);
-	Row(Column, TEXT("RESTORE DEFAULTS"), Reset, true);
-
-	UButton* Back = Crt::Button(WidgetTree, TEXT("[ BACK ]"), 17);
+	Row(Last, TEXT("RESTORE DEFAULTS"), Reset, true);
+	UButton* Back = Crt::Button(WidgetTree, TEXT("[ BACK ]"), SettingsRowSize);
 	Back->OnClicked.AddDynamic(this, &USettingsWidget::OnBack);
-	Row(Column, TEXT("DONE"), Back, true);
+	Row(Last, TEXT("DONE"), Back, true);
 	SetKeyboardFocus();
 }
 

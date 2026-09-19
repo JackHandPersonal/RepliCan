@@ -1,5 +1,5 @@
-#include "ImpactEffects.h"
-#include "AmbientPlayer.h"
+#include "Weapons/ImpactEffects.h"
+#include "World/AmbientPlayer.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
@@ -32,6 +32,15 @@ namespace
 		TArray<FString> Decals;      // "decals": several to pick from at random, so a burst into one wall is not one stamp
 		float DecalSize = 8.0f;
 		float DecalLifeSeconds = 25.0f;
+		// A MARK FOR SURFACES A DECAL CANNOT TOUCH. A deferred decal is projected onto the GBuffer,
+		// and a TRANSLUCENT material never writes to it -- so on glass the decal spawns and then
+		// simply does not draw. Measured on the facility windows: the shot hits (BlockAll, Visibility
+		// ECR_BLOCK) and the default rule did stamp a hole, invisibly, because the glass is
+		// BLEND_TRANSLUCENT. A "patch" is the same mark put on a PLANE instead, which draws like any
+		// other surface. Glass, water, holograms: anything you can see through.
+		FString Patch;
+		float PatchSize = 12.0f;
+		float PatchLifeSeconds = 45.0f;
 		FLinearColor LightColor = FLinearColor(1.0f, 0.75f, 0.35f);
 		float LightIntensity = 0.0f;
 		float LightRadius = 220.0f;
@@ -85,6 +94,9 @@ namespace
 		double N = 0.0;
 		if (Obj->TryGetNumberField(TEXT("decal_size"), N)) { R.DecalSize = N; }
 		if (Obj->TryGetNumberField(TEXT("decal_life"), N)) { R.DecalLifeSeconds = N; }
+		Obj->TryGetStringField(TEXT("patch"), R.Patch);
+		if (Obj->TryGetNumberField(TEXT("patch_size"), N)) { R.PatchSize = N; }
+		if (Obj->TryGetNumberField(TEXT("patch_life"), N)) { R.PatchLifeSeconds = N; }
 		if (Obj->TryGetNumberField(TEXT("light_intensity"), N)) { R.LightIntensity = N; }
 		if (Obj->TryGetNumberField(TEXT("light_radius"), N)) { R.LightRadius = N; }
 		if (Obj->TryGetNumberField(TEXT("light_seconds"), N)) { R.LightSeconds = N; }
@@ -225,11 +237,49 @@ void ImpactEffects::Play(UWorld* World, const FHitResult& Hit, AActor* Instigato
 			const FVector Size(FMath::Max(2.0f, S * 0.5f), S, S);
 			FRotator DecalRot = (-Hit.ImpactNormal).Rotation();
 			DecalRot.Roll = FMath::FRandRange(0.0f, 360.0f);
-			if (UDecalComponent* D = UGameplayStatics::SpawnDecalAtLocation(World, Mat, Size, Hit.ImpactPoint, DecalRot, R.DecalLifeSeconds))
+			// On a body the mark is pinned to the bone it struck, so it rides the limb; a world decal
+			// would hang in the air where the robot was standing.
+			USkeletalMeshComponent* OnBody = Cast<USkeletalMeshComponent>(Hit.GetComponent());
+			UDecalComponent* D = OnBody
+				? UGameplayStatics::SpawnDecalAttached(Mat, Size, OnBody, Hit.BoneName, Hit.ImpactPoint, DecalRot, EAttachLocation::KeepWorldPosition, R.DecalLifeSeconds)
+				: UGameplayStatics::SpawnDecalAtLocation(World, Mat, Size, Hit.ImpactPoint, DecalRot, R.DecalLifeSeconds);
+			if (D)
 			{
 				// Fade out over the last fifth of its life rather than blinking away.
 				D->SetFadeOut(R.DecalLifeSeconds * 0.8f, R.DecalLifeSeconds * 0.2f, false);
 				D->SetFadeScreenSize(0.0004f);   // a decal stops drawing below a screen-size fraction (1% by default): a 6 cm hole crossed that a few metres out
+			}
+		}
+	}
+
+	// THE PATCH: a crack laid ON the surface, for glass and anything else a decal cannot mark.
+	if (!R.Patch.IsEmpty() && R.PatchSize > 0.0f)
+	{
+		UStaticMesh* Plane = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Plane"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+		UMaterialInterface* Mat = LoadObject<UMaterialInterface>(nullptr, *R.Patch, nullptr, LOAD_NoWarn | LOAD_Quiet);
+		USceneComponent* Attach = Hit.GetComponent();
+		if (Plane && Mat)
+		{
+			UObject* Owner = Hit.GetActor() ? (UObject*)Hit.GetActor() : (UObject*)World;
+			UStaticMeshComponent* P = NewObject<UStaticMeshComponent>(Owner);
+			P->SetStaticMesh(Plane);
+			P->SetMaterial(0, Mat);
+			P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			P->SetCastShadow(false);
+			// The engine plane is 100 cm across and faces its own +Z, so the scale is the size in
+			// metres and the rotation is built FROM the normal. Lifted a hair off the surface: a
+			// plane exactly on the glass z-fights with it from every angle.
+			const float S = R.PatchSize * FMath::FRandRange(0.8f, 1.3f);
+			P->SetWorldScale3D(FVector(S / 100.0f));
+			FRotator Face = FRotationMatrix::MakeFromZ(Hit.ImpactNormal).Rotator();
+			Face.Roll += FMath::FRandRange(0.0f, 360.0f);   // no two cracks the same way up
+			P->SetWorldLocationAndRotation(Hit.ImpactPoint + Hit.ImpactNormal * 0.4f, Face);
+			if (Attach) { P->AttachToComponent(Attach, FAttachmentTransformRules::KeepWorldTransform); }
+			P->RegisterComponentWithWorld(World);
+			if (R.PatchLifeSeconds > 0.0f)
+			{
+				FTimerHandle H;
+				World->GetTimerManager().SetTimer(H, FTimerDelegate::CreateWeakLambda(P, [P]() { P->DestroyComponent(); }), R.PatchLifeSeconds, false);
 			}
 		}
 	}

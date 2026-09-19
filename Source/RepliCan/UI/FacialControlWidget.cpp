@@ -1,5 +1,5 @@
-#include "FacialControlWidget.h"
-#include "FaceController.h"
+#include "UI/FacialControlWidget.h"
+#include "Characters/FaceController.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/HorizontalBox.h"
@@ -9,7 +9,7 @@
 #include "Components/Border.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
-#include "CrtStyle.h"
+#include "UI/CrtStyle.h"
 #include "Blueprint/WidgetTree.h"
 #include "Kismet/GameplayStatics.h"
 

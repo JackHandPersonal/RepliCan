@@ -1,6 +1,6 @@
-#include "Vitality.h"
-#include "BaseCharacter.h"
-#include "CharacterConfig.h"
+#include "Characters/Vitality.h"
+#include "Characters/BaseCharacter.h"
+#include "Characters/CharacterConfig.h"
 
 UVitalityComponent* UVitalityComponent::FindOrAdd(AActor* Who)
 {

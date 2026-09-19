@@ -99,8 +99,11 @@ private:
 	UPROPERTY() TObjectPtr<class USizeBox> MirrorBox;
 	UPROPERTY() TObjectPtr<class USizeBox> MirrorFit;   // the 5:8 box the portrait sits in, sized from the mirror's width
 	// What a click picked: the bag slot or the gear slot whose details the info panel shows.
-	int32 SelectedBag = -1, SelectedGear = -1;
+	int32 SelectedBag = -1, SelectedGear = -1, SelectedQuick = -1;   // one picked square across the three grids
 	void ShowSelectedInfo();
+	// What INFO shows for a hovered square: the thing in it, or -- if it is empty -- whatever is
+	// still picked. An empty square is not a thing, so it has nothing to say and should say nothing.
+	void HoverInfo(const FString& Item);
 	UPROPERTY() TObjectPtr<class USizeBox> RightBox;
 	float MirrorWidth = 0.0f;
 	bool bColumnsFitted = false;

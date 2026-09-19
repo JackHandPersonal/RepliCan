@@ -81,6 +81,10 @@ private:
 	void PokeDirector();
 
 	UPROPERTY() TObjectPtr<UVerticalBox> Column;
+	UPROPERTY() TArray<TObjectPtr<UVerticalBox>> Cols;   // the three columns across the box; Column is the first
+	UPROPERTY() TObjectPtr<UHorizontalBox> Columns;
+	UPROPERTY() TObjectPtr<UVerticalBox> TitleBox;      // above the columns: the title (title context) and the keys page's hint
+	UVerticalBox* Col(int32 Index) const;
 	// The box the rows sit in: the character sheet's panel, header rule and [ X ] (pause context);
 	// on the title screen, which frames the panel itself, these stay bare.
 	UPROPERTY() TObjectPtr<class UBorder> Root;

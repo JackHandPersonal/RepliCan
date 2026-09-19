@@ -1,5 +1,5 @@
-#include "CharacterNameWidget.h"
-#include "CrtStyle.h"
+#include "UI/CharacterNameWidget.h"
+#include "UI/CrtStyle.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/TextBlock.h"

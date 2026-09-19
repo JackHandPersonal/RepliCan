@@ -1,4 +1,4 @@
-#include "FaceManagerWidget.h"
+#include "UI/FaceManagerWidget.h"
 
 UFaceManagerWidget::UFaceManagerWidget(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)

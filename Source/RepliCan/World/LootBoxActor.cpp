@@ -1,4 +1,4 @@
-#include "LootBoxActor.h"
+#include "World/LootBoxActor.h"
 #include "Components/StaticMeshComponent.h"
 
 ALootBoxActor::ALootBoxActor()
@@ -31,13 +31,16 @@ void ALootBoxActor::SetOpen(bool bInOpen)
 void ALootBoxActor::PlaceLid()
 {
 	if (!Lid) { return; }
-	// Lifted off and propped against the far edge, as the bay's opened crates are.
-	if (bOpen) { Lid->SetRelativeLocationAndRotation(FVector(-14.0f, 0.0f, 34.0f), FRotator(0.0f, 0.0f, -58.0f)); }
-	else { Lid->SetRelativeLocationAndRotation(FVector::ZeroVector, FRotator::ZeroRotator); }
+	// Lifted off and propped against the far edge, as the bay's opened crates are (the defaults);
+	// a swapped-in pair carries its own seat and open pose.
+	if (bOpen) { Lid->SetRelativeLocationAndRotation(LidSeat + LidOpenOffset, LidOpenRotation); }
+	else { Lid->SetRelativeLocationAndRotation(LidSeat, FRotator::ZeroRotator); }
 }
 
 void ALootBoxActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
+	if (CrateMesh && Crate) { Crate->SetStaticMesh(CrateMesh); }
+	if (LidMesh && Lid) { Lid->SetStaticMesh(LidMesh); }
 	PlaceLid();
 }

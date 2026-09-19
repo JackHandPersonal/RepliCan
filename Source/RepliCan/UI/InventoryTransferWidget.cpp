@@ -1,11 +1,11 @@
-#include "InventoryTransferWidget.h"
-#include "BasePlayerController.h"
-#include "CrtStyle.h"
-#include "CrtRuleWidget.h"
-#include "InventoryGridWidget.h"
-#include "LootBoxActor.h"
-#include "ItemCatalog.h"
-#include "SheetSpec.h"
+#include "UI/InventoryTransferWidget.h"
+#include "Core/BasePlayerController.h"
+#include "UI/CrtStyle.h"
+#include "UI/CrtRuleWidget.h"
+#include "UI/InventoryGridWidget.h"
+#include "World/LootBoxActor.h"
+#include "Items/ItemCatalog.h"
+#include "UI/SheetSpec.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
@@ -109,7 +109,7 @@ void UInventoryTransferWidget::Refresh()
 void UInventoryTransferWidget::OnBoxSlot(int32 Index)
 {
 	if (!Box || !OwnerController || !Box->Items.IsValidIndex(Index)) { return; }
-	if (!OwnerController->AddToInventory(Box->Items[Index])) { if (Note) { Note->SetText(FText::FromString(TEXT("NO ROOM"))); } return; }
+	if (!OwnerController->AddToInventory(Box->Items[Index], true)) { if (Note) { Note->SetText(FText::FromString(TEXT("NO ROOM"))); } return; }
 	Box->Items.RemoveAt(Index);
 	Refresh();
 }

@@ -1,4 +1,4 @@
-#include "CombatAnimLibrary.h"
+#include "Characters/CombatAnimLibrary.h"
 #include "Animation/AnimSequence.h"
 
 void FCombatAnimLibrary::Build(const TArray<UAnimSequence*>& Clips)

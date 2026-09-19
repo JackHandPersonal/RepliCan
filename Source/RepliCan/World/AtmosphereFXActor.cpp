@@ -1,4 +1,4 @@
-#include "AtmosphereFXActor.h"
+#include "World/AtmosphereFXActor.h"
 #include "NiagaraComponent.h"
 #include "Components/BillboardComponent.h"
 

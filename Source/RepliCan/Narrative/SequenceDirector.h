@@ -6,7 +6,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SequenceData.h"
+#include "Narrative/SequenceData.h"
 #include "UObject/Object.h"
 #include "SequenceDirector.generated.h"
 

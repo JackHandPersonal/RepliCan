@@ -7,6 +7,10 @@
 #include "GameFramework/HUD.h"
 #include "BaseHUD.generated.h"
 
+// The HUD face, shared by both of ABaseHUD's translation units (see BaseHUDSight.cpp):
+// declared here and defined once in BaseHUD.cpp, never a file-scope static in each.
+class UFont* HudMonoFont();
+
 UCLASS()
 class REPLICAN_API ABaseHUD : public AHUD
 {
@@ -58,6 +62,20 @@ private:
 	// selected (see ABaseCharacter::SelectedAttackIndex/CyclePose) -- left
 	// mouse button plays it.
 	void DrawAttackPreviewOverlay();
+	// A SMART SIGHT'S FIGURES: range to whatever is under the reticle and what is left in the
+	// magazine, beside the aim mark and only while such a sight is actually up. Drawn here rather
+	// than as a widget because it belongs to the reticle -- it should sit where the eye already is,
+	// and disappear the moment the weapon comes down.
+	void DrawSmartOptic(float CenterX, float CenterY);
+	/** The fitted sight's mark, in screen space, on the point of impact. Returns true when it drew
+	 *  one -- the ordinary spread reticle then stands down, because two marks on one aim point is
+	 *  worse than either alone. */
+	bool DrawOpticReticle(float CenterX, float CenterY);
+	/** The scope picture: black over the whole view but a circle in the middle. Returns true when
+	 *  the sight is blacked out entirely (jammed against something), so nothing else is drawn. */
+	bool DrawScopeOverlay(float CenterX, float CenterY);
+	UPROPERTY(Transient) TObjectPtr<class UMaterialInstanceDynamic> ScopeMaskMID;
+	bool bScopeBlackedOut = false;
 
 	// The armed reticle. Returns false when nothing is in hand, so the caller falls back to
 	// the plain dot the rest of the game points with.

@@ -1,4 +1,4 @@
-#include "SheetSpec.h"
+#include "UI/SheetSpec.h"
 #include "Dom/JsonObject.h"
 #include "HAL/FileManager.h"
 #include "Misc/FileHelper.h"
@@ -22,8 +22,22 @@ FSheetSpec FSheetSpec::Defaults()
 	};
 	// Equipment 2x2 at the left (rows 1-2), a spacer column, then the apparel 2x3: upper body parts
 	// over their lower halves, captions above the top row and below the bottom row.
-	Slot(TEXT("Slot 1"), 1, 0, true, TEXT("above"), { TEXT("Rifle"), TEXT("Primary") });
-	Slot(TEXT("Slot 2"), 1, 1, true, TEXT("above"), { TEXT("Sidearm") });
+	// FOUR WEAPON SLOTS, TWO ENABLED, NO ROLES. Any weapon fits any enabled slot, so the enabled
+	// ones share one kind list. There is no "primary" and no "sidearm": those were kinds that no
+	// weapon in the catalogue has ever carried, so by these defaults Slot 2 accepted nothing at all
+	// and Slot 1 accepted only something of kind "Rifle". UI/CharacterSheet.json has overridden
+	// this with the real list for some time, so the fault never showed -- but a default that
+	// describes a design the game does not have is a trap for whoever reads it next, and it is what
+	// the game falls back to if that file is ever missing.
+	const std::initializer_list<const TCHAR*> AnyWeapon = {
+		TEXT("Alien Weapon"), TEXT("Assault Rifle"), TEXT("Dagger"), TEXT("Great Axe"),
+		TEXT("Grenade Launcher"), TEXT("Hammer"), TEXT("Hand Axe"), TEXT("Heavy Gun"), TEXT("Laser"),
+		TEXT("Launcher"), TEXT("Marksman Rifle"), TEXT("Paint"), TEXT("Pistol"), TEXT("Rifle"),
+		TEXT("SMG"), TEXT("Shield"), TEXT("Shock"), TEXT("Shotgun"), TEXT("Shuriken"), TEXT("Sword"),
+		TEXT("Tool") };
+	Slot(TEXT("Slot 1"), 1, 0, true, TEXT("above"), AnyWeapon);
+	Slot(TEXT("Slot 2"), 1, 1, true, TEXT("above"), AnyWeapon);
+	// Not earned yet: disabled AND empty, so nothing can be routed into them either way.
 	Slot(TEXT("Slot 3"), 2, 0, false, TEXT("below"), {});
 	Slot(TEXT("Slot 4"), 2, 1, false, TEXT("below"), {});
 	Slot(TEXT("Arms"), 1, 3, true, TEXT("above"), { TEXT("Sleeves"), TEXT("Arms") });

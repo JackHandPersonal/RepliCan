@@ -1,8 +1,8 @@
-#include "SaveGameSubsystem.h"
-#include "SyntySaveGame.h"
-#include "BaseCharacter.h"
-#include "BasePlayerController.h"
-#include "CharacterConfig.h"
+#include "Core/SaveGameSubsystem.h"
+#include "Core/SyntySaveGame.h"
+#include "Characters/BaseCharacter.h"
+#include "Core/BasePlayerController.h"
+#include "Characters/CharacterConfig.h"
 #include "Engine/StaticMeshActor.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
@@ -63,6 +63,8 @@ USyntySaveGame* USaveGameSubsystem::Capture(UWorld* World) const
 	{
 		Save->ControlRotation = PC->GetControlRotation();
 		Save->Inventory = PC->Inventory;
+		Save->ItemInstances = PC->ItemInstances;
+		Save->NextItemInstanceId = PC->NextItemInstanceId;
 		Save->ConversationFlags = PC->ConversationFlags.Array();
 		Save->ConversationChoicesTaken = PC->ConversationChoicesTaken.Array();
 	}
@@ -136,6 +138,10 @@ bool USaveGameSubsystem::Apply(UWorld* World, const USyntySaveGame* Save) const
 	{
 		PC->EndConversation();
 		PC->Inventory = Save->Inventory;
+		PC->ItemInstances = Save->ItemInstances;
+		// Never let a fresh id collide with one already in the file.
+		PC->NextItemInstanceId = FMath::Max(Save->NextItemInstanceId, 1);
+		for (const FItemInstance& I : PC->ItemInstances) { PC->NextItemInstanceId = FMath::Max(PC->NextItemInstanceId, I.Id + 1); }
 		PC->ConversationFlags = TSet<FString>(Save->ConversationFlags);
 		PC->ConversationChoicesTaken = TSet<FString>(Save->ConversationChoicesTaken);
 	}

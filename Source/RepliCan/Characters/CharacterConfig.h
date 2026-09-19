@@ -13,7 +13,7 @@
 
 #include "CoreMinimal.h"
 #include "AssetRegistry/AssetData.h"
-#include "GaitAdjustments.h"
+#include "Characters/GaitAdjustments.h"
 #include "CharacterConfig.generated.h"
 
 // One entry of an NPC's gaze schedule: "player" (the camera), "prop" (the
@@ -173,6 +173,9 @@ struct REPLICAN_API FCharacterConfig
 	// pack, all on the UE4 Mannequin rig).
 	UPROPERTY() FString Kit;
 	bool IsSciFiKit() const { return Kit == TEXT("SciFi"); }
+	// A body clothes can go on: the sci-fi kit, or any body assembled from the cut library's parts (the Kit
+	// string was not always stamped on a body chosen in the appearance page, which read as "nothing to put it on").
+	bool WearsCutParts() const { return IsSciFiKit() || Parts.Contains(TEXT("CutTorso")) || Parts.Contains(TEXT("CutLegs")) || Parts.Contains(TEXT("CutArms")); }
 
 	UPROPERTY() FCharacterFaceConfig Face;
 
@@ -207,6 +210,15 @@ struct REPLICAN_API FCharacterConfig
 	// the scale along the direction of travel so stride length keeps
 	// matching distance covered (see FLocomotionInputs::StrideScale).
 	UPROPERTY() FVector Scale = FVector::OneVector;
+
+	// THE EYELINE IS THE BODY'S, NOT THE GUN'S. The rig carries one combined "eyes" bone sitting
+	// between the eyes, so where a model aims from needs only two numbers on top of it: SIDE picks
+	// which of the two eyes (half this model's interpupillary distance, toward the trigger hand),
+	// UP and FORWARD move the pupil off that bone for a head whose bone sits low or back in the skull.
+	// Measured on the player model 2026-09-17 by walking the hand page's eye rod onto the eye.
+	UPROPERTY() float EyeSideCm = 4.25f;
+	UPROPERTY() float EyeUpCm = 0.0f;
+	UPROPERTY() float EyeForwardCm = 0.0f;
 
 	// Multiplies every ground-speed tier (Walk/Jog/Run/crouch) for this
 	// character specifically; the tiers themselves stay the shared base.

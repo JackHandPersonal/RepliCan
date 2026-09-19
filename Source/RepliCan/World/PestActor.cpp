@@ -1,9 +1,9 @@
-#include "PestActor.h"
+#include "World/PestActor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "CollisionQueryParams.h"
-#include "AmbientPlayer.h"
+#include "World/AmbientPlayer.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 
@@ -61,20 +61,15 @@ void APestActor::PickNextBurst()
 	                     : FMath::FRandRange(FreezeSeconds.X, FreezeSeconds.Y);
 	if (bRunning)
 	{
-		// The sound of it moving, level set by how near it is. PlayOneShot is 2D, so the
-		// distance has to be baked into the volume rather than left to attenuation -- which is
-		// honest enough for something this quiet, and the player never gets a fix on it anyway.
-		const APlayerController* PC = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr;
-		if (const APawn* Player = PC ? PC->GetPawn() : nullptr)
-		{
-			const float D = FVector::Dist(GetActorLocation(), Player->GetActorLocation());
-			if (D < SkitterAudibleCm)
-			{
-				const float Near = 1.0f - D / SkitterAudibleCm;
-				const FString File = FString::Printf(TEXT("pest_skitter_%d.wav"), FMath::RandRange(1, FMath::Max(1, SkitterVariants)));
-				UAmbientPlayer::PlayOneShot(this, GetWorld(), File, SkitterVolume * Near * Near, FMath::FRandRange(0.88f, 1.18f));
-			}
-		}
+		// SILENT, DELIBERATELY (2026-09-17, the user's call: "I don't want them to make a sound, the
+		// ambient would cover anything that subtle"). A pest dashes about once a second and this
+		// played a skitter on every dash; six of them inside the audible radius came to roughly eight
+		// a second, which is not vermin heard in the distance but a constant clicking that follows
+		// the player around the map. It was reported as clicking three times and cost a long hunt
+		// through leaked audio components before anyone thought to ask what in the game is SUPPOSED
+		// to make a small repetitive noise. Anything quiet enough to be right here would be under the
+		// ambient bed anyway, so there is nothing to gain by tuning it down instead of out.
+		// The pests are seen, not heard. RawAudio/pest_skitter_*.wav are left on disk, unused.
 		// A new heading each burst: mostly toward the goal, deflected a little. Choosing the
 		// deflection once per burst rather than every frame is what makes the path look
 		// decided rather than noisy -- it commits, then commits again somewhere else.

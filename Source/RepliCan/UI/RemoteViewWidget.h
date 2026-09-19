@@ -28,6 +28,9 @@ protected:
 
 private:
 	UPROPERTY() TObjectPtr<UImage> Feed;
+	// Holds the feed to the SHAPE OF ITS TARGET. Without it the image fills whatever the column
+	// gives it, and a square camera is stretched into a rectangle -- see PaneShape.h.
+	UPROPERTY() TObjectPtr<class USizeBox> FeedFit;
 	UPROPERTY() TObjectPtr<UTextBlock> CaptionText;
 	UPROPERTY() TObjectPtr<UTextBlock> LiveText;
 	float Clock = 0.0f;

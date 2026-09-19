@@ -1,8 +1,9 @@
-#include "AmbientPlayer.h"
+#include "World/AmbientPlayer.h"
+#include "Sound/SoundAttenuation.h"
 #include "Dom/JsonObject.h"
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonReader.h"
-#include "VoiceLines.h"
+#include "Narrative/VoiceLines.h"
 #include "Components/AudioComponent.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
@@ -32,9 +33,27 @@ void UAmbientPlayer::Start(UWorld* World, const FString& Profile)
 		{ const FVector Machines(500.0f, 300.0f, 110.0f); AddLoop(World, TEXT("respirator_loop.wav"), 0.34f, &Machines, 300.0f, 650.0f); }   // only near the bay's medical machines
 		AddLoop(World, TEXT("fan_loop.wav"), 0.14f);
 		AddPool({ TEXT("thud_01.wav"), TEXT("thud_02.wav"), TEXT("thud_03.wav") }, FVector2D(9.0f, 24.0f), FVector2D(0.27f, 0.45f), FVector2D(0.85f, 1.1f));
-		AddPool({ TEXT("emb_tick_01.wav"), TEXT("emb_tick_02.wav"), TEXT("emb_tick_03.wav") }, FVector2D(3.0f, 11.0f), FVector2D(0.05f, 0.12f), FVector2D(0.8f, 1.25f));
+		// NO TICK POOL. This is the clicking that was reported six times and hunted five times through
+		// the code, where there was nothing to find: nothing was broken, this bed was simply playing a
+		// tenth-of-a-second tick every three to eleven seconds, everywhere in the map, forever, with
+		// its pitch scattered over 0.8-1.25 -- which is what made it read as an insect rather than as
+		// machinery. Wall clocks are not what this room should sound like; the creaks and hisses below
+		// are the atmosphere, and they are rare enough to be atmosphere. The wavs are left on disk.
 		AddPool({ TEXT("emb_creak_01.wav"), TEXT("emb_creak_02.wav"), TEXT("emb_creak_03.wav") }, FVector2D(12.0f, 40.0f), FVector2D(0.03f, 0.07f), FVector2D(0.85f, 1.15f));
 		AddPool({ TEXT("emb_hiss_01.wav"), TEXT("emb_hiss_02.wav"), TEXT("emb_hiss_03.wav") }, FVector2D(10.0f, 30.0f), FVector2D(0.04f, 0.09f), FVector2D(0.9f, 1.1f));
+	}
+	else if (Profile == TEXT("deck"))
+	{
+		// THE SERVICE DECK (Tools/make_deck_sounds): the base's floor hum lower, a compressor that
+		// cycles up and down on its own, a cable hum, drips into a puddle, a far clank now and then,
+		// and the pressure hisses. The player controller switches to this bed below the lift's
+		// lowest stop and back to the facility's above it.
+		AddLoop(World, TEXT("base_floor_loop.wav"), 0.18f);
+		AddLoop(World, TEXT("deck_compressor_loop.wav"), 0.30f);
+		AddLoop(World, TEXT("cable_hum_loop.wav"), 0.10f);
+		AddPool({ TEXT("drip_01.wav"), TEXT("drip_02.wav"), TEXT("drip_03.wav"), TEXT("drip_04.wav"), TEXT("drip_05.wav"), TEXT("drip_06.wav") }, FVector2D(3.0f, 11.0f), FVector2D(0.14f, 0.32f), FVector2D(0.85f, 1.2f));
+		AddPool({ TEXT("deck_clank_01.wav"), TEXT("deck_clank_02.wav"), TEXT("deck_clank_03.wav") }, FVector2D(14.0f, 45.0f), FVector2D(0.10f, 0.22f), FVector2D(0.8f, 1.1f));
+		AddPool({ TEXT("emb_hiss_01.wav"), TEXT("emb_hiss_02.wav"), TEXT("emb_hiss_03.wav") }, FVector2D(12.0f, 32.0f), FVector2D(0.04f, 0.09f), FVector2D(0.9f, 1.1f));
 		AddSteamVents(World);
 		World->GetTimerManager().SetTimer(DriftTimer, this, &UAmbientPlayer::DriftLevels, 7.0f, true);
 	}
@@ -81,6 +100,36 @@ void UAmbientPlayer::AddSteamVents(UWorld* World)
 
 void UAmbientPlayer::AddLoop(UWorld* World, const FString& File, float Volume, const FVector* At, float Inner, float Falloff)
 {
+	// THE IMPORTED LOOP FIRST: no underflow callback, no seam, no click. See the note above
+	// AddLoop -- the seam is the mixer's problem once the sound is an asset, and the mixer does
+	// not drop a sample at it.
+	if (USoundBase* Sample = SampleFor(File))
+	{
+		USoundAttenuation* Att = nullptr;
+		if (At)
+		{
+			Att = NewObject<USoundAttenuation>(this);
+			Att->Attenuation.bAttenuate = true;
+			Att->Attenuation.bSpatialize = true;
+			Att->Attenuation.AttenuationShape = EAttenuationShape::Sphere;
+			Att->Attenuation.AttenuationShapeExtents = FVector(Inner, 0.0f, 0.0f);
+			Att->Attenuation.FalloffDistance = Falloff;
+		}
+		UAudioComponent* C = At
+			? UGameplayStatics::SpawnSoundAtLocation(World, Sample, *At, FRotator::ZeroRotator, Volume, 1.0f, 0.0f, Att, nullptr, false)
+			: UGameplayStatics::SpawnSound2D(World, Sample, Volume, 1.0f, 0.0f, nullptr, true, false);
+		if (C)
+		{
+			// Loops, Waves and Components are walked in step by the volume drift and the shot duck,
+			// so all three take an entry even though an imported sound needs no wave of its own.
+			TSharedPtr<FLoop> Imported = MakeShared<FLoop>();
+			Imported->BaseVolume = Volume;
+			Loops.Add(Imported);
+			Waves.Add(nullptr);
+			Components.Add(C);
+			return;
+		}
+	}
 	TSharedPtr<FLoop> Loop = MakeShared<FLoop>();
 	Loop->BaseVolume = Volume;
 	int32 Rate = 0, Channels = 0;
@@ -221,10 +270,83 @@ void UAmbientPlayer::Duck(UWorld* World, float Depth, float Seconds)
 	World->GetTimerManager().SetTimer(DuckTimer, FTimerDelegate::CreateWeakLambda(this, [this, Restore, Seconds]() { SetFade(Restore, FMath::Max(0.1f, Seconds * 0.8f)); }), 0.15f, false);
 }
 
+USoundBase* UAmbientPlayer::SampleFor(const FString& File)
+{
+	FString Stem = FPaths::GetBaseFilename(File);
+	if (Stem.IsEmpty()) { return nullptr; }
+	// Cached, but HITS ONLY. Caching a miss looked like the same optimisation and was a trap: the
+	// table is a static, so it outlives a Play session, and a sound that was missing the first time
+	// it was asked for stayed missing for the life of the editor process -- which meant importing
+	// the file did nothing until the editor was restarted, and the clicking it was meant to fix
+	// carried on with the fix sitting on disk. A miss now costs one quiet package lookup, which is
+	// what a sound that genuinely has no asset should cost.
+	static TMap<FString, TWeakObjectPtr<USoundBase>> Known;
+	if (TWeakObjectPtr<USoundBase>* Hit = Known.Find(Stem))
+	{
+		if (Hit->IsValid()) { return Hit->Get(); }
+		Known.Remove(Stem);       // it was collected, or it has been imported since: ask again
+	}
+	USoundBase* Found = LoadObject<USoundBase>(nullptr, *FString::Printf(TEXT("/Game/RepliCan/Audio/A_%s.A_%s"), *Stem, *Stem), nullptr, LOAD_NoWarn | LOAD_Quiet);
+	if (Found) { Known.Add(Stem, Found); }
+	return Found;
+}
+
+USoundAttenuation* UAmbientPlayer::DefaultFalloff()
+{
+	// Built once and kept alive by hand: it is not an asset anyone authored, it is the rule that a
+	// sound which happens SOMEWHERE should only be heard near there.
+	static USoundAttenuation* A = nullptr;
+	if (!A)
+	{
+		A = NewObject<USoundAttenuation>(GetTransientPackage(), TEXT("RepliCanPositionalFalloff"));
+		A->AddToRoot();
+		A->Attenuation.bAttenuate = true;
+		A->Attenuation.bSpatialize = true;
+		A->Attenuation.AttenuationShape = EAttenuationShape::Sphere;
+		A->Attenuation.DistanceAlgorithm = EAttenuationDistanceModel::NaturalSound;
+		A->Attenuation.AttenuationShapeExtents = FVector(FalloffStartCm, 0.0f, 0.0f);
+		A->Attenuation.FalloffDistance = FalloffEndCm - FalloffStartCm;
+	}
+	return A;
+}
+
+UAudioComponent* UAmbientPlayer::PlayFileAt(UObject* Outer, UWorld* World, const FString& File,
+	const FVector& At, float Volume, float Pitch, USoundAttenuation* Attenuation)
+{
+	if (!World || File.IsEmpty()) { return nullptr; }
+	// A caller that names no attenuation is not asking to be heard everywhere; it simply has no
+	// opinion. Give it the falloff rather than the whole level.
+	if (!Attenuation) { Attenuation = DefaultFalloff(); }
+	// The recording, if it has been imported: it ends by itself and the component goes with it.
+	if (USoundBase* Sample = SampleFor(File))
+	{
+		return UGameplayStatics::SpawnSoundAtLocation(World, Sample, At, FRotator::ZeroRotator, Volume, Pitch, 0.0f, Attenuation, nullptr, true);
+	}
+	float Seconds = 0.0f;
+	USoundWave* Wave = VoiceLines::LoadWav(Outer ? Outer : World, FPaths::Combine(RawAudioDir(), File), Seconds);
+	if (!Wave) { return nullptr; }
+	UAudioComponent* Comp = UGameplayStatics::SpawnSoundAtLocation(World, Wave, At, FRotator::ZeroRotator, Volume, Pitch, 0.0f, Attenuation, nullptr, false);
+	if (!Comp) { return nullptr; }
+	FTimerHandle Handle;
+	TWeakObjectPtr<UAudioComponent> WeakComp = Comp;
+	World->GetTimerManager().SetTimer(Handle, FTimerDelegate::CreateLambda([WeakComp]()
+	{
+		if (UAudioComponent* C = WeakComp.Get()) { C->Stop(); C->DestroyComponent(); }
+	}), Seconds / FMath::Max(0.1f, Pitch) + 0.15f, false);
+	return Comp;
+}
+
 float UAmbientPlayer::PlayOneShot(UObject* Outer, UWorld* World, const FString& File, float Volume, float Pitch, bool bIgnoreDuck)
 {
 	if (!bIgnoreDuck) { Volume *= (1.0f - CurrentDuck()); }
 	if (!World) { return 0.0f; }
+	// The recording, when there is one: it ends on its own, so it is spawned to auto-destroy and
+	// no timer is involved at all.
+	if (USoundBase* Sample = SampleFor(File))
+	{
+		UGameplayStatics::SpawnSound2D(World, Sample, Volume, Pitch, 0.0f, nullptr, false, true);
+		return Sample->GetDuration();
+	}
 	float Seconds = 0.0f;
 	USoundWave* Sound = VoiceLines::LoadWav(Outer ? Outer : World, FPaths::Combine(RawAudioDir(), File), Seconds);
 	if (!Sound) { return 0.0f; }

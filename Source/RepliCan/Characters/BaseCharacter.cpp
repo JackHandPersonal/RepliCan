@@ -1,14 +1,22 @@
-#include "BaseCharacter.h"
-#include "Vitality.h"
-#include "ShotReactions.h"
-#include "DeathThrash.h"
+#include "Characters/BaseCharacter.h"
+#include "Characters/Vitality.h"
+#include "Weapons/ShotReactions.h"
+#include "Characters/DeathThrash.h"
 #include "GameFramework/PlayerStart.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "ImpactEffects.h"
+#include "Engine/Engine.h"
+#include "Narrative/VoiceLines.h"
+#include "World/AmbientMotes.h"
+#include "Components/AudioComponent.h"
+#include "TimerManager.h"
+#include "Engine/OverlapResult.h"
+#include "HAL/FileManager.h"
+#include "Sound/SoundWave.h"
+#include "Weapons/ImpactEffects.h"
 #include "Components/PointLightComponent.h"
-#include "AmbientPlayer.h"
-#include "RepliCanUserSettings.h"
+#include "World/AmbientPlayer.h"
+#include "Core/RepliCanUserSettings.h"
 #include "Components/SpotLightComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -23,28 +31,28 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
-#include "CharacterAnimInstance.h"
-#include "FaceController.h"
+#include "Characters/CharacterAnimInstance.h"
+#include "Characters/FaceController.h"
 #include "Engine/World.h"
 #include "Animation/AnimSequence.h"
-#include "CharacterBuilderWidget.h"
+#include "UI/CharacterBuilderWidget.h"
 #include "Blueprint/UserWidget.h"
-#include "CharacterConfig.h"
+#include "Characters/CharacterConfig.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/StaticMesh.h"
 #include "Animation/Skeleton.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/LocalPlayer.h"
-#include "BasePlayerController.h"
-#include "WeaponCatalog.h"
+#include "Core/BasePlayerController.h"
+#include "Weapons/WeaponCatalog.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "EngineUtils.h"
 #include "Engine/StaticMeshActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
-#include "CharacterNameWidget.h"
+#include "UI/CharacterNameWidget.h"
 #include "InputMappingContext.h"
 #include "InputAction.h"
 
@@ -103,6 +111,7 @@ ABaseCharacter::ABaseCharacter()
 	CameraBoom->bUsePawnControlRotation = true;
 	CameraBoom->bDoCollisionTest = true;
 
+	AmbientMotes = CreateDefaultSubobject<UAmbientMotesComponent>(TEXT("AmbientMotes"));
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->SetFieldOfView(90.0f);
@@ -173,6 +182,13 @@ void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// A BODY A SHOT CAN HIT. The engine's CharacterMesh profile ignores the Visibility channel
+	// (and so does the capsule's Pawn profile), so every trace this game aims -- a round, the
+	// laser, the reticle -- passed straight through people and robots and hit the wall behind
+	// (found 2026-09-17: a rifle emptied into the work bot did nothing). The mesh blocks it now;
+	// every trace that starts inside a body already ignores its own actor.
+	if (GetMesh()) { GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block); }
+
 	// Applied here rather than the constructor since WeaponMesh is meant to
 	// be assigned per-instance (via Python or the CharacterBuilder panel,
 	// same as FaceController's NoseMesh) after construction.
@@ -235,6 +251,8 @@ void ABaseCharacter::BeginPlay()
 	// The name tag's widget only exists once the component has initialised;
 	// give it the name now (ApplyCharacterConfig above may have run before).
 	UpdateNameLabel();
+	// The once-a-second stuck check, each character on its own beat.
+	GetWorldTimerManager().SetTimer(StuckTimer, this, &ABaseCharacter::CheckStuck, 1.0f, true, FMath::FRandRange(0.5f, 1.5f));
 
 	// Clamped here (not just at the constructor default) since
 	// ZoomArmLengths/DefaultZoomLevelIndex are editable per-instance and
@@ -395,7 +413,21 @@ void ABaseCharacter::MoveRight(const FInputActionValue& Value)
 // The look scale of the moment: slower down the sights (AimSensitivityScale), full otherwise.
 float ABaseCharacter::LookScale() const
 {
-	return MouseLookSensitivity * (CurrentCarry == EWeaponCarry::ADS ? AimSensitivityScale : 1.0f);
+	// ON THE BLEND, NOT ON THE STATE. Reading CurrentCarry made the whole slowdown arrive in one
+	// frame, at the instant the carry flipped -- the mouse changed gain under the hand while the
+	// weapon was still travelling, which is felt as a snag rather than as fine aim. It rides the
+	// same eased blend as the weapon and the lens now, so the three arrive together.
+	const float Up = FMath::Clamp(AdsAlpha(), 0.0f, 1.0f);
+	float Scale = MouseLookSensitivity * FMath::Lerp(1.0f, AimSensitivityScale, Up);
+	if (WeaponOpticZoom > 1.01f)
+	{
+		// A scope multiplies how far the world moves for a given movement of the mouse, so at 9x an
+		// unchanged sensitivity makes the sight unusable. See AimSensitivityZoomExponent for why
+		// this is not simply 1/zoom.
+		const float Zoomed = FMath::Pow(FMath::Max(1.0f, WeaponOpticZoom), FMath::Clamp(AimSensitivityZoomExponent, 0.0f, 1.0f));
+		Scale /= FMath::Lerp(1.0f, Zoomed, Up);
+	}
+	return Scale;
 }
 
 void ABaseCharacter::LookYaw(const FInputActionValue& Value)
@@ -422,6 +454,11 @@ void ABaseCharacter::StepZoomLevel()
 
 void ABaseCharacter::CycleZoom(const FInputActionValue& Value)
 {
+	// DOWN A VARIABLE SCOPE, THIS KEY IS THE MAGNIFICATION RING. Moving the camera out to third
+	// person while your eye is behind a 3-9x scope is never what the key was meant for, and needing
+	// a second binding for the ring would be one more thing to learn. Up at the sights it turns the
+	// ring; anywhere else it does what it always did.
+	if (bSightAlignActive && AdsAlpha() > 0.5f && StepOpticZoom(1)) { return; }
 	if (ZoomArmLengths.Num() == 0) { return; }
 
 	// Always steps toward third person then wraps back to index 0 (closest/
@@ -1405,8 +1442,43 @@ void ABaseCharacter::RefreshWeaponStancePose()
 	bPosedForADS = bADSPose;
 }
 
+void ABaseCharacter::TickOpticDot(float DeltaSeconds)
+{
+	// THE TUBE STOPS BEING DRAWN TO ITS OWN SHOOTER. This is the whole trick behind a scope overlay
+	// and the thing we were missing: the eye sits behind thirty centimetres of solid tube, so
+	// looking "through" the sight shows a pipe. Once the mask is over the view there is nothing for
+	// the tube to do but block it, so it is hidden from the owner -- and only the owner, so anyone
+	// else still sees the scope on the rifle.
+	{
+		// A STATE, NOT AN EDGE. This used to fire only when a character-level flag changed, so any
+		// path that replaced the mesh, re-equipped the weapon or rebuilt a component left the flag
+		// saying "hidden" while the component was not, or the reverse -- and the weapon stayed
+		// invisible to its owner with the sights down. Probed live: both the rifle body and its
+		// optic were owner-hidden at a 90 degree field of view, which is to say while not aiming at
+		// all. Asking each component what it is doing and correcting it cannot get out of step.
+		const bool bMaskUp = bWeaponOpticOverlay && AdsAlpha() > 0.55f;
+		bOpticHiddenForOverlay = bMaskUp;
+		if (OpticMeshComponent && OpticMeshComponent->bOwnerNoSee != bMaskUp) { OpticMeshComponent->SetOwnerNoSee(bMaskUp); }
+		// The weapon goes too: the mask covers everything outside the opening, and anything of
+		// the gun that reaches INTO the opening is just clutter in the sight picture.
+		if (WeaponMeshComponent && WeaponMeshComponent->bOwnerNoSee != bMaskUp) { WeaponMeshComponent->SetOwnerNoSee(bMaskUp); }
+	}
+	if (OpticDotMIDs.Num() == 0) { return; }
+	// Lit only while the weapon is at the eye: the sights are up (SightAlignAlpha) AND the carry is
+	// the one that puts the eye behind the glass. Anything else and the glass is just glass.
+	const bool bAtTheEye = GetDesiredCarry() == EWeaponCarry::ADS && PosedCarry() == EWeaponCarry::ADS;
+	const float Want = (bAtTheEye ? 1.0f : 0.0f) * FMath::Clamp(SightAlignAlpha, 0.0f, 1.0f);
+	if (FMath::IsNearlyEqual(OpticDotVisible, Want, 0.002f)) { return; }
+	OpticDotVisible = FMath::FInterpTo(OpticDotVisible, Want, DeltaSeconds, 12.0f);
+	for (const TObjectPtr<UMaterialInstanceDynamic>& M : OpticDotMIDs)
+	{
+		if (M) { M->SetScalarParameterValue(TEXT("DotVisible"), OpticDotVisible); }
+	}
+}
+
 void ABaseCharacter::TickWeaponStance(float DeltaSeconds)
 {
+	TickOpticDot(DeltaSeconds);
 	// Bloom always closes, whether or not anything is held -- putting a weapon
 	// away should not leave the next one inheriting the last one spray.
 	SpreadBloomDegrees = FMath::Max(0.0f, SpreadBloomDegrees - SpreadRecoverDegreesPerSecond * DeltaSeconds);
@@ -1486,6 +1558,12 @@ FRotator ABaseCharacter::AimRotationSteady() const
 	if (bInFirstPerson && bPredictedEyeValid) { return PredictedEyeRot; }   // this frame's, not the cache's
 	const APlayerController* PC = Cast<APlayerController>(GetController());
 	if (PC && PC->PlayerCameraManager) { return PC->PlayerCameraManager->GetCameraRotation(); }
+	// ANYTHING ELSE WITH A CONTROLLER STILL AIMS. An NPC, or the hand page's stand-in, aims by its
+	// control rotation; dropping straight through to the ACTOR's rotation threw the pitch away, so
+	// AimPitchDegrees was zero for every one of them -- the torso never leaned into the aim and the
+	// head never followed it. Measured 2026-09-17: the stand-in's head tilt read 24.9, 26.0 and
+	// 26.1 degrees at aim pitches of 0, +28 and -42, which is to say it never moved at all.
+	if (GetController()) { return GetViewRotation(); }
 	return GetActorRotation();
 }
 
@@ -1510,6 +1588,17 @@ bool ABaseCharacter::ShouldFaceAim() const
 	return bInFirstPerson || !WeaponStance.IsEmpty();
 }
 
+void ABaseCharacter::SetWeaponDrawScale(float S)
+{
+	const FVector Want = CurrentConfig.WeaponScale * FMath::Max(0.05f, S);
+	if (WeaponRelativeScale.Equals(Want)) { return; }
+	WeaponRelativeScale = Want;
+	if (WeaponMeshComponent && WeaponMeshComponent->GetAttachParent() == GetMesh())
+	{
+		WeaponMeshComponent->SetRelativeTransform(WeaponOnSocket());   // grip offset and size together
+	}
+}
+
 void ABaseCharacter::SetWeaponGrip(const FVector& GripLocal)
 {
 	WeaponGripLocal = GripLocal;
@@ -1529,6 +1618,27 @@ void ABaseCharacter::SetTriggerHandRotation(const FRotator& R)
 		WeaponMeshComponent->SetRelativeTransform(OnSocket);
 	}
 }
+
+void ABaseCharacter::SetWeaponHandRotation(const FRotator& R)
+{
+	WeaponHandRotation = R;
+	if (WeaponMeshComponent && WeaponMeshComponent->GetAttachParent() && GetMesh() && GetMesh()->DoesSocketExist(WeaponGripSocket))
+	{
+		FTransform OnSocket = WeaponOnSocket(); OnSocket.SetScale3D(WeaponRelativeScale);
+		WeaponMeshComponent->SetRelativeTransform(OnSocket);
+	}
+}
+
+bool ABaseCharacter::SocketOnBoneFor(FName Socket, FTransform& Out) const
+{
+	const USkeletalMesh* Asset = GetMesh() ? GetMesh()->GetSkeletalMeshAsset() : nullptr;
+	const USkeletalMeshSocket* Sock = Asset ? Asset->FindSocket(Socket) : nullptr;
+	if (!Sock) { return false; }
+	Out = FTransform(Sock->RelativeRotation, Sock->RelativeLocation, Sock->RelativeScale);
+	return true;
+}
+
+bool ABaseCharacter::GripSocketOnBone(FTransform& Out) const { return SocketOnBoneFor(WeaponGripSocket, Out); }
 
 void ABaseCharacter::SetWeaponSight(const FVector& SightLocal, bool bHasSight, float SightPitch)
 {
@@ -1550,8 +1660,27 @@ float ABaseCharacter::RaiseToShoulder()
 	return RaiseFromLowReadySeconds;
 }
 
+void ABaseCharacter::SetTicksWhenPaused(bool bOn)
+{
+	SetTickableWhenPaused(bOn);
+	PostCameraTickFunction.bTickEvenWhenPaused = bOn;   // the weapon's placement after the camera
+	// Every component: the leader rig and its part followers (the pose), the weapon and its optic,
+	// the face attachments. A follower that does not tick keeps yesterday's bones.
+	TArray<UActorComponent*> Comps;
+	GetComponents(Comps);
+	for (UActorComponent* C : Comps)
+	{
+		// NOT the movement component. It is the one component whose tick MOVES the actor: unpause
+		// it and the stand-in starts falling the moment the page opens, which is exactly what it
+		// did. Everything the hold needs is pose, not motion.
+		if (!C || C->IsA<UMovementComponent>()) { continue; }
+		C->SetTickableWhenPaused(bOn);
+	}
+}
+
 EWeaponCarry ABaseCharacter::GetDesiredCarry() const
 {
+	if (CarryOverride >= 0 && CarryOverride <= 3) { return static_cast<EWeaponCarry>(CarryOverride); }   // the hand-tuning page holds a posture
 	if (bAiming) { return EWeaponCarry::ADS; }
 	// A commanded raise beats everything short of the sights: he was told to shoot. A hip-fire
 	// weapon raises to the hip; that IS its firing posture.
@@ -1569,19 +1698,30 @@ FVector ABaseCharacter::CarryOffset(EWeaponCarry Carry) const
 	// A stance with its own hold (a pistol indexes off the trigger hand, arms out, not a stock in
 	// the shoulder) overrides the rifle-tuned defaults below; the sights are the sights either way.
 	// ADS included: a pistol's rear sight sits at arm's length, a rifle's at the cheek, and only the stance knows which.
+	FVector V;
+	bool bFromStance = false;
 	if (!WeaponStance.IsEmpty())
 	{
 		const TCHAR* Which = Carry == EWeaponCarry::ADS ? TEXT("ads") : Carry == EWeaponCarry::HipFire ? TEXT("hip") : Carry == EWeaponCarry::LowReady ? (bInFirstPerson ? TEXT("low_ready_first_person") : TEXT("low_ready")) : TEXT("shouldered");
-		FVector V;
-		if (WeaponCatalog::StanceCarry(WeaponStance, Which, V)) { return V; }
+		bFromStance = WeaponCatalog::StanceCarry(WeaponStance, Which, V);
 	}
-	switch (Carry)
+	if (!bFromStance)
 	{
-	case EWeaponCarry::ADS:      return CarryADS;
-	case EWeaponCarry::HipFire:  return CarryHipFire;
-	case EWeaponCarry::LowReady: return bInFirstPerson ? CarryLowReadyFirstPerson : CarryLowReady;
-	default:                     return CarryShouldered;
+		switch (Carry)
+		{
+		case EWeaponCarry::ADS:      V = CarryADS; break;
+		case EWeaponCarry::HipFire:  V = CarryHipFire; break;
+		case EWeaponCarry::LowReady: V = bInFirstPerson ? CarryLowReadyFirstPerson : CarryLowReady; break;
+		default:                     V = CarryShouldered; break;
+		}
 	}
+	// EACH CARRY IS HELD ITS OWN WAY. How far along the aim the weapon sits (pull) and how far off
+	// to the trigger side (lateral) are the weapon's own numbers, one pair per carry, tuned on the
+	// hand page. Doing it here rather than in the sight solve means they blend with the carry
+	// change instead of snapping. Hip fire keeps the character's own defaults.
+	const int32 CarrySlot = Carry == EWeaponCarry::LowReady ? 0 : Carry == EWeaponCarry::Shouldered ? 1 : Carry == EWeaponCarry::ADS ? 2 : -1;
+	if (CarrySlot >= 0) { V.Y = WeaponLateralCm[CarrySlot]; }   // the PULL is not here: it runs along the weapon, see SolveWeaponPose
+	return V;
 }
 
 float ABaseCharacter::CarryTransitionSeconds(EWeaponCarry From, EWeaponCarry To) const
@@ -1651,8 +1791,24 @@ void ABaseCharacter::TickHandIK(float DeltaSeconds)
 {
 	UCharacterAnimInstance* Anim = GetCharacterAnimInstance();
 	if (!Anim) { return; }
+	Anim->bHandIKTargetLFollowsR = false;
 
 	const bool bArmed = WeaponMesh && WeaponMeshComponent && !WeaponStance.IsEmpty();
+	// The weapon's finger curls ride along whenever it is in the hand; empty hands get the clip.
+	Anim->FingerCurlR = bArmed ? WeaponFingersR : TArray<float>();
+	Anim->FingerCurlL = bArmed ? WeaponFingersL : TArray<float>();
+	// The hunch and the lean are what a shooter does to get behind the sights, so they come in with
+	// the sights and go out with them: at low ready and shouldered the body stands as the clip has it.
+	const float AdsNow = bArmed ? CarryAdsAlpha() : 0.0f;
+	Anim->WeaponHunchDegrees = WeaponHunch * AdsNow;
+	Anim->WeaponLeanDegrees = WeaponLeanDeg * AdsNow;
+	// Each carry has its own elbows, blended across a change the same way the hold is.
+	const float ElbowT = (CarryBlendTotal > KINDA_SMALL_NUMBER) ? FMath::InterpEaseInOut(0.0f, 1.0f, FMath::Clamp(1.0f - CarryBlendLeft / CarryBlendTotal, 0.0f, 1.0f), 2.0f) : 1.0f;
+	// The carry's elbow, plus the aim's: where the arm sits for this hold, bent by where the weapon
+	// is pointed. The two are separate axes -- a shouldered rifle aimed at the ceiling is neither a
+	// shouldered rifle held level nor an aimed one -- so they add rather than replace each other.
+	Anim->ElbowTwistR = bArmed ? FMath::Lerp(CarryElbow(CarryFrom, false), CarryElbow(CurrentCarry, false), ElbowT) + ElbowAim(false) : 0.0f;
+	Anim->ElbowTwistL = bArmed ? FMath::Lerp(CarryElbow(CarryFrom, true), CarryElbow(CurrentCarry, true), ElbowT) + ElbowAim(true) : 0.0f;
 	// The support hand only has somewhere to be on a two-handed weapon. A pistol's off hand is
 	// free, and dragging it onto the barrel would look far worse than leaving it alone.
 	const bool bWantSupport = (bArmed && bWeaponHasForeGrip && WeaponCatalog::StanceIsTwoHanded(WeaponStance)) || CarriedByHand.IsValid();   // or the off hand is holding something
@@ -1660,14 +1816,14 @@ void ABaseCharacter::TickHandIK(float DeltaSeconds)
 	// exactly when the geometric solve has taken the weapon off the socket. The rest of the
 	// time the socket already puts the hand and the weapon in the same place by construction,
 	// and running IK would be asking the arm to reach somewhere it already is.
-	const bool bWantTrigger = bArmed && bSightAlignActive;
+	const bool bWantTrigger = bArmed && bSightAlignActive && bSightSolvedValid;
 
 	SupportIKBlend.Set(bWantSupport ? FMath::Clamp(SupportHandIKWeight, 0.0f, 1.0f) : 0.0f, HandIKBlendSeconds);
 	TriggerIKBlend.Set(bWantTrigger ? FMath::Clamp(TriggerHandIKWeight, 0.0f, 1.0f) : 0.0f, HandIKBlendSeconds);
 	SupportIKBlend.Tick(DeltaSeconds);
 	TriggerIKBlend.Tick(DeltaSeconds);
 	SupportIKAlpha = SupportIKBlend.Value;
-	TriggerIKAlpha = TriggerIKBlend.Value;
+	TriggerIKAlpha = TriggerIKBlend.Value * SightAlignAlpha;   // the arm goes to the sights as the sights come up
 
 	// --- #8: the torso leans into the aim pitch. Handed to the proxy here because it already
 	// has the anim instance in hand; the lean itself is applied in ApplySpineLean.
@@ -1683,7 +1839,9 @@ void ABaseCharacter::TickHandIK(float DeltaSeconds)
 	Anim->ElbowDownBiasR = Anim->ElbowDownBiasL = WeaponCatalog::StanceElbowDown(WeaponStance);   // a pistol's elbows down and out
 	if (SupportIKAlpha <= KINDA_SMALL_NUMBER && TriggerIKAlpha <= KINDA_SMALL_NUMBER) { return; }
 
-	const FTransform WeaponWorld = WeaponMeshComponent->GetComponentTransform();
+	// The pose the sights asked for this frame -- not where last frame's hand left the component,
+	// which would be the arm chasing its own tail.
+	const FTransform WeaponWorld = bSightSolvedValid ? SightSolvedWeaponWorld : WeaponMeshComponent->GetComponentTransform();
 
 	// A socket's transform relative to its bone is the whole relationship between hand and
 	// weapon. Going through it in reverse -- weapon world, undo the socket -- gives the place
@@ -1723,11 +1881,24 @@ void ABaseCharacter::TickHandIK(float DeltaSeconds)
 		// The global wrap angle, pitched by this weapon's own handguard slope. Component-wise on
 		// the rotator is right here: UE applies roll, then pitch, then yaw, so the pitch is taken
 		// about the weapon's lateral axis after the palm has been rolled onto the guard.
-		const FRotator Wrap(SupportHandRotation.Pitch + WeaponForeGripPitch, SupportHandRotation.Yaw, SupportHandRotation.Roll);
+		const FRotator Wrap(SupportHandRotation.Pitch + WeaponForeGripPitch + WeaponForeHandRotation.Pitch, SupportHandRotation.Yaw + WeaponForeHandRotation.Yaw, SupportHandRotation.Roll + WeaponForeHandRotation.Roll);
 		const FTransform ForeGripWorld = FTransform(Wrap, WeaponForeGripLocal) * WeaponWorld;
 		FTransform Target;
 		if (HandFor(TEXT("WeaponGrip_L"), ForeGripWorld, Target)) { Anim->HandIKTargetL = Target; }
 		else { Anim->HandIKWeightL = 0.0f; }
+		// And the same target hung off the hand_r BONE, for the anim proxy to read after the right
+		// arm has been solved: the weapon is a child of that hand's socket, so the fore grip is
+		// SocketL^-1 * wrap * OnSocket * SocketR away from the bone, wherever the bone ends up.
+		FTransform SocketL, SocketR;
+		if (WeaponMeshComponent->GetAttachParent() == GetMesh() && SocketOnBoneFor(TEXT("WeaponGrip_L"), SocketL) && GripSocketOnBone(SocketR))
+		{
+			Anim->HandIKTargetLInHandR = SocketL.Inverse() * FTransform(Wrap, WeaponForeGripLocal) * WeaponOnSocket() * SocketR;
+			Anim->bHandIKTargetLFollowsR = true;
+			// This weapon's own turn of the support hand (fore_hand_rot), in weapon space, and where
+			// the weapon sits on the hand_r bone, so the proxy can turn the clip's hold by it.
+			Anim->HandIKForeDeltaWeapon = WeaponForeHandRotation;
+			Anim->WeaponInHandR = WeaponOnSocket() * SocketR;
+		}
 	}
 }
 
@@ -1778,6 +1949,102 @@ bool ABaseCharacter::TryUnstuck()
 	return false;
 }
 
+void ABaseCharacter::NoteHurt(float Dealt)
+{
+	// The player feels it: a kick to the view, the way recoil is felt, so a blow reads as a blow
+	// and not as a number in the corner. Scaled by what got through, capped so a hammer does not
+	// spin the camera.
+	if (IsPlayerControlled() && Dealt > 0.0f)
+	{
+		const float K = FMath::Clamp(Dealt / 12.0f, 0.4f, 2.0f);
+		AddControllerPitchInput(K * FMath::FRandRange(-1.0f, 1.0f));
+		AddControllerYawInput(K * FMath::FRandRange(-0.9f, 0.9f));
+	}
+	if (bDead || Dealt <= 0.0f || !IsPlayerControlled() || !GetWorld()) { return; }
+	const float Now = GetWorld()->GetTimeSeconds();
+	if (Now - LastHurtBarkAt < 0.7f) { return; }   // a burst of hits is one grunt, not a stutter
+	LastHurtBarkAt = Now;
+	PlayVoiceBark(TEXT("grunt"));
+}
+
+void ABaseCharacter::PlayVoiceBark(const FString& Kind)
+{
+	if (!GetWorld() || !GetMesh()) { return; }
+	const bool bFemale = CurrentConfig.Gender.Equals(TEXT("Female"), ESearchCase::IgnoreCase);
+	const FString Folder = FPaths::Combine(FPaths::ProjectDir(), TEXT("Conversations"), TEXT("Voice"), bFemale ? TEXT("PlayerGruntsFemale") : TEXT("PlayerGruntsMale"));
+	TArray<FString> Files;
+	IFileManager::Get().FindFiles(Files, *FPaths::Combine(Folder, Kind + TEXT("_*.wav")), true, false);
+	if (Files.Num() == 0) { return; }
+	int32 Pick = FMath::RandRange(0, Files.Num() - 1);
+	if (Files.Num() > 1 && Files[Pick] == LastBark) { Pick = (Pick + 1) % Files.Num(); }   // not the same one twice running
+	LastBark = Files[Pick];
+	// These are recordings now, not synthesised speech -- a grunt is a person or it is nothing, and
+	// no vocoder carries pain. The folders are cut from two CC0 packs by the voice grunt tool.
+	float Seconds = 0.0f;
+	USoundWave* S = VoiceLines::LoadWav(this, FPaths::Combine(Folder, Files[Pick]), Seconds);
+	if (!S) { return; }
+	UAudioComponent* Comp = UGameplayStatics::SpawnSoundAttached(S, GetMesh(), TEXT("head"), FVector::ZeroVector, EAttachLocation::SnapToTarget, true, 0.9f, 1.0f, 0.0f, nullptr, nullptr, false);
+	if (!Comp) { return; }
+	// A procedural wave never ends by itself. Left alone, every grunt the player ever made would
+	// still be hanging off their head, starved, ticking -- which is what the clicking was.
+	FTimerHandle Handle;
+	TWeakObjectPtr<UAudioComponent> WeakComp = Comp;
+	GetWorldTimerManager().SetTimer(Handle, FTimerDelegate::CreateLambda([WeakComp]()
+	{
+		if (UAudioComponent* C = WeakComp.Get()) { C->Stop(); C->DestroyComponent(); }
+	}), Seconds + 0.15f, false);
+}
+
+void ABaseCharacter::CheckStuck()
+{
+	if (bDead || IsSitting() || !GetWorld() || !GetCapsuleComponent() || !GetCharacterMovement() || GetCharacterMovement()->MovementMode == MOVE_None) { return; }
+	UnstickNow();
+}
+
+void ABaseCharacter::UnstickNow()
+{
+	UWorld* World = GetWorld(); UCapsuleComponent* Cap = GetCapsuleComponent();
+	if (!World || !Cap) { return; }
+	// Inside geometry: the capsule, a little smaller than itself, overlaps something static or
+	// dynamic that blocks (not a person, not a ragdoll). The nearest free floor takes it: rings
+	// outward, eight bearings each, every candidate dropped onto the floor under it.
+	const float R = Cap->GetScaledCapsuleRadius(), H = Cap->GetScaledCapsuleHalfHeight();
+	FCollisionQueryParams Q(SCENE_QUERY_STAT(Unstick), false, this);
+	TArray<AActor*> Attached; GetAttachedActors(Attached, true, true); Q.AddIgnoredActors(Attached);
+	// What blocks a pawn, less other pawns and anything simulating (a ragdoll under the feet is not a wall).
+	auto Free = [&](const FVector& At)
+	{
+		TArray<FOverlapResult> Hits;
+		World->OverlapMultiByChannel(Hits, At, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeCapsule(R * 0.85f, H * 0.85f), Q);
+		for (const FOverlapResult& O : Hits)
+		{
+			if (!O.bBlockingHit || Cast<APawn>(O.GetActor())) { continue; }
+			const UPrimitiveComponent* C = O.GetComponent();
+			if (C && (C->GetCollisionObjectType() == ECC_PhysicsBody || C->IsSimulatingPhysics())) { continue; }
+			return false;
+		}
+		return true;
+	};
+	const FVector Here = GetActorLocation();
+	if (Free(Here)) { return; }
+	for (float Ring = 45.0f; Ring <= 400.0f; Ring += 45.0f)
+	{
+		for (int32 k = 0; k < 8; ++k)
+		{
+			const float A = FMath::DegreesToRadians(k * 45.0f + Ring * 0.37f);   // the bearings staggered ring to ring
+			FVector P = Here + FVector(FMath::Cos(A) * Ring, FMath::Sin(A) * Ring, 60.0f);
+			FHitResult Floor;
+			if (!World->LineTraceSingleByChannel(Floor, P, P - FVector(0.0f, 0.0f, 400.0f), ECC_Visibility, Q)) { continue; }
+			P.Z = Floor.ImpactPoint.Z + H + 2.0f;
+			if (!Free(P)) { continue; }
+			SetActorLocation(P, false, nullptr, ETeleportType::TeleportPhysics);
+			UE_LOG(LogTemp, Warning, TEXT("%s: stuck in geometry at %s; moved %.0f cm to %s"), *GetName(), *Here.ToString(), Ring, *P.ToString());
+			return;
+		}
+	}
+	UE_LOG(LogTemp, Warning, TEXT("%s: stuck in geometry at %s and no free floor within 4 m"), *GetName(), *Here.ToString());
+}
+
 void ABaseCharacter::NoteInjury(const FString& Region, bool bDestroyed)
 {
 	if (Region == TEXT("LegL") || Region == TEXT("LegR"))
@@ -1793,6 +2060,7 @@ void ABaseCharacter::Die(const FVector& ShotDir)
 {
 	if (bDead) { return; }
 	bDead = true;
+	if (IsPlayerControlled()) { PlayVoiceBark(TEXT("death")); }
 	Tags.AddUnique(TEXT("dead"));
 	if (UCharacterMovementComponent* Move = GetCharacterMovement()) { Move->StopMovementImmediately(); Move->DisableMovement(); }
 	if (UCapsuleComponent* Cap = GetCapsuleComponent()) { Cap->SetCollisionEnabled(ECollisionEnabled::NoCollision); }
@@ -1813,6 +2081,7 @@ void ABaseCharacter::Revive()
 		M->SetSimulatePhysics(false);
 		M->SetAllBodiesSimulatePhysics(false);
 		M->SetCollisionProfileName(TEXT("CharacterMesh"));
+		M->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);   // the profile ignores Visibility; a shot has to land (see BeginPlay)
 		M->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		if (bDead) { M->SetRelativeTransform(DeadMeshRelative); }
 	}
@@ -1909,7 +2178,21 @@ void ABaseCharacter::TickWeaponSway(float DeltaSeconds)
 
 void ABaseCharacter::TickSightAlignment(float DeltaSeconds)
 {
-	if (!WeaponMeshComponent || !WeaponMesh) { SightAlignAlpha = 0.0f; return; }
+	if (!WeaponMeshComponent || !WeaponMesh) { SightAlignAlpha = 0.0f; bSightSolvedValid = false; return; }
+	// The arm's length, off its own bones, for the solve's reach rule.
+	if (const UCharacterAnimInstance* Anim = GetCharacterAnimInstance())
+	{
+		if (GetMesh() && GetMesh()->DoesSocketExist(Anim->IKUpperArmR) && GetMesh()->DoesSocketExist(Anim->IKLowerArmR) && GetMesh()->DoesSocketExist(Anim->IKHandR))
+		{
+			const FVector U = GetMesh()->GetSocketLocation(Anim->IKUpperArmR), L = GetMesh()->GetSocketLocation(Anim->IKLowerArmR), Hn = GetMesh()->GetSocketLocation(Anim->IKHandR);
+			ArmReachR = FVector::Dist(U, L) + FVector::Dist(L, Hn);
+		}
+		if (GetMesh() && GetMesh()->DoesSocketExist(Anim->IKUpperArmL) && GetMesh()->DoesSocketExist(Anim->IKLowerArmL) && GetMesh()->DoesSocketExist(Anim->IKHandL))
+		{
+			const FVector U = GetMesh()->GetSocketLocation(Anim->IKUpperArmL), L = GetMesh()->GetSocketLocation(Anim->IKLowerArmL), Hn = GetMesh()->GetSocketLocation(Anim->IKHandL);
+			ArmReachL = FVector::Dist(U, L) + FVector::Dist(L, Hn);
+		}
+	}
 
 	// Every view. In first person the eye is the camera; in third person it is the CHARACTER'S
 	// eye -- the head bone plus the same forward/above offsets the first-person camera uses --
@@ -1934,7 +2217,9 @@ void ABaseCharacter::TickSightAlignment(float DeltaSeconds)
 		if (bSightAlignActive)
 		{
 			bSightAlignActive = false;
+			bSightSolvedValid = false;
 			SightAlignAlpha = 0.0f;
+			bViewDampValid = false;   // the damping drove the component by world transform; ApplyWeapon puts it back on the socket
 			ApplyWeapon();
 		}
 		return;
@@ -1976,68 +2261,238 @@ FTransform ABaseCharacter::SolveWeaponPose(const FVector& EyeLoc, const FRotator
 		HandlingRoll = -ReloadRollDegrees * Arc;
 		HandlingPitch = ReloadPitchDegrees * Arc + FMath::Sin(U * PI * 4.0f) * 2.0f * Arc;
 	}
-	const FVector SightWorld = EyeLoc + EyeRot.RotateVector(Offset);
-
-	// The point of aim. Everything but low ready keeps the barrel CONVERGING on it, which is
-	// what makes "held off to one side" still mean "pointed at the target": the weapon is
-	// displaced from the eye, not swivelled away from what you are looking at.
-	// Low ready points at the deck a few metres ahead; everything else points at the target.
-	// Same line of code either way -- only the point differs.
-	auto ConvergePoint = [&](EWeaponCarry Carry)
-	{
-		return (Carry == EWeaponCarry::LowReady)
-			? EyeLoc + EyeRot.Vector() * LowReadyConvergeCm - FVector(0.0f, 0.0f, bInFirstPerson ? LowReadyDropCmFirstPerson : LowReadyDropCm)
-			: EyeLoc + EyeRot.Vector() * AimConvergeCm;
-	};
-	const FVector AimPoint = FMath::Lerp(ConvergePoint(CarryFrom), ConvergePoint(CurrentCarry), T);
-	FRotator DesiredRotator = (AimPoint - SightWorld).Rotation();
-	// A weapon whose sights sit off the bore line is pitched so that looking along the sight
-	// line is looking along the shot. Zero on anything with no usable sights.
-	DesiredRotator.Pitch += WeaponSightPitch + HandlingPitch;
-	DesiredRotator.Roll += SwayRoll + HandlingRoll;
-	const FQuat DesiredRot = DesiredRotator.Quaternion();
-
+	// THE POSE for a carry whose FORWARD component is scaled by S: where the sight sits, which way
+	// the weapon points, where its origin therefore goes. Written once so the reach rule below can
+	// run it again with a shorter carry.
 	// A weapon with no derived rear sight aims down the bore instead, which is close enough to
 	// look deliberate and never looks broken.
 	const FVector SightLocal = bWeaponHasSight ? WeaponSightLocal : FVector::ZeroVector;
-	// Put the weapon's origin where it has to be for its sight point to land where it belongs.
-	const FVector DesiredLoc = SightWorld - DesiredRot.RotateVector(SightLocal);
-	const FVector Scale = WeaponMeshComponent ? WeaponMeshComponent->GetComponentScale() : FVector::OneVector;
-	return FTransform(DesiredRot, DesiredLoc, Scale);
+	// WHAT THE WEAPON TURNS ABOUT. At the sights it is the sight itself: the optic has to sit on
+	// the eye line whatever the pitch, so nothing here changes for ADS. ANYWHERE ELSE the stock is
+	// in the shoulder pocket and it is the MUZZLE that swings, so the weapon turns about its
+	// shoulder point instead -- and that point is placed in a YAW-ONLY frame, because pointing the
+	// muzzle down does not lift the butt off your shoulder. Anchoring everything at the sight and
+	// rotating the offset by the full aim is what drove the stock up into the face at a low aim.
+	const float Ads = CarryAdsAlpha();
+	const FRotator YawOnly(0.0f, EyeRot.Yaw, 0.0f);
+	const FVector AnchorLocal = FMath::Lerp(WeaponShoulderLocal, SightLocal, Ads);
+	// The anchor is pinned where the weapon ALREADY sits with the aim level, so a carry tuned at
+	// AIM MIDDLE does not move at all; all that changes is what the pitch turns the weapon about.
+	const FQuat QLevel = FRotator(WeaponSightPitch + HandlingPitch, EyeRot.Yaw, SwayRoll + HandlingRoll).Quaternion();
+	const float PullNow = FMath::Lerp(CarryPullCm(CarryFrom), CarryPullCm(CurrentCarry), FMath::InterpEaseInOut(0.0f, 1.0f, T, 2.0f));
+	auto PoseFor = [&](float S, FVector& OutSightWorld) -> FTransform
+	{
+		const FVector Off(Offset.X * S, Offset.Y, Offset.Z);
+		OutSightWorld = EyeLoc + FMath::Lerp(YawOnly.RotateVector(Off), EyeRot.RotateVector(Off), Ads);
+		const FVector AnchorWorld = OutSightWorld + QLevel.RotateVector(AnchorLocal - SightLocal);
+		// The point of aim. Everything but low ready keeps the barrel CONVERGING on it, which is
+		// what makes "held off to one side" still mean "pointed at the target": the weapon is
+		// displaced from the eye, not swivelled away from what you are looking at. Low ready
+		// points at the deck a few metres ahead; everything else points at the target.
+		auto ConvergePoint = [&](EWeaponCarry Carry)
+		{
+			return (Carry == EWeaponCarry::LowReady)
+				? EyeLoc + EyeRot.Vector() * LowReadyConvergeCm - FVector(0.0f, 0.0f, bInFirstPerson ? LowReadyDropCmFirstPerson : LowReadyDropCm)
+				: EyeLoc + EyeRot.Vector() * AimConvergeCm;
+		};
+		const FVector AimPoint = FMath::Lerp(ConvergePoint(CarryFrom), ConvergePoint(CurrentCarry), T);
+		FRotator R = (AimPoint - OutSightWorld).Rotation();
+		// A weapon whose sights sit off the bore line is pitched so that looking along the sight
+		// line is looking along the shot. Zero on anything with no usable sights.
+		R.Pitch += WeaponSightPitch + HandlingPitch;
+		R.Roll += SwayRoll + HandlingRoll;
+		// LOW READY POINTS AWAY. Nothing has to line up with the eye down here, so the weapon turns
+		// off the aim by its own two angles -- muzzle down and across the body -- fading in with the
+		// carry so it is not a snap.
+		const float LowAlpha = CarryAlpha(EWeaponCarry::LowReady);
+		if (LowAlpha > KINDA_SMALL_NUMBER) { R.Pitch += WeaponLowReadyPitch * LowAlpha; R.Yaw += WeaponLowReadyYaw * LowAlpha; }
+		const FQuat Q = R.Quaternion();
+		// Put the weapon's origin where it has to be for its sight point to land where it belongs.
+		// LENGTH OF PULL RUNS ALONG THE WEAPON, not along the aim. It is the distance from the
+		// trigger to the butt, so it can only mean "further out along its own bore" -- adding it to
+		// the carry offset's forward component moved the weapon along the EYE's X instead, which
+		// at low ready, where the weapon is turned well off the aim, slid it sideways through the air.
+		const FVector Loc = AnchorWorld - Q.RotateVector(AnchorLocal) + Q.RotateVector(FVector(PullNow, 0.0f, 0.0f));
+		const FVector Scale = WeaponMeshComponent ? WeaponMeshComponent->GetComponentScale() : FVector::OneVector;
+		return FTransform(Q, Loc, Scale);
+	};
+	FVector SightWorld;
+	FTransform Pose = PoseFor(1.0f, SightWorld);
+
+	// REACH. The carry tables ask for a pistol's rear sight at arm's length from the EYE, and
+	// the shoulder sits below, behind and outboard of the eye, so the hand target can lie past
+	// the arm (measured: 63-66 cm against a 57.5 cm Mannequin arm). An arm that cannot reach
+	// leaves the weapon floating ahead of the fingers. So the carry's forward component is
+	// pulled in until the trigger hand's target lies within the arm's usable reach (the IK's own
+	// limit, less a hair, so the hand lands exactly). The sight stays on the eye line and the
+	// barrel still converges on the point of aim; only the distance gives.
+	// BOTH ARMS HAVE TO REACH, not just the trigger arm.
+	//
+	// This rule used to measure the right hand only. The support hand has it harder in every way --
+	// it reaches ACROSS the body, from the far shoulder, to a fore grip further along the weapon --
+	// so a pose the right arm can just about make is routinely a few centimetres beyond the left.
+	// The left arm then straightens, stops short, and the hand hangs in the air beside the gun with
+	// nothing wrong in any of the gates or weights, which is exactly the fault that kept coming
+	// back. Each arm now proposes how far the carry has to be pulled in for ITS hand to land, and
+	// the weapon goes to whichever asks for more.
+	ReachClampScale = 1.0f; HandReachRatio = 0.0f; SupportReachRatio = 0.0f;
+	const UCharacterAnimInstance* Anim = GetCharacterAnimInstance();
+	FTransform SocketOnBone, SupportSocketOnBone;
+	if (Anim && GetMesh())
+	{
+		const float MaxReach = FMath::Clamp(Anim->HandIKMaxReach, 0.5f, 1.0f) * 0.99f;
+		FVector Sight0; const FTransform Pose0 = PoseFor(0.0f, Sight0);
+		// The S at which this hand lands exactly on its limit. The hand moves linearly with S (the
+		// rotation barely changes: the aim point is far), so it is a quadratic; the far root, or the
+		// closest approach when even a carry pulled all the way in is out of reach.
+		auto ScaleFor = [&](const FVector& Shoulder, float ArmLen, const FVector& HandInWeapon, float& OutRatio) -> float
+		{
+			const float Limit = ArmLen * MaxReach;
+			auto HandAt = [&](const FTransform& P) { return P.TransformPosition(HandInWeapon); };
+			const FVector H1 = HandAt(Pose);
+			OutRatio = FVector::Dist(H1, Shoulder) / FMath::Max(1.0f, Limit);
+			if (OutRatio <= 1.0f) { return 1.0f; }
+			const FVector A = HandAt(Pose0) - Shoulder, B = H1 - HandAt(Pose0);
+			const float a = B.SizeSquared(), b = 2.0f * FVector::DotProduct(A, B), c = A.SizeSquared() - Limit * Limit;
+			if (a <= KINDA_SMALL_NUMBER) { return 1.0f; }
+			const float Disc = b * b - 4.0f * a * c;
+			const float S = Disc >= 0.0f ? (-b + FMath::Sqrt(Disc)) / (2.0f * a) : -b / (2.0f * a);
+			return FMath::Clamp(S, 0.25f, 1.0f);
+		};
+		float Scale = 1.0f;
+		if (ArmReachR > 1.0f && GetMesh()->DoesSocketExist(Anim->IKUpperArmR) && GripSocketOnBone(SocketOnBone))
+		{
+			const FVector HandInWeapon = (SocketOnBone.Inverse() * WeaponOnSocket().Inverse()).GetLocation();
+			Scale = FMath::Min(Scale, ScaleFor(GetMesh()->GetSocketLocation(Anim->IKUpperArmR), ArmReachR, HandInWeapon, HandReachRatio));
+		}
+		// The support hand, when there is one to place: where hand_l has to sit for its own grip
+		// socket to land on the fore grip, expressed in the weapon's frame like the trigger hand's.
+		if (ArmReachL > 1.0f && bWeaponHasForeGrip && WeaponCatalog::StanceIsTwoHanded(WeaponStance)
+			&& GetMesh()->DoesSocketExist(Anim->IKUpperArmL) && SocketOnBoneFor(TEXT("WeaponGrip_L"), SupportSocketOnBone))
+		{
+			const FRotator Wrap(SupportHandRotation.Pitch + WeaponForeGripPitch + WeaponForeHandRotation.Pitch,
+				SupportHandRotation.Yaw + WeaponForeHandRotation.Yaw,
+				SupportHandRotation.Roll + WeaponForeHandRotation.Roll);
+			const FVector SupportHandInWeapon = (SupportSocketOnBone.Inverse() * FTransform(Wrap, WeaponForeGripLocal)).GetLocation();
+			Scale = FMath::Min(Scale, ScaleFor(GetMesh()->GetSocketLocation(Anim->IKUpperArmL), ArmReachL, SupportHandInWeapon, SupportReachRatio));
+		}
+		if (Scale < 1.0f)
+		{
+			ReachClampScale = Scale;
+			Pose = PoseFor(ReachClampScale, SightWorld);
+		}
+	}
+	return Pose;
 }
 
 void ABaseCharacter::PlaceWeapon(const FVector& EyeLoc, const FRotator& EyeRot)
 {
 	if (!WeaponMeshComponent || !WeaponMesh) { return; }
-	// OFF THE HAND while the sights own it. The solve writes the weapon's WORLD transform, but a
-	// child of the grip socket stores that as a transform RELATIVE to the hand -- and the hand
-	// then moves: the idle breathes, and the IK reaches for the weapon. So every frame the
-	// weapon was placed, dragged off by the hand's motion, and placed again: a jitter at frame
-	// rate, felt as the gun shaking against a perfectly smooth reticle. Detached, it goes where
-	// it is put and stays there, and the hands come to IT. ApplyWeapon() puts it back on the
-	// socket when the blend runs out.
-	if (WeaponMeshComponent->GetAttachParent() != nullptr)
+	// ON THE HAND, ALWAYS. The solve says where the sights want the weapon; the hand IK takes the
+	// arm there (TickHandIK reads SightSolvedWeaponWorld, its weight following the sight blend)
+	// and the weapon, a child of the grip socket, arrives with the hand. It used to be detached
+	// here and driven by world transform, with the IK chasing the component: that left the weapon
+	// floating ahead of the fingers whenever the arm could not reach, and swapped the weapon
+	// between "where the hand is" and "where the sights are" at every blend end -- two systems
+	// where a wrench had one. Now there is one, in every mode. See Docs/HandAnchoring.md.
+	SightSolvedWeaponWorld = SolveWeaponPose(EyeLoc, EyeRot);
+	bSightSolvedValid = true;
+	if (WeaponMeshComponent->GetAttachParent() == nullptr) { ApplyWeapon(); }   // back on the socket if anything ever took it off
+	// AND THE WEAPON HANGS OFF THE SOCKET BY WHAT THE SOLVE ASSUMED IT DOES. Everything above works
+	// backwards through WeaponOnSocket(): the hand is sent to WeaponOnSocket^-1 * the wanted pose, so
+	// that hanging the weapon back on by WeaponOnSocket() lands it exactly there. The two only cancel
+	// while they are the SAME offset -- and WeaponOnSocket() is recomputed every frame from the hand
+	// tuning and the carry state, while the weapon's actual relative transform was written once, by
+	// ApplyWeapon, back when the weapon was equipped. Change carry, or tune a hand, and the offset
+	// the solve reasons with is no longer the offset the weapon has.
+	//
+	// That drift is the whole of the fault that has made the guns sit wrong. Measured on a rifle at
+	// low ready: the arm put the grip socket within 0.07 cm and 0.00 degrees of where it was asked --
+	// the IK was never at fault -- while the weapon hung 1.09 cm and 8.24 degrees off the assumed
+	// offset, and the weapon missed its solved pose by exactly that 1.09 cm and 8.24 degrees. Out at
+	// the muzzle, half a metre down the barrel, eight degrees is most of a gun length of aim error,
+	// and the support hand -- aimed at the fore grip of where the weapon SHOULD be -- reaches into
+	// open air beside the weapon that is actually there.
+	//
+	// So it is re-asserted here, every frame, from the same expression the solve uses. The assumption
+	// and the reality cannot drift apart if they are written from one source each frame.
+	if (WeaponMeshComponent->GetAttachParent() == GetMesh())
 	{
-		WeaponMeshComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		FTransform OnSocket = WeaponOnSocket(); OnSocket.SetScale3D(WeaponRelativeScale);
+		WeaponMeshComponent->SetRelativeTransform(OnSocket);
 	}
-	const FTransform Desired = SolveWeaponPose(EyeLoc, EyeRot);
-	// BLEND FROM THE HAND, NOT FROM WHEREVER IT ENDED UP LAST FRAME. The two ends of this blend
-	// are both poses computed fresh this frame -- where the HAND holds the weapon, and where the
-	// SIGHTS want it -- so it is a crossfade, not a feedback loop, stable at every alpha and
-	// exact at alpha 1.
-	const FTransform Current = WeaponMeshComponent->GetComponentTransform();
-	const FTransform HandWorld = (GetMesh() && GetMesh()->DoesSocketExist(WeaponGripSocket))
-		? GetMesh()->GetSocketTransform(WeaponGripSocket, ERelativeTransformSpace::RTS_World)
-		: Current;
-	const FTransform Held = WeaponOnSocket() * HandWorld;   // where the hand's hold puts the weapon, correction included
-	const FTransform From(Held.GetRotation(), Held.GetLocation(), Current.GetScale3D());
-	FTransform Blended;
-	Blended.Blend(From, Desired, SightAlignAlpha);
-	WeaponMeshComponent->SetWorldTransform(Blended, false, nullptr, ETeleportType::TeleportPhysics);
 }
 
 // Where the camera will be at the end of this frame (first person), or where the character's
 // eye is (third person), from things that are final by this point of Tick.
+void ABaseCharacter::SetEyeTune(float SideCm, float UpCm, float ForwardCm) { CurrentConfig.EyeSideCm = SideCm; CurrentConfig.EyeUpCm = UpCm; CurrentConfig.EyeForwardCm = ForwardCm; }
+float ABaseCharacter::GetEyeSideCm() const { return CurrentConfig.EyeSideCm; }
+float ABaseCharacter::GetEyeUpCm() const { return CurrentConfig.EyeUpCm; }
+float ABaseCharacter::GetEyeForwardCm() const { return CurrentConfig.EyeForwardCm; }
+
+float ABaseCharacter::CarryAlpha(EWeaponCarry Which) const
+{
+	const float T = (CarryBlendTotal > KINDA_SMALL_NUMBER) ? FMath::Clamp(1.0f - CarryBlendLeft / CarryBlendTotal, 0.0f, 1.0f) : 1.0f;
+	const float From = (CarryFrom == Which) ? 1.0f : 0.0f;
+	const float To = (CurrentCarry == Which) ? 1.0f : 0.0f;
+	return FMath::Lerp(From, To, FMath::InterpEaseInOut(0.0f, 1.0f, T, 2.0f));
+}
+
+float ABaseCharacter::CarryAdsAlpha() const { return CarryAlpha(EWeaponCarry::ADS); }
+
+float ABaseCharacter::ElbowAim(bool bSupport) const
+{
+	// Three tuned points, [high, middle, low], against the aim's pitch. Linear from the middle out
+	// to whichever end the aim is on, and FMath::Lerp does not clamp, so beyond an end the same
+	// slope simply continues -- which is what "interpolate between and past" has to mean for an arm
+	// that can be pointed further up than the page ever previews.
+	const float* V = bSupport ? WeaponElbowSupportAim : WeaponElbowMainAim;
+	const float P = FRotator::NormalizeAxis(GetAimRotation().Pitch);
+	return (P >= 0.0f) ? FMath::Lerp(V[1], V[0], P / ElbowAimHighPitch)
+	                   : FMath::Lerp(V[1], V[2], P / ElbowAimLowPitch);
+}
+
+float ABaseCharacter::CarryElbow(EWeaponCarry Carry, bool bSupport) const
+{
+	const float* Arm = bSupport ? WeaponElbowSupport : WeaponElbowMain;
+	switch (Carry)
+	{
+	case EWeaponCarry::LowReady:   return Arm[0];
+	case EWeaponCarry::Shouldered: return Arm[1];
+	case EWeaponCarry::ADS:        return Arm[2];
+	default:                       return 0.0f;
+	}
+}
+
+float ABaseCharacter::CarryPullCm(EWeaponCarry Carry) const
+{
+	switch (Carry)
+	{
+	case EWeaponCarry::LowReady:   return WeaponPullCm[0];
+	case EWeaponCarry::Shouldered: return WeaponPullCm[1];
+	case EWeaponCarry::ADS:        return WeaponPullCm[2];
+	default:                       return 0.0f;
+	}
+}
+
+bool ABaseCharacter::EyeFromRig(const FRotator& Ctl, FVector& OutLoc) const
+{
+	if (!GetMesh()) { return false; }
+	const FRotator YawOnly(0.0f, Ctl.Yaw, 0.0f);
+	if (GetMesh()->DoesSocketExist(EyesBone))
+	{
+		// The bone is between the eyes; the offset picks one of them.
+		OutLoc = GetMesh()->GetSocketLocation(EyesBone) + YawOnly.RotateVector(FVector(CurrentConfig.EyeForwardCm, CurrentConfig.EyeSideCm, CurrentConfig.EyeUpCm));
+		return true;
+	}
+	if (GetMesh()->DoesSocketExist(FirstPersonHeadBone))
+	{
+		OutLoc = GetMesh()->GetSocketLocation(FirstPersonHeadBone) + YawOnly.RotateVector(FVector(FirstPersonEyeForwardOfHeadCm + CurrentConfig.EyeForwardCm, CurrentConfig.EyeSideCm, FirstPersonEyeAboveHeadCm + CurrentConfig.EyeUpCm));
+		return true;
+	}
+	return false;
+}
+
 void ABaseCharacter::PredictEye()
 {
 	bPredictedEyeValid = false;
@@ -2055,19 +2510,139 @@ void ABaseCharacter::PredictEye()
 		PredictedEyeRot = (ArmRot.Quaternion() * FollowCamera->GetRelativeRotation().Quaternion()).Rotator();
 		bPredictedEyeValid = true;
 	}
-	else if (GetMesh() && GetMesh()->DoesSocketExist(FirstPersonHeadBone))
+	else if (GetMesh() && (GetMesh()->DoesSocketExist(EyesBone) || GetMesh()->DoesSocketExist(FirstPersonHeadBone)))
 	{
 		// Third person: the CHARACTER'S eye -- the head bone plus the first-person offsets --
 		// aimed along the control rotation. Placing from the camera would swing the weapon out
 		// to the over-the-shoulder camera; placing from the head puts it at the sights or the
 		// shoulder of the body you are looking at, and the hands follow it by IK.
 		const FRotator Ctl = bFreelook ? FrozenAim : GetViewRotation();
-		const FRotator YawOnly(0.0f, Ctl.Yaw, 0.0f);
-		PredictedEyeLoc = GetMesh()->GetSocketLocation(FirstPersonHeadBone)
-		                + YawOnly.RotateVector(FVector(FirstPersonEyeForwardOfHeadCm, 0.0f, FirstPersonEyeAboveHeadCm));
+		// The offset recorded after the last animation, carried onto where the body is NOW. The
+		// actor's transform is already current at this point in the frame (movement has run); only
+		// the mesh is behind. Falls back to reading the bone directly on the first frame, before
+		// there is anything recorded.
+		if (bEyeLocalValid) { PredictedEyeLoc = GetActorTransform().TransformPosition(EyeLocalToActor); }
+		else if (!EyeFromRig(Ctl, PredictedEyeLoc)) { return; }
 		PredictedEyeRot = Ctl;
 		bPredictedEyeValid = true;
 	}
+}
+
+FString ABaseCharacter::DumpHold() const
+{
+	auto V = [](const FVector& P) { return FString::Printf(TEXT("[%.2f, %.2f, %.2f]"), P.X, P.Y, P.Z); };
+	auto R3 = [](const FRotator& Q) { return FString::Printf(TEXT("[%.2f, %.2f, %.2f]"), Q.Pitch, Q.Yaw, Q.Roll); };
+	auto Three = [](const float* A) { return FString::Printf(TEXT("[%.2f, %.2f, %.2f]"), A[0], A[1], A[2]); };
+	auto Carry = [](EWeaponCarry C) -> const TCHAR*
+	{
+		switch (C)
+		{
+		case EWeaponCarry::LowReady: return TEXT("low_ready");
+		case EWeaponCarry::Shouldered: return TEXT("shouldered");
+		case EWeaponCarry::ADS: return TEXT("ads");
+		default: return TEXT("hip");
+		}
+	};
+	const UCharacterAnimInstance* Anim = GetCharacterAnimInstance();
+	const USkeletalMeshComponent* M = GetMesh();
+	auto Socket = [&](const TCHAR* Name) { return (M && M->DoesSocketExist(Name)) ? V(M->GetSocketLocation(Name)) : FString(TEXT("null")); };
+	FVector EyeLoc = FVector::ZeroVector; FRotator EyeRot = FRotator::ZeroRotator;
+	const bool bEye = GetEye(false, EyeLoc, EyeRot);
+
+	TArray<FString> L;
+	L.Add(TEXT("{"));
+	L.Add(FString::Printf(TEXT("  \"weapon\": \"%s\","), *WeaponStance));
+	L.Add(FString::Printf(TEXT("  \"mesh\": \"%s\","), WeaponMesh ? *WeaponMesh->GetName() : TEXT("none")));
+	L.Add(FString::Printf(TEXT("  \"first_person\": %s, \"aiming\": %s, \"melee\": %s, \"hip_fire\": %s,"),
+		bInFirstPerson ? TEXT("true") : TEXT("false"), IsAiming() ? TEXT("true") : TEXT("false"),
+		bWeaponMelee ? TEXT("true") : TEXT("false"), bWeaponHipFire ? TEXT("true") : TEXT("false")));
+	L.Add(FString::Printf(TEXT("  \"carry\": \"%s\", \"carry_from\": \"%s\", \"carry_blend_left\": %.3f, \"posed\": \"%s\","),
+		Carry(CurrentCarry), Carry(CarryFrom), CarryBlendLeft, Carry(PosedCarry())));
+	// THE GATES. Any one of these off is a hand that silently stops being placed.
+	L.Add(FString::Printf(TEXT("  \"gates\": { \"has_fore_grip\": %s, \"has_sight\": %s, \"sight_align_active\": %s, \"sight_solved_valid\": %s, \"attached_to_mesh\": %s },"),
+		bWeaponHasForeGrip ? TEXT("true") : TEXT("false"), bWeaponHasSight ? TEXT("true") : TEXT("false"),
+		bSightAlignActive ? TEXT("true") : TEXT("false"), bSightSolvedValid ? TEXT("true") : TEXT("false"),
+		(WeaponMeshComponent && WeaponMeshComponent->GetAttachParent() == M) ? TEXT("true") : TEXT("false")));
+	L.Add(FString::Printf(TEXT("  \"alphas\": { \"sight\": %.3f, \"support_ik\": %.3f, \"trigger_ik\": %.3f, \"ads\": %.3f },"),
+		SightAlignAlpha, SupportIKAlpha, TriggerIKAlpha, CarryAdsAlpha()));
+	L.Add(FString::Printf(TEXT("  \"anim\": { \"weight_r\": %.3f, \"weight_l\": %.3f, \"l_follows_r\": %s, \"elbow_r\": %.2f, \"elbow_l\": %.2f, \"hunch\": %.2f, \"lean\": %.2f, \"aim_pitch\": %.2f },"),
+		Anim ? Anim->HandIKWeightR : -1.0f, Anim ? Anim->HandIKWeightL : -1.0f,
+		(Anim && Anim->bHandIKTargetLFollowsR) ? TEXT("true") : TEXT("false"),
+		Anim ? Anim->ElbowTwistR : 0.0f, Anim ? Anim->ElbowTwistL : 0.0f,
+		Anim ? Anim->WeaponHunchDegrees : 0.0f, Anim ? Anim->WeaponLeanDegrees : 0.0f,
+		Anim ? Anim->AimPitchDegrees : 0.0f));
+	L.Add(FString::Printf(TEXT("  \"reach\": { \"arm_cm\": %.2f, \"hand_over_reach\": %.3f, \"carry_pulled_in_to\": %.3f, \"hand_gap_cm\": %.2f, \"sight_off_eye_cm\": %.2f },"),
+		ArmReachR, HandReachRatio, ReachClampScale, HandGapCm, SightOffEyeCm));
+	// THE SUPPORT HAND'S OWN NUMBERS: how far its arm goes, how far it was asked to go, and the gap
+	// between the fore grip and where the hand's grip socket actually ended up. A big gap with a
+	// ratio over one is the arm falling short; a big gap with a ratio under one is a bad target.
+	{
+		const FVector ForeWorld = WeaponMeshComponent ? WeaponMeshComponent->GetComponentTransform().TransformPosition(WeaponForeGripLocal) : FVector::ZeroVector;
+		const FVector GripLWorld = (M && M->DoesSocketExist(TEXT("WeaponGrip_L"))) ? M->GetSocketLocation(TEXT("WeaponGrip_L")) : FVector::ZeroVector;
+		L.Add(FString::Printf(TEXT("  \"support_reach\": { \"arm_l_cm\": %.2f, \"asked_over_reach\": %.3f, \"fore_world\": %s, \"grip_l_world\": %s, \"gap_cm\": %.2f },"),
+			ArmReachL, SupportReachRatio, *V(ForeWorld), *V(GripLWorld), (float)FVector::Dist(ForeWorld, GripLWorld)));
+	}
+	L.Add(FString::Printf(TEXT("  \"eye\": { \"valid\": %s, \"loc\": %s, \"rot\": %s },"),
+		bEye ? TEXT("true") : TEXT("false"), *V(EyeLoc), *R3(EyeRot)));
+	L.Add(FString::Printf(TEXT("  \"solved_weapon\": { \"loc\": %s, \"rot\": %s },"),
+		*V(SightSolvedWeaponWorld.GetLocation()), *R3(SightSolvedWeaponWorld.Rotator())));
+	// HOW FAR FORWARD, AND WHAT PUT IT THERE. The complaint is always "a gun length too far down the
+	// aim", so the eye-to-weapon vector is split along the aim, across it and up it, and printed
+	// beside the three terms that can push it forward: the carry offset's own X, the length of pull,
+	// and the distance from the weapon's origin to whichever point the solve anchored it by. One
+	// reading in the state that looks wrong names the term.
+	{
+		const FVector Fwd = EyeRot.Vector();
+		const FVector Right = FRotationMatrix(EyeRot).GetUnitAxis(EAxis::Y);
+		const FVector Up = FRotationMatrix(EyeRot).GetUnitAxis(EAxis::Z);
+		const FVector ToWeapon = SightSolvedWeaponWorld.GetLocation() - EyeLoc;
+		const FVector Ads0 = CarryOffset(CurrentCarry);
+		const FVector AnchorLocal = FMath::Lerp(WeaponShoulderLocal, WeaponSightLocal, CarryAdsAlpha());
+		// THE ONE MEASUREMENT THAT SPLITS THE BLAME. The weapon ends up where it is by two separate
+		// steps, and "the weapon is not where the solve asked" does not say which of them failed.
+		// Step one: the arm puts the GRIP SOCKET somewhere. Step two: the weapon hangs off that
+		// socket by a fixed offset. So ask where the socket was supposed to be, where it actually
+		// is, and whether the offset the solver assumed is the offset the weapon really has.
+		//   socket gap big   -> the arm did not deliver; look at the IK.
+		//   socket gap small -> the arm was fine and the weapon hangs wrong; look at the attachment.
+		// Guessing between those two has cost more rounds than any other question in this file.
+		if (WeaponMeshComponent && GetMesh())
+		{
+			const FTransform WantSocket = WeaponOnSocket().Inverse() * SightSolvedWeaponWorld;
+			const FTransform HaveSocket = GetMesh()->GetSocketTransform(WeaponGripSocket);
+			const FTransform Assumed = WeaponOnSocket();
+			const FTransform Really = WeaponMeshComponent->GetRelativeTransform();
+			L.Add(FString::Printf(TEXT("  \"socket\": { \"name\": \"%s\", \"gap_cm\": %.2f, \"gap_deg\": %.2f },"),
+				*WeaponGripSocket.ToString(),
+				FVector::Dist(WantSocket.GetLocation(), HaveSocket.GetLocation()),
+				FMath::RadiansToDegrees(WantSocket.GetRotation().AngularDistance(HaveSocket.GetRotation()))));
+			L.Add(FString::Printf(TEXT("  \"attach\": { \"parent_is_mesh\": %s, \"socket\": \"%s\", \"assumed_loc\": %s, \"real_loc\": %s, \"off_cm\": %.2f, \"off_deg\": %.2f },"),
+				WeaponMeshComponent->GetAttachParent() == GetMesh() ? TEXT("true") : TEXT("false"),
+				*WeaponMeshComponent->GetAttachSocketName().ToString(),
+				*V(Assumed.GetLocation()), *V(Really.GetLocation()),
+				FVector::Dist(Assumed.GetLocation(), Really.GetLocation()),
+				FMath::RadiansToDegrees(Assumed.GetRotation().AngularDistance(Really.GetRotation()))));
+		}
+		L.Add(FString::Printf(TEXT("  \"forward\": { \"along_aim_cm\": %.2f, \"across_cm\": %.2f, \"up_cm\": %.2f,"),
+			(float)FVector::DotProduct(ToWeapon, Fwd), (float)FVector::DotProduct(ToWeapon, Right), (float)FVector::DotProduct(ToWeapon, Up)));
+		L.Add(FString::Printf(TEXT("    \"carry_offset\": %s, \"pull_cm\": %.2f, \"anchor_local\": %s, \"shoulder_local\": %s },"),
+			*V(Ads0), CarryPullCm(CurrentCarry), *V(AnchorLocal), *V(WeaponShoulderLocal)));
+	}
+	L.Add(FString::Printf(TEXT("  \"actual_weapon\": { \"loc\": %s, \"rot\": %s },"),
+		WeaponMeshComponent ? *V(WeaponMeshComponent->GetComponentLocation()) : TEXT("null"),
+		WeaponMeshComponent ? *R3(WeaponMeshComponent->GetComponentRotation()) : TEXT("null")));
+	L.Add(FString::Printf(TEXT("  \"bones\": { \"hand_r\": %s, \"hand_l\": %s, \"grip_r\": %s, \"grip_l\": %s, \"upperarm_r\": %s, \"head\": %s },"),
+		*Socket(TEXT("hand_r")), *Socket(TEXT("hand_l")), *Socket(TEXT("WeaponGrip_R")), *Socket(TEXT("WeaponGrip_L")),
+		*Socket(TEXT("upperarm_r")), *Socket(TEXT("head"))));
+	L.Add(FString::Printf(TEXT("  \"tuning\": { \"grip\": %s, \"hand_rot\": %s, \"fore\": %s, \"fore_rot\": %s, \"fore_pitch\": %.2f,"),
+		*V(WeaponGripLocal), *R3(TriggerHandRotation), *V(WeaponForeGripLocal), *R3(WeaponForeHandRotation), WeaponForeGripPitch));
+	L.Add(FString::Printf(TEXT("    \"elbow_main\": %s, \"elbow_support\": %s, \"elbow_main_aim\": %s, \"elbow_support_aim\": %s,"),
+		*Three(WeaponElbowMain), *Three(WeaponElbowSupport), *Three(WeaponElbowMainAim), *Three(WeaponElbowSupportAim)));
+	L.Add(FString::Printf(TEXT("    \"pull\": %s, \"lateral\": %s, \"low_ready\": [%.2f, %.2f], \"hunch\": %.2f, \"lean\": %.2f,"),
+		*Three(WeaponPullCm), *Three(WeaponLateralCm), WeaponLowReadyPitch, WeaponLowReadyYaw, WeaponHunch, WeaponLeanDeg));
+	L.Add(FString::Printf(TEXT("    \"sight_local\": %s, \"sight_pitch\": %.2f }"), *V(WeaponSightLocal), WeaponSightPitch));
+	L.Add(TEXT("}"));
+	return FString::Join(L, TEXT("\n"));
 }
 
 bool ABaseCharacter::GetEye(bool bFinal, FVector& OutLoc, FRotator& OutRot) const
@@ -2083,12 +2658,15 @@ bool ABaseCharacter::GetEye(bool bFinal, FVector& OutLoc, FRotator& OutRot) cons
 			OutLoc = View.Location; OutRot = View.Rotation;
 			return true;
 		}
-		if (!bInFirstPerson && GetMesh() && GetMesh()->DoesSocketExist(FirstPersonHeadBone))
+		if (!bInFirstPerson && GetMesh())
 		{
 			const FRotator Ctl = bFreelook ? FrozenAim : GetViewRotation();
-			const FRotator YawOnly(0.0f, Ctl.Yaw, 0.0f);
-			OutLoc = GetMesh()->GetSocketLocation(FirstPersonHeadBone) + YawOnly.RotateVector(FVector(FirstPersonEyeForwardOfHeadCm, 0.0f, FirstPersonEyeAboveHeadCm));
+			if (!EyeFromRig(Ctl, OutLoc)) { return false; }
 			OutRot = Ctl;
+			// The mesh has animated by now, so this is the eye's real place this frame. Kept in the
+			// actor's frame for the next frame's prediction; see EyeLocalToActor.
+			const_cast<ABaseCharacter*>(this)->EyeLocalToActor = GetActorTransform().InverseTransformPosition(OutLoc);
+			const_cast<ABaseCharacter*>(this)->bEyeLocalValid = true;
 			return true;
 		}
 		return false;
@@ -2125,9 +2703,106 @@ void ABaseCharacter::RegisterActorTickFunctions(bool bRegister)
 // same place Tick predicted, and the difference -- measured by the lag test -- is the proof.
 void ABaseCharacter::PostCameraTick(float DeltaSeconds)
 {
-	if (!bSightAlignActive || !WeaponMeshComponent || !WeaponMesh) { bLagPrevValid = false; return; }
+	if (!bSightAlignActive || !WeaponMeshComponent || !WeaponMesh) { bLagPrevValid = false; bViewDampValid = false; return; }
 	FVector EyeLoc; FRotator EyeRot;
 	if (!GetEye(true, EyeLoc, EyeRot)) { return; }
+	// THE WEAPON, STEADIED IN THE VIEW. Only in first person, and only while the sights are up: the
+	// weapon's pose is taken into the eye's frame, followed with a damped spring, and put back. In
+	// the eye's frame a turn of the head is not motion, so nothing lags when you look around -- what
+	// is taken out is the arm animation's own noise, which in first person arrives at full size.
+	// Bounded: the correction never exceeds a few centimetres, so the weapon cannot leave the hand.
+	if (bInFirstPerson)
+	{
+		const FTransform EyeXf(EyeRot, EyeLoc);
+		// WHERE THE WEAPON WANTS TO BE, in the eye's frame. Working in the eye's frame is what makes
+		// head bob and looking around cost nothing: they move the eye, and the weapon is expressed
+		// relative to it, so they cancel. What is left is the part that should move.
+		const FTransform Source = (bViewLeadFromSolve && bSightSolvedValid)
+			? SightSolvedWeaponWorld                             // the solve: smooth, no animation in it
+			: WeaponMeshComponent->GetComponentTransform();      // otherwise wherever the hand put it
+		FTransform Target = Source.GetRelativeTransform(EyeXf);
+
+		const float Dt = FMath::Clamp(DeltaSeconds, 0.0f, 0.05f);   // a hitch must not launch the spring
+
+		// ---- SWAY: the weapon trails the turn and catches up ----
+		const float TurnYaw = (Dt > KINDA_SMALL_NUMBER) ? FRotator::NormalizeAxis(EyeRot.Yaw - ViewPrevYaw) / Dt : 0.0f;
+		const float TurnPitch = (Dt > KINDA_SMALL_NUMBER) ? FRotator::NormalizeAxis(EyeRot.Pitch - ViewPrevPitch) / Dt : 0.0f;
+		ViewPrevYaw = EyeRot.Yaw; ViewPrevPitch = EyeRot.Pitch;
+		// Eased rather than taken raw: a mouse delivers turn in spikes, and a sway that followed
+		// them exactly would be the very jitter this is here to remove.
+		// MAGNIFICATION MAGNIFIES THE WOBBLE. A 6x scope shows six times the shake, because it shows
+		// six times of everything -- that is what makes a strong scope hard to hold and a red dot
+		// easy, with no special-casing anywhere.
+		const float ZoomSway = FMath::Sqrt(FMath::Max(1.0f, WeaponOpticZoom));
+		const float WantSwayYaw = FMath::Clamp(-TurnYaw * ViewSwayScale * ZoomSway, -ViewSwayMaxDeg * ZoomSway, ViewSwayMaxDeg * ZoomSway);
+		const float WantSwayPitch = FMath::Clamp(-TurnPitch * ViewSwayScale, -ViewSwayMaxDeg, ViewSwayMaxDeg);
+		ViewSwayYaw = FMath::FInterpTo(ViewSwayYaw, WantSwayYaw, Dt, 9.0f);
+		ViewSwayPitch = FMath::FInterpTo(ViewSwayPitch, WantSwayPitch, Dt, 9.0f);
+
+		// ---- BOB: a figure of eight, sized by how fast the body is really moving ----
+		const FVector Flat(GetVelocity().X, GetVelocity().Y, 0.0f);
+		const float Stride = FMath::Clamp(Flat.Size() / FMath::Max(1.0f, ViewBobSpeedRef), 0.0f, 1.0f);
+		ViewBobPhase = FMath::Fmod(ViewBobPhase + Dt * ViewBobHz * (0.6f + Stride) * 2.0f * PI, 2.0f * PI);
+		const FVector Bob(0.0f,
+			FMath::Sin(ViewBobPhase) * ViewBobCm * Stride,
+			FMath::Cos(ViewBobPhase * 2.0f) * ViewBobCm * 0.5f * Stride);
+
+		// Sway and bob are applied to the TARGET, in the eye's frame, so the spring smooths them too
+		// and there is exactly one thing moving the weapon.
+		Target.SetLocation(Target.GetLocation() + Bob + FVector(0.0f, ViewSwayYaw * ViewSwayShiftCm / FMath::Max(1.0f, ViewSwayMaxDeg), 0.0f));
+		Target.SetRotation((FRotator(ViewSwayPitch, ViewSwayYaw, 0.0f).Quaternion() * Target.GetRotation()).GetNormalized());
+
+		if (!bViewDampValid)
+		{
+			ViewDampedLocal = Target; ViewVel = FVector::ZeroVector; ViewRotVel = FVector::ZeroVector;
+			bViewDampValid = true;
+		}
+		else
+		{
+			// CRITICALLY DAMPED SPRING, implicit form: unconditionally stable, so a frame spike
+			// cannot make it explode, and critically damped means it never overshoots and wobbles.
+			auto Spring = [](FVector& X, FVector& V, const FVector& To, float W, float H)
+			{
+				const float F = 1.0f + 2.0f * H * W;
+				const float WW = W * W;
+				const float HWW = H * WW;
+				const float Det = 1.0f / (F + H * HWW);
+				const FVector NewX = (X * F + V * H + To * (H * HWW)) * Det;
+				const FVector NewV = (V + (To - X) * HWW) * Det;
+				X = NewX; V = NewV;
+			};
+			FVector Pos = ViewDampedLocal.GetLocation();
+			Spring(Pos, ViewVel, Target.GetLocation(), FMath::Max(0.1f, ViewSpringRate), Dt);
+
+			// The same spring on the rotation, run on the error as a rotation vector.
+			FQuat Cur = ViewDampedLocal.GetRotation();
+			FQuat Delta = Target.GetRotation() * Cur.Inverse();
+			Delta.EnforceShortestArcWith(FQuat::Identity);
+			FVector Axis; float Angle;
+			Delta.ToAxisAndAngle(Axis, Angle);
+			const FVector Err = Axis * Angle;
+			const float W = FMath::Max(0.1f, ViewSpringRateRot);
+			ViewRotVel += (Err * (W * W) - ViewRotVel * (2.0f * W)) * Dt;
+			const FVector Step = ViewRotVel * Dt;
+			if (!Step.IsNearlyZero()) { Cur = (FQuat(Step.GetSafeNormal(), Step.Size()) * Cur).GetNormalized(); }
+
+			// The net, never the mechanism: with the spring doing the work this should not be met in
+			// ordinary play, and if it is, the weapon still cannot leave the hand.
+			FVector Off = Pos - Target.GetLocation();
+			if (Off.Size() > ViewMaxOffsetCm) { Pos = Target.GetLocation() + Off.GetSafeNormal() * ViewMaxOffsetCm; ViewVel = FVector::ZeroVector; }
+			const float Ang = FMath::RadiansToDegrees(Cur.AngularDistance(Target.GetRotation()));
+			if (Ang > ViewMaxOffsetDeg)
+			{
+				Cur = FQuat::Slerp(Target.GetRotation(), Cur, ViewMaxOffsetDeg / Ang).GetNormalized();
+				ViewRotVel = FVector::ZeroVector;
+			}
+			ViewDampedLocal.SetLocation(Pos);
+			ViewDampedLocal.SetRotation(Cur);
+			ViewDampedLocal.SetScale3D(Target.GetScale3D());
+		}
+		WeaponMeshComponent->SetWorldTransform(ViewDampedLocal * EyeXf);
+	}
+	else { bViewDampValid = false; ViewVel = FVector::ZeroVector; ViewRotVel = FVector::ZeroVector; }
 	if (LagTestLeft > 0.0f && bPredictedEyeValid)
 	{
 		const double CamErr = FVector::Dist(EyeLoc, PredictedEyeLoc);
@@ -2135,7 +2810,33 @@ void ABaseCharacter::PostCameraTick(float DeltaSeconds)
 		LagCamErrSum += CamErr; LagCamErrMax = FMath::Max(LagCamErrMax, CamErr); LagRotErrMax = FMath::Max(LagRotErrMax, RotErr);
 	}
 	EyeRot += AimSway;   // the point of aim wanders; the weapon is held along it, sights and all
-	PlaceWeapon(EyeLoc, EyeRot);
+	// THE NUMBERS. The pose is final here (animation and camera both done), so this is where the
+	// hold is measured: how far the weapon on the hand ended from where the sights asked, and how
+	// far its sight point sits off the eye line. Both read near zero whenever the arm can reach.
+	if (bSightSolvedValid)
+	{
+		const FTransform Actual = WeaponMeshComponent->GetComponentTransform();
+		HandGapCm = FVector::Dist(Actual.GetLocation(), SightSolvedWeaponWorld.GetLocation());
+		const FVector SightLocal = bWeaponHasSight ? WeaponSightLocal : FVector::ZeroVector;
+		const FVector P = Actual.TransformPosition(SightLocal) - EyeLoc;
+		const FVector Dir = EyeRot.Vector();
+		SightOffEyeCm = (P - Dir * FVector::DotProduct(P, Dir)).Size();
+		// AND KEEP THAT SIGHT IN FRONT OF THE NEAR CLIPPING PLANE. See FirstPersonMinSightDepthCm:
+		// the first-person pass draws these primitives at FirstPersonViewScale of their true depth,
+		// so a sight brought properly to the eye is scaled straight through the plane and culled.
+		// Raise the scale only by as much as this frame needs, so nothing changes until it must.
+		if (bInFirstPerson && FollowCamera)
+		{
+			const float Depth = FVector::DotProduct(P, Dir);
+			const float Needed = (Depth > 1.0f) ? (FirstPersonMinSightDepthCm / Depth) : FirstPersonViewScale;
+			FollowCamera->FirstPersonScale = FMath::Clamp(FMath::Max(FirstPersonViewScale, Needed), 0.001f, 1.0f);
+		}
+		if (bHandDiag && GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(4711, 0.5f, FColor::Yellow, FString::Printf(TEXT("hand: reach %.0f%% of %.0f cm   carry x%.2f   gap %.1f cm   sight off eye line %.1f cm   ik %.2f   align %.2f"),
+				HandReachRatio * 100.0f, ArmReachR, ReachClampScale, HandGapCm, SightOffEyeCm, TriggerIKAlpha, SightAlignAlpha));
+		}
+	}
 	if (LagTestLeft > 0.0f)
 	{
 		++LagFrames;
@@ -2202,7 +2903,48 @@ float ABaseCharacter::GetWeaponSpreadDegrees() const
 	return Spread + FMath::Min(SpreadBloomDegrees, SpreadBloomMaxDegrees);
 }
 
-void ABaseCharacter::SetWeaponOptic(UStaticMesh* OpticMesh, const FVector& MountLocal)
+bool ABaseCharacter::StepOpticZoom(int32 Dir)
+{
+	if (WeaponOpticZoomLevels.Num() < 2) { return false; }
+	const int32 N = WeaponOpticZoomLevels.Num();
+	OpticZoomIndex = (OpticZoomIndex + (Dir >= 0 ? 1 : N - 1)) % N;
+	WeaponOpticZoom = FMath::Max(1.0f, WeaponOpticZoomLevels[OpticZoomIndex]);
+	return true;
+}
+
+float ABaseCharacter::OpticSettle() const
+{
+	// THE EYEBOX. A scope only gives its full picture when the eye is square behind it; off axis,
+	// the tube shadows the edges and the opening closes in. Walking and recoil are what take you off
+	// axis, so they are what close it -- which also makes a magnified sight honestly worse to shoot
+	// on the move, without a single artificial penalty being applied anywhere.
+	const FVector Flat(GetVelocity().X, GetVelocity().Y, 0.0f);
+	const float Move = FMath::Clamp(Flat.Size() / 320.0f, 0.0f, 1.0f);
+	const float Kick = FMath::Clamp(FMath::Abs(RecoilToRecover) / 2.5f, 0.0f, 1.0f);
+	const float Up = FMath::Clamp(AdsAlpha(), 0.0f, 1.0f);
+	return FMath::Clamp(Up * (1.0f - FMath::Max(Move * 0.85f, Kick)), 0.0f, 1.0f);
+}
+
+bool ABaseCharacter::IsOpticBlocked() const
+{
+	// Muzzle into a wall: a scope shows black, it does not show the inside of the plaster. Traced
+	// from the sight forward by about the length of the weapon in front of it.
+	const UWorld* World = GetWorld();
+	if (!World || !WeaponMeshComponent) { return false; }
+	const FVector Start = WeaponMeshComponent->GetComponentTransform().TransformPosition(WeaponSightLocal);
+	const FVector Dir = GetAimRotation().Vector();
+	FHitResult Hit;
+	FCollisionQueryParams Q(SCENE_QUERY_STAT(OpticBlocked), false, const_cast<ABaseCharacter*>(this));
+	return World->LineTraceSingleByChannel(Hit, Start, Start + Dir * 55.0f, ECC_Visibility, Q);
+}
+
+void ABaseCharacter::SetWeaponOpticOffset(const FVector& Offset)
+{
+	WeaponOpticOffset = Offset;
+	if (OpticMeshComponent) { OpticMeshComponent->SetRelativeLocation(WeaponOpticBaseLocal + WeaponOpticOffset); }
+}
+
+void ABaseCharacter::SetWeaponOptic(UStaticMesh* OpticMesh, const FVector& MountLocal, const FRotator& MountRot)
 {
 	if (!OpticMeshComponent)
 	{
@@ -2212,13 +2954,35 @@ void ABaseCharacter::SetWeaponOptic(UStaticMesh* OpticMesh, const FVector& Mount
 		OpticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		OpticMeshComponent->RegisterComponent();
 	}
+	// THE OVERRIDES GO FIRST. GetNumMaterials answers with whichever is longer, the mesh's slots or
+	// the overrides left on the component -- so a three-slot optic followed by a two-slot one left
+	// the component claiming three, and the third slot, which no mesh has, was asked every frame
+	// for a dynamic instance it could not give ("Material index 2 is invalid", once a frame, for
+	// as long as the page was open). Clearing them also stops the previous sight's paint carrying
+	// over onto this one.
+	OpticMeshComponent->EmptyOverrideMaterials();
 	OpticMeshComponent->SetStaticMesh(OpticMesh);
 	OpticMeshComponent->SetVisibility(OpticMesh != nullptr);
 	bWeaponHasOptic = OpticMesh != nullptr;
+	// One dynamic instance per slot, so the reticle can be lit and put out. A slot whose material
+	// has no DotVisible simply ignores it; a slot with no material at all is skipped.
+	OpticDotMIDs.Reset();
+	OpticDotVisible = 0.0f;
+	if (OpticMesh)
+	{
+		for (int32 i = 0; i < OpticMeshComponent->GetNumMaterials(); ++i)
+		{
+			if (!OpticMeshComponent->GetMaterial(i)) { continue; }
+			if (UMaterialInstanceDynamic* M = OpticMeshComponent->CreateDynamicMaterialInstance(i)) { M->SetScalarParameterValue(TEXT("DotVisible"), 0.0f); OpticDotMIDs.Add(M); }
+		}
+	}
 	// Bolted flat to the rail: the optic is authored in the same space as the weapon, so the
 	// mount is a translation and nothing else.
-	OpticMeshComponent->SetRelativeLocation(MountLocal);
-	OpticMeshComponent->SetRelativeRotation(FRotator::ZeroRotator);
+	WeaponOpticBaseLocal = MountLocal;
+	OpticMeshComponent->SetRelativeLocation(MountLocal + WeaponOpticOffset);
+	// NOT ALWAYS IDENTITY. A scope authored across the aim needs yawing onto it, and that is a
+	// property of the optic's own model -- see FOptic::Rot.
+	OpticMeshComponent->SetRelativeRotation(MountRot);
 	// The head is hidden from its owner in first person; the optic must NOT be, or the player
 	// aims down a sight they cannot see.
 	OpticMeshComponent->SetOwnerNoSee(false);
@@ -2227,6 +2991,7 @@ void ABaseCharacter::SetWeaponOptic(UStaticMesh* OpticMesh, const FVector& Mount
 void ABaseCharacter::SetWeaponMesh(UStaticMesh* NewMesh)
 {
 	WeaponMesh = NewMesh;
+	if (!NewMesh) { WeaponFingersR.Reset(); WeaponFingersL.Reset(); WeaponHunch = 0.0f; WeaponLeanDeg = 0.0f; }   // nothing in the hand, nothing to close it on or hunch over
 	CurrentConfig.WeaponMesh = NewMesh ? NewMesh->GetPathName() : FString();
 	ApplyWeapon();
 }
@@ -3012,7 +3777,14 @@ void ABaseCharacter::OnWeaponFired(const FVector& MuzzleLocal)
 		const float Kick = (WeaponRecoilOverride >= 0.0f ? WeaponRecoilOverride : RecoilPitchDegrees) * Scale;
 		if (Kick > KINDA_SMALL_NUMBER)
 		{
-			FRotator R = PC->GetControlRotation(); const float Before = R.Pitch; R.Pitch = FRotator::NormalizeAxis(R.Pitch + Kick); PC->SetControlRotation(R);
+			// The sideways throw: a fraction of the kick, one way or the other, so no two shots in a
+			// burst wander the same direction and a burst cannot be held on a straight line.
+			const float Sway = Kick * FMath::Max(0.0f, RecoilYawFraction) * (FMath::RandBool() ? 1.0f : -1.0f);
+			FRotator R = PC->GetControlRotation(); const float Before = R.Pitch;
+			R.Pitch = FRotator::NormalizeAxis(R.Pitch + Kick);
+			R.Yaw = FRotator::NormalizeAxis(R.Yaw + Sway);
+			PC->SetControlRotation(R);
+			RecoilYawToRecover += Sway * FMath::Clamp(RecoilRecoverFraction, 0.0f, 1.0f);
 			UE_LOG(LogTemp, Log, TEXT("Recoil: kick %.2f (weapon %.2f, scale %.2f) pitch %.2f -> %.2f (read back %.2f)"), Kick, WeaponRecoilOverride, Scale, Before, R.Pitch, PC->GetControlRotation().Pitch);
 		}
 		else { UE_LOG(LogTemp, Log, TEXT("Recoil: no kick (weapon %.2f, scale %.2f)"), WeaponRecoilOverride, Scale); }
@@ -3024,12 +3796,14 @@ void ABaseCharacter::OnWeaponFired(const FVector& MuzzleLocal)
 
 void ABaseCharacter::TickRecoil(float DeltaSeconds)
 {
-	if (RecoilRecoverLeft <= 0.0f || RecoilToRecover <= KINDA_SMALL_NUMBER) { RecoilToRecover = 0.0f; return; }
+	if (RecoilRecoverLeft <= 0.0f || (RecoilToRecover <= KINDA_SMALL_NUMBER && FMath::Abs(RecoilYawToRecover) <= KINDA_SMALL_NUMBER)) { RecoilToRecover = 0.0f; RecoilYawToRecover = 0.0f; return; }
 	APlayerController* PC = Cast<APlayerController>(GetController());
 	if (!PC) { RecoilToRecover = 0.0f; RecoilRecoverLeft = 0.0f; return; }
 	const float Step = RecoilToRecover * FMath::Clamp(DeltaSeconds / FMath::Max(RecoilRecoverLeft, KINDA_SMALL_NUMBER), 0.0f, 1.0f);
-	{ FRotator R = PC->GetControlRotation(); R.Pitch = FRotator::NormalizeAxis(R.Pitch - Step); PC->SetControlRotation(R); }   // back down, the same way it went up
+	const float YawStep = RecoilYawToRecover * FMath::Clamp(DeltaSeconds / FMath::Max(RecoilRecoverLeft, KINDA_SMALL_NUMBER), 0.0f, 1.0f);
+	{ FRotator R = PC->GetControlRotation(); R.Pitch = FRotator::NormalizeAxis(R.Pitch - Step); R.Yaw = FRotator::NormalizeAxis(R.Yaw - YawStep); PC->SetControlRotation(R); }   // back down and back across, the same way it went
 	RecoilToRecover -= Step;
+	RecoilYawToRecover -= YawStep;
 	RecoilRecoverLeft -= DeltaSeconds;
 }
 
@@ -3619,8 +4393,30 @@ void ABaseCharacter::Tick(float DeltaSeconds)
 	}
 	if (FollowCamera)
 	{
-		const float TargetFov = bAiming ? AimFieldOfView : HipFieldOfView;
-		FollowCamera->SetFieldOfView(FMath::FInterpTo(FollowCamera->FieldOfView, TargetFov, DeltaSeconds, AimInterpSpeed));
+		// A MAGNIFIED SIGHT NARROWS THE VIEW, and only while the sights are up -- that is what
+		// magnification is. Dividing the aim field of view by the zoom gives the real thing: 2x
+		// shows half the angle.
+		//
+		// RAMPED ON THE SAME BLEND THE SCOPE MASK USES, so the picture and the magnification cannot
+		// disagree. Driving one off the aiming flag and the other off how far the weapon has come up
+		// is how you end up with the black surround arriving over an un-magnified view for a few
+		// frames, which reads as the scope being broken.
+		//
+		// AND IT IS DRIVEN, NOT CHASED. This used to aim an FInterpTo at a target picked off the
+		// aiming FLAG: a second smoother, with its own rate, running behind a carry blend that is
+		// already eased -- so the lens was still opening out when the weapon had arrived, and
+		// still narrowing after the button came up. An exponential chase also never actually
+		// reaches its target, which is what "mushy" is. The blend IS the animation; the field of
+		// view is a function of it and of nothing else, and it lands exactly when the weapon does.
+		const float Up = FMath::Clamp(AdsAlpha(), 0.0f, 1.0f);
+		const float AimFov = AimFieldOfView / FMath::Max(1.0f, WeaponOpticZoom);
+		// Interpolated in the TANGENT, not in degrees: tan(fov/2) is what the image is actually
+		// scaled by, so this is a view that grows evenly. Lerping the angle at a 9x scope spends
+		// most of the blend barely changing and then rushes the last part.
+		const float TanHip = FMath::Tan(FMath::DegreesToRadians(FMath::Clamp(HipFieldOfView, 10.0f, 170.0f) * 0.5f));
+		const float TanAim = FMath::Tan(FMath::DegreesToRadians(FMath::Clamp(AimFov, 1.0f, 170.0f) * 0.5f));
+		const float TargetFov = FMath::RadiansToDegrees(FMath::Atan(FMath::Lerp(TanHip, TanAim, Up))) * 2.0f;
+		FollowCamera->SetFieldOfView(TargetFov);
 	}
 	if (bFreelook && ShouldFaceAim())
 	{
@@ -3662,6 +4458,7 @@ void ABaseCharacter::Tick(float DeltaSeconds)
 	{
 		bInFirstPerson = bShouldBeFirstPerson;
 		ApplyFirstPersonHeadHiding(bInFirstPerson);
+		ApplyFirstPersonRendering(bInFirstPerson);
 
 		// Third person: body turns to face movement direction over time
 		// (TurnRateDegPerSec), independent of where the camera/mouse is
@@ -4024,6 +4821,31 @@ void ABaseCharacter::Tick(float DeltaSeconds)
 	}
 }
 
+void ABaseCharacter::ApplyFirstPersonRendering(bool bFirstPerson)
+{
+	// The arms are what the eye sees of the body; the head and torso are behind it or hidden.
+	static const TCHAR* ArmSlots[] = { TEXT("CutArms"), TEXT("Arms"), TEXT("Hands") };
+	const EFirstPersonPrimitiveType Type = bFirstPerson ? EFirstPersonPrimitiveType::FirstPerson : EFirstPersonPrimitiveType::None;
+	if (WeaponMeshComponent) { WeaponMeshComponent->SetFirstPersonPrimitiveType(Type); }
+	if (OpticMeshComponent) { OpticMeshComponent->SetFirstPersonPrimitiveType(Type); }
+	for (const TCHAR* Slot : ArmSlots)
+	{
+		if (TObjectPtr<USkeletalMeshComponent>* Comp = PartComponents.Find(FString(Slot)))
+		{
+			if (*Comp) { (*Comp)->SetFirstPersonPrimitiveType(Type); }
+		}
+	}
+	if (FollowCamera)
+	{
+		// The camera's half of the bargain: the field of view and the depth squeeze those primitives
+		// are drawn with. Without these the mark does nothing.
+		FollowCamera->bEnableFirstPersonFieldOfView = bFirstPerson;
+		FollowCamera->bEnableFirstPersonScale = bFirstPerson;
+		FollowCamera->FirstPersonFieldOfView = FirstPersonViewFov;
+		FollowCamera->FirstPersonScale = FMath::Clamp(FirstPersonViewScale, 0.001f, 1.0f);
+	}
+}
+
 void ABaseCharacter::ApplyFirstPersonHeadHiding(bool bFirstPerson)
 {
 	// Modular characters carry the head/face/hair as separate part
@@ -4049,7 +4871,9 @@ void ABaseCharacter::ApplyFirstPersonHeadHiding(bool bFirstPerson)
 	// in this project names it "head".
 	if (!bModularMode)
 	{
-		if (bFirstPerson) { GetMesh()->HideBoneByName(TEXT("head"), EPhysBodyOp::PBO_None); }
+		// An AI's body is only ever seen from outside: whatever the zoom index says, its head stays.
+		const bool bMachineOrExtra = GetController() && !GetController()->IsPlayerController();
+		if (bFirstPerson && !bMachineOrExtra) { GetMesh()->HideBoneByName(TEXT("head"), EPhysBodyOp::PBO_None); }
 		else { GetMesh()->UnHideBoneByName(TEXT("head")); }
 	}
 

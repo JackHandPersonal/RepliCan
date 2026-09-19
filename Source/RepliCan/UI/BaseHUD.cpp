@@ -1,20 +1,22 @@
-#include "BaseHUD.h"
+#include "UI/BaseHUD.h"
 #include "Engine/Canvas.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialInterface.h"
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "BaseCharacter.h"
-#include "BasePlayerController.h"
-#include "CharacterAnimInstance.h"
+#include "Characters/BaseCharacter.h"
+#include "Core/BasePlayerController.h"
+#include "Characters/CharacterAnimInstance.h"
 #include "Animation/AnimSequence.h"
-#include "CrtStyle.h"
+#include "UI/CrtStyle.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 
 // The HUD draws in the same fixed-pitch face as the rest of the UI (the engine's DroidSansMono
 // font asset), falling back to the small engine font if it is ever missing.
-static UFont* HudMonoFont()
+UFont* HudMonoFont()
 {
 	UFont* F = Crt::Font();
 	return F ? F : (GEngine ? GEngine->GetSmallFont() : nullptr);
@@ -22,6 +24,7 @@ static UFont* HudMonoFont()
 
 void ABaseHUD::DrawHUD()
 {
+	bScopeBlackedOut = false;
 	Super::DrawHUD();
 
 	if (!Canvas) { return; }
@@ -50,82 +53,26 @@ void ABaseHUD::DrawHUD()
 	// the world, and a circle in the middle of it read as a ghost of something.
 	const ABasePlayerController* PC = Cast<ABasePlayerController>(GetOwner());
 	const bool bScreen = PC && PC->IsPageOpen();
-	if (!bScreen && !DrawWeaponReticle(CenterX, CenterY))
+	// THE SCOPE PICTURE FIRST, then the mark inside it.
+	// A FITTED SIGHT OWNS THE AIM MARK. Down the sights you are looking through glass with its own
+	// reticle on it, so the spread ring has nothing to add and two marks on one point read as a
+	// fault. Off the sights, or with no optic, the ordinary ring comes back.
+	if (!bScreen)
 	{
-		DrawRect(FLinearColor::White, CenterX - ReticleSize * 0.5f, CenterY - ReticleSize * 0.5f, ReticleSize, ReticleSize);
+		bScopeBlackedOut = DrawScopeOverlay(CenterX, CenterY);
+		if (!bScopeBlackedOut && !DrawOpticReticle(CenterX, CenterY) && !DrawWeaponReticle(CenterX, CenterY))
+		{
+			DrawRect(FLinearColor::White, CenterX - ReticleSize * 0.5f, CenterY - ReticleSize * 0.5f, ReticleSize, ReticleSize);
+		}
 	}
+
+	// The readout lives inside the sight picture. Drawn after the mask so it is never under it, and
+	// not at all when the sight is blacked out.
+	if (!bScreen && !bScopeBlackedOut) { DrawSmartOptic(CenterX, CenterY); }
 
 	// The development overlays are intentionally not drawn: the frame counter (the metrics
 	// panel on F11 carries it, with far more), the upper-right locomotion readout, and the
 	// centred combat-clip selector. Their draw functions are kept for when one is wanted back.
-}
-
-bool ABaseHUD::DrawWeaponReticle(float CenterX, float CenterY)
-{
-	const ABaseCharacter* Me = Cast<ABaseCharacter>(GetOwningPawn());
-	if (!Me || Me->GetWeaponStance().IsEmpty()) { ReticleRadius = -1.0f; return false; }
-
-	// Looking through an optic: the glass has its own reticle, and it is collimated, so it is
-	// the honest one. Drawing ours over it would put a second aiming mark on screen a few
-	// pixels away from the first, which is worse than having neither.
-	// Third person aims over the shoulder, where the glass cannot be read: the dot and cross stay.
-	if (Me->IsAiming() && Me->HasOpticSight() && Me->IsFirstPerson())
-	{
-		ReticleRadius = -1.0f;
-		return true;   // handled: draw nothing at all, not even the plain dot
-	}
-
-	// Degrees of cone -> pixels on this screen, at this field of view. The ring is the cone,
-	// projected: half the screen width spans tan(FOV/2), so the spread spans the same
-	// fraction of it that tan(spread) is of that.
-	const APlayerController* PC = Cast<APlayerController>(GetOwner());
-	const float Fov = (PC && PC->PlayerCameraManager) ? PC->PlayerCameraManager->GetFOVAngle() : 90.0f;
-	const float HalfFovTan = FMath::Tan(FMath::DegreesToRadians(FMath::Clamp(Fov, 10.0f, 170.0f) * 0.5f));
-	const float SpreadTan = FMath::Tan(FMath::DegreesToRadians(FMath::Max(Me->GetWeaponSpreadDegrees(), 0.0f)));
-	const float Target = FMath::Clamp((Canvas->SizeX * 0.5f) * SpreadTan / FMath::Max(HalfFovTan, KINDA_SMALL_NUMBER),
-		ReticleMinRadius, ReticleMaxRadius);
-
-	const float DeltaSeconds = GetWorld() ? GetWorld()->GetDeltaSeconds() : 0.0f;
-	ReticleRadius = (ReticleRadius < 0.0f) ? Target : FMath::FInterpTo(ReticleRadius, Target, DeltaSeconds, ReticleInterpSpeed);
-
-	// The dot. Deliberately the same size as the unarmed one: it is still the point the world
-	// is queried through, and it should not move or change when a weapon comes out.
-	DrawRect(ReticleColor, CenterX - ReticleSize * 0.5f, CenterY - ReticleSize * 0.5f, ReticleSize, ReticleSize);
-
-	if (Me->IsAiming())
-	{
-		// Four ticks pointing in at the dot, from the spread cone outward. Nothing is drawn
-		// inside CrosshairGap, so the dot always sits in clear space however tight the cone is.
-		const float Inner = bCrosshairTracksSpread ? FMath::Max(ReticleRadius, CrosshairGap) : CrosshairGap;
-		const float Outer = Inner + CrosshairArm;
-		DrawLine(CenterX, CenterY - Inner, CenterX, CenterY - Outer, ReticleColor, ReticleThickness);
-		DrawLine(CenterX, CenterY + Inner, CenterX, CenterY + Outer, ReticleColor, ReticleThickness);
-		DrawLine(CenterX - Inner, CenterY, CenterX - Outer, CenterY, ReticleColor, ReticleThickness);
-		DrawLine(CenterX + Inner, CenterY, CenterX + Outer, CenterY, ReticleColor, ReticleThickness);
-		return true;
-	}
-
-	// The arcs. Each is drawn as a run of short chords -- enough of them that the eye reads a
-	// curve, few enough that a wide ring is not hundreds of draw calls.
-	const int32 Arcs = FMath::Max(1, ReticleArcs);
-	const float Sweep = FMath::Clamp(ReticleArcSweepDegrees, 5.0f, 360.0f / Arcs);
-	const int32 Steps = FMath::Clamp(FMath::CeilToInt(ReticleRadius * 0.25f), 4, 24);
-	for (int32 Arc = 0; Arc < Arcs; ++Arc)
-	{
-		// Gaps centred on the diagonals, so the four arcs sit above, below, left and right and
-		// the dot is never crowded.
-		const float Mid = 360.0f * Arc / Arcs;
-		const float Start = Mid - Sweep * 0.5f;
-		for (int32 Step = 0; Step < Steps; ++Step)
-		{
-			const float A0 = FMath::DegreesToRadians(Start + Sweep * Step / Steps);
-			const float A1 = FMath::DegreesToRadians(Start + Sweep * (Step + 1) / Steps);
-			DrawLine(CenterX + FMath::Cos(A0) * ReticleRadius, CenterY + FMath::Sin(A0) * ReticleRadius,
-			         CenterX + FMath::Cos(A1) * ReticleRadius, CenterY + FMath::Sin(A1) * ReticleRadius,
-			         ReticleColor, ReticleThickness);
-		}
-	}
-	return true;
 }
 
 void ABaseHUD::DrawPerformanceOverlay()

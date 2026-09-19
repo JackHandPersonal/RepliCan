@@ -1,5 +1,5 @@
-#include "TitleGameMode.h"
-#include "TitlePlayerController.h"
+#include "Core/TitleGameMode.h"
+#include "Core/TitlePlayerController.h"
 #include "GameFramework/SpectatorPawn.h"
 
 ATitleGameMode::ATitleGameMode()

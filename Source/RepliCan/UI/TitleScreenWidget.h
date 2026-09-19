@@ -7,7 +7,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "TitlePlayerController.h"
+#include "Core/TitlePlayerController.h"
 #include "TitleScreenWidget.generated.h"
 
 class UBorder;

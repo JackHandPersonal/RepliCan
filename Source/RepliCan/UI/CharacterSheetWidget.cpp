@@ -1,17 +1,18 @@
-#include "CharacterSheetWidget.h"
+#include "UI/CharacterSheetWidget.h"
+#include "UI/PaneShape.h"
 #include "Framework/Application/SlateApplication.h"
-#include "InventoryGridWidget.h"
-#include "CrtRuleWidget.h"
-#include "CrtTabsWidget.h"
-#include "ItemCatalog.h"
-#include "WeaponCatalog.h"
-#include "WeaponSkins.h"
+#include "UI/InventoryGridWidget.h"
+#include "UI/CrtRuleWidget.h"
+#include "UI/CrtTabsWidget.h"
+#include "Items/ItemCatalog.h"
+#include "Weapons/WeaponCatalog.h"
+#include "Weapons/WeaponSkins.h"
 #include "Components/ButtonSlot.h"
-#include "SheetSpec.h"
-#include "BaseCharacter.h"
-#include "BasePlayerController.h"
-#include "CrtStyle.h"
-#include "ContextMenuWidget.h"
+#include "UI/SheetSpec.h"
+#include "Characters/BaseCharacter.h"
+#include "Core/BasePlayerController.h"
+#include "UI/CrtStyle.h"
+#include "UI/ContextMenuWidget.h"
 #include "Blueprint/WidgetTree.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/Border.h"
@@ -204,7 +205,7 @@ void UCharacterSheetWidget::Rebuild()
 	// At the TOP of the column, its own height (5:8 of the mirror's width, set with the width in
 	// NativeTick): a fill slot stretched the box to the column and centred the picture in it.
 	FitSlot->SetSize(ESlateSizeRule::Automatic); FitSlot->SetHorizontalAlignment(HAlign_Fill); FitSlot->SetVerticalAlignment(VAlign_Top);
-	Fit->SetHeightOverride(FMath::Floor(MirrorWidth / 0.625f));
+	Fit->SetHeightOverride(FMath::Floor(PaneShape::HeightFor(PaneShape::Mirror, MirrorWidth)));
 	if (!S.MirrorFooter.IsEmpty()) { AddRow(MirrorBody, S.MirrorFooter, S.CaptionSize, Crt::DimGreen)->SetPadding(FMargin(0, 8, 0, 0)); }
 	// A fixed width, so nothing about this column depends on the rest of the page settling. The
 	// first guess is from the viewport; NativeTick replaces it with the body's real width.
@@ -401,12 +402,18 @@ TArray<FString> UCharacterSheetWidget::QuickbarItems() const
 void UCharacterSheetWidget::OnQuickSlot(int32 Index)
 {
 	if (!OwnerController || !QuickGrid) { return; }
+	// A quickbar square is PICKED, exactly as a bag or gear square is: the pick outlives the
+	// pointer, so INFO keeps showing it once the mouse moves away. Without a remembered pick the
+	// info flicked back to whatever the bag had selected the moment you left the square.
+	SelectedQuick = Index; SelectedBag = -1; SelectedGear = -1;
 	QuickGrid->SetSelected(Index);
+	if (InventoryGrid) { InventoryGrid->SetSelected(-1); }
+	if (GearGrid) { GearGrid->SetSelected(-1); }
 	if (Index < 2 && !QuickbarItems()[Index].IsEmpty()) { OwnerController->EquipWeaponSlot(Index + 1); }
-	ShowInfo(QuickbarItems()[Index]);
+	ShowSelectedInfo();
 }
 
-void UCharacterSheetWidget::OnQuickHover(int32 Index) { if (Index < 0) { ShowSelectedInfo(); return; } const TArray<FString> Q = QuickbarItems(); ShowInfo(Q.IsValidIndex(Index) ? Q[Index] : FString()); }
+void UCharacterSheetWidget::OnQuickHover(int32 Index) { if (Index < 0) { ShowSelectedInfo(); return; } const TArray<FString> Q = QuickbarItems(); HoverInfo(Q.IsValidIndex(Index) ? Q[Index] : FString()); }
 
 // A drop is valid when the item fits where it lands and whatever it displaces fits where it came
 // from: bag to bag always, bag to a gear slot of the right kind, gear back to the bag, gear to
@@ -458,10 +465,14 @@ void UCharacterSheetWidget::OnInventoryRightClick(int32 Index, FVector2D ScreenP
 	if (!OwnerController || !OwnerController->Inventory.IsValidIndex(Index) || OwnerController->Inventory[Index].IsEmpty()) { return; }
 	OnInventorySlot(Index);   // shown in INFO, as a click would
 	TWeakObjectPtr<UCharacterSheetWidget> Self(this);
-	UContextMenuWidget::Show(OwnerController, ScreenPos, WeaponCatalog::DisplayName(OwnerController->Inventory[Index]), { TEXT("Drop") }, [Self, Index](const FString& Pick)
+	UContextMenuWidget::Show(OwnerController, ScreenPos, WeaponCatalog::DisplayName(OwnerController->Inventory[Index]), { TEXT("Drop"), TEXT("Delete") }, [Self, Index](const FString& Pick)
 	{
-		if (!Self.IsValid() || !Self->OwnerController || Pick != TEXT("Drop")) { return; }
-		if (Self->OwnerController->DropInventory(Index)) { Self->SelectedBag = -1; Self->Refresh(); Self->ShowSelectedInfo(); }
+		if (!Self.IsValid() || !Self->OwnerController) { return; }
+		// Drop leaves it on the floor; Delete does not. A thing with no mesh to drop can only go the
+		// second way, which is why both are offered rather than one being the other's fallback.
+		const bool bGone = (Pick == TEXT("Drop")) ? Self->OwnerController->DropInventory(Index)
+			: (Pick == TEXT("Delete")) ? Self->OwnerController->DeleteInventory(Index) : false;
+		if (bGone) { Self->SelectedBag = -1; Self->Refresh(); Self->ShowSelectedInfo(); }
 	});
 }
 
@@ -470,37 +481,45 @@ void UCharacterSheetWidget::OnGearRightClick(int32 Index, FVector2D ScreenPos)
 	if (!OwnerController || !OwnerController->Equipped.IsValidIndex(Index) || OwnerController->Equipped[Index].IsEmpty()) { return; }
 	OnGearSlot(Index);
 	TWeakObjectPtr<UCharacterSheetWidget> Self(this);
-	UContextMenuWidget::Show(OwnerController, ScreenPos, WeaponCatalog::DisplayName(OwnerController->Equipped[Index]), { TEXT("Drop") }, [Self, Index](const FString& Pick)
+	UContextMenuWidget::Show(OwnerController, ScreenPos, WeaponCatalog::DisplayName(OwnerController->Equipped[Index]), { TEXT("Drop"), TEXT("Delete") }, [Self, Index](const FString& Pick)
 	{
-		if (!Self.IsValid() || !Self->OwnerController || Pick != TEXT("Drop")) { return; }
-		if (Self->OwnerController->DropGear(Index)) { Self->SelectedGear = -1; Self->Refresh(); Self->ShowSelectedInfo(); }
+		if (!Self.IsValid() || !Self->OwnerController) { return; }
+		const bool bGone = (Pick == TEXT("Drop")) ? Self->OwnerController->DropGear(Index)
+			: (Pick == TEXT("Delete")) ? Self->OwnerController->DeleteGear(Index) : false;
+		if (bGone) { Self->SelectedGear = -1; Self->Refresh(); Self->ShowSelectedInfo(); }
 	});
 }
 
 void UCharacterSheetWidget::OnInventorySlot(int32 Index)
 {
-	if (CtrlHeld()) { if (OwnerController && OwnerController->EquipFromInventory(Index)) { SelectedBag = -1; SelectedGear = -1; Refresh(); } return; }
-	SelectedBag = Index; SelectedGear = -1;
+	if (CtrlHeld()) { if (OwnerController && OwnerController->EquipFromInventory(Index)) { SelectedBag = -1; SelectedGear = -1; SelectedQuick = -1; Refresh(); } return; }
+	SelectedBag = Index; SelectedGear = -1; SelectedQuick = -1;
 	if (InventoryGrid) { InventoryGrid->SetSelected(Index); }
 	if (GearGrid) { GearGrid->SetSelected(-1); }
+	if (QuickGrid) { QuickGrid->SetSelected(-1); }
 	ShowSelectedInfo();
 }
 void UCharacterSheetWidget::OnGearSlot(int32 Index)
 {
-	if (CtrlHeld()) { if (OwnerController && OwnerController->UnequipSlot(Index)) { SelectedBag = -1; SelectedGear = -1; Refresh(); } return; }
-	SelectedGear = Index; SelectedBag = -1;
+	if (CtrlHeld()) { if (OwnerController && OwnerController->UnequipSlot(Index)) { SelectedBag = -1; SelectedGear = -1; SelectedQuick = -1; Refresh(); } return; }
+	SelectedGear = Index; SelectedBag = -1; SelectedQuick = -1;
 	if (GearGrid) { GearGrid->SetSelected(Index); }
 	if (InventoryGrid) { InventoryGrid->SetSelected(-1); }
+	if (QuickGrid) { QuickGrid->SetSelected(-1); }
 	ShowSelectedInfo();
 }
 // Hovering shows what is under the pointer; leaving goes back to what was picked.
-void UCharacterSheetWidget::OnInventoryHover(int32 Index) { if (Index < 0) { ShowSelectedInfo(); return; } ShowInfo(OwnerController && OwnerController->Inventory.IsValidIndex(Index) ? OwnerController->Inventory[Index] : FString()); }
-void UCharacterSheetWidget::OnGearHover(int32 Index) { if (Index < 0) { ShowSelectedInfo(); return; } ShowInfo(OwnerController && OwnerController->Equipped.IsValidIndex(Index) ? OwnerController->Equipped[Index] : FString()); }
+// Passing over an EMPTY square leaves INFO alone. Blanking it there meant a pick was wiped out by
+// the pointer merely crossing a gap in the grid on its way somewhere else.
+void UCharacterSheetWidget::HoverInfo(const FString& Item) { if (Item.IsEmpty()) { ShowSelectedInfo(); } else { ShowInfo(Item); } }
+void UCharacterSheetWidget::OnInventoryHover(int32 Index) { if (Index < 0) { ShowSelectedInfo(); return; } HoverInfo(OwnerController && OwnerController->Inventory.IsValidIndex(Index) ? OwnerController->Inventory[Index] : FString()); }
+void UCharacterSheetWidget::OnGearHover(int32 Index) { if (Index < 0) { ShowSelectedInfo(); return; } HoverInfo(OwnerController && OwnerController->Equipped.IsValidIndex(Index) ? OwnerController->Equipped[Index] : FString()); }
 void UCharacterSheetWidget::ShowSelectedInfo()
 {
 	if (!OwnerController) { ShowInfo(FString()); return; }
 	if (SelectedBag >= 0 && OwnerController->Inventory.IsValidIndex(SelectedBag)) { ShowInfo(OwnerController->Inventory[SelectedBag]); return; }
 	if (SelectedGear >= 0 && OwnerController->Equipped.IsValidIndex(SelectedGear)) { ShowInfo(OwnerController->Equipped[SelectedGear]); return; }
+	if (SelectedQuick >= 0) { const TArray<FString> Q = QuickbarItems(); if (Q.IsValidIndex(SelectedQuick)) { ShowInfo(Q[SelectedQuick]); return; } }
 	ShowInfo(FString());
 }
 
@@ -509,7 +528,15 @@ void UCharacterSheetWidget::ShowInfo(const FString& Item)
 	InfoItem = Item;
 	if (InfoLink) { InfoLink->SetVisibility(Item.IsEmpty() ? ESlateVisibility::Collapsed : ESlateVisibility::Visible); }
 	if (InfoName) { InfoName->SetText(FText::FromString(ItemCatalog::InfoTitle(Item))); }
-	if (InfoText) { InfoText->SetText(FText::FromString(Item.IsEmpty() ? FString() : ItemCatalog::Describe(Item))); }
+	if (InfoText)
+	{
+		// The description, and under it what THIS copy is carrying. Empty for anything that cannot
+		// take an accessory, so the line simply does not appear rather than reading "none".
+		FString Blurb = Item.IsEmpty() ? FString() : ItemCatalog::Describe(Item);
+		const FString Fitted = (Item.IsEmpty() || !OwnerController) ? FString() : OwnerController->AccessorySummary(Item);
+		if (!Fitted.IsEmpty()) { Blurb += LINE_TERMINATOR; Blurb += Fitted; }
+		InfoText->SetText(FText::FromString(Blurb));
+	}
 	if (SkinButton)
 	{
 		const WeaponCatalog::FWeapon* W = Item.IsEmpty() ? nullptr : WeaponCatalog::Find(Item);
@@ -652,7 +679,7 @@ void UCharacterSheetWidget::NativeTick(const FGeometry& MyGeometry, float InDelt
 			const float StatsW = FMath::Max(120.0f, FMath::Floor(Usable - RightW - MirrorWidth));
 			StatsBox->SetWidthOverride(StatsW);
 			MirrorBox->SetWidthOverride(MirrorWidth);
-			if (MirrorFit) { MirrorFit->SetHeightOverride(FMath::Floor(MirrorWidth / 0.625f)); }
+			if (MirrorFit) { MirrorFit->SetHeightOverride(FMath::Floor(PaneShape::HeightFor(PaneShape::Mirror, MirrorWidth))); }
 			RightBox->SetWidthOverride(RightW);
 			if (UHorizontalBoxSlot* SS = Cast<UHorizontalBoxSlot>(StatsBox->Slot)) { SS->SetSize(FSlateChildSize(ESlateSizeRule::Automatic)); }
 			if (UHorizontalBoxSlot* MS = Cast<UHorizontalBoxSlot>(MirrorBox->Slot)) { MS->SetSize(FSlateChildSize(ESlateSizeRule::Automatic)); }

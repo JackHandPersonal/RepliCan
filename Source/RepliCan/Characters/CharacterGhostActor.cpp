@@ -1,5 +1,5 @@
-#include "CharacterGhostActor.h"
-#include "CharacterConfig.h"
+#include "Characters/CharacterGhostActor.h"
+#include "Characters/CharacterConfig.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"

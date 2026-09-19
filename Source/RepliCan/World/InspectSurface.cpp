@@ -1,4 +1,4 @@
-#include "InspectSurface.h"
+#include "World/InspectSurface.h"
 #include "Components/StaticMeshComponent.h"
 
 AInspectSurface::AInspectSurface()

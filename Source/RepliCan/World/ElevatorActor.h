@@ -135,6 +135,9 @@ public:
 	// the car -- not the car, not the doors -- so the floor list appears when you look at the
 	// buttons, which is where a person looks for it. From outside, the doors are the call point.
 	UPROPERTY(VisibleAnywhere, Category = "Elevator") TObjectPtr<UStaticMeshComponent> Panel;
+	// And a second, larger board on the BACK wall facing the door (2026-09-17: "the lift controls
+	// have disappeared" -- the small plate beside the door was too easy to miss), the same inspect point.
+	UPROPERTY(VisibleAnywhere, Category = "Elevator") TObjectPtr<UStaticMeshComponent> PanelBack;
 	UFUNCTION(BlueprintPure, Category = "Elevator") bool IsInspectPoint(const UPrimitiveComponent* Comp) const;
 	// The car's own lamp. A shaft is a hole in the rock with nothing in it, so a ten-storey
 	// descent was ten storeys of black; the light that matters is the one riding WITH you.

@@ -13,9 +13,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "CharacterAnimInstance.h" // for ECharacterDashDirection, stored by value below
-#include "CharacterConfig.h"
-#include "CombatAnimLibrary.h"
+#include "Characters/CharacterAnimInstance.h" // for ECharacterDashDirection, stored by value below
+#include "Characters/CharacterConfig.h"
+#include "Characters/CombatAnimLibrary.h"
 #include "BaseCharacter.generated.h"
 
 class USpringArmComponent;
@@ -145,6 +145,11 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
 	TObjectPtr<UCameraComponent> FollowCamera;
 
+	// The station's air. Ticks only for the locally controlled player; see AmbientMotes.h for why
+	// this rides the person rather than sitting in the rooms.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Atmosphere")
+	TObjectPtr<class UAmbientMotesComponent> AmbientMotes;
+
 	// Optional weapon, added as a separate mesh rigidly attached to hand_r
 	// (not welded into the character's own mesh) -- same "attach, don't
 	// weld" approach as FaceController's NoseMesh, and left unset here in
@@ -219,7 +224,46 @@ public:
 	// Null mesh takes the optic off. The weapon's own sight point is set separately, because
 	// with an optic fitted the catalogue already reports the lens centre as the sight.
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void SetWeaponOptic(UStaticMesh* OpticMesh, const FVector& MountLocal);
+	void SetWeaponOptic(UStaticMesh* OpticMesh, const FVector& MountLocal, const FRotator& MountRot = FRotator::ZeroRotator);
+	// WHERE THE OPTIC SITS ON THE RAIL, kept apart from the rail point itself so it can be nudged
+	// while you watch. SetWeaponOptic gives the base (the weapon rail minus the optic mount point);
+	// this adds the optic own offset on top, and the tuning page drives it live before it is saved.
+	void SetWeaponOpticOffset(const FVector& Offset);
+	// What the fitted sight magnifies by, and whether it draws figures. Only meaningful at the
+	// sights: a scope does nothing for you from the hip.
+	void SetWeaponOpticOptics(float Zoom, bool bSmart, const FString& Reticle = FString(),
+		const FLinearColor& Colour = FLinearColor(0.45f, 1.0f, 0.65f, 1.0f),
+		const TArray<float>& Levels = TArray<float>(), bool bOverlay = false)
+	{
+		WeaponOpticZoomLevels = Levels;
+		OpticZoomIndex = 0;
+		WeaponOpticZoom = FMath::Max(1.0f, Levels.Num() > 0 ? Levels[0] : Zoom);
+		bWeaponOpticSmart = bSmart;
+		WeaponOpticReticle = Reticle;
+		WeaponOpticReticleColour = Colour;
+		bWeaponOpticOverlay = bOverlay;
+	}
+	/** Steps a variable scope to the next power. True when it actually changed. */
+	bool StepOpticZoom(int32 Dir);
+	bool HasVariableOptic() const { return WeaponOpticZoomLevels.Num() > 1; }
+	bool OpticUsesOverlay() const { return bWeaponOpticOverlay; }
+	/** 1 when the weapon is settled behind the glass, 0 when it is not. The black ring of a real
+	 *  scope grows the moment your eye is off the axis, and that is what this drives. */
+	float OpticSettle() const;
+	/** The sight is jammed against something: a scope shows black, not the inside of a wall. */
+	bool IsOpticBlocked() const;
+	const FString& GetOpticReticle() const { return WeaponOpticReticle; }
+	FLinearColor GetOpticReticleColour() const { return WeaponOpticReticleColour; }
+	float GetWeaponOpticZoom() const { return WeaponOpticZoom; }
+	bool HasSmartOptic() const { return bWeaponOpticSmart; }
+	FVector GetWeaponOpticOffset() const { return WeaponOpticOffset; }
+	// A RED DOT IS A DOT ONLY FOR THE EYE BEHIND IT. The reticle is painted on the glass by the
+	// material, so from any other angle -- the weapon at low ready, a third-person camera -- it
+	// would sit there glowing. These drive the material's DotVisible up as the weapon comes to
+	// the eye and down again as it leaves.
+	UPROPERTY(Transient) TArray<TObjectPtr<class UMaterialInstanceDynamic>> OpticDotMIDs;
+	float OpticDotVisible = 0.0f;
+	void TickOpticDot(float DeltaSeconds);
 
 	// True when the weapon is carrying its own sighting device. The HUD hides its reticle while
 	// aiming through one: two reticles on screen at once is worse than either alone, and the
@@ -606,6 +650,11 @@ public:
 	// Down the sights the same hand movement turns the view this much less: fine aim on a
 	// narrower view, the way a scoped camera slows the mouse. 1 = no change.
 	UPROPERTY(EditAnywhere, Category = "Weapon|Aim", meta = (ClampMin = "0.05", ClampMax = "1.0")) float AimSensitivityScale = 0.5f;
+	// AND THE MAGNIFICATION SLOWS IT FURTHER, by zoom^-this. 0 ignores magnification (a 9x is then
+	// unusable: the smallest flick throws the target off the glass); 1 is "relative" aim, where the
+	// target moves the same number of pixels per count of mouse at every magnification -- correct on
+	// paper and felt as glue by most players. 0.5 is where the genre has settled.
+	UPROPERTY(EditAnywhere, Category = "Weapon|Aim", meta = (ClampMin = "0.0", ClampMax = "1.0")) float AimSensitivityZoomExponent = 0.5f;
 	// Down the sights the round leaves the muzzle along the bore, which runs parallel to the
 	// sight line and below it (height over bore, from the catalogue's muzzle and optic points).
 	// 0 keeps it parallel: a near wall takes the round that much under the point of aim. A range
@@ -681,6 +730,26 @@ public:
 	float FirstPersonEyeForwardOfHeadCm = 12.0f;
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	float FirstPersonEyeAboveHeadCm = 6.0f;
+	// A SHOOTER AIMS WITH ONE EYE, the one on the side the weapon is. The head bone sits in the
+	// middle of the skull, so a sight brought to it is brought to the bridge of the nose: the rifle
+	// crosses the face and the body reads as aiming left-eyed.
+	// MEASURED, NOT ASSUMED (2026-09-17): the page draws a rod from this computed eye down the aim,
+	// and the rod was walked out until it started at the model's own right eye -- 7.7 cm. Half a
+	// HUMAN interpupillary distance is 3.2, which is what this was first set to and it read as dead
+	// centre: a Synty head is about 26 cm across, so its eyes sit far wider than a person's.
+	// First person is not touched: there the camera IS the aiming eye and the sight has to sit in
+	// the middle of the screen.
+	UPROPERTY(EditAnywhere, Category = "Camera")
+	float FirstPersonEyeSideOfHeadCm = 4.25f;
+	// Where the aiming eye is this frame: the rig's own eyes bone, moved by the character's own two
+	// eyeline numbers (FCharacterConfig::EyeSideCm / EyeForwardCm). Falls back to the head bone plus
+	// the two offsets above on a rig with no eyes bone.
+	bool EyeFromRig(const FRotator& Ctl, FVector& OutLoc) const;
+	// The eyeline, live (the hand page edits it before anything is saved).
+	void SetEyeTune(float SideCm, float UpCm, float ForwardCm);
+	float GetEyeSideCm() const;
+	float GetEyeUpCm() const;
+	float GetEyeForwardCm() const;
 
 	// The crouch lean carries the eye well outside the collision capsule, so the eye is swept
 	// out from the body rather than simply clamped to the capsule: it travels as far as the head
@@ -710,6 +779,11 @@ public:
 	// The bone the first-person eye rides. Every rig in this project names it "head".
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	FName FirstPersonHeadBone = TEXT("head");
+	// THE EYES ARE A BONE. The rig carries one combined "eyes" bone sitting between them (probed
+	// 2026-09-17: 13.7 cm forward of the head bone and 6.4 up, which the two constants above were
+	// only approximating -- and unlike them it follows the head when it turns or tips). When it is
+	// there the eye line is taken from it and only WHICH eye is a number.
+	FName EyesBone = TEXT("eyes");
 
 	// While crouched in third person, the camera boom only follows this
 	// fraction of the capsule's own crouch-induced drop -- 0 anchors the
@@ -931,6 +1005,90 @@ private:
 	// cosmetics) from the owning camera in first person, leaving the body,
 	// arms, hands and weapon visible to the player.
 	void ApplyFirstPersonHeadHiding(bool bFirstPerson);
+	// THE WEAPON IS VIEW GEOMETRY IN FIRST PERSON. The sights come to within sixteen centimetres of
+	// the eye and the near clip plane is ten, so the back of the optic and the receiver behind it
+	// were being sliced open by the near plane. The engine has a pass for exactly this: a primitive
+	// marked FirstPerson is drawn with the camera's own first-person field of view and a COMPRESSED
+	// DEPTH RANGE, so it cannot clip against the world. Marked on the weapon, its optic and the
+	// arms while the view is first person, and cleared when it is not.
+	void ApplyFirstPersonRendering(bool bFirstPerson);
+	UPROPERTY(EditAnywhere, Category = "Camera") float FirstPersonViewFov = 70.0f;
+	// How much of the depth range first-person geometry is squeezed into: smaller keeps it further
+	// from the near plane. 1 is off.
+	UPROPERTY(EditAnywhere, Category = "Camera") float FirstPersonViewScale = 0.55f;
+	// HOW CLOSE A SIGHT MAY EVER BE DRAWN. First-person primitives are rendered at
+	// FirstPersonViewScale of their real depth, and anything nearer than the near clipping plane
+	// (10 cm by default) is simply not drawn. At ADS the solve brings the sight to about 14.5 cm
+	// from the eye -- which is correct, and exactly the problem: 14.5 x 0.55 = 8.0 cm, inside the
+	// plane, so the optic vanished at the one moment the player is looking through it. Low ready
+	// holds the weapon further out and survived, which is why it looked like an ADS bug.
+	// The scale is eased up only as far as it must be to keep the sight in front of the plane.
+	UPROPERTY(EditAnywhere, Category = "Camera") float FirstPersonMinSightDepthCm = 12.0f;
+	// STEADYING THE WEAPON IN THE VIEW. In first person the weapon rides the hand, so every twitch
+	// the clips put in the arm arrives at the eye at full size. This damps the weapon's pose IN THE
+	// EYE'S OWN FRAME, so turning the head does not lag it and only the animation's own noise is
+	// taken out. Rate in "per second": higher follows the hand more exactly, lower is steadier.
+	UPROPERTY(EditAnywhere, Category = "Weapon|Sights") float ViewDampRate = 14.0f;
+	// The correction can never exceed this, so the weapon cannot drift off the hand however noisy
+	// the animation: past it the damping gives up and the weapon is where the hand put it.
+	// HOW FAR THE STEADYING MAY EVER PULL THE WEAPON OFF THE HAND. Measured while moving, the damping
+	// sat pegged at both of these every frame -- 6 cm and 8 degrees. Eight degrees, out at a muzzle
+	// half a metre down the barrel, throws the aim point about 7 cm: far more than the animation
+	// jitter this exists to absorb, and plainly visible as the gun not sitting in the hand. Two and a
+	// half degrees is about 2 cm at the same muzzle, which still swallows the jitter without the
+	// weapon ever reading as loose.
+public:
+	// ---- FIRST PERSON VIEW ----------------------------------------------------------------
+	// In first person the weapon LEADS and the hands follow it. Everywhere else the weapon rides the
+	// hand, which is right when you can see the body -- but in first person the hand is the only
+	// thing on screen and every twitch in the locomotion clips arrives a foot from the camera at
+	// full size. The solve (SightSolvedWeaponWorld) is built from the eye and the aim and contains
+	// no animation at all, and TickHandIK already aims BOTH hands at it, so taking the weapon's
+	// target from the solve makes the weapon and the hands agree exactly and removes the jitter at
+	// its source rather than filtering it afterwards.
+	UPROPERTY(EditAnywhere, Category = "Weapon|First Person") bool bViewLeadFromSolve = true;
+	// A CRITICALLY DAMPED SPRING, not a lerp with a wall in front of it. The old filter closed a
+	// fraction of the gap each frame and then hit a hard clamp; at the clamp it stops behaving like
+	// a filter and starts behaving like a wall, and the weapon sticking against that wall reads as
+	// snapping. A spring with a velocity has no such corner: bigger rate, tighter follow.
+	UPROPERTY(EditAnywhere, Category = "Weapon|First Person") float ViewSpringRate = 16.0f;      // rad/s, position
+	UPROPERTY(EditAnywhere, Category = "Weapon|First Person") float ViewSpringRateRot = 20.0f;   // rad/s, rotation
+	// The safety net, not the mechanism: how far the spring may ever be from the target. Generous,
+	// because with the spring doing the work it should never be reached in ordinary play.
+	UPROPERTY(EditAnywhere, Category = "Weapon|First Person") float ViewMaxOffsetCm = 10.0f;
+	UPROPERTY(EditAnywhere, Category = "Weapon|First Person") float ViewMaxOffsetDeg = 10.0f;
+	// SWAY: the weapon trails a turn and catches up. Degrees of lag per degree-per-second of turn.
+	UPROPERTY(EditAnywhere, Category = "Weapon|First Person") float ViewSwayScale = 0.020f;
+	UPROPERTY(EditAnywhere, Category = "Weapon|First Person") float ViewSwayMaxDeg = 5.0f;
+	UPROPERTY(EditAnywhere, Category = "Weapon|First Person") float ViewSwayShiftCm = 1.4f;   // and a little sideways with it
+	// BOB: side to side at the step, up and down at twice it -- a figure of eight, in the EYE's
+	// frame, scaled by how fast the body is actually moving. Driven by speed rather than inherited
+	// from the clip, so it is the same at any frame rate and stops dead when you do.
+	UPROPERTY(EditAnywhere, Category = "Weapon|First Person") float ViewBobCm = 1.0f;
+	UPROPERTY(EditAnywhere, Category = "Weapon|First Person") float ViewBobHz = 1.05f;
+	UPROPERTY(EditAnywhere, Category = "Weapon|First Person") float ViewBobSpeedRef = 320.0f;   // cm/s that counts as a full stride
+private:
+
+	UPROPERTY(EditAnywhere, Category = "Weapon|Sights") float ViewDampMaxCm = 2.0f;
+	UPROPERTY(EditAnywhere, Category = "Weapon|Sights") float ViewDampMaxDeg = 2.5f;
+	FVector WeaponOpticBaseLocal = FVector::ZeroVector;   // the rail point, as handed over
+	FVector WeaponOpticOffset = FVector::ZeroVector;      // and this optic own nudge off it
+	float WeaponOpticZoom = 1.0f;
+	bool bWeaponOpticSmart = false;
+	TArray<float> WeaponOpticZoomLevels;
+	int32 OpticZoomIndex = 0;
+	bool bWeaponOpticOverlay = false;
+	bool bOpticHiddenForOverlay = false;
+	FString WeaponOpticReticle;
+	FLinearColor WeaponOpticReticleColour = FLinearColor(0.45f, 1.0f, 0.65f, 1.0f);
+	FTransform ViewDampedLocal = FTransform::Identity;
+	FVector ViewVel = FVector::ZeroVector;      // the spring's velocities, which are what make it a spring
+	FVector ViewRotVel = FVector::ZeroVector;   // radians/s, as a rotation vector
+	float ViewBobPhase = 0.0f;
+	float ViewPrevYaw = 0.0f, ViewPrevPitch = 0.0f;
+	float ViewSwayYaw = 0.0f, ViewSwayPitch = 0.0f;
+	bool bViewDampValid = false;
+
 	AActor* PickAmbientLookAtTarget() const;
 	// The player's controlled character, if it is one of ours and sits in
 	// front within AmbientLookAtPlayerRadius; null otherwise.
@@ -989,6 +1147,7 @@ public:
 	// Jump straight to a zoom step; 0 is first person. Exposed as a console command so the
 	// camera can be put in a known state for testing without hunting the mouse wheel.
 	UFUNCTION(Exec, BlueprintCallable, Category = "Camera") void SetZoomLevel(int32 Index);
+	int32 GetZoomLevel() const { return CurrentZoomLevelIndex; }
 	UFUNCTION(BlueprintPure, Category = "Camera") int32 GetNumZoomLevels() const { return ZoomArmLengths.Num(); }
 	// Debugging: the guards on the move handlers and whether they are being reached.
 	UFUNCTION(BlueprintPure, Category = "Debug") FString DescribeMoveGuards() const;
@@ -1104,6 +1263,10 @@ public:
 	void StartIdleBehaviour();
 	void PlayNextIdle();
 	UPROPERTY() TArray<TObjectPtr<UAnimSequence>> IdleClips;
+	void CheckStuck();
+	FTimerHandle StuckTimer;
+	FString LastBark;
+	float LastHurtBarkAt = -10.0f;
 	UPROPERTY() TObjectPtr<class USpotLightComponent> Headlamp;
 	TWeakObjectPtr<AActor> SeatActor;
 	TWeakObjectPtr<AActor> ApproachSeat;
@@ -1358,6 +1521,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Weapon|Accuracy", meta = (ClampMin = "0.0")) float AimArmScale = 0.45f;
 	UPROPERTY(EditAnywhere, Category = "Weapon|Accuracy", meta = (ClampMin = "10.0")) float AimFieldOfView = 62.0f;
 	UPROPERTY(EditAnywhere, Category = "Weapon|Accuracy", meta = (ClampMin = "10.0")) float HipFieldOfView = 90.0f;
+	// NO LONGER DRIVES THE FIELD OF VIEW -- that is a function of the carry blend now, and arrives
+	// exactly when the weapon does; see the lens in Tick. How fast the sights come up is
+	// IntoSightsSeconds / OutOfSightsSeconds / RaiseFromLowReadySeconds, which are durations you can
+	// put a number on. Left here for the camera arm's own easing.
 	UPROPERTY(EditAnywhere, Category = "Weapon|Accuracy", meta = (ClampMin = "0.1")) float AimInterpSpeed = 9.0f;
 
 	// ---- Carry positions ----------------------------------------------------
@@ -1509,6 +1676,7 @@ public:
 	// How long the weapon takes to move between hand placement and sight placement. A duration,
 	// not a rate -- see FTimedBlend.
 	UPROPERTY(EditAnywhere, Category = "Weapon|Sights", meta = (ClampMin = "0.02")) float AimSightBlendSeconds = 0.20f;
+
 	// Where the eye should line up, in the weapon mesh's own space. Set by the controller from
 	// the catalogue when a weapon is drawn; zero means the weapon has no derived sight and the
 	// alignment falls back to the bore line.
@@ -1525,9 +1693,22 @@ public:
 	TArray<FVector> GoodSpots;
 	float GoodSpotClock = 0.0f;
 	void TickGoodSpots(float DeltaSeconds);
-	// The trigger hand's weapon-space correction (see TriggerHandRotation); the console's HandRot goes through here.
+	// The main hand's weapon-space correction (see TriggerHandRotation); the console's HandRot goes through here.
 	void SetTriggerHandRotation(const FRotator& R);
 	FRotator GetTriggerHandRotation() const { return TriggerHandRotation; }
+	// The held weapon's own turn of the hand on its grip (the catalogue's hand_rot), on top of the correction above.
+	void SetWeaponHandRotation(const FRotator& R);
+	FRotator GetWeaponHandRotation() const { return WeaponHandRotation; }
+	// HandDiag: the hold's numbers on screen every frame (reach, carry pull-in, hand gap, sight off the eye line).
+	bool bHandDiag = false;
+	// The hand-tuning page pins the carry (EWeaponCarry as an int; -1 = the game decides).
+	int32 CarryOverride = -1;
+	void SetCarryOverride(int32 Carry) { CarryOverride = Carry; }
+	// A PAGE THAT PAUSES THE GAME still wants this one character alive. Everything the hold is made
+	// of runs on a tick -- the carry blend and the sight solve and the hand IK in Tick, the weapon's
+	// final placement in the post-camera tick function, the pose in the meshes' own ticks -- so a
+	// paused stand-in is a frozen statue with its gun hanging by its leg. Nothing else is unpaused.
+	void SetTicksWhenPaused(bool bOn);
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void SetWeaponMuzzle(const FVector& MuzzleLocal);
 
@@ -1558,9 +1739,83 @@ public:
 	float HandIKBlendSeconds = 0.15f;
 	// The support hand's wrist, relative to the weapon. A hand placed correctly but rotated
 	// wrongly grips the handguard sideways, so this is as much a part of the answer as the
-	// position is. Tuned by eye against the rifle, shared by every two-handed weapon.
-	UPROPERTY(EditAnywhere, Category = "Weapon|Hand IK")
-	FRotator SupportHandRotation = FRotator(0.0f, 0.0f, 90.0f);
+	// position is. Shared by every two-handed weapon.
+	// MEASURED 2026-09-17 (scratch hand_basis, on SK_Chr_SpaceSoldier_Male_01 with the WeaponGrip_L
+	// socket as authored): the old roll-90 guess sent the left hand's fingers BACK along the barrel
+	// (-0.83, 0.49, 0.27) with the palm facing down (-0.39, 0.14, -0.91) -- the hand twisted round
+	// backwards under the handguard. This wrap puts the fingers across the guard (+Y), the palm up
+	// into it (+Z) and the thumb forward (0.92, 0.38, 0.05): a support hand. Solved from the hand
+	// bone's own finger and palm directions and the socket's rotation; HandRotL tunes it live.
+	UPROPERTY(EditAnywhere, Category = "Weapon|Hands") FRotator SupportHandRotation = FRotator(-16.0f, -120.6f, -85.7f);
+	// The held weapon's own turn of the support hand on its fore grip (the catalogue's fore_hand_rot).
+	FRotator WeaponForeHandRotation = FRotator::ZeroRotator;
+	void SetSupportHandRotation(const FRotator& R) { SupportHandRotation = R; }
+	FRotator GetSupportHandRotation() const { return SupportHandRotation; }
+	void SetWeaponForeHandRotation(const FRotator& R) { WeaponForeHandRotation = R; }
+	// The held weapon's closing of each finger (fingers_r / fingers_l: thumb, index, middle, ring,
+	// pinky; degrees per phalanx, + closes) on top of the clip's hand. Empty = the clip as it is.
+	TArray<float> WeaponFingersR, WeaponFingersL;
+	FString HeldWeaponName;
+	void SetWeaponFingers(const TArray<float>& R, const TArray<float>& L) { WeaponFingersR = R; WeaponFingersL = L; }
+	// WHICH weapon the numbers on this character came from. Not used to look anything up in the
+	// normal run of things -- the catalogue is read once and pushed here -- but it is what lets a
+	// tuning save find every character carrying that weapon and push the new numbers again.
+	UFUNCTION(BlueprintPure, Category = "Weapon") const FString& GetHeldWeaponName() const { return HeldWeaponName; }
+	void SetHeldWeaponName(const FString& In) { HeldWeaponName = In; }
+	// The held weapon's posture at the sights: hunch (cm of shrug) and lean (degrees at the waist).
+	float WeaponHunch = 0.0f;
+	void SetWeaponHunch(float Cm) { WeaponHunch = Cm; }
+	// Where the stock meets the shoulder, in the weapon's own space (the catalogue's "shoulder").
+	// Zero means the weapon's origin, which is its grip -- a fair pivot for anything with no stock.
+	FVector WeaponShoulderLocal = FVector::ZeroVector;
+	// The weapon's own low-ready angles and elbow twists.
+	float WeaponLowReadyPitch = -30.0f, WeaponLowReadyYaw = -30.0f;
+	float WeaponElbowMain[3] = { 0.0f, 0.0f, 0.0f };
+	float WeaponElbowSupport[3] = { 0.0f, 0.0f, 0.0f };
+	// The elbow across the AIM: [high, middle, low], at the pitches below. Added to the carry's.
+	float WeaponElbowMainAim[3] = { 0.0f, 0.0f, 0.0f };
+	float WeaponElbowSupportAim[3] = { 0.0f, 0.0f, 0.0f };
+	// The two ends the curve is tuned at. They are the tuning page's own HIGH and LOW preview
+	// angles on purpose: a value set while looking at HIGH has to be the value you were looking at.
+	// Between them the curve is linear, and PAST them it carries the same slope on rather than
+	// flattening -- an arm still has somewhere to go at eighty degrees up.
+	static constexpr float ElbowAimHighPitch = 28.0f;
+	static constexpr float ElbowAimLowPitch = -42.0f;
+	void SetWeaponElbowAim(const float* Main, const float* Support)
+	{
+		for (int32 i = 0; i < 3; ++i) { WeaponElbowMainAim[i] = Main[i]; WeaponElbowSupportAim[i] = Support[i]; }
+	}
+	float ElbowAim(bool bSupport) const;
+	void SetWeaponLowReady(float Pitch, float Yaw) { WeaponLowReadyPitch = Pitch; WeaponLowReadyYaw = Yaw; }
+	void SetWeaponElbowTwist(const float* Main, const float* Support)
+	{
+		for (int32 i = 0; i < 3; ++i) { WeaponElbowMain[i] = Main[i]; WeaponElbowSupport[i] = Support[i]; }
+	}
+	// An arm folded in at the sights wants a different elbow from the same arm hanging at low ready.
+	float CarryElbow(EWeaponCarry Carry, bool bSupport) const;
+	// How much of a given carry is in effect right now, blended across a change.
+	float CarryAlpha(EWeaponCarry Which) const;
+	// Length of pull for a carry, in centimetres along the weapon's own bore.
+	float CarryPullCm(EWeaponCarry Carry) const;
+	void SetWeaponShoulderPoint(const FVector& Local) { WeaponShoulderLocal = Local; }
+	float WeaponLeanDeg = 0.0f;
+	void SetWeaponLean(float Degrees) { WeaponLeanDeg = Degrees; }
+	// PER CARRY, from the weapon: how far along the aim it is held (pull) and how far off to the
+	// trigger side (lateral), indexed low ready 0, shouldered 1, sights 2. ADS is normally zero
+	// sideways -- the optic is in the eye line -- and the other two hold the weapon off the face.
+	float WeaponPullCm[3] = { 0.0f, 0.0f, 0.0f };
+	float WeaponLateralCm[3] = { 12.0f, 11.0f, 0.0f };
+	void SetWeaponCarryTune(const float* Pull, const float* Lateral)
+	{
+		for (int32 i = 0; i < 3; ++i) { WeaponPullCm[i] = Pull[i]; WeaponLateralCm[i] = Lateral[i]; }
+	}
+	// How much of the ADS posture is in effect right now, blended across a carry change: the hunch
+	// and the lean belong to looking through the sights and to nothing else.
+	float CarryAdsAlpha() const;
+	// Where the aiming eye is this frame and which way it looks: in third person the character's
+	// own eye (the head bone plus the offsets, eye_side included), in first person the camera.
+	bool GetAimEye(FVector& OutLoc, FRotator& OutRot) const { return GetEye(false, OutLoc, OutRot); }
+	FRotator GetWeaponForeHandRotation() const { return WeaponForeHandRotation; }
 	// THE TRIGGER HAND'S CORRECTION, in weapon space, on top of the WeaponGrip_R socket. Probed
 	// live (2026-09-16) with the socket at identity: the wrist sat 2.8 cm to the LEFT of the
 	// grip and the palm faced down -- the right hand taking the grip from the wrong side. In the
@@ -1574,7 +1829,19 @@ public:
 	// The weapon's transform under the grip socket that realises TriggerHandRotation.
 	// The mesh under the grip socket: turned by the trigger-hand correction, and shifted so the
 	// weapon's own GRIP point (mesh space, usually the origin) sits at the socket.
-	FTransform WeaponOnSocket() const { const FQuat R = TriggerHandRotation.Quaternion().Inverse(); return FTransform(R, -R.RotateVector(WeaponGripLocal)); }
+	// THE SCALE BELONGS IN HERE, not bolted on afterwards. The grip point is a place on the MESH, so
+	// scaling the mesh moves it: at twice the size the grip is twice as far from the origin, and an
+	// offset worked out from the unscaled point puts the weapon that far out of the hand. It never
+	// showed because the scale was 1 everywhere. The solve inverts this same expression, so as long
+	// as both halves carry the scale they still cancel exactly and the hold is unaffected.
+	FTransform WeaponOnSocket() const
+	{
+		const FQuat R = (TriggerHandRotation + WeaponHandRotation).Quaternion().Inverse();
+		return FTransform(R, -R.RotateVector(WeaponGripLocal * WeaponRelativeScale), WeaponRelativeScale);
+	}
+	/** The catalogue's size for the weapon in hand, multiplied into the character's own. */
+	void SetWeaponDrawScale(float S);
+	FRotator WeaponHandRotation = FRotator::ZeroRotator;
 	FVector WeaponGripLocal = FVector::ZeroVector;
 	void SetWeaponGrip(const FVector& GripLocal);
 
@@ -1609,6 +1876,10 @@ public:
 	// player is forever dragging it down; with it the view settles over this long, which is
 	// what makes a burst feel like a burst rather than a climb.
 	UPROPERTY(EditAnywhere, Category = "Weapon|Recoil", meta = (ClampMin = "0.0")) float RecoilRecoverSeconds = 0.22f;
+	// SIDEWAYS, AS WELL AS UP. A kick that is purely vertical walks the muzzle up a straight line and
+	// a burst becomes easy to hold; real recoil wanders. This is the sideways part as a fraction of
+	// the upward kick, thrown left or right at random each shot, and recovered the same way.
+	UPROPERTY(EditAnywhere, Category = "Weapon|Recoil", meta = (ClampMin = "0.0")) float RecoilYawFraction = 0.42f;
 	// How much of each kick is given back. 1 returns exactly to the pre-shot aim; a little less
 	// leaves a trace of climb to fight, which is what sustained fire should cost.
 	UPROPERTY(EditAnywhere, Category = "Weapon|Recoil", meta = (ClampMin = "0.0", ClampMax = "1.0")) float RecoilRecoverFraction = 0.8f;
@@ -1681,6 +1952,14 @@ public:
 	FLinearColor GetPartColor(const FString& Parameter) const;
 	void SetCharacterScale(const FVector& NewScale);
 	void SetSpeedMultiplier(float NewMultiplier);
+	void SetWalkOnly(bool bWalk) { bWalkToggled = bWalk; UpdateStandingSpeed(); }   // an NPC that never jogs: its top speed is the walk
+	// HURT. A hit that dealt damage (ShotReactions): the player's own voice grunts, in the sex the
+	// config gives; Die plays the last one. Conversations/Voice/PlayerGrunts<Male|Female>/<kind>_*.wav.
+	void NoteHurt(float Dealt);
+	void PlayVoiceBark(const FString& Kind);
+	// STUCK. Once a second every mobile character checks its capsule is not inside geometry (a
+	// placement in a cage, a save restored into a moved prop) and moves to the nearest free floor.
+	void UnstickNow();
 
 	// Tags: freeform string labels stored in the config, saved to JSON, and
 	// mirrored onto the actor's own Tags so AActor::ActorHasTag works. The
@@ -1871,6 +2150,14 @@ private:
 	FVector PredictedEyeLoc = FVector::ZeroVector;
 	FRotator PredictedEyeRot = FRotator::ZeroRotator;
 	bool bPredictedEyeValid = false;
+	// WHERE THE EYE SITS ON THE BODY, in the actor's own frame, recorded after the animation has
+	// run. The eye is a BONE, and the solve that places the weapon runs before the mesh animates,
+	// so reading the bone there gives last frame's pose in last frame's actor transform -- and the
+	// weapon, placed relative to that eye, slides by an amount proportional to how fast the
+	// character is moving. Measured: 2.6 cm of error standing still, 11.6 cm walking. Rebuilding
+	// this offset on the CURRENT actor transform keeps the animated height and loses the lag.
+	FVector EyeLocalToActor = FVector::ZeroVector;
+	bool bEyeLocalValid = false;
 	// ---- The lag test: numbers instead of eyes ------------------------------------------------
 	// WeaponLagTest N in the console (or pc.weapon_lag_test(N) from Python) turns the view and
 	// walks forward for N seconds while measuring, every frame, (a) how far the predicted eye
@@ -1899,6 +2186,7 @@ private:
 	// carry move rather than the instant the button is pressed, so the arms and the weapon agree.
 	bool bPosedForADS = false;
 	float RecoilToRecover = 0.0f;
+	float RecoilYawToRecover = 0.0f;   // the sideways half of the kick, owed back
 	float RecoilRecoverLeft = 0.0f;
 	void TickRecoil(float DeltaSeconds);
 	FVector WeaponMuzzleLocal = FVector::ZeroVector;
@@ -1914,6 +2202,30 @@ private:
 	// Whether the weapon is currently being driven by the geometric solve rather than hanging
 	// off its socket. Needed so the hand-off back to the socket happens exactly once.
 	bool bSightAlignActive = false;
+	// THE SOLVED POSE: where the sights want the weapon this frame (SolveWeaponPose). The weapon
+	// itself never leaves the grip socket any more; the hand IK aims the arm at the hand position
+	// this pose implies and the weapon arrives with the hand. See Docs/HandAnchoring.md.
+	FTransform SightSolvedWeaponWorld;
+	bool bSightSolvedValid = false;
+	// The right arm, upper plus lower, off its own bones (TickSightAlignment); the reach rule's input.
+	float ArmReachR = 0.0f;
+	// AND THE SUPPORT ARM'S. The reach rule used to measure only the trigger arm, so the weapon was
+	// pulled in until the RIGHT hand could reach it and no further -- and the left hand, which has
+	// to get across the body to a fore grip further along the weapon, was routinely left short. That
+	// is the hand hanging in the air beside the gun in every screenshot of the fault.
+	float ArmReachL = 0.0f;
+	mutable float SupportReachRatio = 0.0f;   // the support hand's distance over its own arm, for the dump
+	// What the last solve did and how the hold came out, for HandDiag. Mutable: the solve is pure
+	// in what it returns and records these on the side.
+	mutable float ReachClampScale = 1.0f;   // the carry's forward component, scaled so the hand can reach: 1 = untouched
+	mutable float HandReachRatio = 0.0f;    // the hand target's distance from the shoulder over the arm's usable reach
+	float HandGapCm = 0.0f;                 // after animation: the weapon on the hand against the solved pose
+	float SightOffEyeCm = 0.0f;             // after the camera: the sight point's distance from the eye line
+	// Every number the hold was computed from and every number it produced, as JSON. Const, reads
+	// only, safe to call at any time; ABasePlayerController::HandDump writes it to disk.
+	FString DumpHold() const;
+	bool GripSocketOnBone(FTransform& Out) const;   // WeaponGrip_R relative to hand_r, from the mesh asset
+	bool SocketOnBoneFor(FName Socket, FTransform& Out) const;   // any socket relative to its bone, from the mesh asset
 	// Seconds left of a commanded raise out of low ready, which outranks everything but the
 	// sights while it lasts.
 	float ForceShoulderLeft = 0.0f;

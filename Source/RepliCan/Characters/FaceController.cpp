@@ -1,4 +1,4 @@
-#include "FaceController.h"
+#include "Characters/FaceController.h"
 #include "Components/DecalComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -13,7 +13,7 @@
 #include "Rendering/SkeletalMeshRenderData.h"
 #include "Rendering/SkeletalMeshLODRenderData.h"
 #include "ShaderCompiler.h"
-#include "CharacterAnimInstance.h"
+#include "Characters/CharacterAnimInstance.h"
 #include "UObject/ConstructorHelpers.h"
 
 namespace

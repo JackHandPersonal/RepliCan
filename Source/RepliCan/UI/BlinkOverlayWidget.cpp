@@ -1,4 +1,4 @@
-#include "BlinkOverlayWidget.h"
+#include "UI/BlinkOverlayWidget.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Rendering/DrawElements.h"

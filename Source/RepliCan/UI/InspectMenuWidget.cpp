@@ -1,5 +1,5 @@
-#include "InspectMenuWidget.h"
-#include "CrtStyle.h"
+#include "UI/InspectMenuWidget.h"
+#include "UI/CrtStyle.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/HorizontalBox.h"
 #include "Components/Border.h"

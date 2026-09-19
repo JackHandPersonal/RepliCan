@@ -84,6 +84,13 @@ public:
 protected:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	// The asset path scrolls when it is too long for its corner. Held here rather than worked out
+	// each frame so it keeps its place across a repaint.
+	UPROPERTY() TObjectPtr<class USizeBox> MeshMarquee;
+	float MeshScroll = 0.0f;
+	float MeshScrollWait = 0.0f;
+	static constexpr float MeshScrollSpeed = 42.0f;        // pixels a second: slow enough to read
+	static constexpr float MeshScrollHoldSeconds = 1.6f;   // still at each end, so both can be read
 	virtual void NativeDestruct() override;
 	virtual int32 NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
@@ -150,6 +157,7 @@ private:
 	UPROPERTY() TObjectPtr<UTextBlock> OpticLabel;
 	UFUNCTION() void OnCycleOptic();
 	void ShowOptic();
+	bool SelectedOpticFixed() const;   // the sight is part of the gun; the OPTIC cycle refuses
 	TArray<FString> StanceNames;   // the catalogue's stances, the order the button cycles them in
 	UPROPERTY() TObjectPtr<UTextBlock> StanceLabel;
 	// The catalogue's points for the weapon on show: filled dots over the render (PaintMarkers)
@@ -173,6 +181,29 @@ private:
 	void BuildDetailHeader(UVerticalBox* Into);
 	UFUNCTION() void OnRevert();
 	UFUNCTION() void OnResetPoints();   // the POINTS back to what the file has; nothing else touched
+	UFUNCTION() void OnTuneHands();     // the hand-tuning page for this weapon
+	UFUNCTION() void OnCycleSkin();     // the next texture variant this weapon can wear
+	UFUNCTION() void OnSetDefaultSkin();   // and the one that makes it this weapon's own
+	// RECATEGORISING. One button per category the selected entry is not already in; pressing one
+	// moves the record and the card follows to that tab.
+	UFUNCTION() void OnMoveToWeapons();
+	UFUNCTION() void OnMoveToOptics();
+	UFUNCTION() void OnMoveToArmor();
+	UFUNCTION() void OnMoveToEquipment();
+	UFUNCTION() void OnMoveToConsumables();
+	UFUNCTION() void OnMoveToOther();
+	void MoveSelectedTo(const FString& NewCategory);
+	// Writes the entry into its new home and only then takes it out of the old one, so a failure
+	// halfway leaves a duplicate rather than nothing at all. Returns what to tell the user.
+	FString MoveEntryTo(FReferenceEntry& E, const FString& NewCategory);
+	UPROPERTY() TObjectPtr<class UVerticalBox> MoveBox;
+	UPROPERTY() TArray<TObjectPtr<class UWidget>> MoveButtons;
+	UPROPERTY() TObjectPtr<class UTextBlock> SkinDefaultLabel;
+	UPROPERTY() TObjectPtr<class UWidget> SkinDefaultButton;
+	FString TriedSkin;   // the paint on show; empty until the cycler is touched
+	void RefreshSkinLabel();
+	UPROPERTY() TObjectPtr<class UTextBlock> SkinLabel;   // "[ SKIN 2/6 ]", or hidden where there is no choice
+	UPROPERTY() TObjectPtr<class UWidget> SkinButton;
 	UFUNCTION() void OnToggleHidden();
 	UPROPERTY() TObjectPtr<UTextBlock> HiddenLabel;
 	UPROPERTY() TObjectPtr<class UScrollBox> DetailScroll;

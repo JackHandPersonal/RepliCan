@@ -1,6 +1,6 @@
-#include "DeathThrash.h"
-#include "BaseCharacter.h"
-#include "ShotReactions.h"
+#include "Characters/DeathThrash.h"
+#include "Characters/BaseCharacter.h"
+#include "Weapons/ShotReactions.h"
 #include "Animation/AnimSequence.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "HAL/IConsoleManager.h"
@@ -134,7 +134,7 @@ void UDeathPlayComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 		return;
 	}
 	// Down: the pool spreads under the trunk once it has come to rest a moment.
-	if (!bPooled && Clock >= ThrashFrom + 1.5f) { bPooled = true; if (Body->GetBoneIndex(TEXT("pelvis")) != INDEX_NONE) { ShotReactions::PoolAt(GetWorld(), Body->GetSocketLocation(TEXT("pelvis")), 110.0f); } }
+	if (!bPooled && Clock >= ThrashFrom + 1.5f) { bPooled = true; if (Body->GetBoneIndex(TEXT("pelvis")) != INDEX_NONE && !(GetOwner() && GetOwner()->ActorHasTag(TEXT("robot")))) { ShotReactions::PoolAt(GetWorld(), Body->GetSocketLocation(TEXT("pelvis")), 110.0f); } }
 	if (!Body->IsSimulatingPhysics() || (ThrashUntil <= 0.0f && bPooled) || (ThrashUntil > 0.0f && Clock >= ThrashUntil && bPooled)) { DestroyComponent(); return; }
 	if (ThrashUntil <= 0.0f || Clock < NextKick || Clock >= ThrashUntil) { return; }
 	const float T = FMath::Clamp((Clock - ThrashFrom) / FMath::Max(0.1f, ThrashUntil - ThrashFrom), 0.0f, 1.0f);
