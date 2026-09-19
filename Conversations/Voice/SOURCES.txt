@@ -1,0 +1,20 @@
+Player pain and death voice lines
+=================================
+
+These are recordings of a person, not synthesised speech. Both packs are CC0 (public domain
+dedication): free for any use, commercial included, with no attribution required and no licence
+text that has to ship with the game. The credit below is courtesy, not obligation.
+
+PlayerGruntsMale/     "grunts of male death and pain", OpenGameArt, CC0
+                      https://opengameart.org/content/grunts-male-death-and-pain
+                      One 49.7 s take, 44.1 kHz, cut into 3 death cries and 16 hurt grunts.
+
+PlayerGruntsFemale/   "female hurt grunts and groans", OpenGameArt, CC0
+                      https://opengameart.org/content/female-hurt-grunts-groans
+                      One 13.0 s Ogg, 48 kHz, cut into 2 death cries and 5 hurt grunts.
+
+Both were cut on silence and level-matched by Tools/import_voice_grunts.py, which can be re-run to
+reproduce every file here from the two downloads.
+
+_RetiredSynth/        the earlier Piper-synthesised grunts, kept only for comparison. The game does
+                      not read this folder: PlayVoiceBark globs one directory, without recursing.
