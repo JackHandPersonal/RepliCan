@@ -137,6 +137,11 @@ public:
 	/** This copy value for Key, or Fallback when it has no opinion -- which is what makes an
 	 *  unmodified item behave exactly as it did before instances existed. */
 	FString ItemProp(const FString& Handle, const FString& Key, const FString& Fallback = FString()) const;
+	/** The optic actually fitted to this copy: its own "optic" prop when it has one, the type's
+	 *  default otherwise -- EXCEPT on a weapon whose sight is built in, where the catalogue always
+	 *  wins. Use this rather than reading the prop directly, or a stray instance prop bolts a scope
+	 *  onto a weapon that has nowhere to put one. */
+	FString FittedOptic(const FString& Handle, const WeaponCatalog::FWeapon* W) const;
 	void SetItemProp(const FString& Handle, const FString& Key, const FString& Value);
 	/** Forgets a copy, so the registry does not grow forever. */
 	void ReleaseItemInstance(const FString& Handle);
@@ -539,6 +544,10 @@ public:
 	void HandTuneStepOptic(int32 Dir);
 	FString HandTuneOpticLabel() const;
 	bool HandTuneTakesOptic() const;
+	/** The weapon's sight is built in and will not be traded. DISTINCT from HandTuneTakesOptic,
+	 *  which means there is nowhere to mount one at all: these are different states and must not
+	 *  look alike to the player. See the comment on the definition. */
+	bool HandTuneOpticFixed() const;
 	// Writes the previewed paint to the catalogue as this weapon's default: what it wears wherever
 	// it appears in the world, and what the preview booth renders for its inventory icon. Until
 	// this is pressed the cycler is only a fitting, on the stand-in and nowhere else.

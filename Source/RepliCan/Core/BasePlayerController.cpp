@@ -1039,6 +1039,29 @@ bool ABasePlayerController::HandTuneTakesOptic() const
 	return W && !W->OpticMount.IsNearlyZero();
 }
 
+FString ABasePlayerController::FittedOptic(const FString& Handle, const WeaponCatalog::FWeapon* W) const
+{
+	if (!W) { return FString(); }
+	// A BUILT-IN SIGHT IGNORES THE COPY'S OPINION. An item instance can carry its own "optic" prop
+	// and it normally wins over the type default -- that is how a modified rifle keeps the scope
+	// somebody fitted to it. A weapon whose sight is part of its own geometry has no such freedom:
+	// there is nothing to unclip and nowhere for a different sight to clamp, so the catalogue's
+	// answer stands whatever the prop says. Without this the refusal is only skin deep: the menus
+	// decline to change it while a stray or stale instance prop bolts a scope on anyway.
+	if (W->bOpticFixed) { return W->Optic; }
+	return ItemProp(Handle, TEXT("optic"), W->Optic);
+}
+
+bool ABasePlayerController::HandTuneOpticFixed() const
+{
+	// DELIBERATELY NOT FOLDED INTO HandTuneTakesOptic. That one means "there is nowhere to bolt a
+	// sight on", and it makes the label read NO MOUNT and greys the row out. A fixed optic is the
+	// opposite case: the weapon HAS a sight, mounted and working, and simply will not trade it.
+	// Reporting one as the other would tell the player their BugBuster has no mount, which is false.
+	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(HandTuneName);
+	return W && W->bOpticFixed;
+}
+
 FString ABasePlayerController::HandTuneOpticLabel() const
 {
 	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(HandTuneName);
@@ -1050,6 +1073,10 @@ FString ABasePlayerController::HandTuneOpticLabel() const
 void ABasePlayerController::HandTuneStepOptic(int32 Dir)
 {
 	if (!HandTuneTakesOptic()) { return; }
+	// AND THE WEAPON HAS TO BE WILLING TO TRADE IT. The widgets refuse this too, with a reason the
+	// player can read -- but a refusal that lives only in the UI is a refusal any console command,
+	// any later caller, walks straight past.
+	if (HandTuneOpticFixed()) { return; }
 	const WeaponCatalog::FWeapon* W = WeaponCatalog::Find(HandTuneName);
 	if (!W) { return; }
 	// The empty string first: iron sights are a choice, not the absence of one.
@@ -5163,7 +5190,7 @@ FString ABasePlayerController::AccessorySummary(const FString& Handle) const
 	if (!W) { return FString(); }
 	// The optic this COPY carries, falling back to the type own default. More accessory kinds slot
 	// in here as they arrive; the shape is already right for them.
-	const FString OpticKey = ItemProp(Handle, TEXT("optic"), W->Optic);
+	const FString OpticKey = FittedOptic(Handle, W);
 	return FString::Printf(TEXT("FITTED   OPTIC %s"),
 		OpticKey.IsEmpty() ? TEXT("none") : *WeaponCatalog::OpticDisplayName(OpticKey));
 }
@@ -5186,7 +5213,7 @@ void ABasePlayerController::ApplyWeaponToPawn(ABaseCharacter* Me, const WeaponCa
 	// own rear sight; collimated glass has no pitch to correct for.
 	// THIS COPY optic if it has one of its own, otherwise the type default. An unmodified rifle has
 	// no opinion and so behaves exactly as it did before instances existed.
-	const WeaponCatalog::FOptic* Optic = WeaponCatalog::FindOptic(ItemProp(Handle, TEXT("optic"), W->Optic));
+	const WeaponCatalog::FOptic* Optic = WeaponCatalog::FindOptic(FittedOptic(Handle, W));
 	UStaticMesh* OpticMesh = Optic ? LoadObject<UStaticMesh>(nullptr, *Optic->MeshPath, nullptr, LOAD_NoWarn | LOAD_Quiet) : nullptr;
 	// THE CUT-DOWN MESH WHENEVER THERE IS ONE, optic or no optic. This used to fall back to the
 	// UN-cut mesh when nothing was fitted, which meant "no optic" quietly put the weapon's moulded-on

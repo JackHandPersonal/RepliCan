@@ -65,7 +65,7 @@ namespace
 		return FVector((*Arr)[0]->AsNumber(), (*Arr)[1]->AsNumber(), (*Arr)[2]->AsNumber());
 	}
 
-	void LoadIfNeeded()
+	void LoadWeaponCatalogueIfNeeded()
 	{
 		if (GWeaponCatalogLoaded) { return; }
 		GWeaponCatalogLoaded = true;
@@ -334,7 +334,7 @@ namespace
 
 const WeaponCatalog::FWeapon* WeaponCatalog::Find(const FString& ItemName)
 {
-	LoadIfNeeded();
+	LoadWeaponCatalogueIfNeeded();
 	if (ItemName.IsEmpty()) { return nullptr; }
 	// A HANDLE IS A NAME HERE. Inventory entries for instanced items carry an id ("Spear 350#7");
 	// stripping it at this one door is what lets every existing caller keep passing whatever it has.
@@ -343,14 +343,14 @@ const WeaponCatalog::FWeapon* WeaponCatalog::Find(const FString& ItemName)
 
 TArray<FString> WeaponCatalog::OpticNames()
 {
-	LoadIfNeeded();
+	LoadWeaponCatalogueIfNeeded();
 	TArray<FString> Out; GOptics.GetKeys(Out); Out.Sort();
 	return Out;
 }
 
 const WeaponCatalog::FOptic* WeaponCatalog::FindOptic(const FString& OpticName)
 {
-	LoadIfNeeded();
+	LoadWeaponCatalogueIfNeeded();
 	if (OpticName.IsEmpty()) { return nullptr; }
 	return GOptics.Find(OpticName);
 }
@@ -434,11 +434,11 @@ bool WeaponCatalog::WriteOpticNumbers(const FString& OpticKey, const TCHAR* Fiel
 	});
 }
 
-int32 WeaponCatalog::Num() { LoadIfNeeded(); return GByName.Num(); }
+int32 WeaponCatalog::Num() { LoadWeaponCatalogueIfNeeded(); return GByName.Num(); }
 
 TArray<FString> WeaponCatalog::TunableNames()
 {
-	LoadIfNeeded();
+	LoadWeaponCatalogueIfNeeded();
 	TArray<FString> Out;
 	Out.Reserve(GByName.Num());
 	for (const TPair<FString, FWeapon>& It : GByName)
@@ -481,7 +481,7 @@ const TArray<FString>& WeaponCatalog::AmmoKindNames() { static TArray<FString> C
 
 const TArray<FName>& WeaponCatalog::StanceRoots(const FString& Stance)
 {
-	LoadIfNeeded();
+	LoadWeaponCatalogueIfNeeded();
 	static const TArray<FName> None;
 	const FStance* S = GStances.Find(Stance);
 	return S ? S->Roots : None;
@@ -489,13 +489,13 @@ const TArray<FName>& WeaponCatalog::StanceRoots(const FString& Stance)
 
 const TArray<WeaponCatalog::FFingerPreset>& WeaponCatalog::FingerPresets()
 {
-	LoadIfNeeded();
+	LoadWeaponCatalogueIfNeeded();
 	return GFingerPresets;
 }
 
 bool WeaponCatalog::StanceCarry(const FString& Stance, const TCHAR* Which, FVector& Out)
 {
-	LoadIfNeeded();
+	LoadWeaponCatalogueIfNeeded();
 	const FStance* S = GStances.Find(Stance);
 	if (!S || !S->bHasCarry) { return false; }
 	const FString W(Which);
@@ -510,28 +510,28 @@ bool WeaponCatalog::StanceCarry(const FString& Stance, const TCHAR* Which, FVect
 
 FVector WeaponCatalog::StanceGripNudge(const FString& Stance)
 {
-	LoadIfNeeded();
+	LoadWeaponCatalogueIfNeeded();
 	const FStance* S = GStances.Find(Stance);
 	return S ? S->GripNudge : FVector::ZeroVector;
 }
 
 float WeaponCatalog::StanceElbowDown(const FString& Stance)
 {
-	LoadIfNeeded();
+	LoadWeaponCatalogueIfNeeded();
 	const FStance* S = GStances.Find(Stance);
 	return S ? FMath::Clamp(S->ElbowDown, 0.0f, 1.0f) : 0.0f;
 }
 
 bool WeaponCatalog::StanceIsTwoHanded(const FString& Stance)
 {
-	LoadIfNeeded();
+	LoadWeaponCatalogueIfNeeded();
 	const FStance* S = GStances.Find(Stance);
 	return S && S->bTwoHanded;
 }
 
 UAnimSequence* WeaponCatalog::StanceClip(const FString& Stance, const TCHAR* Clip, bool bFeminine)
 {
-	LoadIfNeeded();
+	LoadWeaponCatalogueIfNeeded();
 	// Walk the fallback chain -- Shotgun has no locomotion of its own and borrows Rifle's.
 	// Capped rather than trusted, because a JSON typo could make the chain a loop.
 	FString Current = Stance;

@@ -1139,6 +1139,12 @@ void UReferenceWidget::ToggleBoolField(const FString& Key)
 	bool& V = FieldBoolValues.FindOrAdd(Key);
 	V = !V;
 	if (TObjectPtr<UTextBlock>* L = FieldBoolLabels.Find(Key)) { if (*L) { (*L)->SetText(FText::FromString(FixedLabel(V ? TEXT("X  YES") : TEXT("   NO"), 7))); (*L)->SetColorAndOpacity(FSlateColor(V ? Crt::Green : Crt::DimGreen)); } }
+	// Setting OPTIC FIXED locks the sight in the same visit, not only after a save and reselect.
+	if (Key == TEXT("optic_fixed"))
+	{
+		if (TObjectPtr<UEditableTextBox>* Box = FieldBoxes.Find(TEXT("optic"))) { if (*Box) { (*Box)->SetIsReadOnly(V); } }
+		ShowOptic();
+	}
 }
 
 void UReferenceWidget::FillFields(const FReferenceEntry& E)
@@ -1226,6 +1232,9 @@ void UReferenceWidget::FillFields(const FReferenceEntry& E)
 		{
 			UEditableTextBox* Box = StyledBox(WidgetTree, S.CaptionSize);
 			Box->SetText(FText::FromString(Value));
+			// TYPING IS THE OTHER WAY IN. The OPTIC cycle refuses a built-in sight, so the free-text
+			// box must too, or the refusal is theatre -- every box is harvested wholesale on save.
+			if (FCString::Strcmp(F.Key, TEXT("optic")) == 0 && SelectedOpticFixed()) { Box->SetIsReadOnly(true); }
 			FieldBoxes.Add(F.Key, Box);
 			UHorizontalBoxSlot* BS = Row->AddChildToHorizontalBox(Box); BS->SetSize(ESlateSizeRule::Fill); BS->SetVerticalAlignment(VAlign_Center);
 			break;
